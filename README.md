@@ -1,1 +1,1 @@
-# mega-alerts-v2
+# Azeroth Auction Assassin
