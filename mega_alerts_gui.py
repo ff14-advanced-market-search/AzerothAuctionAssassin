@@ -103,159 +103,160 @@ class App(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
+
         self.discord_webhook_input=LabelTextbox(self,"Discord Webhook",25,25,425,40)
-        self.discord_webhook_input.Label.setToolTip('Placeholder Tooltip')
+        self.discord_webhook_input.Label.setToolTip('Setup a discord channel with a webhook url for sending the alert messages.')
 
         self.wow_client_id_input=LabelTextbox(self,"WoW Client ID",25,100,425,40)
-        self.wow_client_id_input.Label.setToolTip('Placeholder Tooltip')
+        self.wow_client_id_input.Label.setToolTip('Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids.')
 
         self.wow_client_secret_input=LabelTextbox(self,"WoW Client Secret",25,175,425,40)
-        self.wow_client_secret_input.Label.setToolTip('Placeholder Tooltip')
+        self.wow_client_secret_input.Label.setToolTip('Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids.')
 
         self.authentication_token=LabelTextbox(self,"Auction Assassin Token",25,250,425,40)
-        self.authentication_token.Label.setToolTip('Placeholder Tooltip')
+        self.authentication_token.Label.setToolTip('Go to the Saddlebag Exchange Discord and generate a token with the bot command: /wow AuctionAssassinToken')
 
         self.wow_region_label = LabelText(self, 'Wow Region', 25, 325, 200, 40)
         self.wow_region=ComboBoxes(self,25,325,200,40)
         self.wow_region.Combo.addItems(['EU','NA'])
-        self.wow_region_label.Label.setToolTip('Placeholder Tooltip')
+        self.wow_region_label.Label.setToolTip('Pick your region, currently supporting: EU and NA')
 
         self.number_of_mega_threads=LabelTextbox(self,"Number of Threads",250,325,200,40)
         self.number_of_mega_threads.Text.setText('48')
-        self.number_of_mega_threads.Label.setToolTip('Placeholder Tooltip')
+        self.number_of_mega_threads.Label.setToolTip('Change the thread count.\nDo 100 for the fastest scans, but RIP to ur CPU and MEM.')
 
         self.scan_time_min=LabelTextbox(self,"Scan Time Min",250,400,200,40)
         self.scan_time_min.Text.setText('1')
-        self.scan_time_min.Label.setToolTip('Placeholder Tooltip')
+        self.scan_time_min.Label.setToolTip('Increase or decrease the minutes before or after the data update to start timed scans.')
 
         self.scan_time_max=LabelTextbox(self,"Scan Time Max",250,475,200,40)
         self.scan_time_max.Text.setText('3')
-        self.scan_time_max.Label.setToolTip('Placeholder Tooltip')
+        self.scan_time_max.Label.setToolTip('Increase or decrease the minutes before or after the data update to stop running scans.')
 
         self.important_emoji=LabelTextbox(self,"Important Emoji",250,550,200,40)
-        self.important_emoji.Label.setToolTip('Placeholder Tooltip')
+        self.important_emoji.Label.setToolTip('Changes the separators from ==== to whatever emoji you want.')
 
         self.show_bid_prices = CheckBox(self, 'Show Bid Prices', 25, 375, 200, 40)
-        self.show_bid_prices.Checkbox.setToolTip('Placeholder Tooltip')
+        self.show_bid_prices.Checkbox.setToolTip('Show items with Bid prices below your price limit on Desired Items')
 
         self.wow_head_link = CheckBox(self, 'Show WoWHead Link', 25, 405, 200, 40)
-        self.wow_head_link.Checkbox.setToolTip('Placeholder Tooltip')
+        self.wow_head_link.Checkbox.setToolTip('Uses WoWHead links instead of Undermine and shows pictures.')
 
         self.russian_realms = CheckBox(self, 'No Russian Realms', 25, 435, 200, 40)
-        self.russian_realms.Checkbox.setToolTip('Placeholder Tooltip')
+        self.russian_realms.Checkbox.setToolTip('Removes alerts from Russian Realms.')
 
         self.refresh_alerts = CheckBox(self, 'Refresh Alerts', 25, 465, 200, 40)
-        self.refresh_alerts.Checkbox.setToolTip('Placeholder Tooltip')
+        self.refresh_alerts.Checkbox.setToolTip('Set to true to refresh alerts every 1 hour.')
 
         self.debug_mode = CheckBox(self, 'Debug Mode', 25, 495, 200, 40)
-        self.debug_mode.Checkbox.setToolTip('Placeholder Tooltip')
+        self.debug_mode.Checkbox.setToolTip('Trigger a scan on all realms once.\nUse this to test make sure your data is working.')
 
         self.import_config_button = UIButtons(self, "Import Config", 25, 550, 200, 50)
         self.import_config_button.Button.clicked.connect(self.import_configs)
-        self.import_config_button.Button.setToolTip('Placeholder Tooltip')
+        self.import_config_button.Button.setToolTip('Import your mega_data.json config.')
 
         self.save_data_button = UIButtons(self, "Save Data", 25, 625, 200, 50)
         self.save_data_button.Button.clicked.connect(self.save_data_to_json)
-        self.save_data_button.Button.setToolTip('Placeholder Tooltip')
+        self.save_data_button.Button.setToolTip('Save data without starting a scan.')
 
         self.reset_data_button = UIButtons(self, "Reset Data", 250, 625, 200, 50)
         self.reset_data_button.Button.clicked.connect(self.reset_app_data)
-        self.reset_data_button.Button.setToolTip('Placeholder Tooltip')
+        self.reset_data_button.Button.setToolTip('Erase all data and reset the app.')
 
         self.start_button = UIButtons(self, "Start Alerts", 25, 700, 200, 50)
         self.start_button.Button.clicked.connect(self.start_alerts)
-        self.start_button.Button.setToolTip('Placeholder Tooltip')
+        self.start_button.Button.setToolTip('Start the scan! Runs once on start and then waits for new data to send more alerts.')
 
         self.stop_button = UIButtons(self, "Stop Alerts", 250, 700, 200, 50)
         self.stop_button.Button.clicked.connect(self.stop_alerts)
         self.stop_button.Button.setEnabled(False)
-        self.stop_button.Button.setToolTip('Placeholder Tooltip')
+        self.stop_button.Button.setToolTip('Gracefully stop the alerts.\nThis will not stop alerts in progress.\nYou may need to kill the process for a force stop.')
 
         self.mega_alerts_progress = LabelText(self, 'Waiting for user to Start!', 25, 775, 1000, 40)
 
         ########################## PET STUFF ###################################################
 
         self.pet_id_input=LabelTextbox(self,"Pet ID",500,25,100,40)
-        self.pet_id_input.Label.setToolTip('Placeholder Tooltip')
+        self.pet_id_input.Label.setToolTip('Add the Pet ID that you want to snipe.\nYou can find that id at the end of the undermine exchange link for the item next to 82800 (which is the item id for pet cages)\nhttps://undermine.exchange/#us-suramar/82800-3390.')
 
         self.pet_price_input=LabelTextbox(self,"Price",625,25,100,40)
-        self.pet_price_input.Label.setToolTip('Placeholder Tooltip')
+        self.pet_price_input.Label.setToolTip('Pick a price you want to buy at or under.')
 
         self.add_pet_button = UIButtons(self, "Add Pet", 500, 100, 100, 50)
         self.add_pet_button.Button.clicked.connect(self.add_pet_to_dict)
-        self.add_pet_button.Button.setToolTip('Placeholder Tooltip')
+        self.add_pet_button.Button.setToolTip('Add pet to your snipe list.')
 
         self.remove_pet_button = UIButtons(self, "Remove\nPet", 625, 100, 100, 50)
         self.remove_pet_button.Button.clicked.connect(self.remove_pet_to_dict)
-        self.remove_pet_button.Button.setToolTip('Placeholder Tooltip')
+        self.remove_pet_button.Button.setToolTip('Remove pet from your snipe list.')
 
         self.pet_list_display = ListView(self,500,175,225,400)
         self.pet_list_display.List.itemClicked.connect(self.pet_list_double_clicked)
 
         self.import_pet_data_button = UIButtons(self, "Import Pet Data", 500, 600, 225, 50)
         self.import_pet_data_button.Button.clicked.connect(self.import_pet_data)
-        self.import_pet_data_button.Button.setToolTip('This is a tooltip')
+        self.import_pet_data_button.Button.setToolTip('Import your desired_pets.json config')
 
         ########################## ITEM STUFF ###################################################
 
         self.item_id_input=LabelTextbox(self,"Item ID",750,25,100,40)
-        self.item_id_input.Label.setToolTip('Placeholder Tooltip')
+        self.item_id_input.Label.setToolTip('Add the item id of and item you want to buy.\nYou can search by name for them here with recommended prices\nhttps://temp.saddlebagexchange.com/megaitemnames')
 
         self.item_price_input=LabelTextbox(self,"Price",875,25,100,40)
-        self.item_price_input.Label.setToolTip('Placeholder Tooltip')
+        self.item_price_input.Label.setToolTip('Pick a price you want to buy at or under.')
 
         self.add_item_button = UIButtons(self, "Add Item", 750, 100, 100, 50)
         self.add_item_button.Button.clicked.connect(self.add_item_to_dict)
-        self.add_item_button.Button.setToolTip('Placeholder Tooltip')
+        self.add_item_button.Button.setToolTip('Add item to your snipe list.')
 
         self.remove_item_button = UIButtons(self, "Remove\nItem", 875, 100, 100, 50)
         self.remove_item_button.Button.clicked.connect(self.remove_item_to_dict)
-        self.remove_item_button.Button.setToolTip('Placeholder Tooltip')
+        self.remove_item_button.Button.setToolTip('Remove item from your snipe list.')
 
         self.item_list_display = ListView(self,750,175,225,400)
         self.item_list_display.List.itemClicked.connect(self.item_list_double_clicked)
 
         self.import_item_data_button = UIButtons(self, "Import Item Data", 750, 600, 225, 50)
         self.import_item_data_button.Button.clicked.connect(self.import_item_data)
-        self.import_item_data_button.Button.setToolTip('Placeholder Tooltip')
+        self.import_item_data_button.Button.setToolTip('Import your desired_items.json config')
 
         ########################## ILVL STUFF ###################################################
 
         self.ilvl_item_input=LabelTextbox(self,"Item ID",1000,25,100,40)
-        self.ilvl_item_input.Label.setToolTip('Placeholder Tooltip')
+        self.ilvl_item_input.Label.setToolTip('Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420')
 
         self.ilvl_input=LabelTextbox(self,"Item level",1000,100,100,40)
-        self.ilvl_input.Label.setToolTip('Placeholder Tooltip')
+        self.ilvl_input.Label.setToolTip('Set the minimum item level you want to snipe.')
 
         self.ilvl_price_input=LabelTextbox(self,"Buyout",1000,175,100,40)
-        self.ilvl_price_input.Label.setToolTip('Placeholder Tooltip')
+        self.ilvl_price_input.Label.setToolTip('Set the maximum buyout you want to snipe.')
 
         self.ilvl_sockets=CheckBox(self,"Sockets",1000,225,100,40)
-        self.ilvl_sockets.Checkbox.setToolTip('Placeholder Tooltip')
+        self.ilvl_sockets.Checkbox.setToolTip('Do you want the item to have Sockets?')
 
         self.ilvl_speed=CheckBox(self,"Speed",1000,275,100,40)
-        self.ilvl_speed.Checkbox.setToolTip('Placeholder Tooltip')
+        self.ilvl_speed.Checkbox.setToolTip('Do you want the item to have Speed?')
 
         self.ilvl_leech=CheckBox(self,"Leech",1000,325,100,40)
-        self.ilvl_leech.Checkbox.setToolTip('Placeholder Tooltip')
+        self.ilvl_leech.Checkbox.setToolTip('Do you want the item to have Leech?')
 
         self.ilvl_avoidance=CheckBox(self,"Avoidance",1000,375,100,40)
-        self.ilvl_avoidance.Checkbox.setToolTip('Placeholder Tooltip')
+        self.ilvl_avoidance.Checkbox.setToolTip('Do you want the item to have Avoidance?')
 
         self.add_ilvl_button = UIButtons(self, "Add Item", 1000, 425, 100, 50)
         self.add_ilvl_button.Button.clicked.connect(self.add_ilvl_to_list)
-        self.add_ilvl_button.Button.setToolTip('Placeholder Tooltip')
+        self.add_ilvl_button.Button.setToolTip('Add item to your snipe list.')
 
         self.remove_ilvl_button = UIButtons(self, "Remove\nItem", 1000, 500, 100, 50)
         self.remove_ilvl_button.Button.clicked.connect(self.remove_ilvl_to_list)
-        self.remove_ilvl_button.Button.setToolTip('Placeholder Tooltip')
+        self.remove_ilvl_button.Button.setToolTip('Remove item from your snipe list.')
 
         self.ilvl_list_display = ListView(self,1125,25,500,550)
         self.ilvl_list_display.List.itemClicked.connect(self.ilvl_list_double_clicked)
 
         self.import_ilvl_data_button = UIButtons(self, "Import ILvl Data", 1125, 600, 500, 50)
         self.import_ilvl_data_button.Button.clicked.connect(self.import_ilvl_data)
-        self.import_ilvl_data_button.Button.setToolTip('Placeholder Tooltip')
+        self.import_ilvl_data_button.Button.setToolTip('Import your desired_ilvl_list.json config')
 
         self.check_for_settings()
 
@@ -520,8 +521,8 @@ class App(QMainWindow):
         self.important_emoji.Text.setText(''),
         self.russian_realms.Checkbox.setChecked(False),
         self.refresh_alerts.Checkbox.setChecked(False),
-        self.scan_time_max.Text.setText('1'),
-        self.scan_time_min.Text.setText('3'),
+        self.scan_time_min.Text.setText('1'),
+        self.scan_time_max.Text.setText('3'),
         self.debug_mode.Checkbox.setChecked(False)
 
 

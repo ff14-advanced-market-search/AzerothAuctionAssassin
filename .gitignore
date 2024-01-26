@@ -1,3 +1,9 @@
+data/desired_ilvl.json
+data/desired_ilvl_list.json
+data/desired_items.json
+data/desired_pets.json
+data/mega_data.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
