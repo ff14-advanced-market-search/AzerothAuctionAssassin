@@ -15,21 +15,23 @@ Blizzard only sends out new AH data to the API one time per hour, the rest of th
 # Alert Example
 <img width="601" alt="image" src="https://user-images.githubusercontent.com/17516896/224507162-53513e8a-69ab-41e2-a5d5-ea4e51a9fc89.png">
 
+# Desktop GUI 
+
+<img width="1639" alt="Screenshot 2024-01-26 at 12 57 32 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/6e115afe-db3f-4f9f-8bed-e90fd4a6b934">
+
 # Installation
 
 1. Download the App: [Windows](https://www.dropbox.com/scl/fi/3n5n4fa5e6n1cqrpqmpeg/mega_alerts_gui-windows.zip?rlkey=w25mrnwynyw2yc07fx1iejqxp&dl=0) or [Mac](https://www.dropbox.com/scl/fi/jmzj7ifr5xa599xg2ubr6/mega_alerts_gui-mac.zip?rlkey=9jh8xbpu4qd4cos06o1tf1s12&dl=0)
 
-2. Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids.  You will use these values for the `WOW_CLIENT_ID` and `WOW_CLIENT_SECRET` later on.
+2. Go to the [Saddlebag Exchange Discord](https://discord.gg/SYv8854Tbr) and ask us for a 30 day Auction Assasin Token.  Soon we will have our discord bot generate these for Super Fancy [Patreon Supporters](https://www.patreon.com/indopan). 
+
+3. [Setup a discord channel with a webhook url for sending the alert messages](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) You will use this for the `MEGA_WEBHOOK_URL` later on.
+
+4. Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids.  You will use these values for the `WOW_CLIENT_ID` and `WOW_CLIENT_SECRET` later on.
 
 <img width="1304" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/e954289a-ccbc-4afb-9f66-897bbc68f677">
 
 <img width="633" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/595fee57-e0db-4910-995d-5b5ae48190a2">
-
-
-3. [Setup a discord channel with a webhook url for sending the alert messages](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) You will use this for the `MEGA_WEBHOOK_URL` later on.
-
-4. Go to the [Saddlebag Exchange Discord](https://discord.gg/SYv8854Tbr) and ask us for a 30 day Auction Assasin Token.  Soon we will have our discord bot generate these for Super Fancy [Patreon Supporters](https://www.patreon.com/indopan). 
-
 
 # Item Selection
 1. If you have specific items and prices you want, then make a json object with the item ids and prices that you want to snipe for!
@@ -95,7 +97,9 @@ Even if you are not going to run directly in python then you should still save t
 
 # How to run the alerts
 
-With whatever method you choose you will provide all the details the code needs in *Environmental Variables*.  You must provide at least the following:
+<img width="1639" alt="Screenshot 2024-01-26 at 12 57 32 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/6e115afe-db3f-4f9f-8bed-e90fd4a6b934">
+
+You will need the following to run AAA:
 
 - `MEGA_WEBHOOK_URL`
 - `WOW_CLIENT_ID`
@@ -104,14 +108,14 @@ With whatever method you choose you will provide all the details the code needs 
 - Then for your snipe method you must provide at least one correct json data for `DESIRED_ITEMS`, `DESIRED_PETS` or `DESIRED_ILVL`
 
 We also have the following **optional** env vars you can add in to change alert behavior, but you dont need to as all have default values when not manually set:
-- `DEBUG="true"` This will instantly trigger a scan on all realms against your inputs, this will only run once and then exit the script or container so use it to debug and make sure your data is working.
+- `DEBUG=true` This will instantly trigger a scan on all realms against your inputs, this will only run once and then exit the script or container so use it to debug and make sure your data is working.
 - `SHOW_BID_PRICES=true` Bid prices below your price limit will also be shown (default false)
 - `WOWHEAD_LINK=true` Uses wowhead links instead of undermine and shows pictures, but the message length will be longer (default false)
 - `SCAN_TIME_MIN=-1` increase or decrease the minutes before or at the data update time to start scanning (default to keep scanning 1 min after the data updates).
 - `SCAN_TIME_MAX=1` increase or decrease the minutes after the data updates to stop scanning (default to keep scanning 3 min after the data updates).
 - `MEGA_THREADS=100` increase or decrease the threadcount (default to scan 48 realms at once)(more threads = faster scans, but doing more threads then realms is pointless).
-- `REFRESH_ALERTS="false"` if set to false then you will not see the same alert more than once (default true)
-- `NO_RUSSIAN_REALMS="true"` set this to true if you are on EU and do not want to get alerts from russian realms
+- `REFRESH_ALERTS=false` if set to false then you will not see the same alert more than once (default true)
+- `NO_RUSSIAN_REALMS=true` set this to true if you are on EU and do not want to get alerts from russian realms
 - `IMPORTANT_EMOJI=🔥` changes the separators from `====` to whatever emoji you set. 
 
 ## Starting and Stopping the Sniper 
