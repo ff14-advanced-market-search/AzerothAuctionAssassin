@@ -1,0 +1,10 @@
+---
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: "."
+    volumes:
+      - ".:/app"
+    init: true

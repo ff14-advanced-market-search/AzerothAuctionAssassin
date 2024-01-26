@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
+data/upload_timers.json
+output
+dist
+venv
 
 # C extensions
 *.so

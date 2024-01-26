@@ -1,0 +1,9 @@
+{
+  "ilvl": 360,
+  "buyout": 1000,
+  "sockets": false,
+  "speed": true,
+  "leech": false,
+  "avoidance": false,
+  "item_ids": [204965, 204930]
+}
