@@ -600,38 +600,71 @@ class App(QMainWindow):
         self.save_data_to_json()
 
     def save_data_to_json(self):
+        wow_region = self.wow_region.Combo.currentText()
+
+        # Check if WOW_REGION is either 'NA' or 'EU'
+        if wow_region not in ['NA', 'EU']:
+            QMessageBox.critical(self, "Invalid Region", "WOW region must be either 'NA' or 'EU'.")
+            return False
+
+        mega_threads = self.number_of_mega_threads.Text.text()
+        scan_time_max = self.scan_time_max.Text.text()
+        scan_time_min = self.scan_time_min.Text.text()
+
+        # Check if MEGA_THREADS, SCAN_TIME_MAX, and SCAN_TIME_MIN are integers 
+        integer_fields = {'MEGA_THREADS': mega_threads, 'SCAN_TIME_MAX': scan_time_max, 'SCAN_TIME_MIN': scan_time_min}
+
+        for field, value in integer_fields.items():
+            try:
+                int(value)
+            except ValueError:
+                QMessageBox.critical(self, "Invalid Value", f"{field} should be an integer.")
+                return False
+
+        show_bids = self.show_bid_prices.Checkbox.isChecked()
+        wowhead = self.wow_head_link.Checkbox.isChecked()
+        no_russians = self.russian_realms.Checkbox.isChecked()
+        refresh_alerts = self.refresh_alerts.Checkbox.isChecked()
+        debug = self.debug_mode.Checkbox.isChecked()
+
+        boolean_fields = {'SHOW_BID_PRICES': show_bids, 'WOWHEAD_LINK': wowhead, 'NO_RUSSIAN_REALMS': no_russians, 'REFRESH_ALERTS': refresh_alerts, 'DEBUG': debug}
+
+        # Ensure all boolean fields have a boolean value.
+        for field, value in boolean_fields.items():
+            if type(value) != bool:
+                QMessageBox.critical(self, "Invalid Value", f"{field} should be a boolean.")
+                return False
+
+        # If all tests pass, save data to JSON.
         config_json = {
             'MEGA_WEBHOOK_URL': self.discord_webhook_input.Text.text(),
             'WOW_CLIENT_ID': self.wow_client_id_input.Text.text(),
             'WOW_CLIENT_SECRET': self.wow_client_secret_input.Text.text(),
             'AUTHENTICATION_TOKEN': self.authentication_token.Text.text(),
-            'WOW_REGION': self.wow_region.Combo.currentText(),
-            # 'EXTRA_ALERTS': '[]',
-            'SHOW_BID_PRICES': self.show_bid_prices.Checkbox.isChecked(),
-            'MEGA_THREADS': int(self.number_of_mega_threads.Text.text()),
-            'WOWHEAD_LINK': self.wow_head_link.Checkbox.isChecked(),
+            'WOW_REGION': wow_region,
+            'SHOW_BID_PRICES': show_bids,
+            'MEGA_THREADS': int(mega_threads),
+            'WOWHEAD_LINK': wowhead,
             'IMPORTANT_EMOJI': self.important_emoji.Text.text(),
-            'NO_RUSSIAN_REALMS': self.russian_realms.Checkbox.isChecked(),
-            'REFRESH_ALERTS': self.refresh_alerts.Checkbox.isChecked(),
-            'SCAN_TIME_MAX': int(self.scan_time_max.Text.text()),
-            'SCAN_TIME_MIN': int(self.scan_time_min.Text.text()),
-            'DEBUG': self.debug_mode.Checkbox.isChecked()
+            'NO_RUSSIAN_REALMS': no_russians,
+            'REFRESH_ALERTS': refresh_alerts,
+            'SCAN_TIME_MAX': int(scan_time_max),
+            'SCAN_TIME_MIN': int(scan_time_min),
+            'DEBUG': debug
         }
 
-        with open(self.path_to_data, 'w', encoding="utf-8") as json_file:
-            json.dump(config_json, json_file, ensure_ascii=False, indent=4)
+        # Save JSON files
+        self.save_json_file(self.path_to_data, config_json)
+        self.save_json_file(self.path_to_desired_pets, self.pet_list)
+        self.save_json_file(self.path_to_desired_items, self.items_list)
+        self.save_json_file(self.path_to_desired_ilvl_list, self.ilvl_list)
+        self.save_json_file(self.path_to_desired_ilvl_items, self.ilvl_items)
 
-        with open(self.path_to_desired_pets, 'w') as json_file:
-            json.dump(self.pet_list, json_file, indent=4)
+        return True
 
-        with open(self.path_to_desired_items, 'w') as json_file:
-            json.dump(self.items_list, json_file, indent=4)
-
-        with open(self.path_to_desired_ilvl_list, 'w') as json_file:
-            json.dump(self.ilvl_list, json_file, indent=4)
-        
-        with open(self.path_to_desired_ilvl_items, 'w') as json_file:
-            json.dump(self.ilvl_items, json_file, indent=4)
+    def save_json_file(self, path, data):
+        with open(path, 'w', encoding="utf-8") as json_file:
+            json.dump(data, json_file, ensure_ascii=False, indent=4)
 
     def start_alerts(self):
 
@@ -654,7 +687,9 @@ class App(QMainWindow):
         self.start_button.Button.setEnabled(False)
         self.stop_button.Button.setEnabled(True)
 
-        self.save_data_to_json()
+        if not self.save_data_to_json():
+            QMessageBox.critical(self, "Save Error", "Could not save data to JSON.\nAbort scan.\nYour inputs may be invalid")
+            return
 
         self.alerts_thread = Alerts(
             path_to_data_files = self.path_to_data,
