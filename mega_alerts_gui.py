@@ -432,10 +432,14 @@ class App(QMainWindow):
         self.ilvl_list_display.List.clear()
         self.ilvl_list = {}
 
-        self.ilvl_list = json.load(open(pathname))
-        for ilvl_dict_data in self.ilvl_list:
-            string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
-            self.ilvl_list_display.List.insertItem(self.ilvl_list_display.List.count() , string_with_data)
+        try:
+            with open(pathname) as file:
+                self.ilvl_list = json.load(file)
+            for ilvl_dict_data in self.ilvl_list:
+                string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
+                self.ilvl_list_display.List.insertItem(self.ilvl_list_display.List.count(), string_with_data)
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
 
 
     def item_list_double_clicked(self,item):
@@ -469,10 +473,13 @@ class App(QMainWindow):
         self.item_list_display.List.clear()
         self.items_list = {}
 
-        self.items_list = json.load(open(pathname))
-        for key,value in self.items_list.items():
-            self.item_list_display.List.insertItem(self.item_list_display.List.count() , f'Item ID: {key}, Price: {value}')
-
+        try:
+            with open(pathname) as file:
+                self.items_list = json.load(file)
+            for key,value in self.items_list.items():
+                self.item_list_display.List.insertItem(self.item_list_display.List.count(), f'Item ID: {key}, Price: {value}')
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
 
     def pet_list_double_clicked(self,item):
         item_split = item.text().replace(' ', '').split(':')
@@ -505,9 +512,13 @@ class App(QMainWindow):
         self.pet_list_display.List.clear()
         self.pet_list = {}
 
-        self.pet_list = json.load(open(pathname))
-        for key,value in self.pet_list.items():
-            self.pet_list_display.List.insertItem(self.pet_list_display.List.count() , f'Pet ID: {key}, Price: {value}')
+        try:
+            with open(pathname) as file:
+                self.pet_list = json.load(file)
+            for key,value in self.pet_list.items():
+                self.pet_list_display.List.insertItem(self.pet_list_display.List.count(), f'Pet ID: {key}, Price: {value}')
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
 
 
     def import_configs(self):
