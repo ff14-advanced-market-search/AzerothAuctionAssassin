@@ -265,9 +265,9 @@ class App(QMainWindow):
         self.show()
 
     def check_config_file(self, path_to_config):
-        raw_mega_data = json.load(open(path_to_config, encoding="utf-8"))
-
         try:
+            with open(path_to_config, encoding="utf-8") as json_file:
+                raw_mega_data = json.load(json_file)
             if 'MEGA_WEBHOOK_URL' in raw_mega_data:
                 self.discord_webhook_input.Text.setText(raw_mega_data['MEGA_WEBHOOK_URL'])
 
@@ -311,9 +311,10 @@ class App(QMainWindow):
 
             if 'DEBUG' in raw_mega_data:
                 self.debug_mode.Checkbox.setChecked(raw_mega_data['DEBUG'])
-
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Parsing Error", f"Could not parse JSON data in {path_to_config}")
         except:
-            QMessageBox.critical(self, "Loading Error", "Could not load config settings from mega_data.json")
+            QMessageBox.critical(self, "Loading Error", f"Could not load config settings from {path_to_config}")
 
     def check_for_settings(self):
 
