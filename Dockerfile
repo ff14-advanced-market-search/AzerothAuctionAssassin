@@ -12,16 +12,12 @@ RUN pip3 install tenacity requests PyQt5 \
 
 
 WORKDIR /app
-RUN mkdir /app/data/
-RUN mkdir /app/user_data/
-RUN mkdir /app/user_data/mega/
-RUN mkdir /app/user_data/simple/
+RUN mkdir /app/AzerothAuctionAssassinData/
 RUN mkdir /app/utils/
 COPY ./mega_alerts.py /app/
 COPY ./utils/* /app/utils/
 COPY ./data/* /app/data/
-COPY ./user_data/mega/* /app/user_data/mega/
-COPY ./user_data/simple/* /app/user_data/simple/
+COPY ./AzerothAuctionAssassinData/mega/* /app/AzerothAuctionAssassinData/
 COPY ./run /app/
 RUN chmod +x /app/*
 

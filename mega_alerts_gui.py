@@ -82,14 +82,14 @@ class App(QMainWindow):
 
         self.token_auth_url = "http://api.saddlebagexchange.com/api/wow/checkmegatoken"
 
-        self.eu_connected_realms = os.path.join(os.getcwd(), "data", "eu-wow-connected-realm-ids.json")
-        self.na_connected_realms = os.path.join(os.getcwd(), "data", "na-wow-connected-realm-ids.json")
+        self.eu_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "eu-wow-connected-realm-ids.json")
+        self.na_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "na-wow-connected-realm-ids.json")
 
-        self.path_to_data = os.path.join(os.getcwd(), "data", "mega_data.json")
-        self.path_to_desired_items = os.path.join(os.getcwd(), "data", "desired_items.json")
-        self.path_to_desired_pets = os.path.join(os.getcwd(), "data", "desired_pets.json")
-        self.path_to_desired_ilvl_items = os.path.join(os.getcwd(), "data", "desired_ilvl.json")
-        self.path_to_desired_ilvl_list = os.path.join(os.getcwd(), "data", "desired_ilvl_list.json")
+        self.path_to_data = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "mega_data.json")
+        self.path_to_desired_items = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_items.json")
+        self.path_to_desired_pets = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_pets.json")
+        self.path_to_desired_ilvl_items = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_ilvl.json")
+        self.path_to_desired_ilvl_list = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_ilvl_list.json")
 
         self.pet_list = {}
         self.items_list = {}
@@ -315,7 +315,7 @@ class App(QMainWindow):
 
     def check_for_settings(self):
 
-        data_folder = os.path.join(os.getcwd(), "data")
+        data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
 

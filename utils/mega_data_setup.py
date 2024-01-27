@@ -17,27 +17,31 @@ class MegaData:
                  path_to_desired_ilvl_list = None,):
         # the raw file users can write their input into
         if path_to_data_files == None:
-            raw_mega_data = json.load(open("user_data/mega/mega_data.json"))
+            raw_mega_data = json.load(open("AzerothAuctionAssassinData/mega_data.json"))
         else:
             raw_mega_data = json.load(open(path_to_data_files))
 
+        # set optional env vars
         self.THREADS = self.__set_mega_vars("MEGA_THREADS", raw_mega_data)
         self.SCAN_TIME_MIN = self.__set_mega_vars("SCAN_TIME_MIN", raw_mega_data)
         self.SCAN_TIME_MAX = self.__set_mega_vars("SCAN_TIME_MAX", raw_mega_data)
         self.REFRESH_ALERTS = self.__set_mega_vars("REFRESH_ALERTS", raw_mega_data)
+        self.IMPORTANT_EMOJI = self.__set_mega_vars("IMPORTANT_EMOJI", raw_mega_data)
+        self.WOWHEAD_LINK = self.__set_mega_vars("WOWHEAD_LINK", raw_mega_data)
+        self.SHOW_BIDPRICES = self.__set_mega_vars("SHOW_BID_PRICES", raw_mega_data)
+        self.EXTRA_ALERTS = self.__set_mega_vars("EXTRA_ALERTS", raw_mega_data)
+        self.NO_RUSSIAN_REALMS = self.__set_mega_vars("NO_RUSSIAN_REALMS", raw_mega_data)
+        self.DEBUG = self.__set_mega_vars("DEBUG", raw_mega_data)
 
-        # set generic values usually in the env vars
+        # set required env vars
         self.WOW_CLIENT_ID = self.__set_mega_vars("WOW_CLIENT_ID", raw_mega_data, True)
         self.WOW_CLIENT_SECRET = self.__set_mega_vars(
             "WOW_CLIENT_SECRET", raw_mega_data, True
         )
         self.WEBHOOK_URL = self.__set_mega_vars("MEGA_WEBHOOK_URL", raw_mega_data, True)
-        self.WOWHEAD_LINK = self.__set_mega_vars("WOWHEAD_LINK", raw_mega_data)
-        self.SHOW_BIDPRICES = self.__set_mega_vars("SHOW_BID_PRICES", raw_mega_data)
         self.REGION = self.__set_mega_vars("WOW_REGION", raw_mega_data, True)
-        self.EXTRA_ALERTS = self.__set_mega_vars("EXTRA_ALERTS", raw_mega_data)
         self.WOW_SERVER_NAMES = json.load(
-            open(f"data/{str(self.REGION).lower()}-wow-connected-realm-ids.json")
+            open(f"AzerothAuctionAssassinData/{str(self.REGION).lower()}-wow-connected-realm-ids.json")
         )
         # set access token for wow api
         self.access_token_creation_unix_time = 0
@@ -75,16 +79,13 @@ class MegaData:
                 self.DESIRED_ILVL_NAMES[k] = v
 
         # get upload times once from api and then we get it dynamically from each scan
-        self.NO_RUSSIAN_REALMS = self.__set_mega_vars(
-            "NO_RUSSIAN_REALMS", raw_mega_data
-        )
         self.upload_timers = self.__set_upload_timers()
 
     #### VARIABLE RELATED FUNCTIONS ####
     @staticmethod
     def __set_mega_vars(var_name, raw_mega_data, required=False):
         if len(raw_mega_data) != 0 and var_name in raw_mega_data.keys():
-            print(f"loading {var_name} from user_data/mega/mega_data.json")
+            print(f"loading {var_name} from AzerothAuctionAssassinData/mega_data.json")
             var_value = raw_mega_data[var_name]
         elif os.getenv(var_name):
             print(f"loading {var_name} from environment variables")
@@ -138,10 +139,28 @@ class MegaData:
                 var_value = 1
 
         if var_name == "REFRESH_ALERTS":
+            if str(var_value).lower() == "false" or var_value == False:
+                var_value = False
+            else:
+                var_value = True
+
+        if var_name == "IMPORTANT_EMOJI":
+            if len(str(var_value)) != 1:
+                var_value = "🔥"
+            else:
+                var_value = str(var_value)
+
+        if var_name == "NO_RUSSIAN_REALMS":
             if var_value == "false" or var_value == False:
                 var_value = False
             else:
                 var_value = True
+
+        if var_name == "DEBUG":
+            if str(var_value).lower() == "true" or var_value == True:
+                var_value = True
+            else:
+                var_value = False
 
         return var_value
 
@@ -186,13 +205,13 @@ class MegaData:
         env_var_name = item_list_name.upper()
         if path_to_data == None:
             
-            desired_items_raw = json.load(open(f"user_data/mega/{file_name}"))
+            desired_items_raw = json.load(open(f"AzerothAuctionAssassinData/{file_name}"))
         else:
             desired_items_raw = json.load(open(path_to_data))
         # if file is not set use env var
         if len(desired_items_raw) == 0:
             print(
-                f"no desired items found in user_data/mega/{file_name} pulling from env vars"
+                f"no desired items found in AzerothAuctionAssassinData/{file_name} pulling from env vars"
             )
             if os.getenv(env_var_name):
                 desired_items_raw = json.loads(os.getenv(env_var_name))
@@ -210,14 +229,14 @@ class MegaData:
         env_var_name = item_list_name.upper()
 
         if path_to_data == None:
-            ilvl_info = json.load(open(f"user_data/mega/{file_name}"))
+            ilvl_info = json.load(open(f"AzerothAuctionAssassinData/{file_name}"))
         else:
             ilvl_info = json.load(open(path_to_data))
 
         # if file is not set use env var
         if len(ilvl_info) == 0:
             print(
-                f"no desired items found in user_data/mega/{file_name} pulling from env vars"
+                f"no desired items found in AzerothAuctionAssassinData/{file_name} pulling from env vars"
             )
             if os.getenv(env_var_name):
                 ilvl_info = json.loads(os.getenv(env_var_name))
@@ -232,14 +251,14 @@ class MegaData:
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
         if path_to_data == None:
-            ilvl_info = json.load(open(f"user_data/mega/{file_name}"))
+            ilvl_info = json.load(open(f"AzerothAuctionAssassinData/{file_name}"))
         else:
             ilvl_info = json.load(open(path_to_data))
 
         # if file is not set use env var
         if len(ilvl_info) == 0:
             print(
-                f"no desired items found in user_data/mega/{file_name} pulling from env vars"
+                f"no desired items found in AzerothAuctionAssassinData/{file_name} pulling from env vars"
             )
             if os.getenv(env_var_name):
                 ilvl_info = json.loads(os.getenv(env_var_name))
@@ -310,7 +329,7 @@ class MegaData:
         ):
             error_message = "Error no snipe data found!\n"
             error_message += "You need to set env vars for DESIRED_ITEMS or DESIRED_PETS, DESIRED_ILVL or DESIRED_ILVL_LIST\n"
-            error_message += "Or you need to set up your user_data/mega/ json files with one of the following files:\n"
+            error_message += "Or you need to set up your AzerothAuctionAssassinData/ json files with one of the following files:\n"
             error_message += "- desired_items.json\n"
             error_message += "- desired_pets.json\n"
             error_message += "- desired_ilvl.json\n"

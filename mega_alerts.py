@@ -52,13 +52,9 @@ class Alerts(QThread):
                     if auction["petID"] in mega_data.PET_NAMES:
                         pet_name = mega_data.PET_NAMES[auction["petID"]]
                         id_msg += f"`Name:` {pet_name}\n"
-                if os.getenv("IMPORTANT_EMOJI"):
-                    if len(os.getenv("IMPORTANT_EMOJI")) == 1:
-                        message = os.getenv("IMPORTANT_EMOJI") * 20 + "\n"
-                    else:
-                        message = "🔥🔥🔥🔥🔥🟢🟢🟢🟢🟢🟢🟢🔥🔥🔥🔥🔥\n"
-                else:
-                    message = "==================================\n"
+
+                # construct message
+                message = f"{mega_data.IMPORTANT_EMOJI * 20}\n"
                 message += (
                     f"`region:` {mega_data.REGION} "
                     + f"`realmID:` {auction['realmID']} "
@@ -74,13 +70,7 @@ class Alerts(QThread):
                     message += f"`bid_prices`: {auction['bid_prices']}\n"
                 else:
                     message += f"`buyout_prices`: {auction['buyout_prices']}\n"
-                if os.getenv("IMPORTANT_EMOJI"):
-                    if len(os.getenv("IMPORTANT_EMOJI")) == 1:
-                        message += os.getenv("IMPORTANT_EMOJI") * 20 + "\n"
-                    else:
-                        message += "🔥🔥🔥🔥🔥🟢🟢🟢🟢🟢🟢🟢🔥🔥🔥🔥🔥\n"
-                else:
-                    message += "==================================\n"
+                message += f"{mega_data.IMPORTANT_EMOJI * 20}\n"
                 if auction not in alert_record:
                     mega_data.send_discord_message(message)
                     alert_record.append(auction)
@@ -450,7 +440,7 @@ class Alerts(QThread):
             return
 
         # start app here
-        if os.getenv("DEBUG"):
+        if mega_data.DEBUG:
             mega_data.send_discord_message(
                 "DEBUG MODE: starting mega alerts to run once and then exit operations"
             )
