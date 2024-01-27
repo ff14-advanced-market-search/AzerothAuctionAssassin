@@ -134,6 +134,7 @@ class App(QMainWindow):
         self.scan_time_max.Label.setToolTip('Increase or decrease the minutes before or after the data update to stop running scans.')
 
         self.important_emoji=LabelTextbox(self,"Important Emoji",250,550,200,40)
+        self.important_emoji.Text.setText('🔥')
         self.important_emoji.Label.setToolTip('Changes the separators from ==== to whatever emoji you want.')
 
         self.show_bid_prices = CheckBox(self, 'Show Bid Prices', 25, 375, 200, 40)
@@ -143,6 +144,7 @@ class App(QMainWindow):
         self.wow_head_link.Checkbox.setToolTip('Uses WoWHead links instead of Undermine and shows pictures.')
 
         self.russian_realms = CheckBox(self, 'No Russian Realms', 25, 435, 200, 40)
+        self.russian_realms.Checkbox.setChecked(True)
         self.russian_realms.Checkbox.setToolTip('Removes alerts from Russian Realms.')
 
         self.refresh_alerts = CheckBox(self, 'Refresh Alerts', 25, 465, 200, 40)
@@ -519,7 +521,7 @@ class App(QMainWindow):
         self.number_of_mega_threads.Text.setText('48'),
         self.wow_head_link.Checkbox.setChecked(False),
         self.important_emoji.Text.setText(''),
-        self.russian_realms.Checkbox.setChecked(False),
+        self.russian_realms.Checkbox.setChecked(True),
         self.refresh_alerts.Checkbox.setChecked(False),
         self.scan_time_min.Text.setText('1'),
         self.scan_time_max.Text.setText('3'),
