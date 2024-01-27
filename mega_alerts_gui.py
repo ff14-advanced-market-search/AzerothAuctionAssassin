@@ -437,12 +437,40 @@ class App(QMainWindow):
             with open(pathname) as file:
                 self.ilvl_list = json.load(file)
             for ilvl_dict_data in self.ilvl_list:
-                string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
+                item_ids = ilvl_dict_data['item_ids']
+                buyout_price = ilvl_dict_data['buyout']
+                ilvl = ilvl_dict_data['ilvl']
+                sockets = ilvl_dict_data['sockets']
+                speed = ilvl_dict_data['speed']
+                leech = ilvl_dict_data['leech']
+                avoidance = ilvl_dict_data['avoidance']
+
+                # Check that all item IDs are valid integers, but allow list to be empty
+                if not all(isinstance(id, int) and 1 <= id <= 500000 for id in item_ids):
+                    raise ValueError(f"Invalid item ID(s) in {item_ids}. IDs must be integers between 1-500,000.")
+
+                # Check that price is a valid integer within range
+                if not (1 <= buyout_price <= 10000000):
+                    raise ValueError(f"Invalid buyout price {buyout_price}. Prices must be integers between 1-10,000,000.")
+
+                # Check that ilvl is a valid integer within range
+                if not (200 <= ilvl <= 1000):
+                    raise ValueError(f"Invalid ILvl {ilvl}. ILvl must be an integer between 200-1000.")
+
+                # Check that sockets, speed, leech and avoidance are booleans
+                if not all(isinstance(val, bool) for val in [sockets, speed, leech, avoidance]):
+                    raise ValueError("Sockets, speed, leech, and avoidance should be boolean values.")
+
+                string_with_data = f"Item ID: {','.join(map(str, item_ids))}; Price: {buyout_price}; ILvl: {ilvl}; Sockets: {sockets}; Speed: {speed}; Leech: {leech}; Avoidance: {avoidance}"
                 self.ilvl_list_display.List.insertItem(self.ilvl_list_display.List.count(), string_with_data)
+
         except json.JSONDecodeError:
             QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
+
 
     def item_list_double_clicked(self,item):
         item_split = item.text().replace(' ', '').split(':')
