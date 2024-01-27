@@ -441,7 +441,8 @@ class App(QMainWindow):
                 self.ilvl_list_display.List.insertItem(self.ilvl_list_display.List.count(), string_with_data)
         except json.JSONDecodeError:
             QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
-
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
 
     def item_list_double_clicked(self,item):
         item_split = item.text().replace(' ', '').split(':')
@@ -478,9 +479,18 @@ class App(QMainWindow):
             with open(pathname) as file:
                 self.items_list = json.load(file)
             for key,value in self.items_list.items():
+                if not (1 <= int(key) <= 500000):
+                    raise ValueError(f"Invalid item ID {key}. IDs must be integers between 1-500,000.")
+                if not (1 <= int(value) <= 10000000):
+                    raise ValueError(f"Invalid price {value} for item ID {key}. Prices must be integers between 1-10,000,000.")
                 self.item_list_display.List.insertItem(self.item_list_display.List.count(), f'Item ID: {key}, Price: {value}')
+
         except json.JSONDecodeError:
             QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
 
     def pet_list_double_clicked(self,item):
         item_split = item.text().replace(' ', '').split(':')
@@ -517,10 +527,17 @@ class App(QMainWindow):
             with open(pathname) as file:
                 self.pet_list = json.load(file)
             for key,value in self.pet_list.items():
+                if not (1 <= int(key) <= 10000):
+                    raise ValueError(f"Invalid pet ID {key}. IDs must be integers between 1-500,000.")
+                if not (1 <= int(value) <= 10000000):
+                    raise ValueError(f"Invalid price {value} for pet ID {key}. Prices must be integers between 1-10,000,000.")
                 self.pet_list_display.List.insertItem(self.pet_list_display.List.count(), f'Pet ID: {key}, Price: {value}')
         except json.JSONDecodeError:
             QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
-
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
 
     def import_configs(self):
         pathname=QFileDialog().getOpenFileName(self)[0]
