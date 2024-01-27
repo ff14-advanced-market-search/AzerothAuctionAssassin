@@ -426,6 +426,8 @@ class App(QMainWindow):
 
     def import_ilvl_data(self):
         pathname=QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
+            return
 
         self.ilvl_list_display.List.clear()
         self.ilvl_list = {}
@@ -461,6 +463,8 @@ class App(QMainWindow):
 
     def import_item_data(self):
         pathname=QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
+            return
 
         self.item_list_display.List.clear()
         self.items_list = {}
@@ -495,6 +499,8 @@ class App(QMainWindow):
 
     def import_pet_data(self):
         pathname=QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
+            return
 
         self.pet_list_display.List.clear()
         self.pet_list = {}
@@ -506,6 +512,8 @@ class App(QMainWindow):
 
     def import_configs(self):
         pathname=QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
+            return
         self.check_config_file(pathname)
 
     def reset_app_data(self):
@@ -520,7 +528,7 @@ class App(QMainWindow):
         self.show_bid_prices.Checkbox.setChecked(False),
         self.number_of_mega_threads.Text.setText('48'),
         self.wow_head_link.Checkbox.setChecked(False),
-        self.important_emoji.Text.setText(''),
+        self.important_emoji.Text.setText('🔥'),
         self.russian_realms.Checkbox.setChecked(True),
         self.refresh_alerts.Checkbox.setChecked(False),
         self.scan_time_min.Text.setText('1'),

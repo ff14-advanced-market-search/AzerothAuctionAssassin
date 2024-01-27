@@ -203,20 +203,20 @@ class Alerts(QThread):
                 "speed": len(item_bonus_ids & speed_ids) != 0,
             }
 
+            desired_tertiary_stats = {
+                "sockets": DESIRED_ILVL_ITEMS["sockets"],
+                "leech": DESIRED_ILVL_ITEMS["leech"],
+                "avoidance": DESIRED_ILVL_ITEMS["avoidance"],
+                "speed": DESIRED_ILVL_ITEMS["speed"],
+            }
+
             # if we're looking for sockets, leech, avoidance, or speed, skip if none of those are present
-            if (
-                DESIRED_ILVL_ITEMS["sockets"]
-                or DESIRED_ILVL_ITEMS["leech"]
-                or DESIRED_ILVL_ITEMS["avoidance"]
-                or DESIRED_ILVL_ITEMS["speed"]
-            ):
-                if not (
-                    (DESIRED_ILVL_ITEMS["sockets"] and tertiary_stats["sockets"])
-                    or (DESIRED_ILVL_ITEMS["leech"] and tertiary_stats["leech"])
-                    or (DESIRED_ILVL_ITEMS["avoidance"] and tertiary_stats["avoidance"])
-                    or (DESIRED_ILVL_ITEMS["speed"] and tertiary_stats["speed"])
-                ):
-                    return False
+            # Check if any of the desired stats are True
+            if any(desired_tertiary_stats):
+                # Check if all the desired stats are present in the tertiary_stats
+                for stat, desired in desired_tertiary_stats.items():
+                    if desired and not tertiary_stats.get(stat, False):
+                        return False
 
             # get ilvl
             base_ilvl = DESIRED_ILVL_ITEMS["base_ilvls"][auction["item"]["id"]]
