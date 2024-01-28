@@ -98,7 +98,7 @@ To enable this set the env var `DESIRED_ILVL_LIST` with json similar to the foll
 If we change this to and set `"sockets": true` then it will show items over an ilvl of 360 with a speed stat or a socket:
 
 ```
-[{"ilvl": 424, "buyout": 1000, "sockets": true, "speed": true, "leech": false, "avoidance": false}'
+[{"ilvl": 424, "buyout": 1000, "sockets": true, "speed": true, "leech": false, "avoidance": false}]
 ```
 
 # How to run the alerts
@@ -126,7 +126,7 @@ We also have the following **optional** env vars you can add in to change alert 
 
 ## Starting and Stopping the Sniper 
 
-You can use any combination of `DESIRED_ITEMS`, `DESIRED_PETS`, `DESIRED_ILVL` or `DESIRED_ILVL_LIST` but at least one must be set.
+You can use any combination of `DESIRED_ITEMS`, `DESIRED_PETS`, `DESIRED_ILVL_LIST` but at least one must be set.
 
 # How to update versions
 
@@ -136,12 +136,12 @@ wip
 
 We now have an extra option similar to the `DESIRED_ITEMS` or `DESIRED_PETS` for sniping items based on ilvl.  This also lets you search for items with specific item levels and leech, sockets, speed or avoidance.
 
-To enable this set the env var `DESIRED_ILVL` with json similar to the following. 
+To enable this set the env var `DESIRED_ILVL_LIST` with json similar to the following. 
 
 This example will snipe anything based on ilvl (just make sure all the stats are set to false for ilvl alone):
 
 ```json
-{
+[{
   "ilvl": 420,
   "buyout": 1000,
   "sockets": false,
@@ -149,7 +149,7 @@ This example will snipe anything based on ilvl (just make sure all the stats are
   "leech": false,
   "avoidance": false,
   "item_ids": [204423, 204410]
-}
+}]
 ```
 
 <img width="680" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/722e828d-fdbf-485e-82b5-b8bc08827e3a">
@@ -158,7 +158,7 @@ This example will snipe anything based on ilvl (just make sure all the stats are
 This example looks for items with over an ilvl of 360 with a speed stat because `"speed": true`:
 
 ```json
-{
+[{
   "ilvl": 424,
   "buyout": 1000,
   "sockets": false,
@@ -166,7 +166,7 @@ This example looks for items with over an ilvl of 360 with a speed stat because 
   "leech": false,
   "avoidance": false,
   "item_ids": [204966, 204920]
-}
+}]
 ```
 
 <img width="460" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/1a7250be-e1fe-41f9-b056-a2dc3cfd3abe">
@@ -175,7 +175,7 @@ This example looks for items with over an ilvl of 360 with a speed stat because 
 If we change this and also set `"sockets": true` then it will show items over an ilvl of 360 with a speed stat or a socket:
 
 ```json
-{
+[{
   "ilvl": 424,
   "buyout": 1000,
   "sockets": true,
@@ -183,7 +183,7 @@ If we change this and also set `"sockets": true` then it will show items over an
   "leech": false,
   "avoidance": false,
   "item_ids": [204948, 204951, 204965]
-}
+}]
 ```
 
 <img width="353" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/53418363-caa7-4a71-b388-a270aef464eb">
@@ -192,14 +192,14 @@ If we change this and also set `"sockets": true` then it will show items over an
 You can also remove the `item_ids` or leave it empty to snipe for all items at that ilvl (warning this may spam so many messages it breaks your webhook, if that happens just make a new webhook):
 
 ```json
-{
+[{
   "ilvl": 424,
   "buyout": 1000,
   "sockets": false,
   "speed": false,
   "leech": false,
   "avoidance": false
-}
+}]
 ```
 
 If you want to set specific snipes for multiple different items with different prices or ilvls then you can set a list and give it to `DESIRED_ILVL_LIST`:
