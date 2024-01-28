@@ -61,7 +61,7 @@ You can find that id at the end of the undermine exchange link for the item http
 
 Setting the following and clicking on `Add Item` will add this to your snipe list. 
 
-<img width="261" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/976f23d8-5c42-438a-9d84-1695b4eec387">
+<img width="251" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/f6ed12af-42a4-45fb-914a-804e4f878f4d">
 
 # Adding Battle Pets to Alerts
 
@@ -75,7 +75,7 @@ You can find that id (3390) at the end of the undermine exchange link for the it
 
 Setting the following and clicking on `Add Pet` will add this to your snipe list.
 
-<img width="251" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/f6ed12af-42a4-45fb-914a-804e4f878f4d">
+<img width="261" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/976f23d8-5c42-438a-9d84-1695b4eec387">
 
 # Adding BOE Sniping for Ilvl and Tertiary stats
 
