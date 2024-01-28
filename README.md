@@ -21,7 +21,7 @@ Blizzard only sends out new AH data to the API one time per hour, the rest of th
 
 # Installation
 
-1. Download the App: [Windows]( https://www.dropbox.com/scl/fi/xknsy1mezzzhzyth02vaw/AzerothAuctionAssassin.zip?rlkey=3219rtyp6ibiowdq1qb7t1o6t&dl=0) or [Mac](https://www.dropbox.com/scl/fi/ver8u3tajekf3g75u7x7p/AzerothAuctionAssassin-Mac.zip?rlkey=7pthlwmk3hxv95ltkfwevt7lm&dl=0)
+1. Download the App: [Windows](https://www.dropbox.com/scl/fi/mr2f0xzpjrrxv8cbfj5ra/AzerothAuctionAssassin-Windows.zip?rlkey=k77ffldfh2wme89k28ndt4lcb&dl=0) or [Mac](https://www.dropbox.com/scl/fi/ver8u3tajekf3g75u7x7p/AzerothAuctionAssassin-Mac.zip?rlkey=7pthlwmk3hxv95ltkfwevt7lm&dl=0)
 
 2. [Setup a discord channel with a webhook url for sending the alert messages](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) You will use this for the `MEGA_WEBHOOK_URL` later on.
 
@@ -97,18 +97,6 @@ This example looks for 2 different items with over an ilvl of 360 with a speed s
 
 
 If we change this and also set `"sockets": true` then it will show items over an ilvl of 360 with a speed stat and a socket:
-
-```json
-[{
-  "ilvl": 360,
-  "buyout": 1000,
-  "sockets": true,
-  "speed": true,
-  "leech": false,
-  "avoidance": false,
-  "item_ids": [204948, 204951, 204965]
-}]
-```
 
 <img width="653" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/f1e80777-b88f-4a6d-92fe-c90e786d9783">
 
