@@ -83,45 +83,24 @@ If you want to snipe based on ilvl, leech, speed, avoidance or sockets then you 
 
 Here you can create configurations similar to the following inside the app:
 
-```json
-[{
-  "ilvl": 420,
-  "buyout": 1000,
-  "sockets": false,
-  "speed": false,
-  "leech": false,
-  "avoidance": false,
-  "item_ids": [204423, 204410]
-}]
-```
+<img width="644" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/9493bfc2-15d4-464b-8aa3-d6fbae0aeae6">
 
 This will produce alerts similar to the following:
 
 <img width="680" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/722e828d-fdbf-485e-82b5-b8bc08827e3a">
 
+This example looks for 2 different items with over an ilvl of 360 with a speed stat because `"speed": true`:
 
-This example looks for items with over an ilvl of 360 with a speed stat because `"speed": true`:
-
-```json
-[{
-  "ilvl": 424,
-  "buyout": 1000,
-  "sockets": false,
-  "speed": true,
-  "leech": false,
-  "avoidance": false,
-  "item_ids": [204966, 204920]
-}]
-```
+<img width="647" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/b2cc91e3-1315-4f21-991c-281d379bf6b4">
 
 <img width="460" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/1a7250be-e1fe-41f9-b056-a2dc3cfd3abe">
 
 
-If we change this and also set `"sockets": true` then it will show items over an ilvl of 360 with a speed stat or a socket:
+If we change this and also set `"sockets": true` then it will show items over an ilvl of 360 with a speed stat and a socket:
 
 ```json
 [{
-  "ilvl": 424,
+  "ilvl": 360,
   "buyout": 1000,
   "sockets": true,
   "speed": true,
@@ -131,31 +110,17 @@ If we change this and also set `"sockets": true` then it will show items over an
 }]
 ```
 
+<img width="653" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/f1e80777-b88f-4a6d-92fe-c90e786d9783">
+
+
 <img width="353" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/53418363-caa7-4a71-b388-a270aef464eb">
 
 
 You can also remove the `item_ids` or leave it empty to snipe for all items at that ilvl (warning this may spam so many messages it breaks your webhook, if that happens just make a new webhook):
 
-```json
-[{
-  "ilvl": 424,
-  "buyout": 1000,
-  "sockets": false,
-  "speed": false,
-  "leech": false,
-  "avoidance": false
-}]
-```
+<img width="648" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/b7dc7078-a83e-4bf6-9fbd-042ab6993b35">
 
-If you want to set specific snipes for multiple different items with different prices or ilvls then you can set a list and give it to `DESIRED_ILVL_LIST`:
-
-```json
-[
-  {"ilvl": 457, "buyout":175001, "sockets": false, "speed": false, "leech": false, "avoidance": false,"item_ids": [208420]},
-  {"ilvl": 470, "buyout": 220001, "sockets": true, "speed": false, "leech": true, "avoidance": true,"item_ids": [208426, 208428, 208431]},
-  {"ilvl": 483, "buyout": 1200001, "sockets": false, "speed": false, "leech": true, "avoidance": false,"item_ids": [208426, 208427]}
-]
-```
+Note that this is all going to a list so you can make as many different combinations and configurations for different items at different stat and ilvls that you want!
 
 # How to run the alerts
 
