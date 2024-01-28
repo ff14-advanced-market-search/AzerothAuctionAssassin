@@ -38,6 +38,19 @@ Blizzard only sends out new AH data to the API one time per hour, the rest of th
 <img width="633" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/595fee57-e0db-4910-995d-5b5ae48190a2">
 
 # Item Selection
+
+Note the separate areas of the GUI app:
+
+<img width="1643" alt="Screenshot 2024-01-28 at 3 58 43 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/06ca3a75-1a31-4880-b2e0-2d32178aca34">
+
+- Red is like `DESIRED_PETS`
+- Green is like `DESIRED_ITEMS`
+- Blue is like `DESIRED_ILVL_LIST`
+
+If you have created a 
+
+#  `DESIRED_PETS`, `DESIRED_ITEMS` and `DESIRED_ILVL_LIST`
+
 1. If you have specific items and prices you want, then make a json object with the item ids and prices that you want to snipe for!
 
 This is what you will set for `DESIRED_ITEMS` or you can set `{}` if you only want to snipe pets.
@@ -76,28 +89,17 @@ You can find that id at the end of the undermine exchange link for the item next
 
 We now have an extra option similar to the `DESIRED_ITEMS` or `DESIRED_PETS` for sniping items based on ilvl.  This also lets you search for items with specific item levels and leech, sockets, speed or avoidance.
 
-To enable this set the env var `DESIRED_ILVL` with json similar to the following. This example looks for items with over an ilvl of 360 with a speed stat:
+To enable this set the env var `DESIRED_ILVL_LIST` with json similar to the following. This example looks for items with over an ilvl of 360 with a speed stat:
 
 ```
-{"ilvl": 424, "buyout": 1000, "sockets": false, "speed": true, "leech": false, "avoidance": false}
+[{"ilvl": 424, "buyout": 1000, "sockets": false, "speed": true, "leech": false, "avoidance": false}]
 ```
 
 If we change this to and set `"sockets": true` then it will show items over an ilvl of 360 with a speed stat or a socket:
 
 ```
-{"ilvl": 424, "buyout": 1000, "sockets": true, "speed": true, "leech": false, "avoidance": false}
+[{"ilvl": 424, "buyout": 1000, "sockets": true, "speed": true, "leech": false, "avoidance": false}'
 ```
-
-4. If you want to run locally with python or pycharm, first clone the repo or [download the code](https://github.com/ff14-advanced-market-search/mega-alerts/archive/refs/heads/main.zip).  Then set all your user values in the data files under the [user_data/mega](https://github.com/ff14-advanced-market-search/mega-alerts/blob/main/user_data/) json files:
-
-- [Set the item ids and prices you want](https://github.com/ff14-advanced-market-search/mega-alerts/blob/main/user_data/mega/desired_items.json)
-- [Set the pet ids and prices you want](https://github.com/ff14-advanced-market-search/mega-alerts/blob/main/user_data/mega/desired_pets.json)
-- [Set the ilvl and price info for snipe by ilvl and stats](https://github.com/ff14-advanced-market-search/mega-alerts/blob/main/user_data/mega/desired_ilvl.json)
-- [Set up all the other important details for alerts](https://github.com/ff14-advanced-market-search/mega-alerts/blob/main/user_data/mega/mega_data.json)
-
-
-Even if you are not going to run directly in python then you should still save this somewhere in a text file.
-
 
 # How to run the alerts
 
