@@ -376,26 +376,65 @@ class App(QMainWindow):
         self.ilvl_input.Text.setText(ilvl)
 
     def add_ilvl_to_list(self):
-        if self.ilvl_input.Text.text() == "" or self.ilvl_price_input.Text.text() == "":
-            return 0
-        if self.ilvl_item_input.Text.text() == "":
+        ilvl = self.ilvl_input.Text.text()
+        price = self.ilvl_price_input.Text.text()
+
+        if ilvl == "" or price == "":
+            QMessageBox.critical(self, "Incomplete Information", "Both ilvl and price fields are required.")
+            return False
+
+        try:
+            ilvl_int = int(ilvl)
+            price_int = int(price)
+        except ValueError:
+            QMessageBox.critical(self, "Invalid Input", "Ilvl and price should be numbers.")
+            return False
+
+        # Check if ilvl is between 1 and 999
+        if not 1 <= ilvl_int <= 999:
+            QMessageBox.critical(self, "Incorrect Ilvl Value", "Ilvl must be between 1 and 999.")
+            return False
+        
+        # Check if Price is between 1 and 10 million
+        if not 1 <= price_int <= 10000000:
+            QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
+            return False
+
+        item_ids_text = self.ilvl_item_input.Text.text()
+        if item_ids_text == "":
             item_ids_list = []
         else:
-            item_ids_list = list(map(int, self.ilvl_item_input.Text.text().replace(' ', '').split(',')))
+            # Validate item IDs
+            try:
+                item_ids_list = list(map(int, item_ids_text.replace(' ', '').split(',')))
+
+                # Check if all items are between 100k and 500k
+                if any(not 100000 <= item_id <= 500000 for item_id in item_ids_list):
+                    QMessageBox.critical(self, "Invalid Item ID", "All item IDs should be between 100k and 500k.")
+                    return False
+            except ValueError:
+                QMessageBox.critical(self, "Invalid Input", f"Item IDs should be numbers.")
+                return False
+
+        # Create a dictionary with the data
         ilvl_dict_data = {
-            'ilvl': int(self.ilvl_input.Text.text()),
-            'buyout': int(self.ilvl_price_input.Text.text()),
+            'ilvl': ilvl_int,
+            'buyout': price_int,
             'sockets': self.ilvl_sockets.Checkbox.isChecked(),
             'speed': self.ilvl_speed.Checkbox.isChecked(),
             'leech': self.ilvl_leech.Checkbox.isChecked(),
             'avoidance': self.ilvl_avoidance.Checkbox.isChecked(),
             'item_ids': item_ids_list,
-
         }
+
         if ilvl_dict_data not in self.ilvl_list:
             self.ilvl_list.append(ilvl_dict_data)
-            self.ilvl_list_display.List.insertItem(self.ilvl_list_display.List.count() ,
-                                                   f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}")
+            self.ilvl_list_display.List.insertItem(
+                self.ilvl_list_display.List.count(),
+                f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}")
+
+        return True
+
 
     def remove_ilvl_to_list(self):
         if len(self.ilvl_input.Text.text()) == 0:
@@ -479,12 +518,35 @@ class App(QMainWindow):
         self.item_price_input.Text.setText(item_split[2])
 
     def add_item_to_dict(self):
-        if self.item_id_input.Text.text() == "" or self.item_price_input.Text.text() == "":
-            return 0
+        item_id = self.item_id_input.Text.text()
+        item_price = self.item_price_input.Text.text()
 
-        if self.item_id_input.Text.text() not in self.items_list:
-            self.items_list[self.item_id_input.Text.text()] = self.item_price_input.Text.text()
-            self.item_list_display.List.insertItem(self.item_list_display.List.count() , f'Item ID: {self.item_id_input.Text.text()}, Price: {self.item_price_input.Text.text()}')
+        if item_id == "" or item_price == "":
+            QMessageBox.critical(self, "Incomplete Information", "All fields are required.")
+            return False
+
+        try:
+            item_id_int = int(item_id)
+            item_price_int = int(item_price)
+        except ValueError:
+            QMessageBox.critical(self, "Invalid Input", "Item ID and Price should be numbers.")
+            return False
+
+        # Check if Item ID is between 1 and 500000
+        if not 1 <= item_id_int <= 500000:
+            QMessageBox.critical(self, "Incorrect Item ID", "Item ID must be between 1 and 500000.")
+            return False
+
+        # Check if Price is between 1 and 10 million
+        if not 1 <= item_price_int <= 10000000:
+            QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
+            return False
+
+        if item_id not in self.items_list:
+            self.items_list[item_id] = item_price
+            self.item_list_display.List.insertItem(self.item_list_display.List.count() , f'Item ID: {item_id}, Price: {item_price}')
+
+        return True
 
     def remove_item_to_dict(self):
         if self.item_id_input.Text.text() in self.items_list:
@@ -527,12 +589,35 @@ class App(QMainWindow):
         self.pet_price_input.Text.setText(item_split[2])
 
     def add_pet_to_dict(self):
-        if self.pet_id_input.Text.text() == "" or self.pet_price_input.Text.text() == "":
-            return 0
+        pet_id = self.pet_id_input.Text.text()
+        pet_price = self.pet_price_input.Text.text()
         
-        if self.pet_id_input.Text.text() not in self.pet_list:
-            self.pet_list[self.pet_id_input.Text.text()] = self.pet_price_input.Text.text()
-            self.pet_list_display.List.insertItem(self.pet_list_display.List.count() , f'Pet ID: {self.pet_id_input.Text.text()}, Price: {self.pet_price_input.Text.text()}')
+        if pet_id == "" or pet_price == "":
+            QMessageBox.critical(self, "Incomplete Information", "All fields are required.")
+            return False
+
+        try:
+            pet_id_int = int(pet_id)
+            pet_price_int = int(pet_price)
+        except ValueError:
+            QMessageBox.critical(self, "Invalid Input", "Pet ID and Price should be numbers.")
+            return False
+        
+        # Check if Pet ID is between 1 and 10000
+        if not 1 <= pet_id_int <= 10000:
+            QMessageBox.critical(self, "Incorrect Pet ID", "Pet ID must be between 1 and 10000.")
+            return False
+
+        # Check if Price is between 1 and 10 million
+        if not 1 <= pet_price_int <= 10000000:
+            QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
+            return False
+        
+        if pet_id not in self.pet_list:
+            self.pet_list[pet_id] = pet_price
+            self.pet_list_display.List.insertItem(self.pet_list_display.List.count() , f'Pet ID: {pet_id}, Price: {pet_price}')
+        
+        return True
 
     def remove_pet_to_dict(self):
         if self.pet_id_input.Text.text() in self.pet_list:
