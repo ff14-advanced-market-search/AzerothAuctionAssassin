@@ -21,11 +21,15 @@ Blizzard only sends out new AH data to the API one time per hour, the rest of th
 
 # Installation
 
-1. Download the App: [Windows](https://www.dropbox.com/scl/fi/3n5n4fa5e6n1cqrpqmpeg/mega_alerts_gui-windows.zip?rlkey=w25mrnwynyw2yc07fx1iejqxp&dl=0) or [Mac](https://www.dropbox.com/scl/fi/jmzj7ifr5xa599xg2ubr6/mega_alerts_gui-mac.zip?rlkey=9jh8xbpu4qd4cos06o1tf1s12&dl=0)
+1. Download the App: [Windows]( https://www.dropbox.com/scl/fi/xknsy1mezzzhzyth02vaw/AzerothAuctionAssassin.zip?rlkey=3219rtyp6ibiowdq1qb7t1o6t&dl=0) or [Mac](https://www.dropbox.com/scl/fi/ver8u3tajekf3g75u7x7p/AzerothAuctionAssassin-Mac.zip?rlkey=7pthlwmk3hxv95ltkfwevt7lm&dl=0)
 
-2. Go to the [Saddlebag Exchange Discord](https://discord.gg/SYv8854Tbr) and ask us for a 30 day Auction Assasin Token.  Soon we will have our discord bot generate these for Super Fancy [Patreon Supporters](https://www.patreon.com/indopan). 
+2.[Setup a discord channel with a webhook url for sending the alert messages](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) You will use this for the `MEGA_WEBHOOK_URL` later on.
 
-3. [Setup a discord channel with a webhook url for sending the alert messages](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) You will use this for the `MEGA_WEBHOOK_URL` later on.
+3. Go to the [Saddlebag Exchange Discord](https://discord.gg/SYv8854Tbr) and generate a token with the command `/wow auctionassassintoken`.  Only available for Super Fancy and Elite [Patreon Supporters](https://www.patreon.com/indopan).
+
+<img width="544" alt="Screenshot 2024-01-28 at 2 54 35 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/87d38aeb-012b-4693-9a22-004a7de1ae11">
+
+<img width="564" alt="Screenshot 2024-01-28 at 2 54 48 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/256c05fd-1efe-4f82-add9-c8fa11169d6c">
 
 4. Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids.  You will use these values for the `WOW_CLIENT_ID` and `WOW_CLIENT_SECRET` later on.
 
