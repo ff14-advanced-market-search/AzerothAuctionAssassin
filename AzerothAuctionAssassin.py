@@ -114,7 +114,7 @@ class App(QMainWindow):
         self.wow_client_secret_input.Label.setToolTip('Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids.')
 
         self.authentication_token=LabelTextbox(self,"Auction Assassin Token",25,250,425,40)
-        self.authentication_token.Label.setToolTip('Go to the Saddlebag Exchange Discord and generate a token with the bot command: /wow AuctionAssassinToken')
+        self.authentication_token.Label.setToolTip('Go to the Saddlebag Exchange Discord and generate a token with the bot command: /wow auctionassassintoken')
 
         self.wow_region_label = LabelText(self, 'Wow Region', 25, 325, 200, 40)
         self.wow_region=ComboBoxes(self,25,325,200,40)
