@@ -30,6 +30,7 @@ jobs:
 
         python -m pip install pyinstaller
         pyinstaller --onefile --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" mega_alerts_gui.py
+        find .
 
     - name: Save Windows executable as artifact
       uses: actions/upload-artifact@v2
