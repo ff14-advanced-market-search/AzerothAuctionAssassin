@@ -23,7 +23,7 @@ Blizzard only sends out new AH data to the API one time per hour, the rest of th
 
 1. Download the App: [Windows]( https://www.dropbox.com/scl/fi/xknsy1mezzzhzyth02vaw/AzerothAuctionAssassin.zip?rlkey=3219rtyp6ibiowdq1qb7t1o6t&dl=0) or [Mac](https://www.dropbox.com/scl/fi/ver8u3tajekf3g75u7x7p/AzerothAuctionAssassin-Mac.zip?rlkey=7pthlwmk3hxv95ltkfwevt7lm&dl=0)
 
-2.[Setup a discord channel with a webhook url for sending the alert messages](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) You will use this for the `MEGA_WEBHOOK_URL` later on.
+2. [Setup a discord channel with a webhook url for sending the alert messages](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) You will use this for the `MEGA_WEBHOOK_URL` later on.
 
 3. Go to the [Saddlebag Exchange Discord](https://discord.gg/SYv8854Tbr) and generate a token with the command `/wow auctionassassintoken`.  Only available for Super Fancy and Elite [Patreon Supporters](https://www.patreon.com/indopan).
 
