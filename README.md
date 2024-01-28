@@ -43,63 +43,52 @@ Note the separate areas of the GUI app:
 
 <img width="1643" alt="Screenshot 2024-01-28 at 3 58 43 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/06ca3a75-1a31-4880-b2e0-2d32178aca34">
 
-- Red is like `DESIRED_PETS`
-- Green is like `DESIRED_ITEMS`
-- Blue is like `DESIRED_ILVL_LIST`
+- Red for adding Battle Pets you want to snipe. (like `DESIRED_PETS` from mega-alerts)
+- Green for adding regular items you want to snipe like recipes, transmog, mounts, toys, etc. (like `DESIRED_ITEMS` from mega-alerts)
+- Blue for adding BOE gear with specific Item Levels and Tertiary stats. (like `DESIRED_ILVL_LIST` from mega-alerts)
 
-If you have created a 
+If you have created these configurations before while using `mega-alerts` you can import them into the `Azeroth Auction Assassin` using the import buttons.
 
-#  `DESIRED_PETS`, `DESIRED_ITEMS` and `DESIRED_ILVL_LIST`
+# Adding Regular Items to Alerts
 
-1. If you have specific items and prices you want, then make a json object with the item ids and prices that you want to snipe for!
+The ItemID is a special name for each item you can sell on the auction house (not counting pets).
 
-This is what you will set for `DESIRED_ITEMS` or you can set `{}` if you only want to snipe pets.
-
-* The item ids for items you want to snipe are as the keys
-* and set the price in gold for each item as the value
-
-For example the following looks for [item id 194641 (which is the elemental lariat)](https://undermine.exchange/#us-thrall/194641) for under 500k and another item for under 40k.
-
-```
-{"194641": 500000, "159840":40000}
-```
-
-[Paste that into this json checker if you want to make sure your json is valid](https://jsonlint.com/)
+For example the following shows [item id 194641 for the elemental lariat](https://undermine.exchange/#us-thrall/194641).
 
 You can find that id at the end of the undermine exchange link for the item https://undermine.exchange/#us-thrall/194641 or if you look it up on wowhead the url also has the item id https://www.wowhead.com/item=194641/design-elemental-lariat
 
-[You can also use our item id to name lookup tool, which makes this even easier.](https://temp.saddlebagexchange.com/itemnames)
+[You can also use our item id to name lookup tool, which makes this even easier.](https://temp.saddlebagexchange.com/megaitemnames)
 
-2.  If you have specific pets and prices you want, then make a json object with the pet ids and prices that you want to snipe for!
+Setting the following and clicking on `Add Item` will add this to your snipe list. 
 
-This is what you will set for `DESIRED_PETS` or you can set `{}` if you only want to snipe regular items.
 
-* The pet ids for items you want to snipe are as the keys
-* and set the price in gold for each item as the value
 
-For example the following looks for [pet species id 3390 (which is the Sophic Amalgamation)](https://undermine.exchange/#us-suramar/82800-3390) for under 3K.
+Once added you will be able to view it in the display.
 
-```
-{"3390": 3000}
-```
 
-You can find that id at the end of the undermine exchange link for the item next to `82800` (which is the item id for pet cages) https://undermine.exchange/#us-suramar/82800-3390.
 
-3. If you want to snipe based on ilvl, leech, speed, avoidance or sockets then setup the json object for that:
+# Adding Battle Pets to Alerts
 
-We now have an extra option similar to the `DESIRED_ITEMS` or `DESIRED_PETS` for sniping items based on ilvl.  This also lets you search for items with specific item levels and leech, sockets, speed or avoidance.
+The PetID is a special name for each Battle Pets species id.
 
-To enable this set the env var `DESIRED_ILVL_LIST` with json similar to the following. This example looks for items with over an ilvl of 360 with a speed stat:
+The following shows [pet species id 3390 for the Sophic Amalgamation](https://undermine.exchange/#us-suramar/82800-3390).
 
-```
-[{"ilvl": 424, "buyout": 1000, "sockets": false, "speed": true, "leech": false, "avoidance": false}]
-```
+You can find that id (3390) at the end of the undermine exchange link for the item next to `82800` (which is the item id for pet cages) https://undermine.exchange/#us-suramar/82800-3390.
 
-If we change this to and set `"sockets": true` then it will show items over an ilvl of 360 with a speed stat or a socket:
+[You can also use our pet id to name lookup tool, which makes this even easier.](https://temp.saddlebagexchange.com/itemnames)
 
-```
-[{"ilvl": 424, "buyout": 1000, "sockets": true, "speed": true, "leech": false, "avoidance": false}]
-```
+
+Setting the following and clicking on `Add Pet` will add this to your snipe list.
+
+
+
+Once added you will be able to view it in the display.
+
+
+
+# Adding BOE Sniping for Ilvl and Tertiary stats
+
+If you want to snipe based on ilvl, leech, speed, avoidance or sockets then 
 
 # How to run the alerts
 
