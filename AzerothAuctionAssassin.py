@@ -770,8 +770,12 @@ class App(QMainWindow):
             QMessageBox.critical(self, "Auction Assassin Token", "Please provide a valid Auction Assassin token!")
             return
 
-        if not response_dict['succeeded']:
+        if 'succeeded' not in response_dict:
             QMessageBox.critical(self, "Auction Assassin Token", "Please provide a valid Auction Assassin token!")
+            return
+
+        if not response_dict['succeeded']:
+            QMessageBox.critical(self, "Auction Assassin Token", "Your Auction Assassin token is incorrect or expired!")
             return
 
         self.start_button.Button.setEnabled(False)
