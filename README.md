@@ -77,48 +77,11 @@ Setting the following and clicking on `Add Pet` will add this to your snipe list
 
 <img width="261" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/976f23d8-5c42-438a-9d84-1695b4eec387">
 
-# Adding BOE Sniping for Ilvl and Tertiary stats
+# Adding BOE Sniping for ILVL and Tertiary stats
 
-If you want to snipe based on ilvl, leech, speed, avoidance or sockets then 
+If you want to snipe based on ilvl, leech, speed, avoidance or sockets then you can check out the last section of our app. 
 
-# How to run the alerts
-
-<img width="1639" alt="Screenshot 2024-01-26 at 12 57 32 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/6e115afe-db3f-4f9f-8bed-e90fd4a6b934">
-
-You will need the following to run AAA:
-
-- `MEGA_WEBHOOK_URL`
-- `WOW_CLIENT_ID`
-- `WOW_CLIENT_SECRET`
-- `WOW_REGION` either `EU` or `NA`
-- Then for your snipe method you must provide at least one correct json data for `DESIRED_ITEMS`, `DESIRED_PETS` or `DESIRED_ILVL`
-
-We also have the following **optional** env vars you can add in to change alert behavior, but you dont need to as all have default values when not manually set:
-- `DEBUG=true` This will instantly trigger a scan on all realms against your inputs, this will only run once and then exit the script or container so use it to debug and make sure your data is working.
-- `SHOW_BID_PRICES=true` Bid prices below your price limit will also be shown (default false)
-- `WOWHEAD_LINK=true` Uses wowhead links instead of undermine and shows pictures, but the message length will be longer (default false)
-- `SCAN_TIME_MIN=-1` increase or decrease the minutes before or at the data update time to start scanning (default to keep scanning 1 min after the data updates).
-- `SCAN_TIME_MAX=1` increase or decrease the minutes after the data updates to stop scanning (default to keep scanning 3 min after the data updates).
-- `MEGA_THREADS=100` increase or decrease the threadcount (default to scan 48 realms at once)(more threads = faster scans, but doing more threads then realms is pointless).
-- `REFRESH_ALERTS=false` if set to false then you will not see the same alert more than once (default true)
-- `NO_RUSSIAN_REALMS=true` set this to true if you are on EU and do not want to get alerts from russian realms
-- `IMPORTANT_EMOJI=🔥` changes the separators from `====` to whatever emoji you set. 
-
-## Starting and Stopping the Sniper 
-
-You can use any combination of `DESIRED_ITEMS`, `DESIRED_PETS`, `DESIRED_ILVL_LIST` but at least one must be set.
-
-# How to update versions
-
-wip
-
-# Snipe by ilvl and tertiary stats
-
-We now have an extra option similar to the `DESIRED_ITEMS` or `DESIRED_PETS` for sniping items based on ilvl.  This also lets you search for items with specific item levels and leech, sockets, speed or avoidance.
-
-To enable this set the env var `DESIRED_ILVL_LIST` with json similar to the following. 
-
-This example will snipe anything based on ilvl (just make sure all the stats are set to false for ilvl alone):
+Here you can create configurations similar to the following inside the app:
 
 ```json
 [{
@@ -131,6 +94,8 @@ This example will snipe anything based on ilvl (just make sure all the stats are
   "item_ids": [204423, 204410]
 }]
 ```
+
+This will produce alerts similar to the following:
 
 <img width="680" alt="image" src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/722e828d-fdbf-485e-82b5-b8bc08827e3a">
 
@@ -191,3 +156,34 @@ If you want to set specific snipes for multiple different items with different p
   {"ilvl": 483, "buyout": 1200001, "sockets": false, "speed": false, "leech": true, "avoidance": false,"item_ids": [208426, 208427]}
 ]
 ```
+
+# How to run the alerts
+
+<img width="1639" alt="Screenshot 2024-01-26 at 12 57 32 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/6e115afe-db3f-4f9f-8bed-e90fd4a6b934">
+
+You will need the following to run AAA:
+
+- `MEGA_WEBHOOK_URL`
+- `WOW_CLIENT_ID`
+- `WOW_CLIENT_SECRET`
+- `WOW_REGION` either `EU` or `NA`
+- Then for your snipe method you must provide at least one correct json data for `DESIRED_ITEMS`, `DESIRED_PETS` or `DESIRED_ILVL`
+
+We also have the following **optional** env vars you can add in to change alert behavior, but you dont need to as all have default values when not manually set:
+- `DEBUG=true` This will instantly trigger a scan on all realms against your inputs, this will only run once and then exit the script or container so use it to debug and make sure your data is working.
+- `SHOW_BID_PRICES=true` Bid prices below your price limit will also be shown (default false)
+- `WOWHEAD_LINK=true` Uses wowhead links instead of undermine and shows pictures, but the message length will be longer (default false)
+- `SCAN_TIME_MIN=-1` increase or decrease the minutes before or at the data update time to start scanning (default to keep scanning 1 min after the data updates).
+- `SCAN_TIME_MAX=1` increase or decrease the minutes after the data updates to stop scanning (default to keep scanning 3 min after the data updates).
+- `MEGA_THREADS=100` increase or decrease the threadcount (default to scan 48 realms at once)(more threads = faster scans, but doing more threads then realms is pointless).
+- `REFRESH_ALERTS=false` if set to false then you will not see the same alert more than once (default true)
+- `NO_RUSSIAN_REALMS=true` set this to true if you are on EU and do not want to get alerts from russian realms
+- `IMPORTANT_EMOJI=🔥` changes the separators from `====` to whatever emoji you set. 
+
+## Starting and Stopping the Sniper 
+
+You can use any combination of `DESIRED_ITEMS`, `DESIRED_PETS`, `DESIRED_ILVL_LIST` but at least one must be set.
+
+# How to update versions
+
+wip
