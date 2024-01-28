@@ -3,12 +3,12 @@ name: Build Windows Executable
 on:
   push:
     branches:
-      - main  # Replace with the branch you want to trigger the workflow on
+      - main
       - path-cleanup
   
 jobs:
   build:
-    runs-on: ubuntu-latest  # You can use a Windows runner if needed
+    runs-on: windows-latest  # Use a Windows runner
 
     steps:
     - name: Checkout code
@@ -17,19 +17,15 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.11  # Replace with the Python version you need
+        python-version: 3.11
 
     - name: Install dependencies
       run: pip install -r requirements.txt
 
     - name: Build Windows executable
       run: |
-        sudo dpkg --add-architecture i386
-        sudo apt-get update
-        sudo apt-get install -y wine32
-
         python -m pip install pyinstaller
-        pyinstaller --onefile --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" mega_alerts_gui.py
+        pyinstaller --onefile --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" AzerothAuctionAssassin.py
         find .
 
     - name: Save Windows executable as artifact
