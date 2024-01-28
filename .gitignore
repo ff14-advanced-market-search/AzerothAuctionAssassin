@@ -1,8 +1,8 @@
-data/desired_ilvl.json
-data/desired_ilvl_list.json
-data/desired_items.json
-data/desired_pets.json
-data/mega_data.json
+AzerothAuctionAssassinData/desired_ilvl.json
+AzerothAuctionAssassinData/desired_ilvl_list.json
+AzerothAuctionAssassinData/desired_items.json
+AzerothAuctionAssassinData/desired_pets.json
+AzerothAuctionAssassinData/mega_data.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

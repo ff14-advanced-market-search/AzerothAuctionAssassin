@@ -82,14 +82,14 @@ class App(QMainWindow):
 
         self.token_auth_url = "http://api.saddlebagexchange.com/api/wow/checkmegatoken"
 
-        self.eu_connected_realms = os.path.join(os.getcwd(), "data", "eu-wow-connected-realm-ids.json")
-        self.na_connected_realms = os.path.join(os.getcwd(), "data", "na-wow-connected-realm-ids.json")
+        self.eu_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "eu-wow-connected-realm-ids.json")
+        self.na_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "na-wow-connected-realm-ids.json")
 
-        self.path_to_data = os.path.join(os.getcwd(), "data", "mega_data.json")
-        self.path_to_desired_items = os.path.join(os.getcwd(), "data", "desired_items.json")
-        self.path_to_desired_pets = os.path.join(os.getcwd(), "data", "desired_pets.json")
-        self.path_to_desired_ilvl_items = os.path.join(os.getcwd(), "data", "desired_ilvl.json")
-        self.path_to_desired_ilvl_list = os.path.join(os.getcwd(), "data", "desired_ilvl_list.json")
+        self.path_to_data = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "mega_data.json")
+        self.path_to_desired_items = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_items.json")
+        self.path_to_desired_pets = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_pets.json")
+        self.path_to_desired_ilvl_items = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_ilvl.json")
+        self.path_to_desired_ilvl_list = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_ilvl_list.json")
 
         self.pet_list = {}
         self.items_list = {}
@@ -114,7 +114,7 @@ class App(QMainWindow):
         self.wow_client_secret_input.Label.setToolTip('Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids.')
 
         self.authentication_token=LabelTextbox(self,"Auction Assassin Token",25,250,425,40)
-        self.authentication_token.Label.setToolTip('Go to the Saddlebag Exchange Discord and generate a token with the bot command: /wow AuctionAssassinToken')
+        self.authentication_token.Label.setToolTip('Go to the Saddlebag Exchange Discord and generate a token with the bot command: /wow auctionassassintoken')
 
         self.wow_region_label = LabelText(self, 'Wow Region', 25, 325, 200, 40)
         self.wow_region=ComboBoxes(self,25,325,200,40)
@@ -134,6 +134,7 @@ class App(QMainWindow):
         self.scan_time_max.Label.setToolTip('Increase or decrease the minutes before or after the data update to stop running scans.')
 
         self.important_emoji=LabelTextbox(self,"Important Emoji",250,550,200,40)
+        self.important_emoji.Text.setText('🔥')
         self.important_emoji.Label.setToolTip('Changes the separators from ==== to whatever emoji you want.')
 
         self.show_bid_prices = CheckBox(self, 'Show Bid Prices', 25, 375, 200, 40)
@@ -143,6 +144,7 @@ class App(QMainWindow):
         self.wow_head_link.Checkbox.setToolTip('Uses WoWHead links instead of Undermine and shows pictures.')
 
         self.russian_realms = CheckBox(self, 'No Russian Realms', 25, 435, 200, 40)
+        self.russian_realms.Checkbox.setChecked(True)
         self.russian_realms.Checkbox.setToolTip('Removes alerts from Russian Realms.')
 
         self.refresh_alerts = CheckBox(self, 'Refresh Alerts', 25, 465, 200, 40)
@@ -222,7 +224,7 @@ class App(QMainWindow):
 
         ########################## ILVL STUFF ###################################################
 
-        self.ilvl_item_input=LabelTextbox(self,"Item ID",1000,25,100,40)
+        self.ilvl_item_input=LabelTextbox(self,"Item ID(s)",1000,25,100,40)
         self.ilvl_item_input.Label.setToolTip('Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420')
 
         self.ilvl_input=LabelTextbox(self,"Item level",1000,100,100,40)
@@ -254,7 +256,7 @@ class App(QMainWindow):
         self.ilvl_list_display = ListView(self,1125,25,500,550)
         self.ilvl_list_display.List.itemClicked.connect(self.ilvl_list_double_clicked)
 
-        self.import_ilvl_data_button = UIButtons(self, "Import ILvl Data", 1125, 600, 500, 50)
+        self.import_ilvl_data_button = UIButtons(self, "Import Desired ILvl List Data", 1125, 600, 500, 50)
         self.import_ilvl_data_button.Button.clicked.connect(self.import_ilvl_data)
         self.import_ilvl_data_button.Button.setToolTip('Import your desired_ilvl_list.json config')
 
@@ -263,9 +265,9 @@ class App(QMainWindow):
         self.show()
 
     def check_config_file(self, path_to_config):
-        raw_mega_data = json.load(open(path_to_config, encoding="utf-8"))
-
         try:
+            with open(path_to_config, encoding="utf-8") as json_file:
+                raw_mega_data = json.load(json_file)
             if 'MEGA_WEBHOOK_URL' in raw_mega_data:
                 self.discord_webhook_input.Text.setText(raw_mega_data['MEGA_WEBHOOK_URL'])
 
@@ -309,13 +311,14 @@ class App(QMainWindow):
 
             if 'DEBUG' in raw_mega_data:
                 self.debug_mode.Checkbox.setChecked(raw_mega_data['DEBUG'])
-
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Parsing Error", f"Could not parse JSON data in {path_to_config}")
         except:
-            QMessageBox.critical(self, "Loading Error", "Could not load config settings from mega_data.json")
+            QMessageBox.critical(self, "Loading Error", f"Could not load config settings from {path_to_config}")
 
     def check_for_settings(self):
 
-        data_folder = os.path.join(os.getcwd(), "data")
+        data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
 
@@ -373,26 +376,65 @@ class App(QMainWindow):
         self.ilvl_input.Text.setText(ilvl)
 
     def add_ilvl_to_list(self):
-        if self.ilvl_input.Text.text() == "" or self.ilvl_price_input.Text.text() == "":
-            return 0
-        if self.ilvl_item_input.Text.text() == "":
+        ilvl = self.ilvl_input.Text.text()
+        price = self.ilvl_price_input.Text.text()
+
+        if ilvl == "" or price == "":
+            QMessageBox.critical(self, "Incomplete Information", "Both ilvl and price fields are required.")
+            return False
+
+        try:
+            ilvl_int = int(ilvl)
+            price_int = int(price)
+        except ValueError:
+            QMessageBox.critical(self, "Invalid Input", "Ilvl and price should be numbers.")
+            return False
+
+        # Check if ilvl is between 1 and 999
+        if not 1 <= ilvl_int <= 999:
+            QMessageBox.critical(self, "Incorrect Ilvl Value", "Ilvl must be between 1 and 999.")
+            return False
+        
+        # Check if Price is between 1 and 10 million
+        if not 1 <= price_int <= 10000000:
+            QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
+            return False
+
+        item_ids_text = self.ilvl_item_input.Text.text()
+        if item_ids_text == "":
             item_ids_list = []
         else:
-            item_ids_list = list(map(int, self.ilvl_item_input.Text.text().replace(' ', '').split(',')))
+            # Validate item IDs
+            try:
+                item_ids_list = list(map(int, item_ids_text.replace(' ', '').split(',')))
+
+                # Check if all items are between 100k and 500k
+                if any(not 100000 <= item_id <= 500000 for item_id in item_ids_list):
+                    QMessageBox.critical(self, "Invalid Item ID", "All item IDs should be between 100k and 500k.")
+                    return False
+            except ValueError:
+                QMessageBox.critical(self, "Invalid Input", f"Item IDs should be numbers.")
+                return False
+
+        # Create a dictionary with the data
         ilvl_dict_data = {
-            'ilvl': int(self.ilvl_input.Text.text()),
-            'buyout': int(self.ilvl_price_input.Text.text()),
+            'ilvl': ilvl_int,
+            'buyout': price_int,
             'sockets': self.ilvl_sockets.Checkbox.isChecked(),
             'speed': self.ilvl_speed.Checkbox.isChecked(),
             'leech': self.ilvl_leech.Checkbox.isChecked(),
             'avoidance': self.ilvl_avoidance.Checkbox.isChecked(),
             'item_ids': item_ids_list,
-
         }
+
         if ilvl_dict_data not in self.ilvl_list:
             self.ilvl_list.append(ilvl_dict_data)
-            self.ilvl_list_display.List.insertItem(self.ilvl_list_display.List.count() ,
-                                                   f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}")
+            self.ilvl_list_display.List.insertItem(
+                self.ilvl_list_display.List.count(),
+                f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}")
+
+        return True
+
 
     def remove_ilvl_to_list(self):
         if len(self.ilvl_input.Text.text()) == 0:
@@ -424,14 +466,54 @@ class App(QMainWindow):
 
     def import_ilvl_data(self):
         pathname=QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
+            return
 
         self.ilvl_list_display.List.clear()
         self.ilvl_list = {}
 
-        self.ilvl_list = json.load(open(pathname))
-        for ilvl_dict_data in self.ilvl_list:
-            string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
-            self.ilvl_list_display.List.insertItem(self.ilvl_list_display.List.count() , string_with_data)
+        try:
+            with open(pathname) as file:
+                self.ilvl_list = json.load(file)
+            if not isinstance(self.ilvl_list, list):
+                raise ValueError("Invalid JSON file.\nFile should contain a list of Desired Ilvl Objects.")
+            for ilvl_dict_data in self.ilvl_list:
+                if "item_ids" not in ilvl_dict_data:
+                    item_ids = []
+                else:
+                    item_ids = ilvl_dict_data['item_ids']
+                buyout_price = ilvl_dict_data['buyout']
+                ilvl = ilvl_dict_data['ilvl']
+                sockets = ilvl_dict_data['sockets']
+                speed = ilvl_dict_data['speed']
+                leech = ilvl_dict_data['leech']
+                avoidance = ilvl_dict_data['avoidance']
+
+                # Check that all item IDs are valid integers, but allow list to be empty
+                if not all(isinstance(id, int) and 1 <= id <= 500000 for id in item_ids):
+                    raise ValueError(f"Invalid item ID(s) in {item_ids}.\nIDs must be integers between 1-500,000.")
+
+                # Check that price is a valid integer within range
+                if not (1 <= buyout_price <= 10000000):
+                    raise ValueError(f"Invalid buyout price {buyout_price}.\nPrices must be integers between 1-10,000,000.")
+
+                # Check that ilvl is a valid integer within range
+                if not (200 <= ilvl <= 1000):
+                    raise ValueError(f"Invalid ILvl {ilvl}.\nILvl must be an integer between 200-1000.")
+
+                # Check that sockets, speed, leech and avoidance are booleans
+                if not all(isinstance(val, bool) for val in [sockets, speed, leech, avoidance]):
+                    raise ValueError("Sockets, speed, leech, and avoidance should be boolean values.")
+
+                string_with_data = f"Item ID: {','.join(map(str, item_ids))}; Price: {buyout_price}; ILvl: {ilvl}; Sockets: {sockets}; Speed: {speed}; Leech: {leech}; Avoidance: {avoidance}"
+                self.ilvl_list_display.List.insertItem(self.ilvl_list_display.List.count(), string_with_data)
+
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
 
 
     def item_list_double_clicked(self,item):
@@ -441,12 +523,35 @@ class App(QMainWindow):
         self.item_price_input.Text.setText(item_split[2])
 
     def add_item_to_dict(self):
-        if self.item_id_input.Text.text() == "" or self.item_price_input.Text.text() == "":
-            return 0
+        item_id = self.item_id_input.Text.text()
+        item_price = self.item_price_input.Text.text()
 
-        if self.item_id_input.Text.text() not in self.items_list:
-            self.items_list[self.item_id_input.Text.text()] = self.item_price_input.Text.text()
-            self.item_list_display.List.insertItem(self.item_list_display.List.count() , f'Item ID: {self.item_id_input.Text.text()}, Price: {self.item_price_input.Text.text()}')
+        if item_id == "" or item_price == "":
+            QMessageBox.critical(self, "Incomplete Information", "All fields are required.")
+            return False
+
+        try:
+            item_id_int = int(item_id)
+            item_price_int = int(item_price)
+        except ValueError:
+            QMessageBox.critical(self, "Invalid Input", "Item ID and Price should be numbers.")
+            return False
+
+        # Check if Item ID is between 1 and 500000
+        if not 1 <= item_id_int <= 500000:
+            QMessageBox.critical(self, "Incorrect Item ID", "Item ID must be between 1 and 500000.")
+            return False
+
+        # Check if Price is between 1 and 10 million
+        if not 1 <= item_price_int <= 10000000:
+            QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
+            return False
+
+        if item_id not in self.items_list:
+            self.items_list[item_id] = item_price
+            self.item_list_display.List.insertItem(self.item_list_display.List.count() , f'Item ID: {item_id}, Price: {item_price}')
+
+        return True
 
     def remove_item_to_dict(self):
         if self.item_id_input.Text.text() in self.items_list:
@@ -459,14 +564,28 @@ class App(QMainWindow):
 
     def import_item_data(self):
         pathname=QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
+            return
 
         self.item_list_display.List.clear()
         self.items_list = {}
 
-        self.items_list = json.load(open(pathname))
-        for key,value in self.items_list.items():
-            self.item_list_display.List.insertItem(self.item_list_display.List.count() , f'Item ID: {key}, Price: {value}')
+        try:
+            with open(pathname) as file:
+                self.items_list = json.load(file)
+            for key,value in self.items_list.items():
+                if not (1 <= int(key) <= 500000):
+                    raise ValueError(f"Invalid item ID {key}.\nIDs must be integers between 1-500,000.")
+                if not (1 <= int(value) <= 10000000):
+                    raise ValueError(f"Invalid price {value} for item ID {key}.\nPrices must be integers between 1-10,000,000.")
+                self.item_list_display.List.insertItem(self.item_list_display.List.count(), f'Item ID: {key}, Price: {value}')
 
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
 
     def pet_list_double_clicked(self,item):
         item_split = item.text().replace(' ', '').split(':')
@@ -475,12 +594,35 @@ class App(QMainWindow):
         self.pet_price_input.Text.setText(item_split[2])
 
     def add_pet_to_dict(self):
-        if self.pet_id_input.Text.text() == "" or self.pet_price_input.Text.text() == "":
-            return 0
+        pet_id = self.pet_id_input.Text.text()
+        pet_price = self.pet_price_input.Text.text()
         
-        if self.pet_id_input.Text.text() not in self.pet_list:
-            self.pet_list[self.pet_id_input.Text.text()] = self.pet_price_input.Text.text()
-            self.pet_list_display.List.insertItem(self.pet_list_display.List.count() , f'Pet ID: {self.pet_id_input.Text.text()}, Price: {self.pet_price_input.Text.text()}')
+        if pet_id == "" or pet_price == "":
+            QMessageBox.critical(self, "Incomplete Information", "All fields are required.")
+            return False
+
+        try:
+            pet_id_int = int(pet_id)
+            pet_price_int = int(pet_price)
+        except ValueError:
+            QMessageBox.critical(self, "Invalid Input", "Pet ID and Price should be numbers.")
+            return False
+        
+        # Check if Pet ID is between 1 and 10000
+        if not 1 <= pet_id_int <= 10000:
+            QMessageBox.critical(self, "Incorrect Pet ID", "Pet ID must be between 1 and 10000.")
+            return False
+
+        # Check if Price is between 1 and 10 million
+        if not 1 <= pet_price_int <= 10000000:
+            QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
+            return False
+        
+        if pet_id not in self.pet_list:
+            self.pet_list[pet_id] = pet_price
+            self.pet_list_display.List.insertItem(self.pet_list_display.List.count() , f'Pet ID: {pet_id}, Price: {pet_price}')
+        
+        return True
 
     def remove_pet_to_dict(self):
         if self.pet_id_input.Text.text() in self.pet_list:
@@ -493,17 +635,32 @@ class App(QMainWindow):
 
     def import_pet_data(self):
         pathname=QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
+            return
 
         self.pet_list_display.List.clear()
         self.pet_list = {}
 
-        self.pet_list = json.load(open(pathname))
-        for key,value in self.pet_list.items():
-            self.pet_list_display.List.insertItem(self.pet_list_display.List.count() , f'Pet ID: {key}, Price: {value}')
-
+        try:
+            with open(pathname) as file:
+                self.pet_list = json.load(file)
+            for key,value in self.pet_list.items():
+                if not (1 <= int(key) <= 10000):
+                    raise ValueError(f"Invalid pet ID {key}.\nIDs must be integers between 1-500,000.")
+                if not (1 <= int(value) <= 10000000):
+                    raise ValueError(f"Invalid price {value} for pet ID {key}.\nPrices must be integers between 1-10,000,000.")
+                self.pet_list_display.List.insertItem(self.pet_list_display.List.count(), f'Pet ID: {key}, Price: {value}')
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
 
     def import_configs(self):
         pathname=QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
+            return
         self.check_config_file(pathname)
 
     def reset_app_data(self):
@@ -518,8 +675,8 @@ class App(QMainWindow):
         self.show_bid_prices.Checkbox.setChecked(False),
         self.number_of_mega_threads.Text.setText('48'),
         self.wow_head_link.Checkbox.setChecked(False),
-        self.important_emoji.Text.setText(''),
-        self.russian_realms.Checkbox.setChecked(False),
+        self.important_emoji.Text.setText('🔥'),
+        self.russian_realms.Checkbox.setChecked(True),
         self.refresh_alerts.Checkbox.setChecked(False),
         self.scan_time_min.Text.setText('1'),
         self.scan_time_max.Text.setText('3'),
@@ -533,38 +690,71 @@ class App(QMainWindow):
         self.save_data_to_json()
 
     def save_data_to_json(self):
+        wow_region = self.wow_region.Combo.currentText()
+
+        # Check if WOW_REGION is either 'NA' or 'EU'
+        if wow_region not in ['NA', 'EU']:
+            QMessageBox.critical(self, "Invalid Region", "WOW region must be either 'NA' or 'EU'.")
+            return False
+
+        mega_threads = self.number_of_mega_threads.Text.text()
+        scan_time_max = self.scan_time_max.Text.text()
+        scan_time_min = self.scan_time_min.Text.text()
+
+        # Check if MEGA_THREADS, SCAN_TIME_MAX, and SCAN_TIME_MIN are integers 
+        integer_fields = {'MEGA_THREADS': mega_threads, 'SCAN_TIME_MAX': scan_time_max, 'SCAN_TIME_MIN': scan_time_min}
+
+        for field, value in integer_fields.items():
+            try:
+                int(value)
+            except ValueError:
+                QMessageBox.critical(self, "Invalid Value", f"{field} should be an integer.")
+                return False
+
+        show_bids = self.show_bid_prices.Checkbox.isChecked()
+        wowhead = self.wow_head_link.Checkbox.isChecked()
+        no_russians = self.russian_realms.Checkbox.isChecked()
+        refresh_alerts = self.refresh_alerts.Checkbox.isChecked()
+        debug = self.debug_mode.Checkbox.isChecked()
+
+        boolean_fields = {'SHOW_BID_PRICES': show_bids, 'WOWHEAD_LINK': wowhead, 'NO_RUSSIAN_REALMS': no_russians, 'REFRESH_ALERTS': refresh_alerts, 'DEBUG': debug}
+
+        # Ensure all boolean fields have a boolean value.
+        for field, value in boolean_fields.items():
+            if type(value) != bool:
+                QMessageBox.critical(self, "Invalid Value", f"{field} should be a boolean.")
+                return False
+
+        # If all tests pass, save data to JSON.
         config_json = {
             'MEGA_WEBHOOK_URL': self.discord_webhook_input.Text.text(),
             'WOW_CLIENT_ID': self.wow_client_id_input.Text.text(),
             'WOW_CLIENT_SECRET': self.wow_client_secret_input.Text.text(),
             'AUTHENTICATION_TOKEN': self.authentication_token.Text.text(),
-            'WOW_REGION': self.wow_region.Combo.currentText(),
-            # 'EXTRA_ALERTS': '[]',
-            'SHOW_BID_PRICES': self.show_bid_prices.Checkbox.isChecked(),
-            'MEGA_THREADS': int(self.number_of_mega_threads.Text.text()),
-            'WOWHEAD_LINK': self.wow_head_link.Checkbox.isChecked(),
+            'WOW_REGION': wow_region,
+            'SHOW_BID_PRICES': show_bids,
+            'MEGA_THREADS': int(mega_threads),
+            'WOWHEAD_LINK': wowhead,
             'IMPORTANT_EMOJI': self.important_emoji.Text.text(),
-            'NO_RUSSIAN_REALMS': self.russian_realms.Checkbox.isChecked(),
-            'REFRESH_ALERTS': self.refresh_alerts.Checkbox.isChecked(),
-            'SCAN_TIME_MAX': int(self.scan_time_max.Text.text()),
-            'SCAN_TIME_MIN': int(self.scan_time_min.Text.text()),
-            'DEBUG': self.debug_mode.Checkbox.isChecked()
+            'NO_RUSSIAN_REALMS': no_russians,
+            'REFRESH_ALERTS': refresh_alerts,
+            'SCAN_TIME_MAX': int(scan_time_max),
+            'SCAN_TIME_MIN': int(scan_time_min),
+            'DEBUG': debug
         }
 
-        with open(self.path_to_data, 'w', encoding="utf-8") as json_file:
-            json.dump(config_json, json_file, ensure_ascii=False, indent=4)
+        # Save JSON files
+        self.save_json_file(self.path_to_data, config_json)
+        self.save_json_file(self.path_to_desired_pets, self.pet_list)
+        self.save_json_file(self.path_to_desired_items, self.items_list)
+        self.save_json_file(self.path_to_desired_ilvl_list, self.ilvl_list)
+        self.save_json_file(self.path_to_desired_ilvl_items, self.ilvl_items)
 
-        with open(self.path_to_desired_pets, 'w') as json_file:
-            json.dump(self.pet_list, json_file, indent=4)
+        return True
 
-        with open(self.path_to_desired_items, 'w') as json_file:
-            json.dump(self.items_list, json_file, indent=4)
-
-        with open(self.path_to_desired_ilvl_list, 'w') as json_file:
-            json.dump(self.ilvl_list, json_file, indent=4)
-        
-        with open(self.path_to_desired_ilvl_items, 'w') as json_file:
-            json.dump(self.ilvl_items, json_file, indent=4)
+    def save_json_file(self, path, data):
+        with open(path, 'w', encoding="utf-8") as json_file:
+            json.dump(data, json_file, ensure_ascii=False, indent=4)
 
     def start_alerts(self):
 
@@ -587,7 +777,9 @@ class App(QMainWindow):
         self.start_button.Button.setEnabled(False)
         self.stop_button.Button.setEnabled(True)
 
-        self.save_data_to_json()
+        if not self.save_data_to_json():
+            QMessageBox.critical(self, "Save Error", "Could not save data to JSON.\nAbort scan.\nYour inputs may be invalid")
+            return
 
         self.alerts_thread = Alerts(
             path_to_data_files = self.path_to_data,
