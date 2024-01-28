@@ -36,4 +36,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: windows-executable
-        path: dist/mega_alerts_gui.exe 
+        path: dist/mega_alerts_gui
