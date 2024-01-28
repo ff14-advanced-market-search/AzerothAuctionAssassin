@@ -16,8 +16,7 @@ RUN mkdir /app/AzerothAuctionAssassinData/
 RUN mkdir /app/utils/
 COPY ./mega_alerts.py /app/
 COPY ./utils/* /app/utils/
-COPY ./data/* /app/data/
-COPY ./AzerothAuctionAssassinData/mega/* /app/AzerothAuctionAssassinData/
+COPY ./AzerothAuctionAssassinData/* /app/AzerothAuctionAssassinData/
 COPY ./run /app/
 RUN chmod +x /app/*
 
