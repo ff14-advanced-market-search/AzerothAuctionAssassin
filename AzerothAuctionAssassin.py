@@ -224,7 +224,7 @@ class App(QMainWindow):
 
         ########################## ILVL STUFF ###################################################
 
-        self.ilvl_item_input=LabelTextbox(self,"Item ID",1000,25,100,40)
+        self.ilvl_item_input=LabelTextbox(self,"Item ID(s)",1000,25,100,40)
         self.ilvl_item_input.Label.setToolTip('Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420')
 
         self.ilvl_input=LabelTextbox(self,"Item level",1000,100,100,40)
@@ -256,7 +256,7 @@ class App(QMainWindow):
         self.ilvl_list_display = ListView(self,1125,25,500,550)
         self.ilvl_list_display.List.itemClicked.connect(self.ilvl_list_double_clicked)
 
-        self.import_ilvl_data_button = UIButtons(self, "Import ILvl Data", 1125, 600, 500, 50)
+        self.import_ilvl_data_button = UIButtons(self, "Import Desired ILvl List Data", 1125, 600, 500, 50)
         self.import_ilvl_data_button.Button.clicked.connect(self.import_ilvl_data)
         self.import_ilvl_data_button.Button.setToolTip('Import your desired_ilvl_list.json config')
 
@@ -475,8 +475,13 @@ class App(QMainWindow):
         try:
             with open(pathname) as file:
                 self.ilvl_list = json.load(file)
+            if not isinstance(self.ilvl_list, list):
+                raise ValueError("Invalid JSON file.\nFile should contain a list of Desired Ilvl Objects.")
             for ilvl_dict_data in self.ilvl_list:
-                item_ids = ilvl_dict_data['item_ids']
+                if "item_ids" not in ilvl_dict_data:
+                    item_ids = []
+                else:
+                    item_ids = ilvl_dict_data['item_ids']
                 buyout_price = ilvl_dict_data['buyout']
                 ilvl = ilvl_dict_data['ilvl']
                 sockets = ilvl_dict_data['sockets']
@@ -486,15 +491,15 @@ class App(QMainWindow):
 
                 # Check that all item IDs are valid integers, but allow list to be empty
                 if not all(isinstance(id, int) and 1 <= id <= 500000 for id in item_ids):
-                    raise ValueError(f"Invalid item ID(s) in {item_ids}. IDs must be integers between 1-500,000.")
+                    raise ValueError(f"Invalid item ID(s) in {item_ids}.\nIDs must be integers between 1-500,000.")
 
                 # Check that price is a valid integer within range
                 if not (1 <= buyout_price <= 10000000):
-                    raise ValueError(f"Invalid buyout price {buyout_price}. Prices must be integers between 1-10,000,000.")
+                    raise ValueError(f"Invalid buyout price {buyout_price}.\nPrices must be integers between 1-10,000,000.")
 
                 # Check that ilvl is a valid integer within range
                 if not (200 <= ilvl <= 1000):
-                    raise ValueError(f"Invalid ILvl {ilvl}. ILvl must be an integer between 200-1000.")
+                    raise ValueError(f"Invalid ILvl {ilvl}.\nILvl must be an integer between 200-1000.")
 
                 # Check that sockets, speed, leech and avoidance are booleans
                 if not all(isinstance(val, bool) for val in [sockets, speed, leech, avoidance]):
@@ -570,9 +575,9 @@ class App(QMainWindow):
                 self.items_list = json.load(file)
             for key,value in self.items_list.items():
                 if not (1 <= int(key) <= 500000):
-                    raise ValueError(f"Invalid item ID {key}. IDs must be integers between 1-500,000.")
+                    raise ValueError(f"Invalid item ID {key}.\nIDs must be integers between 1-500,000.")
                 if not (1 <= int(value) <= 10000000):
-                    raise ValueError(f"Invalid price {value} for item ID {key}. Prices must be integers between 1-10,000,000.")
+                    raise ValueError(f"Invalid price {value} for item ID {key}.\nPrices must be integers between 1-10,000,000.")
                 self.item_list_display.List.insertItem(self.item_list_display.List.count(), f'Item ID: {key}, Price: {value}')
 
         except json.JSONDecodeError:
@@ -641,9 +646,9 @@ class App(QMainWindow):
                 self.pet_list = json.load(file)
             for key,value in self.pet_list.items():
                 if not (1 <= int(key) <= 10000):
-                    raise ValueError(f"Invalid pet ID {key}. IDs must be integers between 1-500,000.")
+                    raise ValueError(f"Invalid pet ID {key}.\nIDs must be integers between 1-500,000.")
                 if not (1 <= int(value) <= 10000000):
-                    raise ValueError(f"Invalid price {value} for pet ID {key}. Prices must be integers between 1-10,000,000.")
+                    raise ValueError(f"Invalid price {value} for pet ID {key}.\nPrices must be integers between 1-10,000,000.")
                 self.pet_list_display.List.insertItem(self.pet_list_display.List.count(), f'Pet ID: {key}, Price: {value}')
         except json.JSONDecodeError:
             QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
