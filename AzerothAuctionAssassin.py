@@ -84,8 +84,8 @@ class App(QMainWindow):
 
         self.eu_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "eu-wow-connected-realm-ids.json")
         self.na_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "na-wow-connected-realm-ids.json")
-        self.euclassic_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "euclassic-wow-connected-realm-ids.json")
-        self.naclassic_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "naclassic-wow-connected-realm-ids.json")
+        self.EUCLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "euclassic-wow-connected-realm-ids.json")
+        self.NACLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "naclassic-wow-connected-realm-ids.json")
 
         self.path_to_data = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "mega_data.json")
         self.path_to_desired_items = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_items.json")
@@ -336,16 +336,16 @@ class App(QMainWindow):
             with open(self.na_connected_realms, 'w') as json_file:
                 json.dump(NA_CONNECTED_REALMS_IDS, json_file, indent=4)
 
-        if not os.path.exists(self.euclassic_connected_realms):
+        if not os.path.exists(self.EUCLASSIC_connected_realms):
             from utils.realm_data import EUCLASSIC_CONNECTED_REALMS_IDS
 
-            with open(self.euclassic_connected_realms, 'w') as json_file:
+            with open(self.EUCLASSIC_connected_realms, 'w') as json_file:
                 json.dump(EUCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
 
-        if not os.path.exists(self.naclassic_connected_realms):
+        if not os.path.exists(self.NACLASSIC_connected_realms):
             from utils.realm_data import NACLASSIC_CONNECTED_REALMS_IDS
 
-            with open(self.naclassic_connected_realms, 'w') as json_file:
+            with open(self.NACLASSIC_connected_realms, 'w') as json_file:
                 json.dump(NACLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
 
         if os.path.exists(self.path_to_data):
@@ -706,9 +706,9 @@ class App(QMainWindow):
     def save_data_to_json(self):
         wow_region = self.wow_region.Combo.currentText()
 
-        # Check if WOW_REGION is either 'NA', 'EU', 'NAClassic', 'EUClassic'
-        if wow_region not in ['NA', 'EU', 'NAClassic', 'EUClassic']:
-            QMessageBox.critical(self, "Invalid Region", "WOW region must be either 'NA', 'EU', 'NAClassic' or 'EUClassic'.")
+        # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC'
+        if wow_region not in ['NA', 'EU', 'NACLASSIC', 'EUCLASSIC']:
+            QMessageBox.critical(self, "Invalid Region", "WOW region must be either 'NA', 'EU', 'NACLASSIC' or 'EUCLASSIC'.")
             return False
 
         mega_threads = self.number_of_mega_threads.Text.text()
