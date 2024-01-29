@@ -123,7 +123,7 @@ You will need the following to run AAA:
 - `MEGA_WEBHOOK_URL`
 - `WOW_CLIENT_ID`
 - `WOW_CLIENT_SECRET`
-- `WOW_REGION` either `EU` or `NA`
+- `WOW_REGION` either `EU`, `NA`, `EUCLASSIC` or `NACLASSIC`
 - Then for your snipe method you must provide at least one correct json data for `DESIRED_ITEMS`, `DESIRED_PETS` or `DESIRED_ILVL`
 
 We also have the following **optional** env vars you can add in to change alert behavior, but you dont need to as all have default values when not manually set:
