@@ -100,13 +100,8 @@ class MegaData:
 
         # need to do this no matter where we get the region from
         if var_name == "REGION":
-            if var_value.upper() not in ["US", "EU", "NA"]:
+            if var_value not in ["EU", "NA", "NACLASSIC", "EUCLASSIC"]:
                 raise Exception(f"error {var_value} not a valid region")
-            # for people who are confused about US vs NA, all our data uses NA
-            if var_value.upper() == "US":
-                var_value = "NA"
-            else:
-                var_value = var_value.upper()
 
         # default to 48 threads if not set
         if var_name == "MEGA_THREADS":
@@ -378,12 +373,20 @@ class MegaData:
             f"gather data from connectedRealmId {connectedRealmId} of region {self.REGION}"
         )
         # we want to use check_access_token here to update the token when expired
-        if self.REGION == "NA":
-            url = f"https://us.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}"
-            url += f"/auctions?namespace=dynamic-us&locale=en_US&access_token={self.check_access_token()}"
-        elif self.REGION == "EU":
-            url = f"https://eu.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}"
-            url += f"/auctions?namespace=dynamic-eu&locale=en_EU&access_token={self.check_access_token()}"
+        if self.REGION == "NA" or self.REGION == "NACLASSIC":
+            url = f"https://us.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions"
+            if self.REGION == "NACLASSIC":
+                url += "/2?namespace=dynamic-classic-us"
+            else:
+                url += f"?namespace=dynamic-us"
+            url += f"&locale=en_US&access_token={self.check_access_token()}"
+        elif self.REGION == "EU" or self.REGION == "EUCLASSIC":
+            url = f"https://eu.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions"
+            if self.REGION == "EUCLASSIC":
+                url += "/2?namespace=dynamic-classic-eu"
+            else:
+                url += f"?namespace=dynamic-eu"
+            url += f"&locale=en_EU&access_token={self.check_access_token()}"
         else:
             raise Exception(
                 f"{self.REGION} is not yet supported, reach out for us to add this region option"
