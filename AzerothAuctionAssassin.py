@@ -150,6 +150,7 @@ class App(QMainWindow):
         self.russian_realms.Checkbox.setToolTip('Removes alerts from Russian Realms.')
 
         self.refresh_alerts = CheckBox(self, 'Refresh Alerts', 25, 465, 200, 40)
+        self.refresh_alerts.Checkbox.setChecked(True)
         self.refresh_alerts.Checkbox.setToolTip('Set to true to refresh alerts every 1 hour.')
 
         self.debug_mode = CheckBox(self, 'Debug Mode', 25, 495, 200, 40)
@@ -691,7 +692,7 @@ class App(QMainWindow):
         self.wow_head_link.Checkbox.setChecked(False),
         self.important_emoji.Text.setText('🔥'),
         self.russian_realms.Checkbox.setChecked(True),
-        self.refresh_alerts.Checkbox.setChecked(False),
+        self.refresh_alerts.Checkbox.setChecked(True),
         self.scan_time_min.Text.setText('1'),
         self.scan_time_max.Text.setText('3'),
         self.debug_mode.Checkbox.setChecked(False)
