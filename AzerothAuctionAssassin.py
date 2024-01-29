@@ -87,6 +87,18 @@ class App(QMainWindow):
         self.EUCLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "euclassic-wow-connected-realm-ids.json")
         self.NACLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "naclassic-wow-connected-realm-ids.json")
 
+        # default to 70% discount
+        self.eu_item_statistics = requests.post(
+            f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
+            headers={"Accept": "application/json"},
+            json={"region": "EU", "discount": 70},
+        ).json()
+        self.na_item_statistics = requests.post(
+            f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
+            headers={"Accept": "application/json"},
+            json={"region": "NA", "discount": 70},
+        ).json()
+
         self.path_to_data = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "mega_data.json")
         self.path_to_desired_items = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_items.json")
         self.path_to_desired_pets = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_pets.json")
@@ -224,6 +236,10 @@ class App(QMainWindow):
         self.import_item_data_button = UIButtons(self, "Import Item Data", 750, 600, 225, 50)
         self.import_item_data_button.Button.clicked.connect(self.import_item_data)
         self.import_item_data_button.Button.setToolTip('Import your desired_items.json config')
+
+        self.import_pbs_data_button = UIButtons(self, "Import PBS Data", 750, 650, 225, 50)
+        self.import_pbs_data_button.Button.clicked.connect(self.import_pbs_data)
+        self.import_pbs_data_button.Button.setToolTip('Import your Point Blank Sniper text files')
 
         ########################## ILVL STUFF ###################################################
 
@@ -597,6 +613,32 @@ class App(QMainWindow):
 
         except json.JSONDecodeError:
             QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file!")
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
+
+    def import_pbs_data(self):
+        pathname=QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
+            return
+
+        self.item_list_display.List.clear()
+        self.items_list = {}
+
+        try:
+            # open and read the text file
+            with open(pathname, 'r') as file:
+                pbs_names = [item.split(';;')[0].lower().replace('\n', '') for item in file.read().split('^')]
+            if 'EU' in self.wow_region.Combo.currentText():
+                item_stats = self.eu_item_statistics.copy()
+            elif 'NA' in self.wow_region.Combo.currentText():
+                item_stats = self.na_item_statistics.copy()
+            else:
+                raise ValueError("WOW region must be either 'NA' or 'EU'.")
+            self.items_list = {str(item['itemID']): item['desiredPrice'] for item in item_stats if item['itemName'].lower() in pbs_names}
+            for key,value in self.items_list.items():
+                self.item_list_display.List.insertItem(self.item_list_display.List.count(), f'Item ID: {key}, Price: {value}')
         except ValueError as ve:
             QMessageBox.critical(self, "Invalid Value", str(ve))
         except Exception as e:
