@@ -393,10 +393,6 @@ class Alerts(QThread):
                     print(
                         f"Blizzard API data only updates 1 time per hour. The updates will come on minute {mega_data.get_upload_time_minutes()} of each hour. "
                         + f"{datetime.now()} is not the update time. "
-                        + f"Waiting to run {mega_data.THREADS} concurrent api calls: "
-                        + f"checking for items {mega_data.DESIRED_ITEMS} "
-                        + f"or pets {mega_data.DESIRED_PETS} "
-                        + f"or items to snipe by ilvl and stats "
                     )
                     time.sleep(20)
             
@@ -439,6 +435,19 @@ class Alerts(QThread):
             self.completed.emit(1)
             return
 
+        # show details on run
+        print(
+            f"Blizzard API data only updates 1 time per hour.\n"
+            + f"The updates for region '{mega_data.REGION}' will come on minute {mega_data.get_upload_time_minutes()} of each hour.\n"
+            + f"{datetime.now()} may not the update time. "
+            + "But we will run once to get the current data so no one asks me about the waiting time.\n"
+            + "After the first run we will trigger once per hour when the new data updates.\n"
+            + f"Running {mega_data.THREADS} concurrent api calls\n"
+            + f"checking for items {mega_data.DESIRED_ITEMS}\n"
+            + f"or pets {mega_data.DESIRED_PETS}\n"
+            + f"or or ilvl items from list {mega_data.DESIRED_ILVL_LIST}\n"
+        )
+
         # start app here
         if mega_data.DEBUG:
             mega_data.send_discord_message(
@@ -446,21 +455,13 @@ class Alerts(QThread):
             )
             # for debugging one realm at a time
             main_single()
-            # # for debugging all realms at once in threads
-            # main_fast()
         else:
             mega_data.send_discord_message(
                 "🟢Starting mega alerts and scan all AH data instantly.🟢\n"
                 + "🟢These first few messages might be old.🟢\n"
                 + "🟢All future messages will release seconds after the new data is available.🟢"
             )
-            print(
-                f"Blizzard API data only updates 1 time per hour. "
-                + f"The updates will come on minute {mega_data.get_upload_time_minutes()} of each hour. "
-                + f"{datetime.now()} may not the update time. "
-                + "But we will run once to get the current data so no one asks me about the waiting time. "
-                + "After the first run we will trigger once per hour when the new data updates. "
-            )
+
             time.sleep(1)
 
             if not self.running:
