@@ -120,7 +120,7 @@ class App(QMainWindow):
 
         self.wow_region_label = LabelText(self, 'Wow Region', 25, 325, 200, 40)
         self.wow_region=ComboBoxes(self,25,325,200,40)
-        self.wow_region.Combo.addItems(['EU','NA','EUClassic','NAClassic'])
+        self.wow_region.Combo.addItems(['EU','NA','EUCLASSIC','NACLASSIC'])
         self.wow_region_label.Label.setToolTip('Pick your region, currently supporting: EU, NA, EU-Classic and NA-Classic')
 
         self.number_of_mega_threads=LabelTextbox(self,"Number of Threads",250,325,200,40)
