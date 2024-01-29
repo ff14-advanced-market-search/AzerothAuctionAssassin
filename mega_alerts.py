@@ -164,15 +164,10 @@ class Alerts(QThread):
                 or pet_ah_bids
                 or ilvl_ah_buyouts
             ):
-                print(
-                    f"no listings found matching items {mega_data.DESIRED_ITEMS} "
-                    f"or pets {mega_data.DESIRED_PETS} "
-                    f"or items to snipe by ilvl and stats "
-                    f"on {connected_id} "
-                    f"{mega_data.REGION}"
-                )
+                print(f"no listings found matching desires on {connected_id} of {mega_data.REGION}")
                 return
             else:
+                print(f"Found matches on {connected_id} of {mega_data.REGION}!!!")
                 return format_alert_messages(
                     all_ah_buyouts,
                     all_ah_bids,
@@ -363,6 +358,7 @@ class Alerts(QThread):
 
                 # refresh alerts 1 time per hour
                 if current_min == 1 and mega_data.REFRESH_ALERTS:
+                    print(alert_record)
                     print("\n\nClearing Alert Record\n\n")
                     alert_record = []
 
