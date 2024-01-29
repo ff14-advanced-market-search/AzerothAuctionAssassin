@@ -112,6 +112,8 @@ Note that this is all going to a list so you can make as many different combinat
 
 # How to run the alerts
 
+Once you setup your data and add some pets, items or BOE by ilvl and stats then just save your inputs and hit start!
+
 <img width="1639" alt="Screenshot 2024-01-26 at 12 57 32 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/6e115afe-db3f-4f9f-8bed-e90fd4a6b934">
 
 You will need the following to run AAA:
@@ -132,10 +134,6 @@ We also have the following **optional** env vars you can add in to change alert 
 - `REFRESH_ALERTS=false` if set to false then you will not see the same alert more than once (default true)
 - `NO_RUSSIAN_REALMS=true` set this to true if you are on EU and do not want to get alerts from russian realms
 - `IMPORTANT_EMOJI=🔥` changes the separators from `====` to whatever emoji you set. 
-
-## Starting and Stopping the Sniper 
-
-You can use any combination of `DESIRED_ITEMS`, `DESIRED_PETS`, `DESIRED_ILVL_LIST` but at least one must be set.
 
 # How to update versions
 
