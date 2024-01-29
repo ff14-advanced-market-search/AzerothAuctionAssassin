@@ -10,7 +10,6 @@ from utils.helpers import (
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
 
-alert_record = []
 
 class Alerts(QThread):
 
@@ -25,6 +24,7 @@ class Alerts(QThread):
         self.path_to_desired_pets = path_to_desired_pets
         self.path_to_desired_ilvl_items = path_to_desired_ilvl_items
         self.path_to_desired_ilvl_list = path_to_desired_ilvl_list
+        self.alert_record = []
 
     def run(self):
 
@@ -73,9 +73,9 @@ class Alerts(QThread):
                 else:
                     message += f"`buyout_prices`: {auction['buyout_prices']}\n"
                 message += f"{mega_data.IMPORTANT_EMOJI * 20}\n"
-                if auction not in alert_record:
+                if auction not in self.alert_record:
                     mega_data.send_discord_message(message)
-                    alert_record.append(auction)
+                    self.alert_record.append(auction)
                 else:
                     print(f"Already sent this alert {auction}")
 
@@ -356,15 +356,14 @@ class Alerts(QThread):
 
         #### MAIN ####
         def main():
-            global alert_record
             while self.running:
                 current_min = int(datetime.now().minute)
 
                 # refresh alerts 1 time per hour
                 if current_min == 1 and mega_data.REFRESH_ALERTS:
-                    print(alert_record)
+                    print(self.alert_record)
                     print("\n\nClearing Alert Record\n\n")
-                    alert_record = []
+                    self.alert_record = []
 
                 matching_realms = [
                     realm["dataSetID"]
@@ -422,7 +421,6 @@ class Alerts(QThread):
             return
 
         #### GLOBALS ####
-        alert_record = []
         mega_data = utils.mega_data_setup.MegaData(
             self.path_to_data_files,
             self.path_to_desired_items,
