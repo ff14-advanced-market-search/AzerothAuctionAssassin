@@ -21,7 +21,7 @@ Blizzard only sends out new AH data to the API one time per hour, the rest of th
 
 # Installation
 
-1. Download the App: [Windows](https://www.dropbox.com/scl/fi/mr2f0xzpjrrxv8cbfj5ra/AzerothAuctionAssassin-Windows.zip?rlkey=k77ffldfh2wme89k28ndt4lcb&dl=0) or [Mac](https://www.dropbox.com/scl/fi/ver8u3tajekf3g75u7x7p/AzerothAuctionAssassin-Mac.zip?rlkey=7pthlwmk3hxv95ltkfwevt7lm&dl=0)
+1. Download the App: [Windows](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/releases/) or [Mac](https://www.dropbox.com/scl/fi/ver8u3tajekf3g75u7x7p/AzerothAuctionAssassin-Mac.zip?rlkey=7pthlwmk3hxv95ltkfwevt7lm&dl=0)
 
 2. [Setup a discord channel with a webhook url for sending the alert messages](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) You will use this for the `MEGA_WEBHOOK_URL` later on.
 
