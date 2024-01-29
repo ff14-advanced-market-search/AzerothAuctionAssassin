@@ -10,6 +10,8 @@ from utils.helpers import (
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
 
+alert_record = []
+
 class Alerts(QThread):
 
     completed = pyqtSignal(int)
@@ -74,6 +76,8 @@ class Alerts(QThread):
                 if auction not in alert_record:
                     mega_data.send_discord_message(message)
                     alert_record.append(auction)
+                else:
+                    print(f"Already sent this alert {auction}")
 
         def clean_listing_data(auctions, connected_id):
             all_ah_buyouts = {}
