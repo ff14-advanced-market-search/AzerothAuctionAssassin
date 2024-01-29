@@ -84,6 +84,8 @@ class App(QMainWindow):
 
         self.eu_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "eu-wow-connected-realm-ids.json")
         self.na_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "na-wow-connected-realm-ids.json")
+        self.euclassic_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "euclassic-wow-connected-realm-ids.json")
+        self.naclassic_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "naclassic-wow-connected-realm-ids.json")
 
         self.path_to_data = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "mega_data.json")
         self.path_to_desired_items = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_items.json")
@@ -118,8 +120,8 @@ class App(QMainWindow):
 
         self.wow_region_label = LabelText(self, 'Wow Region', 25, 325, 200, 40)
         self.wow_region=ComboBoxes(self,25,325,200,40)
-        self.wow_region.Combo.addItems(['EU','NA'])
-        self.wow_region_label.Label.setToolTip('Pick your region, currently supporting: EU and NA')
+        self.wow_region.Combo.addItems(['EU','NA','EUClassic','NAClassic'])
+        self.wow_region_label.Label.setToolTip('Pick your region, currently supporting: EU, NA, EU-Classic and NA-Classic')
 
         self.number_of_mega_threads=LabelTextbox(self,"Number of Threads",250,325,200,40)
         self.number_of_mega_threads.Text.setText('48')
@@ -333,6 +335,18 @@ class App(QMainWindow):
 
             with open(self.na_connected_realms, 'w') as json_file:
                 json.dump(NA_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+        if not os.path.exists(self.euclassic_connected_realms):
+            from utils.realm_data import EUCLASSIC_CONNECTED_REALMS_IDS
+
+            with open(self.euclassic_connected_realms, 'w') as json_file:
+                json.dump(EUCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+        if not os.path.exists(self.naclassic_connected_realms):
+            from utils.realm_data import NACLASSIC_CONNECTED_REALMS_IDS
+
+            with open(self.naclassic_connected_realms, 'w') as json_file:
+                json.dump(NACLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
 
         if os.path.exists(self.path_to_data):
             self.check_config_file(self.path_to_data)
@@ -692,9 +706,9 @@ class App(QMainWindow):
     def save_data_to_json(self):
         wow_region = self.wow_region.Combo.currentText()
 
-        # Check if WOW_REGION is either 'NA' or 'EU'
-        if wow_region not in ['NA', 'EU']:
-            QMessageBox.critical(self, "Invalid Region", "WOW region must be either 'NA' or 'EU'.")
+        # Check if WOW_REGION is either 'NA', 'EU', 'NAClassic', 'EUClassic'
+        if wow_region not in ['NA', 'EU', 'NAClassic', 'EUClassic']:
+            QMessageBox.critical(self, "Invalid Region", "WOW region must be either 'NA', 'EU', 'NAClassic' or 'EUClassic'.")
             return False
 
         mega_threads = self.number_of_mega_threads.Text.text()

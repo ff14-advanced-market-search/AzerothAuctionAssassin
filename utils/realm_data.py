@@ -517,3 +517,57 @@ NA_CONNECTED_REALMS_IDS = {
   "Aman'Thul": 3726,
   "Dath'Remar": 3726
 }
+
+EUCLASSIC_CONNECTED_REALMS_IDS = {
+  "Everlook": 4440,
+  "Auberdine": 4441,
+  "Lakeshire": 4442,
+  "Chromie": 4452,
+  "Pyrewood Village": 4453,
+  "Mirage Raceway": 4454,
+  "Razorfen": 4455,
+  "Nethergarde Keep": 4456,
+  "Sulfuron": 4464,
+  "Golemagg": 4465,
+  "Patchwerk": 4466,
+  "Firemaw": 4467,
+  "Flamegor": 4474,
+  "Gehennas": 4476,
+  "Venoxis": 4477,
+  "Hydraxian Waterlords": 4678,
+  "Mograine": 4701,
+  "Amnennar": 4703,
+  "Ashbringer": 4742,
+  "Transcendence": 4745,
+  "Earthshaker": 4749,
+  "Giantstalker": 4811,
+  "Mandokir": 4813,
+  "Thekal": 4815,
+  "Jin'do": 4816
+}
+
+NACLASSIC_CONNECTED_REALMS_IDS = {
+  "Atiesh": 4372,
+  "Myzrael": 4373,
+  "Old Blanchy": 4374,
+  "Azuresong": 4376,
+  "Mankrik": 4384,
+  "Pagle": 4385,
+  "Ashkandi": 4387,
+  "Westfall": 4388,
+  "Whitemane": 4395,
+  "Faerlina": 4408,
+  "Grobbulus": 4647,
+  "Bloodsail Buccaneers": 4648,
+  "Remulos": 4667,
+  "Arugal": 4669,
+  "Yojamba": 4670,
+  "Skyfury": 4725,
+  "Sulfuras": 4726,
+  "Windseeker": 4727,
+  "Benediction": 4728,
+  "Earthfury": 4731,
+  "Maladath": 4738,
+  "Angerforge": 4795,
+  "Eranikus": 4800
+}
