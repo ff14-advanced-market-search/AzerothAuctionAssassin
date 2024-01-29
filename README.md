@@ -2,6 +2,8 @@
 
 A super fast Blizzard AH sniper created by Saddlebag Exchange. Version 2.0 of our [MEGA-ALERTS](https://github.com/ff14-advanced-market-search/mega-alerts)
 
+This is a tool capable of alerting you on the best prices for any item you want to buy **across all realms in your region** to alert you on incredible deals seconds after Blizzard AH API data is released.
+
 **Please dontate to our patreon so we can keep the project running.  If you need help setting it up, our creator will personally help any patreon subscribers.**
 
 https://www.patreon.com/indopan
