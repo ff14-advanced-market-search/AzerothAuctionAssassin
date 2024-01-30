@@ -87,16 +87,17 @@ class App(QMainWindow):
         self.EUCLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "euclassic-wow-connected-realm-ids.json")
         self.NACLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "naclassic-wow-connected-realm-ids.json")
 
-        # default to 70% discount
-        self.eu_item_statistics = requests.post(
+        # default to 90% discount, just use EU for now for less data
+        self.item_statistics = requests.post(
             f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
             headers={"Accept": "application/json"},
-            json={"region": "EU", "discount": 70},
+            json={"region": "EU", "discount": 90},
         ).json()
-        self.na_item_statistics = requests.post(
+
+        self.pet_statistics = requests.post(
             f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
             headers={"Accept": "application/json"},
-            json={"region": "NA", "discount": 70},
+            json={"region": "EU", "discount": 90, "pets": True},
         ).json()
 
         self.path_to_data = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "mega_data.json")
@@ -199,6 +200,8 @@ class App(QMainWindow):
         self.pet_price_input=LabelTextbox(self,"Price",625,25,100,40)
         self.pet_price_input.Label.setToolTip('Pick a price you want to buy at or under.')
 
+        self.pet_name_input=LabelTextbox(self,"",500,75,225,20)
+
         self.add_pet_button = UIButtons(self, "Add Pet", 500, 100, 100, 50)
         self.add_pet_button.Button.clicked.connect(self.add_pet_to_dict)
         self.add_pet_button.Button.setToolTip('Add pet to your snipe list.')
@@ -217,10 +220,12 @@ class App(QMainWindow):
         ########################## ITEM STUFF ###################################################
 
         self.item_id_input=LabelTextbox(self,"Item ID",750,25,100,40)
-        self.item_id_input.Label.setToolTip('Add the item id of and item you want to buy.\nYou can search by name for them here with recommended prices\nhttps://temp.saddlebagexchange.com/megaitemnames')
+        self.item_id_input.Label.setToolTip('Add the item id of any item you want to buy.\nYou can search by name for them here with recommended prices\nhttps://temp.saddlebagexchange.com/megaitemnames')
 
         self.item_price_input=LabelTextbox(self,"Price",875,25,100,40)
         self.item_price_input.Label.setToolTip('Pick a price you want to buy at or under.')
+
+        self.item_name_input=LabelTextbox(self,"",750,75,225,20)
 
         self.add_item_button = UIButtons(self, "Add Item", 750, 100, 100, 50)
         self.add_item_button.Button.clicked.connect(self.add_item_to_dict)
@@ -552,6 +557,11 @@ class App(QMainWindow):
         item_id = item_split[1].split(',')[0]
         self.item_id_input.Text.setText(item_id)
         self.item_price_input.Text.setText(item_split[2])
+        # find the itemName value from item_id in the item_statistics
+        for item in self.item_statistics:
+            if item['itemID'] == int(item_id):
+                self.item_name_input.Text.setText(item['itemName'])
+                return
 
     def add_item_to_dict(self):
         item_id = self.item_id_input.Text.text()
@@ -630,12 +640,7 @@ class App(QMainWindow):
             # open and read the text file
             with open(pathname, 'r') as file:
                 pbs_names = [item.split(';;')[0].lower().replace('\n', '') for item in file.read().split('^')]
-            if 'EU' in self.wow_region.Combo.currentText():
-                item_stats = self.eu_item_statistics.copy()
-            elif 'NA' in self.wow_region.Combo.currentText():
-                item_stats = self.na_item_statistics.copy()
-            else:
-                raise ValueError("WOW region must be either 'NA' or 'EU'.")
+            item_stats = self.item_statistics.copy()
             self.items_list = {str(item['itemID']): item['desiredPrice'] for item in item_stats if item['itemName'].lower() in pbs_names}
             for key,value in self.items_list.items():
                 self.item_list_display.List.insertItem(self.item_list_display.List.count(), f'Item ID: {key}, Price: {value}')
@@ -649,7 +654,11 @@ class App(QMainWindow):
         pet_id = item_split[1].split(',')[0]
         self.pet_id_input.Text.setText(pet_id)
         self.pet_price_input.Text.setText(item_split[2])
-
+        # find the itemName value from item_id in the item_statistics
+        for item in self.pet_statistics:
+            if item['itemID'] == int(pet_id):
+                self.pet_name_input.Text.setText(item['itemName'])
+                return
     def add_pet_to_dict(self):
         pet_id = self.pet_id_input.Text.text()
         pet_price = self.pet_price_input.Text.text()
