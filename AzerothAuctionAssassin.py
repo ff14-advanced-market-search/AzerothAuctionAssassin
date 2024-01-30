@@ -588,9 +588,16 @@ class App(QMainWindow):
             QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
             return False
 
-        if item_id not in self.items_list:
-            self.items_list[item_id] = item_price
-            self.item_list_display.List.insertItem(self.item_list_display.List.count() , f'Item ID: {item_id}, Price: {item_price}')
+        # If item is already in the items_list, remove it
+        if item_id in self.items_list:
+            for existing_item in range(self.item_list_display.List.count()):
+                if self.item_list_display.List.item(existing_item).text() == f'Item ID: {item_id}, Price: {self.items_list[item_id]}':
+                    self.item_list_display.List.takeItem(existing_item)
+                    break
+
+        # Add or Update item in the items_list
+        self.items_list[item_id] = item_price
+        self.item_list_display.List.insertItem(self.item_list_display.List.count(), f'Item ID: {item_id}, Price: {item_price}')
 
         return True
 
@@ -685,10 +692,18 @@ class App(QMainWindow):
             QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
             return False
         
-        if pet_id not in self.pet_list:
-            self.pet_list[pet_id] = pet_price
-            self.pet_list_display.List.insertItem(self.pet_list_display.List.count() , f'Pet ID: {pet_id}, Price: {pet_price}')
-        
+        # If pet_id is already in the list, remove it
+        if pet_id in self.pet_list:
+            for existing_entry in range(self.pet_list_display.List.count()):
+                if self.pet_list_display.List.item(existing_entry).text() == f'Pet ID: {pet_id}, Price: {self.pet_list[pet_id]}':
+                    self.pet_list_display.List.takeItem(existing_entry)
+                    break
+
+        # Add or replace an item in pet_list
+        self.pet_list[pet_id] = pet_price
+        # Add new item to the display list
+        self.pet_list_display.List.insertItem(self.pet_list_display.List.count(), f'Pet ID: {pet_id}, Price: {pet_price}')
+
         return True
 
     def remove_pet_to_dict(self):
