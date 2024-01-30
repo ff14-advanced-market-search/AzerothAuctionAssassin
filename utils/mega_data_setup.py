@@ -406,13 +406,13 @@ class MegaData:
         # check for api errors
         if req.status_code == 429:
             print(
-                f"{req} BLIZZARD too many requests error on {self.REGION} realm data, sleep 30 min and exit"
+                f"{req} BLIZZARD too many requests error on {self.REGION} {str(connectedRealmId)} realm data, sleep 30 min and exit"
             )
             time.sleep(30 * 60)
             exit(1)
         elif req.status_code != 200:
             print(
-                f"{req} BLIZZARD error getting {self.REGION} realm data"
+                f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
             )
             exit(1)
 
@@ -424,7 +424,6 @@ class MegaData:
                 print(f"The exception was:", ex)
 
         auction_info = req.json()
-
         return auction_info
 
     def update_local_timers(self, dataSetID, lastUploadTimeRaw):
