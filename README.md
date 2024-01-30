@@ -120,23 +120,18 @@ Once you setup your data and add some pets, items or BOE by ilvl and stats then 
 
 You will need the following to run AAA:
 
-- `MEGA_WEBHOOK_URL`
-- `WOW_CLIENT_ID`
-- `WOW_CLIENT_SECRET`
-- `WOW_REGION` either `EU`, `NA`, `EUCLASSIC` or `NACLASSIC`
-- Then for your snipe method you must provide at least one correct json data for `DESIRED_ITEMS`, `DESIRED_PETS` or `DESIRED_ILVL`
+- `Discord Webhook` this lets the app send data to discord (a.k.a. `MEGA_WEBHOOK_URL`)
+- `WoW Client ID` and `WoW Client Secret` these let the app make api requests to blizzard (a.k.a. `WOW_CLIENT_ID` and `WOW_CLIENT_SECRET`)
+- `WoW Region` either `EU`, `NA`, `EUCLASSIC` or `NACLASSIC` (a.k.a. `WOW_REGION`)
+- Then you need to set some items in either the pets field, items field or ilvl field (a.k.a. `DESIRED_ITEMS`, `DESIRED_PETS` or `DESIRED_ILVL_LIST`)
 
-We also have the following **optional** env vars you can add in to change alert behavior, but you dont need to as all have default values when not manually set:
-- `DEBUG=true` This will instantly trigger a scan on all realms against your inputs, this will only run once and then exit the script or container so use it to debug and make sure your data is working.
-- `SHOW_BID_PRICES=true` Bid prices below your price limit will also be shown (default false)
-- `WOWHEAD_LINK=true` Uses wowhead links instead of undermine and shows pictures, but the message length will be longer (default false)
-- `SCAN_TIME_MIN=-1` increase or decrease the minutes before or at the data update time to start scanning (default to keep scanning 1 min after the data updates).
-- `SCAN_TIME_MAX=1` increase or decrease the minutes after the data updates to stop scanning (default to keep scanning 3 min after the data updates).
-- `MEGA_THREADS=100` increase or decrease the threadcount (default to scan 48 realms at once)(more threads = faster scans, but doing more threads then realms is pointless).
-- `REFRESH_ALERTS=false` if set to false then you will not see the same alert more than once (default true)
-- `NO_RUSSIAN_REALMS=true` set this to true if you are on EU and do not want to get alerts from russian realms
-- `IMPORTANT_EMOJI=🔥` changes the separators from `====` to whatever emoji you set. 
 
 # How to update versions
 
-wip
+To update AAA or change versions, please follow these steps:
+
+1. Download the latest release of `AzerothAuctionAssassin.exe` from [this link](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/releases).
+2. After downloading the latest version, delete the old `AzerothAuctionAssassin.exe` from your computer.
+3. Place the newly downloaded version of `AzerothAuctionAssassin.exe` into the same folder where the old version used to be.
+
+All of your data is stored in the `AzerothAuctionAssassinData` folder. As long as you keep this folder intact, your data will be seamlessly used by the new version of the app you just downloaded.
