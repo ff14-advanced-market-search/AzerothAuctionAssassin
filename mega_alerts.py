@@ -5,7 +5,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from utils.helpers import (
     create_oribos_exchange_pet_link,
-    create_oribos_exchange_item_link,
+    create_oribos_exchange_item_link, get_wow_russian_realm_ids,
 )
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
@@ -55,24 +55,29 @@ class Alerts(QThread):
                         pet_name = mega_data.PET_NAMES[auction["petID"]]
                         id_msg += f"`Name:` {pet_name}\n"
 
+                russian_realms = get_wow_russian_realm_ids()
+
                 # construct message
-                message = f"{mega_data.IMPORTANT_EMOJI * 20}\n"
-                message += (
-                    f"`region:` {mega_data.REGION} "
-                    + f"`realmID:` {auction['realmID']} "
-                    + id_msg
-                    + f"`realmNames`: {auction['realmNames']}\n"
-                )
-                if mega_data.WOWHEAD_LINK and "itemID" in auction:
-                    item_id = auction["itemID"]
-                    message += f"[Wowhead link](https://www.wowhead.com/item={item_id})\n"
-                else:
-                    message += f"[Undermine link]({auction['itemlink']})\n"
-                if "bid_prices" in auction:
-                    message += f"`bid_prices`: {auction['bid_prices']}\n"
-                else:
-                    message += f"`buyout_prices`: {auction['buyout_prices']}\n"
-                message += f"{mega_data.IMPORTANT_EMOJI * 20}\n"
+                emoji = "🇷🇺" * 20 if auction["realmID"] in russian_realms else f"{mega_data.IMPORTANT_EMOJI * 20}"
+                suffix = " **(RU)**\n" if auction["realmID"] in russian_realms else "\n"
+                is_russian_realm = "**(Russian Realm)**" if auction['realmID'] in russian_realms else ""
+
+                message = f"{emoji}\n"
+                message += f"`region:` {mega_data.REGION}`realmID:` {auction['realmID']} {is_russian_realm}{id_msg}"
+                message += f"`realmNames`: {auction['realmNames']}{suffix}"
+
+                # Add item links, if available
+                link_label = "Wowhead link" if mega_data.WOWHEAD_LINK and "itemID" in auction else "Undermine link"
+                link_url = f"https://www.wowhead.com/item={auction['itemID']}" if mega_data.WOWHEAD_LINK and "itemID" in auction else auction['itemlink']
+                message += f"[{link_label}]({link_url})\n"
+
+                # Add price info, if available
+                price_type = "bid_prices" if "bid_prices" in auction else "buyout_prices"
+                message += f"`{price_type}`: {auction[price_type]}\n"
+
+                message += f"{emoji}\n"
+
+                # send alerts
                 if auction not in self.alert_record:
                     mega_data.send_discord_message(message)
                     self.alert_record.append(auction)

@@ -386,6 +386,8 @@ class App(QMainWindow):
         if os.path.exists(self.path_to_desired_ilvl_list):
             self.ilvl_list = json.load(open(self.path_to_desired_ilvl_list))
             for ilvl_dict_data in self.ilvl_list:
+                if "item_ids" not in ilvl_dict_data:
+                    ilvl_dict_data['item_ids'] = []
                 string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
                 self.ilvl_list_display.List.insertItem(self.ilvl_list_display.List.count() , string_with_data)
 
