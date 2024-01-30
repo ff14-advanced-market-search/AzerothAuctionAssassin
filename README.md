@@ -2,15 +2,11 @@
 
 A super fast Blizzard AH sniper created by Saddlebag Exchange. Version 2.0 of our [MEGA-ALERTS](https://github.com/ff14-advanced-market-search/mega-alerts)
 
-This is a tool capable of alerting you on the best prices for any item you want to buy **across all realms in your region** to alert you on incredible deals seconds after Blizzard AH API data is released.
+This is a tool capable of searching **across all realms in your region** to alert you on incredible deals, alerting you on the best prices for any item you want to buy seconds after Blizzard AH API data is released. 
 
 **Please dontate to our patreon so we can keep the project running.  If you need help setting it up, our creator will personally help any patreon subscribers.**
 
 https://www.patreon.com/indopan
-
-This amazing tool runs every time the blizzard API updates each hour and then alerts you on discord.
-
-Blizzard only sends out new AH data to the API one time per hour, the rest of the time MEGA-ALERTS will sit and wait for new data to come out before sending more alerts. You can see what minute of each hour blizzard releases new data for your realm [here on our upload times page to find when new alerts will be sent to you.](https://saddlebagexchange.com/wow/upload-timers) 
 
 <img src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/dbdf6a86-e560-4f59-b87e-bac7379f3b9d" width="300" height="300">
 
@@ -135,3 +131,7 @@ To update AAA or change versions, please follow these steps:
 3. Place the newly downloaded version of `AzerothAuctionAssassin.exe` into the same folder where the old version used to be.
 
 All of your data is stored in the `AzerothAuctionAssassinData` folder. As long as you keep this folder intact, your data will be seamlessly used by the new version of the app you just downloaded.
+
+# Note on upload times
+
+Blizzard only sends out new AH data to the API one time per hour, the rest of the time AAA will sit and wait for new data to come out before sending more alerts. You can see what minute of each hour blizzard releases new data for your realm [here on our upload times page to find when new alerts will be sent to you.](https://saddlebagexchange.com/wow/upload-timers)
