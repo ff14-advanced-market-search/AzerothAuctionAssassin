@@ -372,27 +372,37 @@ class MegaData:
         print(
             f"gather data from connectedRealmId {connectedRealmId} of region {self.REGION}"
         )
-        # we want to use check_access_token here to update the token when expired
-        if self.REGION == "NA" or self.REGION == "NACLASSIC":
-            url = f"https://us.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions"
-            if self.REGION == "NACLASSIC":
-                url += "/2?namespace=dynamic-classic-us"
-            else:
-                url += f"?namespace=dynamic-us"
-            url += f"&locale=en_US&access_token={self.check_access_token()}"
-        elif self.REGION == "EU" or self.REGION == "EUCLASSIC":
-            url = f"https://eu.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions"
-            if self.REGION == "EUCLASSIC":
-                url += "/2?namespace=dynamic-classic-eu"
-            else:
-                url += f"?namespace=dynamic-eu"
-            url += f"&locale=en_EU&access_token={self.check_access_token()}"
-        else:
-            raise Exception(
-                f"{self.REGION} is not yet supported, reach out for us to add this region option"
-            )
 
+        endpoints = ["/2", "/6", "/7"] if 'CLASSIC' in self.REGION else [""]
+
+        all_auctions = []
+        for endpoint in endpoints:
+            url = self.construct_api_url(connectedRealmId, endpoint)
+            
+            auction_info = self.make_ah_api_request(url, connectedRealmId)
+
+            # merge all the auctions
+            all_auctions.extend(auction_info["auctions"])
+
+        return all_auctions
+
+    def construct_api_url(self, connectedRealmId, endpoint):
+        
+        base_url = "https://us.api.blizzard.com" if "NA" in self.REGION else "https://eu.api.blizzard.com"
+        namespace = "dynamic-us" if "NA" in self.REGION else "dynamic-eu"
+        locale = "en_US" if "NA" in self.REGION else "en_EU"
+
+        if 'CLASSIC' in self.REGION:
+            namespace = f"dynamic-classic-{namespace.split('-')[-1]}"
+
+        url = f"{base_url}/data/wow/connected-realm/{str(connectedRealmId)}/auctions{endpoint}?namespace={namespace}&locale={locale}&access_token={self.check_access_token()}"
+
+        return url
+
+    def make_ah_api_request(self, url, connectedRealmId):
+        
         req = requests.get(url, timeout=20)
+
         # check for api errors
         if req.status_code == 429:
             print(
@@ -406,7 +416,6 @@ class MegaData:
             )
             exit(1)
 
-        # this auto updates self.upload_timers for each realm
         if "Last-Modified" in dict(req.headers):
             try:
                 lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
@@ -415,7 +424,7 @@ class MegaData:
                 print(f"The exception was:", ex)
 
         auction_info = req.json()
-        return auction_info["auctions"]
+        return auction_info
 
     def update_local_timers(self, dataSetID, lastUploadTimeRaw):
         tableName = f"{dataSetID}_singleMinPrices"
