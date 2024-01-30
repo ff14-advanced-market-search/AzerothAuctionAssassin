@@ -659,6 +659,7 @@ class App(QMainWindow):
             if item['itemID'] == int(pet_id):
                 self.pet_name_input.Text.setText(item['itemName'])
                 return
+
     def add_pet_to_dict(self):
         pet_id = self.pet_id_input.Text.text()
         pet_price = self.pet_price_input.Text.text()
