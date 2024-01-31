@@ -2,7 +2,10 @@ name: Build and Sign Windows Executable
 
 on:
   workflow_dispatch:
-  
+  # push:
+  #   branches:
+  #     - main
+
 jobs:
   build:
     runs-on: windows-latest
@@ -42,16 +45,22 @@ jobs:
         & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
       shell: pwsh
 
+    # - name: Save Windows executable as artifact
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: AzerothAuctionAssassin-Windows
+    #     path: dist\AzerothAuctionAssassin.exe
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.2.1
-        release_name: Release v1.0.2.1
-        draft: true
-        prerelease: true
+        tag_name: v1.0.2
+        release_name: Release v1.0.2
+        draft: false
+        prerelease: false
 
     - name: Upload Executable to Release
       uses: actions/upload-release-asset@v1
