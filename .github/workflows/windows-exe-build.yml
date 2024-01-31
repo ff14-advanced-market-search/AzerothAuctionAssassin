@@ -43,7 +43,9 @@ jobs:
         $password = "${{ secrets.CERT_PASSWORD }}"
         $timestamp_url = "http://timestamp.digicert.com"
         $executable_path = "dist\AzerothAuctionAssassin.exe"
-        & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe" sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
+        # Find signtool.exe dynamically
+        $signtoolPath = Get-Command -Name signtool.exe -ErrorAction Stop | Select-Object -ExpandProperty Source
+        & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
       shell: pwsh
 
     - name: Create Release
