@@ -585,8 +585,7 @@ class App(QMainWindow):
         self.item_price_input.Text.setText(item_split[2])
         # find the itemName value from item_id in the item_statistics
         try:
-            item_name = self.item_statistics[self.item_statistics['itemID']
-                                             == int(item_id)].iloc[0]['itemName']
+            item_name = self.item_statistics[self.item_statistics['itemID'] == int(item_id)].iloc[0]['itemName']
             self.item_name_input.Text.setText(item_name)
         except:
             self.item_name_input.Text.setText("Item ID not found")
@@ -694,8 +693,7 @@ class App(QMainWindow):
         self.pet_price_input.Text.setText(item_split[2])
         # find the itemName value from item_id in the item_statistics
         try:
-            pet_name = self.pet_statistics[self.pet_statistics['itemID']
-                                           == int(pet_id)].iloc[0]['itemName']
+            pet_name = self.pet_statistics[self.pet_statistics['itemID'] == int(pet_id)].iloc[0]['itemName']
             self.pet_name_input.Text.setText(pet_name)
         except IndexError:
             self.pet_name_input.Text.setText("Pet ID not found")
