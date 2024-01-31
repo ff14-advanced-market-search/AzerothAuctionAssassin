@@ -25,7 +25,7 @@ jobs:
     - name: Build Windows executable
       run: |
         python -m pip install pyinstaller
-        pyinstaller --onefile --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" AzerothAuctionAssassin.py
+        pyinstaller --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" AzerothAuctionAssassin.py
 
     - name: Decode Certificate
       run: |
@@ -57,8 +57,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.2
-        release_name: Release v1.0.2
+        tag_name: v1.0.3
+        release_name: Release v1.0.3
         draft: false
         prerelease: false
 
