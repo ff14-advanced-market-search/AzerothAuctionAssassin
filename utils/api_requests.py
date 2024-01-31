@@ -99,16 +99,14 @@ def get_raidbots_bonus_ids():
     return {int(id): data for id, data in bonus_ids.items()}
 
 
-def get_ilvl_items(ilvl, item_ids=[]):
-    # hardcode for dragonflight only
-    ilvl = 201
-
+def get_ilvl_items(ilvl=201, item_ids=[]):
     json_data = {
         "ilvl": ilvl,
         "itemQuality": -1,
         "required_level": -1,
         "item_class": [2, 4],
         "item_subclass": [-1],
+        "item_ids": item_ids,
     }
     results = requests.post(
         "http://api.saddlebagexchange.com/api/wow/itemdata",
