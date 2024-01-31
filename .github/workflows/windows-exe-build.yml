@@ -1,7 +1,7 @@
-name: Build Windows Executable
+name: Build and Sign Windows Executable
 
 on:
-  workflow_dispatch:  # Add this to trigger the workflow manually
+  workflow_dispatch:  # Allows you to trigger the workflow manually
   # push:
   #   branches:
   #     - main
@@ -27,11 +27,24 @@ jobs:
         python -m pip install pyinstaller
         pyinstaller --onefile --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" AzerothAuctionAssassin.py
 
-    # - name: Save Windows executable as artifact
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: AzerothAuctionAssassin-Windows
-    #     path: dist\AzerothAuctionAssassin.exe
+    # Decode the Base64 encoded certificate
+    - name: Decode Certificate
+      run: |
+        $cert_content = '${{ secrets.CERT_BASE64 }}'
+        $cert_bytes = [Convert]::FromBase64String($cert_content)
+        $cert_path = "certificate.pfx"
+        [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
+      shell: pwsh
+
+    # Sign the executable
+    - name: Sign Executable
+      run: |
+        $cert_path = "certificate.pfx"
+        $password = "${{ secrets.CERT_PASSWORD }}"
+        $timestamp_url = "http://timestamp.digicert.com"
+        $executable_path = "dist\AzerothAuctionAssassin.exe"
+        & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe" sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
+      shell: pwsh
 
     - name: Create Release
       id: create_release
@@ -39,10 +52,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.2
-        release_name: Release v1.0.2
-        draft: false
-        prerelease: false
+        tag_name: v1.0.2.1
+        release_name: Release v1.0.2.1
+        draft: true
+        prerelease: true
 
     - name: Upload Executable to Release
       uses: actions/upload-release-asset@v1
