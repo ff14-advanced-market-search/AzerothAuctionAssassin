@@ -1,14 +1,11 @@
 name: Build and Sign Windows Executable
 
 on:
-  workflow_dispatch:  # Allows you to trigger the workflow manually
-  # push:
-  #   branches:
-  #     - main
+  workflow_dispatch:
   
 jobs:
   build:
-    runs-on: windows-latest  # Use a Windows runner
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
@@ -27,7 +24,6 @@ jobs:
         python -m pip install pyinstaller
         pyinstaller --onefile --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" AzerothAuctionAssassin.py
 
-    # Decode the Base64 encoded certificate
     - name: Decode Certificate
       run: |
         $cert_content = '${{ secrets.CERT_BASE64 }}'
@@ -36,15 +32,13 @@ jobs:
         [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
       shell: pwsh
 
-    # Sign the executable
     - name: Sign Executable
       run: |
         $cert_path = "certificate.pfx"
         $password = "${{ secrets.CERT_PASSWORD }}"
         $timestamp_url = "http://timestamp.digicert.com"
         $executable_path = "dist\AzerothAuctionAssassin.exe"
-        # Find signtool.exe dynamically
-        $signtoolPath = Get-Command -Name signtool.exe -ErrorAction Stop | Select-Object -ExpandProperty Source
+        $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
         & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
       shell: pwsh
 
