@@ -25,7 +25,7 @@ jobs:
     - name: Build Windows executable
       run: |
         python -m pip install pyinstaller
-        pyinstaller --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" AzerothAuctionAssassin.py
+        pyinstaller --onefile --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" AzerothAuctionAssassin.py
 
     - name: Decode Certificate
       run: |
