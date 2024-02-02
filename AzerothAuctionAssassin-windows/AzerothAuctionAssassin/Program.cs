@@ -16,7 +16,7 @@ namespace AzerothAuctionAssassin
 
 
 
-            string appVersion = Properties.Resources.appVersion;
+            string appVersion = Properties.Resources.appVersion.Trim();
             string appPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AzerothAuctionAssassin");
             string currentVersionPath = Path.Combine(appPath, appVersion);
             string pythonPath = Path.Combine(currentVersionPath, "python-embedded");
