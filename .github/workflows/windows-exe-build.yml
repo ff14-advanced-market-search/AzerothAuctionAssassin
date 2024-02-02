@@ -41,7 +41,7 @@ jobs:
 
     - name: update version number
       run: |
-        echo 1.0.5 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+        echo 1.0.4 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
 
     - name: Build EXE
       run: |
