@@ -16,9 +16,9 @@ namespace AzerothAuctionAssassin
 
 
 
-            string appversion = "1.0.4";
+            string appVersion = Properties.Resources.appVersion;
             string appPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AzerothAuctionAssassin");
-            string currentVersionPath = Path.Combine(appPath, appversion);
+            string currentVersionPath = Path.Combine(appPath, appVersion);
             string pythonPath = Path.Combine(currentVersionPath, "python-embedded");
             string requirementsPath = $"{currentVersionPath}\\requirements.txt";
             string mainPythonFilePath = $"{currentVersionPath}\\AzerothAuctionAssassin.py";
@@ -26,9 +26,9 @@ namespace AzerothAuctionAssassin
 
 
 
-            installApp(appPath, appversion);
+            installApp(appPath, appVersion);
             InstallPython(pythonPath);
-            InstallPipe(pythonPath);
+            //InstallPipe(pythonPath); //no need for pip cuz now packages are installed and zipped during the pipeline.
             InstallPipeRequirements(currentVersionPath,pythonPath, requirementsPath);
             RunPythonFile(currentVersionPath,pythonPath,mainPythonFilePath);
         }
@@ -49,6 +49,8 @@ namespace AzerothAuctionAssassin
                 string zipFile_path = Path.Combine(Path.GetTempPath(), "AzerothAuctionAssassin.zip");
                 File.WriteAllBytes(zipFile_path, Properties.Resources.app);
                 UnzipToFolder(zipFile_path, currentVersionPath);
+
+                deleteOldVersions(installPath, appVersion);
             }
             else
             {
@@ -56,6 +58,33 @@ namespace AzerothAuctionAssassin
             }
 
         }
+
+        public static void deleteOldVersions(string appPath, string currentVersion)
+        {
+            if (!Directory.Exists(appPath)) return;
+
+            // Get all the directories in the application path
+            var directoryInfo = new DirectoryInfo(appPath);
+            var directories = directoryInfo.GetDirectories();
+
+            foreach (var directory in directories)
+            {
+                // If the directory name is not the current version, delete it
+                if (directory.Name != currentVersion)
+                {
+                    try
+                    {
+                        directory.Delete(true); // true to remove directories, subdirectories, and files
+                       
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error deleting old version {directory.Name}: {ex.Message}");
+                    }
+                }
+            }
+        }
+
         public static void UnzipToFolder(string zipFilePath,string folderPath)
         {
             // Ensure the zip file exists
@@ -106,7 +135,7 @@ namespace AzerothAuctionAssassin
 
         static void InstallPipeRequirements(string appPath,string pythonPath,string requirementsPath) 
         {
-
+            /*
             if(File.Exists($"{appPath}\\pip-packages-installed.txt"))
             {
                 return;
@@ -114,14 +143,60 @@ namespace AzerothAuctionAssassin
 
             ExecutePowerShellCommand($"{pythonPath}\\python.exe {pythonPath}\\pip.pyz install -r {requirementsPath} --target={pythonPath}\\Lib\\site-packages");
             File.WriteAllText($"{appPath}\\pip-packages-installed.txt", "yes");
+            */
+
+            if (Directory.Exists($"{pythonPath}\\Lib\\site-packages"))
+            {
+                return;
+            }
+            string downloadPath = Path.Combine(Path.GetTempPath(), "Lib.zip");
+            File.WriteAllBytes(downloadPath, Properties.Resources.Lib);
+
+
+            UnzipToFolder(downloadPath, $"{pythonPath}");
+
         }
 
 
         static void RunPythonFile(string appPath,string pythonPath,string pythonFilePath)
         {
-            string command = $"{pythonPath}\\python.exe {pythonFilePath} run-from-windows-bin \"{appPath}\" \"{pythonPath}\\Lib\\site-packages\"";
+            string command = $"{pythonFilePath} run-from-windows-bin \"{appPath}\" \"{pythonPath}\\Lib\\site-packages\"";
             
-            ExecutePowerShellCommand(command);
+            ExecuteShellCommand($"{pythonPath}\\python.exe",command,false,false);
+        }
+
+
+        static bool ExecuteShellCommand(string fileName, string command, bool hidden = true, bool no_window = true)
+        {
+            using (Process process = new Process())
+            {
+                process.StartInfo.FileName = fileName;
+                process.StartInfo.Arguments = command;
+              
+                //process.StartInfo.UseShellExecute = false;
+                //process.StartInfo.RedirectStandardOutput = true;
+
+                if (no_window)
+                {
+                    process.StartInfo.CreateNoWindow = true;
+                }
+
+                if (hidden)
+                {
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                }
+                process.Start();
+
+                
+
+
+
+                process.WaitForExit();
+
+
+                // Return true if the command executed successfully, false otherwise
+                return process.ExitCode == 0;
+            }
         }
 
         static bool ExecutePowerShellCommand(string command, bool hidden = true,bool no_window=true)

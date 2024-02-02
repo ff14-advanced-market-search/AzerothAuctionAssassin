@@ -14,13 +14,36 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Build
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Setup MSBuild Path
+      uses: microsoft/setup-msbuild@v1.0.2  #use Microsoft's setup-msbuild action
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.2
+
+
+    - name: Install python packages
+      run: pip install -r requirements.txt  --target=.\Lib\site-packages
+
+
+    - name: Zip Project Files
       run: |
-        cd AzerothAuctionAssassin-windows
-        mkdir dist
-        dotnet publish . -o ./dist -p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
+        Compress-Archive -Path * -DestinationPath app.zip -Exclude "AzerothAuctionAssassin-windows", ".github", ".git", ".gitignore", "Lib"
+        Move-Item -Path app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
 
+    - name: Zip python packages
+      run: |
+        Compress-Archive -Path .\Lib -DestinationPath lib.zip
+        Move-Item -Path lib.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\lib.zip -Force
 
+    - name: Build EXE
+      run: |
+        msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"  -restore -t:Publish
+        
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -38,6 +61,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./AzerothAuctionAssassin-windows/dist/AzerothAuctionAssassin.exe
+        asset_path: .\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe
         asset_name: AzerothAuctionAssassin.exe
         asset_content_type: application/octet-stream

@@ -71,6 +71,25 @@ namespace AzerothAuctionAssassin.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 1.0.4.
+        /// </summary>
+        internal static string appVersion {
+            get {
+                return ResourceManager.GetString("appVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Lib {
+            get {
+                object obj = ResourceManager.GetObject("Lib", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] pip {
