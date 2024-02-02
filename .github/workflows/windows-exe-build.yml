@@ -38,7 +38,7 @@ jobs:
         # Install packages from requirements.txt using the embedded Python and pip.pyz
         & "$pythonEmbeddedDir\python.exe" "$pythonEmbeddedDir\pip.pyz" install -r .\requirements.txt --target=".\Lib\site-packages\"
 
-        Remove-Item -Recurse -Force $pythonEmbeddedDir python.zip
+        Remove-Item -Recurse -Force .\python-embedded
       shell: pwsh
 
 
