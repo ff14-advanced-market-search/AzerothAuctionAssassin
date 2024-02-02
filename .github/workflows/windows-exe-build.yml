@@ -33,8 +33,14 @@ jobs:
 
     - name: Zip Project Files
       run: |
-        Compress-Archive -Path * -DestinationPath app.zip -Exclude "AzerothAuctionAssassin-windows", ".github", ".git", ".gitignore", "Lib"
+        $exclude = @('AzerothAuctionAssassin-windows', '.github', '.git', '.gitignore', 'Lib')
+        $items = Get-ChildItem -Path . -Recurse | Where-Object { $exclude -notcontains $_.Name }
+        Compress-Archive -Path $items.FullName -DestinationPath app.zip
         Move-Item -Path app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
+
+    - name: Build EXE
+      run: |
+        echo v1.0.4 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
 
     - name: Build EXE
       run: |
