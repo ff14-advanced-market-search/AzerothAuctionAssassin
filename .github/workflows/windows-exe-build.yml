@@ -19,7 +19,7 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Setup MSBuild Path
+    - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2  #use Microsoft's setup-msbuild action
 
     - name: Install python packages
@@ -41,7 +41,7 @@ jobs:
 
     - name: update version number
       run: |
-        echo v1.0.4 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+        echo 1.0.5 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
 
     - name: Build EXE
       run: |
@@ -53,8 +53,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.4
-        release_name: Release v1.0.4
+        tag_name: v1.0.5
+        release_name: Release v1.0.5
         draft: false
         prerelease: false
 
