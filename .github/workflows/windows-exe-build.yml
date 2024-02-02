@@ -45,7 +45,7 @@ jobs:
 
     - name: Build EXE
       run: |
-        msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"  -restore -t:Publish
+        msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln -restore -t:Publish /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
         
     - name: Create Release
       id: create_release
