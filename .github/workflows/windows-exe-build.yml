@@ -29,11 +29,12 @@ jobs:
       run: |
         Compress-Archive -Path .\Lib -DestinationPath Lib.zip
         Move-Item -Path Lib.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\Lib.zip -Force
+        Remove-Item -Recurse -Force .\Lib
 
 
     - name: Zip Project Files
       run: |
-        $exclude = @('AzerothAuctionAssassin-windows', '.github', '.git', '.gitignore', 'Lib')
+        $exclude = @('AzerothAuctionAssassin-windows', '.github', '.git', '.gitignore')
         $items = Get-ChildItem -Path . -Recurse | Where-Object { $exclude -notcontains $_.Name }
         Compress-Archive -Path $items.FullName -DestinationPath app.zip
         Move-Item -Path app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
