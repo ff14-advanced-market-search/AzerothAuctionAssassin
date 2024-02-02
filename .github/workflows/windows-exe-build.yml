@@ -16,7 +16,7 @@ jobs:
 
 
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.0.2  #use Microsoft's setup-msbuild action
+      uses: microsoft/setup-msbuild@v1.0.2  #using Microsoft's setup-msbuild action
 
     - name: Install python packages
       run: |
@@ -60,7 +60,7 @@ jobs:
         # Get all directories that are not in the exclude list and compress them
         Get-ChildItem -Path $DirToCompress -Directory | Where-Object { $_.Name -notin $DirsToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
 
-        # Get all files and compress them, excluding files that are within the excluded directories
+        # Get all Files that are not in the exclude list and compress them
         Get-ChildItem -Path $DirToCompress -File | Where-Object { $_.Name -notin $FilesToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
 
         
