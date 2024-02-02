@@ -39,6 +39,7 @@ jobs:
         & "$pythonEmbeddedDir\python.exe" "$pythonEmbeddedDir\pip.pyz" install -r .\requirements.txt --target=".\Lib\site-packages\"
 
         Remove-Item -Recurse -Force .\python-embedded
+        Remove-Item -Force python.zip
       shell: pwsh
 
 
@@ -53,20 +54,14 @@ jobs:
       run: |
         $DirToCompress = ".\"
         $ZipFileResult = "..\app.zip"
-        $DirsToExclude = @("AzerothAuctionAssassin-windows", ".git", ".github")
+        $DirsToExclude = @("AzerothAuctionAssassin-windows", ".git", ".github", "__pycache__")
+        $FilesToExclude = @(".gitignore")
 
         # Get all directories that are not in the exclude list and compress them
         Get-ChildItem -Path $DirToCompress -Directory | Where-Object { $_.Name -notin $DirsToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
 
         # Get all files and compress them, excluding files that are within the excluded directories
-        Get-ChildItem -Path $DirToCompress -File | Where-Object {
-            foreach ($dir in $DirsToExclude) {
-                if ($_.DirectoryName -like "*\$dir*") {
-                    return $false
-                }
-            }
-            return $true
-        } | Compress-Archive -DestinationPath $ZipFileResult -Update
+        Get-ChildItem -Path $DirToCompress -File | Where-Object { $_.Name -notin $FilesToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
 
         
         Move-Item -Path ..\app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
@@ -75,7 +70,7 @@ jobs:
 
     - name: update version number
       run: |
-        echo 1.0.7 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+        echo 1.0.4 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
 
     - name: Build EXE
       run: |
@@ -87,8 +82,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.7
-        release_name: Release v1.0.7
+        tag_name: v1.0.4
+        release_name: Release v1.0.4
         draft: false
         prerelease: false
 
