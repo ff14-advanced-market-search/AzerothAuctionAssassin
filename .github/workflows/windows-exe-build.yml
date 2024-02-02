@@ -21,20 +21,20 @@ jobs:
 
     - name: Setup MSBuild Path
       uses: microsoft/setup-msbuild@v1.0.2  #use Microsoft's setup-msbuild action
-      
+
     - name: Install python packages
       run: pip install -r requirements.txt  --target=.\Lib\site-packages
+
+    - name: Zip python packages
+      run: |
+        Compress-Archive -Path .\Lib -DestinationPath Lib.zip
+        Move-Item -Path Lib.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\Lib.zip -Force
 
 
     - name: Zip Project Files
       run: |
         Compress-Archive -Path * -DestinationPath app.zip -Exclude "AzerothAuctionAssassin-windows", ".github", ".git", ".gitignore", "Lib"
         Move-Item -Path app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
-
-    - name: Zip python packages
-      run: |
-        Compress-Archive -Path .\Lib -DestinationPath lib.zip
-        Move-Item -Path lib.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\lib.zip -Force
 
     - name: Build EXE
       run: |
