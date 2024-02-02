@@ -49,12 +49,29 @@ jobs:
         Remove-Item -Recurse -Force .\Lib
 
 
-    # - name: Zip Project Files
-    #   run: |
-    #     $exclude = @('AzerothAuctionAssassin-windows', '.github', '.git', '.gitignore')
-    #     $items = Get-ChildItem -Path . -Recurse | Where-Object { $exclude -notcontains $_.Name }
-    #     Compress-Archive -Path $items.FullName -DestinationPath app.zip
-    #     Move-Item -Path app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
+    - name: Zip Project Files
+      run: |
+        $DirToCompress = ".\"
+        $ZipFileResult = "..\app.zip"
+        $DirsToExclude = @("AzerothAuctionAssassin-windows", ".git", ".github")
+
+        # Get all directories that are not in the exclude list and compress them
+        Get-ChildItem -Path $DirToCompress -Directory | Where-Object { $_.Name -notin $DirsToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
+
+        # Get all files and compress them, excluding files that are within the excluded directories
+        Get-ChildItem -Path $DirToCompress -File | Where-Object {
+            foreach ($dir in $DirsToExclude) {
+                if ($_.DirectoryName -like "*\$dir*") {
+                    return $false
+                }
+            }
+            return $true
+        } | Compress-Archive -DestinationPath $ZipFileResult -Update
+
+        
+        Move-Item -Path ..\app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
+
+      shell: pwsh
 
     - name: update version number
       run: |

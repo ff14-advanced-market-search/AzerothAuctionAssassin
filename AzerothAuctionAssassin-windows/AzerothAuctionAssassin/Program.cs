@@ -29,6 +29,7 @@ namespace AzerothAuctionAssassin
             installApp(appPath, appVersion);
             InstallPython(pythonPath);
             //InstallPipe(pythonPath); //no need for pip cuz now packages are installed and zipped during the pipeline.
+            // this now unzip packages instead of installing them which will make much faster at the first run.
             InstallPipeRequirements(currentVersionPath,pythonPath, requirementsPath);
             RunPythonFile(currentVersionPath,pythonPath,mainPythonFilePath);
         }
@@ -127,11 +128,13 @@ namespace AzerothAuctionAssassin
           
         }
 
+        /*
         static void InstallPipe(string pythonPath)
         {
             string downloadPath = Path.Combine(pythonPath, "pip.pyz");
             File.WriteAllBytes(downloadPath, Properties.Resources.pip);
         }
+        */
 
         static void InstallPipeRequirements(string appPath,string pythonPath,string requirementsPath) 
         {

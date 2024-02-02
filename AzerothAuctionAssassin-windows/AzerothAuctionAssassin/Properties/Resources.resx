@@ -127,9 +127,6 @@
   <data name="Lib" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Lib.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="pip" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\pip.pyz;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="python_3_11_4_embed_win32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\python-3.11.4-embed-win32.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

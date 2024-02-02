@@ -92,16 +92,6 @@ namespace AzerothAuctionAssassin.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] pip {
-            get {
-                object obj = ResourceManager.GetObject("pip", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] python_3_11_4_embed_win32 {
             get {
                 object obj = ResourceManager.GetObject("python_3_11_4_embed_win32", resourceCulture);
