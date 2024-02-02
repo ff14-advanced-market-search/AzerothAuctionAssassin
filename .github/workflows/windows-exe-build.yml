@@ -17,7 +17,8 @@ jobs:
     - name: Build
       run: |
         cd AzerothAuctionAssassin-windows
-        dotnet publish -o . -p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
+        mkdir dist
+        dotnet publish . -o ./dist -p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
 
 
     - name: Create Release
@@ -37,6 +38,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./AzerothAuctionAssassin-windows/AzerothAuctionAssassin.exe
+        asset_path: ./AzerothAuctionAssassin-windows/dist/AzerothAuctionAssassin.exe
         asset_name: AzerothAuctionAssassin.exe
         asset_content_type: application/octet-stream
