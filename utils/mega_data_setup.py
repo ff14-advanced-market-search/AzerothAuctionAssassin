@@ -40,9 +40,7 @@ class MegaData:
         )
         self.WEBHOOK_URL = self.__set_mega_vars("MEGA_WEBHOOK_URL", raw_mega_data, True)
         self.REGION = self.__set_mega_vars("WOW_REGION", raw_mega_data, True)
-        self.WOW_SERVER_NAMES = json.load(
-            open(f"AzerothAuctionAssassinData/{str(self.REGION).lower()}-wow-connected-realm-ids.json")
-        )
+        self.WOW_SERVER_NAMES = self.__set_realm_names()
         # set access token for wow api
         self.access_token_creation_unix_time = 0
         self.access_token = self.check_access_token()
@@ -309,6 +307,19 @@ class MegaData:
         ) = get_ilvl_items(ilvl_info["ilvl"], ilvl_info["item_ids"])
 
         return snipe_info, ilvl_info["ilvl"]
+
+    def __set_realm_names(self):
+        realm_names = json.load(
+            open(f"AzerothAuctionAssassinData/{str(self.REGION).lower()}-wow-connected-realm-ids.json")
+        )
+        if self.NO_RUSSIAN_REALMS:
+            russian_realm_ids = get_wow_russian_realm_ids()
+            realm_names = {
+                k: v
+                for k, v in realm_names.items()
+                if v not in russian_realm_ids
+            }
+        return realm_names
 
     def __validate_snipe_lists(self):
         if (
