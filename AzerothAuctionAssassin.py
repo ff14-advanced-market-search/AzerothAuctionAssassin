@@ -1,18 +1,3 @@
-import sys
-
-try:
-
-    if sys.argv[1] == "run-from-windows-bin":
-
-        sys.path.append(f"{sys.argv[2]}")
-        sys.path.append(f"{sys.argv[3]}")
-    else:
-        pass
-
-except Exception as ex:
-    pass
-
-
 from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel, QLineEdit, QPushButton, QComboBox, QListWidget, QMessageBox, QCheckBox, QFileDialog, QSystemTrayIcon
 from PyQt5 import QtGui
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -23,13 +8,21 @@ from sys import exit
 import json
 from mega_alerts import Alerts
 import pandas as pd
-
+import sys
 import ctypes
 
 if sys.platform == "win32":
     myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
+try:
+    if sys.argv[1] == "run-from-windows-bin":
+        sys.path.append(f"{sys.argv[2]}")
+        sys.path.append(f"{sys.argv[3]}")
+    else:
+        pass
+except Exception as ex:
+    pass
 
 class LabelTextbox(QMainWindow):
 
