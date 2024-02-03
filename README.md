@@ -65,6 +65,8 @@ Setting the following and clicking on `Add Item` will add this to your snipe lis
 
 The PetID is a special name for each Battle Pets species id.
 
+**DO NOT USE WOWHEAD LINKS FOR PETS, WOWHEAD SHOWS THE WRONG ID**
+
 The following shows [pet species id 3390 for the Sophic Amalgamation](https://undermine.exchange/#us-suramar/82800-3390).
 
 You can find that id (3390) at the end of the undermine exchange link for the item next to `82800` (which is the item id for pet cages) https://undermine.exchange/#us-suramar/82800-3390.
