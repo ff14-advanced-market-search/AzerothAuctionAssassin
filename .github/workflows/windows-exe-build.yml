@@ -1,4 +1,4 @@
-name: Build and Sign Windows Executable
+name: Build Windows Executable
 
 on:
   workflow_dispatch:
@@ -14,51 +14,76 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.11
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2  #using Microsoft's setup-msbuild action
 
-    - name: Build Windows executable
+    - name: Install python packages
       run: |
-        python -m pip install pyinstaller
-        pyinstaller --onefile --add-data "AzerothAuctionAssassinData:AzerothAuctionAssassinData" --add-data "utils:utils" AzerothAuctionAssassin.py
+        # Create the python-embedded directory if it doesn't exist
+        $pythonEmbeddedDir = ".\python-embedded"
+        If (-Not (Test-Path $pythonEmbeddedDir)) {
+            New-Item -ItemType Directory -Force -Path $pythonEmbeddedDir
+        }
 
-    - name: Decode Certificate
-      run: |
-        $cert_content = '${{ secrets.CERT_BASE64 }}'
-        $cert_bytes = [Convert]::FromBase64String($cert_content)
-        $cert_path = "certificate.pfx"
-        [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
+        # Download the embedded Python zip
+        curl https://www.python.org/ftp/python/3.11.4/python-3.11.4-embed-win32.zip -o "python.zip"
+
+        # Extract the Python zip
+        Expand-Archive -Path "python.zip" -DestinationPath $pythonEmbeddedDir -Force
+
+        # Download pip.pyz
+        curl https://bootstrap.pypa.io/pip/pip.pyz -o "$pythonEmbeddedDir\pip.pyz"
+
+        # Install packages from requirements.txt using the embedded Python and pip.pyz
+        & "$pythonEmbeddedDir\python.exe" "$pythonEmbeddedDir\pip.pyz" install -r .\requirements.txt --target=".\Lib\site-packages\"
+
+        Remove-Item -Recurse -Force .\python-embedded
+        Remove-Item -Force python.zip
       shell: pwsh
 
-    - name: Sign Executable
+
+    - name: Zip python packages
       run: |
-        $cert_path = "certificate.pfx"
-        $password = "${{ secrets.CERT_PASSWORD }}"
-        $timestamp_url = "http://timestamp.digicert.com"
-        $executable_path = "dist\AzerothAuctionAssassin.exe"
-        $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
-        & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
+        Compress-Archive -Path .\Lib -DestinationPath Lib.zip
+        Move-Item -Path Lib.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\Lib.zip -Force
+        Remove-Item -Recurse -Force .\Lib
+
+
+    - name: Zip Project Files
+      run: |
+        $DirToCompress = ".\"
+        $ZipFileResult = "..\app.zip"
+        $DirsToExclude = @("AzerothAuctionAssassin-windows", ".git", ".github", "__pycache__")
+        $FilesToExclude = @(".gitignore")
+
+        # Get all directories that are not in the exclude list and compress them
+        Get-ChildItem -Path $DirToCompress -Directory | Where-Object { $_.Name -notin $DirsToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
+
+        # Get all Files that are not in the exclude list and compress them
+        Get-ChildItem -Path $DirToCompress -File | Where-Object { $_.Name -notin $FilesToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
+
+        
+        Move-Item -Path ..\app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
+
       shell: pwsh
 
-    # - name: Save Windows executable as artifact
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: AzerothAuctionAssassin-Windows
-    #     path: dist\AzerothAuctionAssassin.exe
+    - name: update version number
+      run: |
+        echo 1.0.5 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
 
+    - name: Build EXE
+      run: |
+        msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln -restore -t:Publish /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
+        
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.3
-        release_name: Release v1.0.3
+        tag_name: v1.0.5
+        release_name: Release v1.0.5
         draft: false
         prerelease: false
 
@@ -68,6 +93,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/AzerothAuctionAssassin.exe
+        asset_path: .\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe
         asset_name: AzerothAuctionAssassin.exe
         asset_content_type: application/octet-stream
