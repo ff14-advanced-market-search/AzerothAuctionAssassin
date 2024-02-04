@@ -386,7 +386,11 @@ class MegaData:
             url = self.construct_api_url(connectedRealmId, endpoint)
             
             auction_info = self.make_ah_api_request(url, connectedRealmId)
-
+            if "auctions" not in auction_info:
+                print(
+                    f"{self.REGION} {str(connectedRealmId)} realm data, no auctions found"
+                )
+                continue
             # merge all the auctions
             all_auctions.extend(auction_info["auctions"])
 
@@ -399,7 +403,7 @@ class MegaData:
         locale = "en_US" if "NA" in self.REGION else "en_EU"
 
         if 'SOD' in self.REGION:
-            namespace += f"dynamic-classic1x-{namespace.split('-')[-1]}"
+            namespace = f"dynamic-classic1x-{namespace.split('-')[-1]}"
         elif 'CLASSIC' in self.REGION:
             namespace = f"dynamic-classic-{namespace.split('-')[-1]}"
 

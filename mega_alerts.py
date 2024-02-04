@@ -91,6 +91,10 @@ class Alerts(QThread):
             pet_ah_bids = {}
             ilvl_ah_buyouts = []
 
+            if len(auctions) == 0:
+                print(f"no listings found on {connected_id} of {mega_data.REGION}")
+                return
+
             def add_price_to_dict(price, item_id, price_dict, is_pet=False):
                 if is_pet:
                     if price < mega_data.DESIRED_PETS[item_id] * 10000:
