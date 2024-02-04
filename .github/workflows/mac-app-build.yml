@@ -1,0 +1,50 @@
+name: Build MacOSX Executable
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Build macOS executable
+      run: |
+        python -m pip install pyinstaller
+        pyinstaller --onefile --add-data "AzerothAuctionAssassinData:./AzerothAuctionAssassinData" --add-data "utils:./utils" AzerothAuctionAssassin.py
+
+    - name: Decode macOS Certificate
+      run: |
+        echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
+
+    - name: Sign macOS Executable
+      run: |
+        security create-keychain -p "" build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "" build.keychain
+        security import certificate.p12 -k build.keychain -P ${{ secrets.CERT_PASSWORD }} -T /usr/bin/codesign
+        codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/AzerothAuctionAssassin.app
+
+    - name: Upload macOS Executable to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.build-windows.steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/AzerothAuctionAssassin.app
+        asset_name: AzerothAuctionAssassin-macOS.app
+        asset_content_type: application/octet-stream
