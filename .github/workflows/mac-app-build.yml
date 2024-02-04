@@ -31,13 +31,14 @@ jobs:
       run: |
         echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
 
-    - name: Sign macOS Executable
-      run: |
-        security create-keychain -p "${{ secrets.CERT_PASSWORD }}"  build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p "${{ secrets.CERT_PASSWORD }} " build.keychain
-        security import certificate.p12 -k build.keychain -P ${{ secrets.CERT_PASSWORD }} -T /usr/bin/codesign
-        codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/AzerothAuctionAssassin.app
+    ### broken probably needs a different cert
+    # - name: Sign macOS Executable
+    #   run: |
+    #     security create-keychain -p ""  build.keychain
+    #     security default-keychain -s build.keychain
+    #     security unlock-keychain -p "" build.keychain
+    #     security import certificate.p12 -k build.keychain -P ${{ secrets.CERT_PASSWORD }} -T /usr/bin/codesign
+    #     codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/AzerothAuctionAssassin
 
     - name: Upload macOS Executable to Release
       uses: actions/upload-release-asset@v1
@@ -45,6 +46,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.build-windows.steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/AzerothAuctionAssassin.app
-        asset_name: AzerothAuctionAssassin-macOS.app
+        asset_path: ./dist/AzerothAuctionAssassin
+        asset_name: AzerothAuctionAssassin-macOS
         asset_content_type: application/octet-stream
