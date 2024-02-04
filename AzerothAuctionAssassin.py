@@ -110,7 +110,7 @@ class App(QMainWindow):
 
     def __init__(self):
         super(App,self).__init__()
-        self.title = 'Azeroth Auction Assassin'
+        self.title = 'Azeroth Auction Assassin v1.0.6'
         self.left = 0
         self.top = 0
         self.width = 1650
