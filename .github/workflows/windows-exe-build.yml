@@ -137,14 +137,14 @@ jobs:
 
     - name: Decode macOS Certificate
       run: |
-        echo "${{ secrets.MAC_CERT_BASE64 }}" | base64 -d > certificate.p12
+        echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
 
     - name: Sign macOS Executable
       run: |
         security create-keychain -p "" build.keychain
         security default-keychain -s build.keychain
         security unlock-keychain -p "" build.keychain
-        security import certificate.p12 -k build.keychain -P ${{ secrets.MAC_CERT_PASSWORD }} -T /usr/bin/codesign
+        security import certificate.p12 -k build.keychain -P ${{ secrets.CERT_PASSWORD }} -T /usr/bin/codesign
         codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/AzerothAuctionAssassin.app
 
     - name: Upload macOS Executable to Release
