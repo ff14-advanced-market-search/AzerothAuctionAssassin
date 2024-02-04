@@ -98,7 +98,7 @@ class MegaData:
 
         # need to do this no matter where we get the region from
         if var_name == "REGION":
-            if var_value not in ["EU", "NA", "NACLASSIC", "EUCLASSIC"]:
+            if var_value not in ["EU", "NA", "NACLASSIC", "NASODCLASSIC", "EUCLASSIC"]:
                 raise Exception(f"error {var_value} not a valid region")
 
         # default to 48 threads if not set
@@ -398,8 +398,11 @@ class MegaData:
         namespace = "dynamic-us" if "NA" in self.REGION else "dynamic-eu"
         locale = "en_US" if "NA" in self.REGION else "en_EU"
 
-        if 'CLASSIC' in self.REGION:
+        if 'SOD' in self.REGION:
+            namespace += f"dynamic-classic1x-{namespace.split('-')[-1]}"
+        elif 'CLASSIC' in self.REGION:
             namespace = f"dynamic-classic-{namespace.split('-')[-1]}"
+
 
         url = f"{base_url}/data/wow/connected-realm/{str(connectedRealmId)}/auctions{endpoint}?namespace={namespace}&locale={locale}&access_token={self.check_access_token()}"
 
