@@ -4,6 +4,11 @@ A super fast Blizzard AH sniper created by Saddlebag Exchange. Version 2.0 of ou
 
 This is a tool capable of searching **across all realms in your region** to alert you on incredible deals, alerting you on the best prices for any item you want to buy seconds after Blizzard AH API data is released. 
 
+We support all game modes including: 
+- Retail
+- Classic
+- Season of Discovery Classic
+
 **Please dontate to our patreon so we can keep the project running.  If you need help setting it up, our creator will personally help any patreon subscribers.**
 
 https://www.patreon.com/indopan
