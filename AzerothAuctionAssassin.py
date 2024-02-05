@@ -14,7 +14,7 @@ except Exception as ex:
     pass
 # i hate the way that looks but if it isnt broken dont fix it
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel, QLineEdit, QPushButton, QComboBox, QListWidget, QMessageBox, QCheckBox, QFileDialog, QSystemTrayIcon
+from PyQt5.QtWidgets import QCompleter, QMainWindow, QApplication, QLabel, QLineEdit, QPushButton, QComboBox, QListWidget, QMessageBox, QCheckBox, QFileDialog, QSystemTrayIcon
 from PyQt5 import QtGui
 from PyQt5.QtCore import QThread, pyqtSignal, QFile, QTextStream
 from PyQt5.QtGui import QIcon
@@ -285,7 +285,8 @@ class App(QMainWindow):
 
         ########################## PET STUFF ###################################################
 
-        self.pet_name_input = LabelTextbox(self, "", 500, 75, 225, 20)
+        self.pet_name_input = ComboBoxes(self, 500, 75, 225, 20)
+        self.pet_name_input.Combo.setEnabled(False)
 
         self.pet_id_input = LabelTextbox(self, "Pet ID", 500, 25, 100, 40)
         self.pet_id_input.Label.setToolTip(
@@ -318,7 +319,8 @@ class App(QMainWindow):
 
         ########################## ITEM STUFF ###################################################
 
-        self.item_name_input = LabelTextbox(self, "", 750, 75, 225, 20)
+        self.item_name_input = ComboBoxes(self, 750, 75, 225, 20)
+        self.item_name_input.Combo.setEnabled(False)
 
         self.item_id_input = LabelTextbox(self, "Item ID", 750, 25, 100, 40)
         self.item_id_input.Label.setToolTip(
@@ -418,6 +420,41 @@ class App(QMainWindow):
     def api_data_received(self, pet_statistics, item_statistics):
         self.pet_statistics = pet_statistics
         self.item_statistics = item_statistics
+
+        self.pet_name_input.Combo.addItems(
+            self.pet_statistics.sort_values(by='itemName')['itemName'].tolist())
+        self.pet_name_input.Combo.setEditable(True)
+        self.pet_name_input.Combo.setInsertPolicy(QComboBox.NoInsert)
+        self.pet_name_input.Combo.completer()
+        self.pet_name_input.Combo.currentIndexChanged.connect(
+            self.on_combo_box_pet_changed)
+
+        self.item_name_input.Combo.addItems(
+            self.item_statistics.sort_values(by='itemName')['itemName'].tolist())
+        self.item_name_input.Combo.setEditable(True)
+        self.item_name_input.Combo.setInsertPolicy(QComboBox.NoInsert)
+        self.item_name_input.Combo.completer()
+        self.item_name_input.Combo.currentIndexChanged.connect(
+            self.on_combo_box_item_changed)
+
+        self.item_name_input.Combo.setEnabled(True)
+        self.pet_name_input.Combo.setEnabled(True)
+
+    def on_combo_box_item_changed(self, index):
+        # This function will be called whenever the user selects a different item
+        selected_item = self.item_name_input.Combo.currentText()
+        selected_item_id = self.item_statistics[self.item_statistics['itemName']
+                                                == selected_item]['itemID'].iloc[0]
+
+        self.item_id_input.Text.setText(str(selected_item_id))
+
+    def on_combo_box_pet_changed(self, index):
+        # This function will be called whenever the user selects a different item
+        selected_pet = self.pet_name_input.Combo.currentText()
+        selected_pet_id = self.pet_statistics[self.pet_statistics['itemName']
+                                              == selected_pet]['itemID'].iloc[0]
+
+        self.pet_id_input.Text.setText(str(selected_pet_id))
 
     def check_config_file(self, path_to_config):
         try:
@@ -742,9 +779,10 @@ class App(QMainWindow):
         try:
             item_name = self.item_statistics[self.item_statistics['itemID'] == int(
                 item_id)].iloc[0]['itemName']
-            self.item_name_input.Text.setText(item_name)
+            index = self.pet_name_input.Combo.findText(item_name)
+            self.item_name_input.Combo.setCurrentIndex(index)
         except:
-            self.item_name_input.Text.setText("Item ID not found")
+            self.item_name_input.Combo.setCurrentText("Item ID not found")
 
     def add_item_to_dict(self):
         item_id = self.item_id_input.Text.text()
@@ -860,9 +898,10 @@ class App(QMainWindow):
         try:
             pet_name = self.pet_statistics[self.pet_statistics['itemID'] == int(
                 pet_id)].iloc[0]['itemName']
-            self.pet_name_input.Text.setText(pet_name)
-        except IndexError:
-            self.pet_name_input.Text.setText("Pet ID not found")
+            index = self.pet_name_input.Combo.findText(pet_name)
+            self.pet_name_input.Combo.setCurrentIndex(index)
+        except:
+            self.pet_name_input.Combo.setCurrentText("Item ID not found")
 
     def add_pet_to_dict(self):
         pet_id = self.pet_id_input.Text.text()
