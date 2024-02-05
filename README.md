@@ -18,9 +18,7 @@ https://www.patreon.com/indopan
 - [Installation](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Installation-Guide)
 - [How to add items to snipe](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Item-Selection-Guide)
 - [How to update the app](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/How-to-update)
-
-Optional Guides:
-- [Installation with python](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Install-with-Python)
+- [All other guides](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki)
 
 # Logo
 <img src="https://github.com/ff14-advanced-market-search/mega-alerts/assets/17516896/dbdf6a86-e560-4f59-b87e-bac7379f3b9d" width="300" height="300">
