@@ -110,7 +110,7 @@ class App(QMainWindow):
 
     def __init__(self):
         super(App,self).__init__()
-        self.title = 'Azeroth Auction Assassin'
+        self.title = 'Azeroth Auction Assassin v1.0.6'
         self.left = 0
         self.top = 0
         self.width = 1650
@@ -125,6 +125,8 @@ class App(QMainWindow):
         self.na_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "na-wow-connected-realm-ids.json")
         self.EUCLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "euclassic-wow-connected-realm-ids.json")
         self.NACLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "naclassic-wow-connected-realm-ids.json")
+        self.NASODCLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "nasodclassic-wow-connected-realm-ids.json")
+        self.EUSODCLASSIC_connected_realms = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "eusodclassic-wow-connected-realm-ids.json")
 
         # default to 90% discount, just use EU for now for less data
         self.api_data_thread = Item_And_Pet_Statistics()
@@ -167,8 +169,8 @@ class App(QMainWindow):
 
         self.wow_region_label = LabelText(self, 'Wow Region', 25, 325, 200, 40)
         self.wow_region=ComboBoxes(self,25,325,200,40)
-        self.wow_region.Combo.addItems(['EU','NA','EUCLASSIC','NACLASSIC'])
-        self.wow_region_label.Label.setToolTip('Pick your region, currently supporting: EU, NA, EU-Classic and NA-Classic')
+        self.wow_region.Combo.addItems(['EU','NA','EUCLASSIC','NACLASSIC','NASODCLASSIC','EUSODCLASSIC'])
+        self.wow_region_label.Label.setToolTip('Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic.')
 
         self.number_of_mega_threads=LabelTextbox(self,"Number of Threads",250,325,200,40)
         self.number_of_mega_threads.Text.setText('48')
@@ -408,6 +410,18 @@ class App(QMainWindow):
             with open(self.NACLASSIC_connected_realms, 'w') as json_file:
                 json.dump(NACLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
 
+        if not os.path.exists(self.NASODCLASSIC_connected_realms):
+            from utils.realm_data import NASODCLASSIC_CONNECTED_REALMS_IDS
+
+            with open(self.NASODCLASSIC_connected_realms, 'w') as json_file:
+                json.dump(NASODCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+        if not os.path.exists(self.EUSODCLASSIC_connected_realms):
+            from utils.realm_data import EUSODCLASSIC_CONNECTED_REALMS_IDS
+
+            with open(self.EUSODCLASSIC_connected_realms, 'w') as json_file:
+                json.dump(EUSODCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
         if os.path.exists(self.path_to_data):
             self.check_config_file(self.path_to_data)
                 
@@ -614,7 +628,7 @@ class App(QMainWindow):
 
         try:
             item_id_int = int(item_id)
-            item_price_int = int(item_price)
+            item_price_int = float(item_price)
         except ValueError:
             QMessageBox.critical(self, "Invalid Input", "Item ID and Price should be numbers.")
             return False
@@ -625,8 +639,8 @@ class App(QMainWindow):
             return False
 
         # Check if Price is between 1 and 10 million
-        if not 1 <= item_price_int <= 10000000:
-            QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
+        if not 0 <= item_price_int <= 10000000:
+            QMessageBox.critical(self, "Incorrect Price", "Price must be between 0 and 10 million.")
             return False
 
         # If item is already in the items_list, remove it
@@ -665,8 +679,8 @@ class App(QMainWindow):
             for key,value in self.items_list.items():
                 if not (1 <= int(key) <= 500000):
                     raise ValueError(f"Invalid item ID {key}.\nIDs must be integers between 1-500,000.")
-                if not (1 <= int(value) <= 10000000):
-                    raise ValueError(f"Invalid price {value} for item ID {key}.\nPrices must be integers between 1-10,000,000.")
+                if not (0 <= int(value) <= 10000000):
+                    raise ValueError(f"Invalid price {value} for item ID {key}.\nPrices must be integers between 0-10,000,000.")
                 self.item_list_display.List.insertItem(self.item_list_display.List.count(), f'Item ID: {key}, Price: {value}')
 
         except json.JSONDecodeError:
@@ -819,9 +833,9 @@ class App(QMainWindow):
     def save_data_to_json(self):
         wow_region = self.wow_region.Combo.currentText()
 
-        # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC'
-        if wow_region not in ['NA', 'EU', 'NACLASSIC', 'EUCLASSIC']:
-            QMessageBox.critical(self, "Invalid Region", "WOW region must be either 'NA', 'EU', 'NACLASSIC' or 'EUCLASSIC'.")
+        # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC'
+        if wow_region not in ['NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC', 'EUSODCLASSIC']:
+            QMessageBox.critical(self, "Invalid Region", "WOW region must be either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'EUSODCLASSIC or 'NASODCLASSIC'.")
             return False
 
         mega_threads = self.number_of_mega_threads.Text.text()

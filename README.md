@@ -120,7 +120,7 @@ You will need the following to run AAA:
 
 - `Discord Webhook` this lets the app send data to discord (a.k.a. `MEGA_WEBHOOK_URL`)
 - `WoW Client ID` and `WoW Client Secret` these let the app make api requests to blizzard (a.k.a. `WOW_CLIENT_ID` and `WOW_CLIENT_SECRET`)
-- `WoW Region` either `EU`, `NA`, `EUCLASSIC` or `NACLASSIC` (a.k.a. `WOW_REGION`)
+- `WoW Region` either `EU`, `NA`, `EUCLASSIC` or `NACLASSIC`, `EUSODCLASSIC` or `NASODCLASSIC` (a.k.a. `WOW_REGION`)
 - Then you need to set some items in either the pets field, items field or ilvl field (a.k.a. `DESIRED_ITEMS`, `DESIRED_PETS` or `DESIRED_ILVL_LIST`)
 
 
