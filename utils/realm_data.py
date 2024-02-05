@@ -625,7 +625,7 @@ NASODCLASSIC_CONNECTED_REALMS_IDS = {
   "Chaos Bolt": 5820
 }
 
-EUSODCLASSIC_REALMS = {
+EUSODCLASSIC_CONNECTED_REALMS_IDS = {
   "Dragonfang": 5233,
   "Stitches": 5220,
   "Earthshaker": 5233,
