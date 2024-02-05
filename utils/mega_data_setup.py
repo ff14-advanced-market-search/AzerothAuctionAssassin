@@ -213,7 +213,7 @@ class MegaData:
                 desired_items_raw = {}
         desired_items = {}
         for k, v in desired_items_raw.items():
-            desired_items[int(k)] = int(v)
+            desired_items[int(k)] = float(v)
         return desired_items
 
     def __set_desired_ilvl_single(self, path_to_data=None):

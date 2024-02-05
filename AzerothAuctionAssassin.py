@@ -628,7 +628,7 @@ class App(QMainWindow):
 
         try:
             item_id_int = int(item_id)
-            item_price_int = int(item_price)
+            item_price_int = float(item_price)
         except ValueError:
             QMessageBox.critical(self, "Invalid Input", "Item ID and Price should be numbers.")
             return False
@@ -639,8 +639,8 @@ class App(QMainWindow):
             return False
 
         # Check if Price is between 1 and 10 million
-        if not 1 <= item_price_int <= 10000000:
-            QMessageBox.critical(self, "Incorrect Price", "Price must be between 1 and 10 million.")
+        if not 0 <= item_price_int <= 10000000:
+            QMessageBox.critical(self, "Incorrect Price", "Price must be between 0 and 10 million.")
             return False
 
         # If item is already in the items_list, remove it
@@ -679,8 +679,8 @@ class App(QMainWindow):
             for key,value in self.items_list.items():
                 if not (1 <= int(key) <= 500000):
                     raise ValueError(f"Invalid item ID {key}.\nIDs must be integers between 1-500,000.")
-                if not (1 <= int(value) <= 10000000):
-                    raise ValueError(f"Invalid price {value} for item ID {key}.\nPrices must be integers between 1-10,000,000.")
+                if not (0 <= int(value) <= 10000000):
+                    raise ValueError(f"Invalid price {value} for item ID {key}.\nPrices must be integers between 0-10,000,000.")
                 self.item_list_display.List.insertItem(self.item_list_display.List.count(), f'Item ID: {key}, Price: {value}')
 
         except json.JSONDecodeError:
