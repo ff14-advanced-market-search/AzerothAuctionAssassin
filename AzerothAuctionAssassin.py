@@ -189,8 +189,21 @@ class App(QMainWindow):
         self.stacked_widget.addWidget(item_page)
         self.stacked_widget.addWidget(ilvl_page)
 
-        ########################## SIDE BUTTONS ###################################################
+        self.make_side_buttons()
 
+        self.make_settings_page(settings_page=settings_page)
+
+        self.make_pet_page(pet_page=pet_page)
+
+        self.make_item_page(item_page=item_page)
+
+        self.make_ilvl_page(ilvl_page=ilvl_page)
+
+        self.check_for_settings()
+
+        self.show()
+
+    def make_side_buttons(self):
         self.go_to_settings_button = UIButtons(
             self, "Application Settings", 25, 25, 200, 50)
         self.go_to_settings_button.Button.clicked.connect(
@@ -246,7 +259,7 @@ class App(QMainWindow):
         self.mega_alerts_progress = LabelText(
             self, 'Waiting for user to Start!', 25, 790, 1000, 40)
 
-        ########################## CONFIG PAGE ###################################################
+    def make_settings_page(self, settings_page):
 
         self.discord_webhook_input = LabelTextbox(
             settings_page, "Discord Webhook", 0, 25, 425, 40)
@@ -333,8 +346,7 @@ class App(QMainWindow):
         self.import_config_button.Button.setToolTip(
             'Import your mega_data.json config.')
 
-        ########################## PET PAGE ###################################################
-
+    def make_pet_page(self, pet_page):
         self.pet_name_input = ComboBoxes(pet_page, 0, 75, 225, 20)
         self.pet_name_input.Combo.setEnabled(False)
 
@@ -368,8 +380,7 @@ class App(QMainWindow):
         self.import_pet_data_button.Button.setToolTip(
             'Import your desired_pets.json config')
 
-        ########################## ITEM PAGE ###################################################
-
+    def make_item_page(self, item_page):
         self.item_name_input = ComboBoxes(item_page, 0, 75, 225, 20)
         self.item_name_input.Combo.setEnabled(False)
 
@@ -405,7 +416,7 @@ class App(QMainWindow):
         self.import_item_data_button.Button.setToolTip(
             'Import your desired_items.json config')
 
-        ########################## ILVL PAGE ###################################################
+    def make_ilvl_page(self, ilvl_page):
 
         self.ilvl_item_input = LabelTextbox(
             ilvl_page, "Item ID(s)", 0, 25, 100, 40)
@@ -461,10 +472,6 @@ class App(QMainWindow):
             self.import_ilvl_data)
         self.import_ilvl_data_button.Button.setToolTip(
             'Import your desired_ilvl_list.json config')
-
-        self.check_for_settings()
-
-        self.show()
 
     def go_to_settings_page(self):
         self.stacked_widget.setCurrentIndex(0)
