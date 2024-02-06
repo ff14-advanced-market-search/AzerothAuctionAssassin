@@ -840,8 +840,9 @@ class App(QMainWindow):
         try:
             item_name = self.item_statistics[self.item_statistics['itemID'] == int(
                 item_id)].iloc[0]['itemName']
-            index = self.pet_name_input.Combo.findText(item_name)
+            index = self.item_name_input.Combo.findText(item_name)
             self.item_name_input.Combo.setCurrentIndex(index)
+
         except:
             self.item_name_input.Combo.setCurrentText("Item ID not found")
 
