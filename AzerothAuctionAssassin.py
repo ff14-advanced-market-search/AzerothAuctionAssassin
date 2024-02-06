@@ -14,7 +14,7 @@ except Exception as ex:
     pass
 # i hate the way that looks but if it isnt broken dont fix it
 
-from PyQt5.QtWidgets import QCompleter, QMainWindow, QApplication, QLabel, QLineEdit, QPushButton, QComboBox, QListWidget, QMessageBox, QCheckBox, QFileDialog, QSystemTrayIcon
+from PyQt5.QtWidgets import QVBoxLayout, QStackedWidget, QMainWindow, QApplication, QLabel, QLineEdit, QPushButton, QComboBox, QListWidget, QMessageBox, QCheckBox, QFileDialog, QWidget
 from PyQt5 import QtGui
 from PyQt5.QtCore import QThread, pyqtSignal, QFile, QTextStream
 from PyQt5.QtGui import QIcon
@@ -123,7 +123,7 @@ class App(QMainWindow):
         self.title = 'Azeroth Auction Assassin v1.0.6'
         self.left = 0
         self.top = 0
-        self.width = 1650
+        self.width = 750
         self.height = 800
 
         icon = QIcon('icon.png')
@@ -175,239 +175,288 @@ class App(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        self.discord_webhook_input = LabelTextbox(
-            self, "Discord Webhook", 25, 25, 425, 40)
-        self.discord_webhook_input.Label.setToolTip(
-            'Setup a discord channel with a webhook url for sending the alert messages.')
+        self.stacked_widget = QStackedWidget(self)
+        self.stacked_widget.move(250, 0)
+        self.stacked_widget.resize(500, 700)
 
-        self.wow_client_id_input = LabelTextbox(
-            self, "WoW Client ID", 25, 100, 425, 40)
-        self.wow_client_id_input.Label.setToolTip(
-            'Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids.')
+        settings_page = QMainWindow()
+        pet_page = QMainWindow()
+        item_page = QMainWindow()
+        ilvl_page = QMainWindow()
 
-        self.wow_client_secret_input = LabelTextbox(
-            self, "WoW Client Secret", 25, 175, 425, 40)
-        self.wow_client_secret_input.Label.setToolTip(
-            'Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids.')
+        self.stacked_widget.addWidget(settings_page)
+        self.stacked_widget.addWidget(pet_page)
+        self.stacked_widget.addWidget(item_page)
+        self.stacked_widget.addWidget(ilvl_page)
 
-        self.authentication_token = LabelTextbox(
-            self, "Auction Assassin Token", 25, 250, 425, 40)
-        self.authentication_token.Label.setToolTip(
-            'Go to the Saddlebag Exchange Discord and generate a token with the bot command:\n/wow auctionassassintoken')
+        ########################## SIDE BUTTONS ###################################################
 
-        self.wow_region_label = LabelText(self, 'Wow Region', 25, 325, 200, 40)
-        self.wow_region = ComboBoxes(self, 25, 325, 200, 40)
-        self.wow_region.Combo.addItems(
-            ['EU', 'NA', 'EUCLASSIC', 'NACLASSIC', 'NASODCLASSIC', 'EUSODCLASSIC'])
-        self.wow_region_label.Label.setToolTip(
-            'Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic.')
+        self.go_to_settings_button = UIButtons(
+            self, "Application Settings", 25, 25, 200, 50)
+        self.go_to_settings_button.Button.clicked.connect(
+            self.go_to_settings_page)
 
-        self.number_of_mega_threads = LabelTextbox(
-            self, "Number of Threads", 250, 325, 200, 40)
-        self.number_of_mega_threads.Text.setText('48')
-        self.number_of_mega_threads.Label.setToolTip(
-            'Change the thread count.\nDo 100 for the fastest scans, but RIP to ur CPU and MEM.')
+        self.go_to_pet_button = UIButtons(
+            self, "Pets", 25, 100, 200, 50)
+        self.go_to_pet_button.Button.clicked.connect(
+            self.go_to_pet_page)
 
-        self.scan_time_min = LabelTextbox(
-            self, "Scan Time Min", 250, 400, 200, 40)
-        self.scan_time_min.Text.setText('1')
-        self.scan_time_min.Label.setToolTip(
-            'Increase or decrease the minutes before or after the data update to start timed scans.')
+        self.go_to_item_button = UIButtons(
+            self, "Items", 25, 175, 200, 50)
+        self.go_to_item_button.Button.clicked.connect(
+            self.go_to_item_page)
 
-        self.scan_time_max = LabelTextbox(
-            self, "Scan Time Max", 250, 475, 200, 40)
-        self.scan_time_max.Text.setText('3')
-        self.scan_time_max.Label.setToolTip(
-            'Increase or decrease the minutes before or after the data update to stop running scans.')
+        self.go_to_ilvl_button = UIButtons(
+            self, "ILvl List", 25, 250, 200, 50)
+        self.go_to_ilvl_button.Button.clicked.connect(
+            self.go_to_ilvl_page)
 
-        self.important_emoji = LabelTextbox(
-            self, "Important Emoji", 250, 550, 200, 40)
-        self.important_emoji.Text.setText('🔥')
-        self.important_emoji.Label.setToolTip(
-            'Changes the separators from ==== to whatever emoji you want.')
+        self.import_pbs_data_button = UIButtons(
+            self, "Import PBS Data", 25, 400, 200, 50)
+        self.import_pbs_data_button.Button.clicked.connect(
+            self.import_pbs_data)
+        self.import_pbs_data_button.Button.setToolTip(
+            'Import your Point Blank Sniper text files')
 
-        self.show_bid_prices = CheckBox(
-            self, 'Show Bid Prices', 25, 375, 200, 40)
-        self.show_bid_prices.Checkbox.setToolTip(
-            'Show items with Bid prices below your price limit on Desired Items')
-
-        self.wow_head_link = CheckBox(
-            self, 'Show WoWHead Link', 25, 405, 200, 40)
-        self.wow_head_link.Checkbox.setToolTip(
-            'Uses WoWHead links instead of Undermine and shows pictures.')
-
-        self.russian_realms = CheckBox(
-            self, 'No Russian Realms', 25, 435, 200, 40)
-        self.russian_realms.Checkbox.setChecked(True)
-        self.russian_realms.Checkbox.setToolTip(
-            'Removes alerts from Russian Realms.')
-
-        self.refresh_alerts = CheckBox(
-            self, 'Refresh Alerts', 25, 465, 200, 40)
-        self.refresh_alerts.Checkbox.setChecked(True)
-        self.refresh_alerts.Checkbox.setToolTip(
-            'Set to true to refresh alerts every 1 hour.')
-
-        self.debug_mode = CheckBox(self, 'Debug Mode', 25, 495, 200, 40)
-        self.debug_mode.Checkbox.setToolTip(
-            'Trigger a scan on all realms once.\nUse this to test make sure your data is working.')
-
-        self.import_config_button = UIButtons(
-            self, "Import Config", 25, 550, 200, 50)
-        self.import_config_button.Button.clicked.connect(self.import_configs)
-        self.import_config_button.Button.setToolTip(
-            'Import your mega_data.json config.')
-
-        self.save_data_button = UIButtons(self, "Save Data", 25, 625, 200, 50)
+        self.save_data_button = UIButtons(
+            self, "Save Data", 25, 475, 200, 50)
         self.save_data_button.Button.clicked.connect(self.save_data_to_json)
         self.save_data_button.Button.setToolTip(
             'Save data without starting a scan.')
 
         self.reset_data_button = UIButtons(
-            self, "Reset Data", 250, 625, 200, 50)
+            self, "Reset Data", 25, 550, 200, 50)
         self.reset_data_button.Button.clicked.connect(self.reset_app_data)
         self.reset_data_button.Button.setToolTip(
             'Erase all data and reset the app.')
 
-        self.start_button = UIButtons(self, "Start Alerts", 25, 700, 200, 50)
+        self.start_button = UIButtons(
+            self, "Start Alerts", 25, 625, 200, 50)
         self.start_button.Button.clicked.connect(self.start_alerts)
         self.start_button.Button.setToolTip(
             'Start the scan! Runs once on start and then waits for new data to send more alerts.')
 
-        self.stop_button = UIButtons(self, "Stop Alerts", 250, 700, 200, 50)
+        self.stop_button = UIButtons(
+            self, "Stop Alerts", 25, 700, 200, 50)
         self.stop_button.Button.clicked.connect(self.stop_alerts)
         self.stop_button.Button.setEnabled(False)
         self.stop_button.Button.setToolTip(
             'Gracefully stop the alerts.\nThis will not stop alerts in progress.\nYou may need to kill the process for a force stop.')
 
         self.mega_alerts_progress = LabelText(
-            self, 'Waiting for user to Start!', 25, 775, 1000, 40)
+            self, 'Waiting for user to Start!', 25, 790, 1000, 40)
 
-        ########################## PET STUFF ###################################################
+        ########################## CONFIG PAGE ###################################################
 
-        self.pet_name_input = ComboBoxes(self, 500, 75, 225, 20)
+        self.discord_webhook_input = LabelTextbox(
+            settings_page, "Discord Webhook", 0, 25, 425, 40)
+        self.discord_webhook_input.Label.setToolTip(
+            'Setup a discord channel with a webhook url for sending the alert messages.')
+
+        self.wow_client_id_input = LabelTextbox(
+            settings_page, "WoW Client ID", 0, 100, 425, 40)
+        self.wow_client_id_input.Label.setToolTip(
+            'Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids.')
+
+        self.wow_client_secret_input = LabelTextbox(
+            settings_page, "WoW Client Secret", 0, 175, 425, 40)
+        self.wow_client_secret_input.Label.setToolTip(
+            'Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids.')
+
+        self.authentication_token = LabelTextbox(
+            settings_page, "Auction Assassin Token", 0, 250, 425, 40)
+        self.authentication_token.Label.setToolTip(
+            'Go to the Saddlebag Exchange Discord and generate a token with the bot command:\n/wow auctionassassintoken')
+
+        self.wow_region_label = LabelText(
+            settings_page, 'Wow Region', 0, 325, 200, 40)
+        self.wow_region = ComboBoxes(settings_page, 0, 325, 200, 40)
+        self.wow_region.Combo.addItems(
+            ['EU', 'NA', 'EUCLASSIC', 'NACLASSIC', 'NASODCLASSIC', 'EUSODCLASSIC'])
+        self.wow_region_label.Label.setToolTip(
+            'Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic.')
+
+        self.number_of_mega_threads = LabelTextbox(
+            settings_page, "Number of Threads", 225, 325, 200, 40)
+        self.number_of_mega_threads.Text.setText('48')
+        self.number_of_mega_threads.Label.setToolTip(
+            'Change the thread count.\nDo 100 for the fastest scans, but RIP to ur CPU and MEM.')
+
+        self.scan_time_min = LabelTextbox(
+            settings_page, "Scan Time Min", 225, 400, 200, 40)
+        self.scan_time_min.Text.setText('1')
+        self.scan_time_min.Label.setToolTip(
+            'Increase or decrease the minutes before or after the data update to start timed scans.')
+
+        self.scan_time_max = LabelTextbox(
+            settings_page, "Scan Time Max", 225, 475, 200, 40)
+        self.scan_time_max.Text.setText('3')
+        self.scan_time_max.Label.setToolTip(
+            'Increase or decrease the minutes before or after the data update to stop running scans.')
+
+        self.important_emoji = LabelTextbox(
+            settings_page, "Important Emoji", 225, 550, 200, 40)
+        self.important_emoji.Text.setText('🔥')
+        self.important_emoji.Label.setToolTip(
+            'Changes the separators from ==== to whatever emoji you want.')
+
+        self.show_bid_prices = CheckBox(
+            settings_page, 'Show Bid Prices', 0, 375, 200, 40)
+        self.show_bid_prices.Checkbox.setToolTip(
+            'Show items with Bid prices below your price limit on Desired Items')
+
+        self.wow_head_link = CheckBox(
+            settings_page, 'Show WoWHead Link', 0, 405, 200, 40)
+        self.wow_head_link.Checkbox.setToolTip(
+            'Uses WoWHead links instead of Undermine and shows pictures.')
+
+        self.russian_realms = CheckBox(
+            settings_page, 'No Russian Realms', 0, 435, 200, 40)
+        self.russian_realms.Checkbox.setChecked(True)
+        self.russian_realms.Checkbox.setToolTip(
+            'Removes alerts from Russian Realms.')
+
+        self.refresh_alerts = CheckBox(
+            settings_page, 'Refresh Alerts', 0, 465, 200, 40)
+        self.refresh_alerts.Checkbox.setChecked(True)
+        self.refresh_alerts.Checkbox.setToolTip(
+            'Set to true to refresh alerts every 1 hour.')
+
+        self.debug_mode = CheckBox(
+            settings_page, 'Debug Mode', 0, 495, 200, 40)
+        self.debug_mode.Checkbox.setToolTip(
+            'Trigger a scan on all realms once.\nUse this to test make sure your data is working.')
+
+        self.import_config_button = UIButtons(
+            settings_page, "Import Config", 0, 550, 200, 50)
+        self.import_config_button.Button.clicked.connect(self.import_configs)
+        self.import_config_button.Button.setToolTip(
+            'Import your mega_data.json config.')
+
+        ########################## PET PAGE ###################################################
+
+        self.pet_name_input = ComboBoxes(pet_page, 0, 75, 225, 20)
         self.pet_name_input.Combo.setEnabled(False)
 
-        self.pet_id_input = LabelTextbox(self, "Pet ID", 500, 25, 100, 40)
+        self.pet_id_input = LabelTextbox(pet_page, "Pet ID", 0, 25, 100, 40)
         self.pet_id_input.Label.setToolTip(
             'Add the Pet ID that you want to snipe.\nYou can find that id at the end of the undermine exchange link for the item next to 82800 (which is the item id for pet cages)\nhttps://undermine.exchange/#us-suramar/82800-3390.')
 
-        self.pet_price_input = LabelTextbox(self, "Price", 625, 25, 100, 40)
+        self.pet_price_input = LabelTextbox(
+            pet_page, "Price", 125, 25, 100, 40)
         self.pet_price_input.Label.setToolTip(
             'Pick a price you want to buy at or under.')
 
-        self.add_pet_button = UIButtons(self, "Add Pet", 500, 100, 100, 50)
+        self.add_pet_button = UIButtons(pet_page, "Add Pet", 0, 100, 100, 50)
         self.add_pet_button.Button.clicked.connect(self.add_pet_to_dict)
         self.add_pet_button.Button.setToolTip('Add pet to your snipe list.')
 
         self.remove_pet_button = UIButtons(
-            self, "Remove\nPet", 625, 100, 100, 50)
+            pet_page, "Remove\nPet", 125, 100, 100, 50)
         self.remove_pet_button.Button.clicked.connect(self.remove_pet_to_dict)
         self.remove_pet_button.Button.setToolTip(
             'Remove pet from your snipe list.')
 
-        self.pet_list_display = ListView(self, 500, 175, 225, 400)
+        self.pet_list_display = ListView(pet_page, 0, 175, 225, 400)
         self.pet_list_display.List.itemClicked.connect(
             self.pet_list_double_clicked)
 
         self.import_pet_data_button = UIButtons(
-            self, "Import Pet Data", 500, 600, 225, 50)
+            pet_page, "Import Pet Data", 0, 600, 225, 50)
         self.import_pet_data_button.Button.clicked.connect(
             self.import_pet_data)
         self.import_pet_data_button.Button.setToolTip(
             'Import your desired_pets.json config')
 
-        ########################## ITEM STUFF ###################################################
+        ########################## ITEM PAGE ###################################################
 
-        self.item_name_input = ComboBoxes(self, 750, 75, 225, 20)
+        self.item_name_input = ComboBoxes(item_page, 0, 75, 225, 20)
         self.item_name_input.Combo.setEnabled(False)
 
-        self.item_id_input = LabelTextbox(self, "Item ID", 750, 25, 100, 40)
+        self.item_id_input = LabelTextbox(item_page, "Item ID", 0, 25, 100, 40)
         self.item_id_input.Label.setToolTip(
             'Add the item id of any item you want to buy.\nYou can search by name for them here with recommended prices\nhttps://temp.saddlebagexchange.com/megaitemnames')
 
-        self.item_price_input = LabelTextbox(self, "Price", 875, 25, 100, 40)
+        self.item_price_input = LabelTextbox(
+            item_page, "Price", 125, 25, 100, 40)
         self.item_price_input.Label.setToolTip(
             'Pick a price you want to buy at or under.')
 
-        self.add_item_button = UIButtons(self, "Add Item", 750, 100, 100, 50)
+        self.add_item_button = UIButtons(
+            item_page, "Add Item", 0, 100, 100, 50)
         self.add_item_button.Button.clicked.connect(self.add_item_to_dict)
         self.add_item_button.Button.setToolTip('Add item to your snipe list.')
 
         self.remove_item_button = UIButtons(
-            self, "Remove\nItem", 875, 100, 100, 50)
+            item_page, "Remove\nItem", 125, 100, 100, 50)
         self.remove_item_button.Button.clicked.connect(
             self.remove_item_to_dict)
         self.remove_item_button.Button.setToolTip(
             'Remove item from your snipe list.')
 
-        self.item_list_display = ListView(self, 750, 175, 225, 400)
+        self.item_list_display = ListView(item_page, 0, 175, 225, 400)
         self.item_list_display.List.itemClicked.connect(
             self.item_list_double_clicked)
 
         self.import_item_data_button = UIButtons(
-            self, "Import Item Data", 750, 600, 225, 50)
+            item_page, "Import Item Data", 0, 600, 225, 50)
         self.import_item_data_button.Button.clicked.connect(
             self.import_item_data)
         self.import_item_data_button.Button.setToolTip(
             'Import your desired_items.json config')
 
-        self.import_pbs_data_button = UIButtons(
-            self, "Import PBS Data", 750, 650, 225, 50)
-        self.import_pbs_data_button.Button.clicked.connect(
-            self.import_pbs_data)
-        self.import_pbs_data_button.Button.setToolTip(
-            'Import your Point Blank Sniper text files')
-
-        ########################## ILVL STUFF ###################################################
+        ########################## ILVL PAGE ###################################################
 
         self.ilvl_item_input = LabelTextbox(
-            self, "Item ID(s)", 1000, 25, 100, 40)
+            ilvl_page, "Item ID(s)", 0, 25, 100, 40)
         self.ilvl_item_input.Label.setToolTip(
             'Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420')
 
-        self.ilvl_input = LabelTextbox(self, "Item level", 1000, 100, 100, 40)
+        self.ilvl_input = LabelTextbox(
+            ilvl_page, "Item level", 0, 100, 100, 40)
         self.ilvl_input.Label.setToolTip(
             'Set the minimum item level you want to snipe.')
 
         self.ilvl_price_input = LabelTextbox(
-            self, "Buyout", 1000, 175, 100, 40)
+            ilvl_page, "Buyout", 0, 175, 100, 40)
         self.ilvl_price_input.Label.setToolTip(
             'Set the maximum buyout you want to snipe.')
 
-        self.ilvl_sockets = CheckBox(self, "Sockets", 1000, 225, 100, 40)
+        self.ilvl_sockets = CheckBox(ilvl_page, "Sockets", 0, 225, 100, 40)
         self.ilvl_sockets.Checkbox.setToolTip(
             'Do you want the item to have Sockets?')
 
-        self.ilvl_speed = CheckBox(self, "Speed", 1000, 275, 100, 40)
+        self.ilvl_speed = CheckBox(ilvl_page, "Speed", 0, 275, 100, 40)
         self.ilvl_speed.Checkbox.setToolTip(
             'Do you want the item to have Speed?')
 
-        self.ilvl_leech = CheckBox(self, "Leech", 1000, 325, 100, 40)
+        self.ilvl_leech = CheckBox(ilvl_page, "Leech", 0, 325, 100, 40)
         self.ilvl_leech.Checkbox.setToolTip(
             'Do you want the item to have Leech?')
 
-        self.ilvl_avoidance = CheckBox(self, "Avoidance", 1000, 375, 100, 40)
+        self.ilvl_avoidance = CheckBox(
+            ilvl_page, "Avoidance", 0, 375, 100, 40)
         self.ilvl_avoidance.Checkbox.setToolTip(
             'Do you want the item to have Avoidance?')
 
-        self.add_ilvl_button = UIButtons(self, "Add Item", 1000, 425, 100, 50)
+        self.add_ilvl_button = UIButtons(
+            ilvl_page, "Add Item", 0, 425, 100, 50)
         self.add_ilvl_button.Button.clicked.connect(self.add_ilvl_to_list)
         self.add_ilvl_button.Button.setToolTip('Add item to your snipe list.')
 
         self.remove_ilvl_button = UIButtons(
-            self, "Remove\nItem", 1000, 500, 100, 50)
+            ilvl_page, "Remove\nItem", 0, 500, 100, 50)
         self.remove_ilvl_button.Button.clicked.connect(
             self.remove_ilvl_to_list)
         self.remove_ilvl_button.Button.setToolTip(
             'Remove item from your snipe list.')
 
-        self.ilvl_list_display = ListView(self, 1125, 25, 500, 550)
+        self.ilvl_list_display = ListView(ilvl_page, 125, 25, 300, 550)
         self.ilvl_list_display.List.itemClicked.connect(
             self.ilvl_list_double_clicked)
 
         self.import_ilvl_data_button = UIButtons(
-            self, "Import Desired ILvl List Data", 1125, 600, 500, 50)
+            ilvl_page, "Import Desired ILvl List Data", 125, 600, 300, 50)
         self.import_ilvl_data_button.Button.clicked.connect(
             self.import_ilvl_data)
         self.import_ilvl_data_button.Button.setToolTip(
@@ -416,6 +465,18 @@ class App(QMainWindow):
         self.check_for_settings()
 
         self.show()
+
+    def go_to_settings_page(self):
+        self.stacked_widget.setCurrentIndex(0)
+
+    def go_to_pet_page(self):
+        self.stacked_widget.setCurrentIndex(1)
+
+    def go_to_item_page(self):
+        self.stacked_widget.setCurrentIndex(2)
+
+    def go_to_ilvl_page(self):
+        self.stacked_widget.setCurrentIndex(3)
 
     def api_data_received(self, pet_statistics, item_statistics):
         self.pet_statistics = pet_statistics
