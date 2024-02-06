@@ -655,8 +655,7 @@ class App(QMainWindow):
             for ilvl_dict_data in self.ilvl_list:
                 if "item_ids" not in ilvl_dict_data:
                     ilvl_dict_data['item_ids'] = []
-                string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {
-                    ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
+                string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
                 self.ilvl_list_display.List.insertItem(
                     self.ilvl_list_display.List.count(), string_with_data)
 
@@ -770,8 +769,7 @@ class App(QMainWindow):
         }
 
         if ilvl_dict_data in self.ilvl_list:
-            string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {
-                ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
+            string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
             print(string_with_data)
             for x in range(self.ilvl_list_display.List.count()):
                 if self.ilvl_list_display.List.item(x).text() == string_with_data:
@@ -807,13 +805,11 @@ class App(QMainWindow):
 
                 # Check that all item IDs are valid integers, but allow list to be empty
                 if not all(isinstance(id, int) and 1 <= id <= 500000 for id in item_ids):
-                    raise ValueError(f"Invalid item ID(s) in {
-                                     item_ids}.\nIDs must be integers between 1-500,000.")
+                    raise ValueError(f"Invalid item ID(s) in {item_ids}.\nIDs must be integers between 1-500,000.")
 
                 # Check that price is a valid integer within range
                 if not (1 <= buyout_price <= 10000000):
-                    raise ValueError(f"Invalid buyout price {
-                                     buyout_price}.\nPrices must be integers between 1-10,000,000.")
+                    raise ValueError(f"Invalid buyout price {buyout_price}.\nPrices must be integers between 1-10,000,000.")
 
                 # Check that ilvl is a valid integer within range
                 if not (200 <= ilvl <= 1000):
@@ -825,8 +821,7 @@ class App(QMainWindow):
                     raise ValueError(
                         "Sockets, speed, leech, and avoidance should be boolean values.")
 
-                string_with_data = f"Item ID: {','.join(map(str, item_ids))}; Price: {buyout_price}; ILvl: {
-                    ilvl}; Sockets: {sockets}; Speed: {speed}; Leech: {leech}; Avoidance: {avoidance}"
+                string_with_data = f"Item ID: {','.join(map(str, item_ids))}; Price: {buyout_price}; ILvl: {ilvl}; Sockets: {sockets}; Speed: {speed}; Leech: {leech}; Avoidance: {avoidance}"
                 self.ilvl_list_display.List.insertItem(
                     self.ilvl_list_display.List.count(), string_with_data)
 
@@ -918,11 +913,9 @@ class App(QMainWindow):
                 self.items_list = json.load(file)
             for key, value in self.items_list.items():
                 if not (1 <= int(key) <= 500000):
-                    raise ValueError(f"Invalid item ID {
-                                     key}.\nIDs must be integers between 1-500,000.")
+                    raise ValueError(f"Invalid item ID {key}.\nIDs must be integers between 1-500,000.")
                 if not (0 <= int(value) <= 10000000):
-                    raise ValueError(f"Invalid price {value} for item ID {
-                                     key}.\nPrices must be integers between 0-10,000,000.")
+                    raise ValueError(f"Invalid price {value} for item ID {key}.\nPrices must be integers between 0-10,000,000.")
                 self.item_list_display.List.insertItem(
                     self.item_list_display.List.count(), f'Item ID: {key}, Price: {value}')
 
@@ -1038,11 +1031,9 @@ class App(QMainWindow):
                 self.pet_list = json.load(file)
             for key, value in self.pet_list.items():
                 if not (1 <= int(key) <= 10000):
-                    raise ValueError(f"Invalid pet ID {
-                                     key}.\nIDs must be integers between 1-500,000.")
+                    raise ValueError(f"Invalid pet ID {key}.\nIDs must be integers between 1-500,000.")
                 if not (1 <= int(value) <= 10000000):
-                    raise ValueError(f"Invalid price {value} for pet ID {
-                                     key}.\nPrices must be integers between 1-10,000,000.")
+                    raise ValueError(f"Invalid price {value} for pet ID {key}.\nPrices must be integers between 1-10,000,000.")
                 self.pet_list_display.List.insertItem(
                     self.pet_list_display.List.count(), f'Pet ID: {key}, Price: {value}')
         except json.JSONDecodeError:
@@ -1105,8 +1096,7 @@ class App(QMainWindow):
             try:
                 int(value)
             except ValueError:
-                QMessageBox.critical(self, "Invalid Value", f"{
-                                     field} should be an integer.")
+                QMessageBox.critical(self, "Invalid Value", f"{field} should be an integer.")
                 return False
 
         show_bids = self.show_bid_prices.Checkbox.isChecked()
@@ -1121,8 +1111,7 @@ class App(QMainWindow):
         # Ensure all boolean fields have a boolean value.
         for field, value in boolean_fields.items():
             if type(value) != bool:
-                QMessageBox.critical(self, "Invalid Value", f"{
-                                     field} should be a boolean.")
+                QMessageBox.critical(self, "Invalid Value", f"{field} should be a boolean.")
                 return False
 
         # If all tests pass, save data to JSON.
@@ -1158,14 +1147,12 @@ class App(QMainWindow):
 
     def start_alerts(self):
 
-        response = requests.post(self.token_auth_url, json={"token": f"{
-                                 self.authentication_token.Text.text()}"})
+        response = requests.post(self.token_auth_url, json={"token": f"{self.authentication_token.Text.text()}"})
 
         response_dict = response.json()
 
         if response.status_code != 200:
-            QMessageBox.critical(self, "Request Error", f"Could not reach server, status code : {
-                                 response.status_code}")
+            QMessageBox.critical(self, "Request Error", f"Could not reach server, status code : {response.status_code}")
             return
 
         if len(response_dict) == 0:
