@@ -570,16 +570,30 @@ class App(QMainWindow):
     def on_combo_box_item_changed(self, index):
         # This function will be called whenever the user selects a different item
         selected_item = self.item_name_input.Combo.currentText()
-        selected_item_id = self.item_statistics[self.item_statistics['itemName']
-                                                == selected_item]['itemID'].iloc[0]
+        selected_item_stats = self.item_statistics[
+            self.item_statistics['itemName'] == selected_item
+        ]
+        selected_item_id = selected_item_stats['itemID'].iloc[0]
+        selected_item_price = selected_item_stats['desiredPrice'].iloc[0]
+
+        # if the user has not set a price for the item, set the price from TSM stats
+        if not self.item_price_input.Text.text() or str(selected_item_id) not in self.items_list:
+            self.item_price_input.Text.setText(str(selected_item_price))
 
         self.item_id_input.Text.setText(str(selected_item_id))
 
     def on_combo_box_pet_changed(self, index):
         # This function will be called whenever the user selects a different item
         selected_pet = self.pet_name_input.Combo.currentText()
-        selected_pet_id = self.pet_statistics[self.pet_statistics['itemName']
-                                              == selected_pet]['itemID'].iloc[0]
+        selected_pet_stats = self.pet_statistics[
+            self.pet_statistics['itemName'] == selected_pet
+        ]
+        selected_pet_id = selected_pet_stats['itemID'].iloc[0]
+        selected_pet_price = selected_pet_stats['desiredPrice'].iloc[0]
+
+        # if the user has not set a price for the item, set the price from TSM stats
+        if not self.pet_price_input.Text.text() or str(selected_pet_id) not in self.pet_list:
+            self.pet_price_input.Text.setText(str(selected_pet_price))
 
         self.pet_id_input.Text.setText(str(selected_pet_id))
 
