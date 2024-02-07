@@ -117,10 +117,10 @@ def get_ilvl_items(ilvl=201, item_ids=[]):
         "http://api.saddlebagexchange.com/api/wow/itemdata",
         json=json_data,
     ).json()
-    if len(results) == 0:
-        raise Exception(
-            f"No items found at or above a base ilvl of {ilvl}, contact us on discord"
-        )
+    # if len(results) == 0:
+    #     raise Exception(
+    #         f"No items found at or above a base ilvl of {ilvl}, contact us on discord"
+    #     )
     # filter only for specific item ids when given, use everything when not given
     if len(item_ids) > 0:
         results = {
