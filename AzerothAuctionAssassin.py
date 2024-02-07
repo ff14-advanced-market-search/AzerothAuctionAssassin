@@ -120,7 +120,7 @@ class App(QMainWindow):
 
     def __init__(self):
         super(App, self).__init__()
-        self.title = 'Azeroth Auction Assassin v1.0.7.1'
+        self.title = 'Azeroth Auction Assassin v1.0.8'
         self.left = 0
         self.top = 0
         self.width = 750
@@ -234,6 +234,11 @@ class App(QMainWindow):
         self.go_to_settings_button.Button.clicked.connect(
             self.go_to_settings_page)
 
+        # add a line to separate the buttons from the rest of the UI
+        self.line = QLabel(self)
+        self.line.setGeometry(25, 385, 200, 5)
+        self.line.setStyleSheet("background-color: white")
+
         self.import_pbs_data_button = UIButtons(
             self, "Import PBS Data", 25, 400, 200, 50)
         self.import_pbs_data_button.Button.clicked.connect(
@@ -273,7 +278,41 @@ class App(QMainWindow):
         # display the icon.ico
         self.icon = QLabel(home_page)
         self.icon.setPixmap(QtGui.QPixmap('icon.ico'))
-        self.icon.setGeometry(0, 0, 250, 250)
+        self.icon.setGeometry(100, 0, 250, 250)
+
+        # add the title
+        self.title = QLabel(home_page)
+        self.title.setText("Azeroth Auction Assassin")
+        self.title.setGeometry(50, 250, 500, 50)
+        self.title.setFont((QtGui.QFont("Arial", 30, QtGui.QFont.Bold)))
+
+        # add link to patreon
+        self.patreon_link = QLabel(home_page)
+        self.patreon_link.setText("<a href='https://www.patreon.com/indopan'>Support the Project on Patreon</a>")
+        self.patreon_link.setGeometry(50, 300, 500, 50)
+        self.patreon_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
+        self.patreon_link.setOpenExternalLinks(True)
+
+        # add discord link
+        self.discord_link = QLabel(home_page)
+        self.discord_link.setText("<a href='https://discord.gg/3YgJ8vJ'>Join the Discord</a>")
+        self.discord_link.setGeometry(50, 350, 500, 50)
+        self.discord_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
+        self.discord_link.setOpenExternalLinks(True)
+
+        # add main website link
+        self.website_link = QLabel(home_page)
+        self.website_link.setText("<a href='https://saddlebagexchange.com'>Check out our main website: Saddlebag Exchange</a>")
+        self.website_link.setGeometry(50, 400, 500, 50)
+        self.website_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
+        self.website_link.setOpenExternalLinks(True)
+
+        # add a guides link
+        self.guides_link = QLabel(home_page)
+        self.guides_link.setText("<a href='https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki'>Check out our guides</a>")
+        self.guides_link.setGeometry(50, 450, 500, 50)
+        self.guides_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
+        self.guides_link.setOpenExternalLinks(True)
 
 
     def make_settings_page(self, settings_page):
