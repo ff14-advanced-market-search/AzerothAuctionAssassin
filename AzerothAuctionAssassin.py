@@ -295,7 +295,7 @@ class App(QMainWindow):
 
         # add discord link
         self.discord_link = QLabel(home_page)
-        self.discord_link.setText("<a href='https://discord.gg/3YgJ8vJ'>Join the Discord</a>")
+        self.discord_link.setText("<a href='https://discord.gg/9dHx2rEq9F'>Join the Discord</a>")
         self.discord_link.setGeometry(50, 350, 500, 50)
         self.discord_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.discord_link.setOpenExternalLinks(True)
