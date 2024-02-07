@@ -28,7 +28,7 @@ https://www.patreon.com/indopan
 
 # Desktop GUI 
 
-<img width="1639" alt="Screenshot 2024-01-26 at 12 57 32 PM" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/6e115afe-db3f-4f9f-8bed-e90fd4a6b934">
+<img width="743" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/9f1c7e15-6b07-4b56-83ba-b14b998d6ec7">
 
 # Note on upload times
 
