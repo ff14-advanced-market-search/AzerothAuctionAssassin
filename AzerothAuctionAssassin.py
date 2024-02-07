@@ -347,7 +347,7 @@ class App(QMainWindow):
             'Import your mega_data.json config.')
 
     def make_pet_page(self, pet_page):
-        self.pet_name_input = ComboBoxes(pet_page, 0, 75, 225, 20)
+        self.pet_name_input = ComboBoxes(pet_page, 0, 75, 225, 40)
         self.pet_name_input.Combo.setEnabled(False)
 
         self.pet_id_input = LabelTextbox(pet_page, "Pet ID", 0, 25, 100, 40)
@@ -359,29 +359,29 @@ class App(QMainWindow):
         self.pet_price_input.Label.setToolTip(
             'Pick a price you want to buy at or under.')
 
-        self.add_pet_button = UIButtons(pet_page, "Add Pet", 0, 100, 100, 50)
+        self.add_pet_button = UIButtons(pet_page, "Add Pet", 0, 125, 100, 50)
         self.add_pet_button.Button.clicked.connect(self.add_pet_to_dict)
         self.add_pet_button.Button.setToolTip('Add pet to your snipe list.')
 
         self.remove_pet_button = UIButtons(
-            pet_page, "Remove\nPet", 125, 100, 100, 50)
+            pet_page, "Remove\nPet", 125, 125, 100, 50)
         self.remove_pet_button.Button.clicked.connect(self.remove_pet_to_dict)
         self.remove_pet_button.Button.setToolTip(
             'Remove pet from your snipe list.')
 
-        self.pet_list_display = ListView(pet_page, 0, 175, 225, 400)
+        self.pet_list_display = ListView(pet_page, 0, 200, 225, 400)
         self.pet_list_display.List.itemClicked.connect(
             self.pet_list_double_clicked)
 
         self.import_pet_data_button = UIButtons(
-            pet_page, "Import Pet Data", 0, 600, 225, 50)
+            pet_page, "Import Pet Data", 0, 625, 225, 50)
         self.import_pet_data_button.Button.clicked.connect(
             self.import_pet_data)
         self.import_pet_data_button.Button.setToolTip(
             'Import your desired_pets.json config')
 
     def make_item_page(self, item_page):
-        self.item_name_input = ComboBoxes(item_page, 0, 75, 225, 20)
+        self.item_name_input = ComboBoxes(item_page, 0, 75, 225, 40)
         self.item_name_input.Combo.setEnabled(False)
 
         self.item_id_input = LabelTextbox(item_page, "Item ID", 0, 25, 100, 40)
@@ -394,23 +394,23 @@ class App(QMainWindow):
             'Pick a price you want to buy at or under.')
 
         self.add_item_button = UIButtons(
-            item_page, "Add Item", 0, 100, 100, 50)
+            item_page, "Add Item", 0, 125, 100, 50)
         self.add_item_button.Button.clicked.connect(self.add_item_to_dict)
         self.add_item_button.Button.setToolTip('Add item to your snipe list.')
 
         self.remove_item_button = UIButtons(
-            item_page, "Remove\nItem", 125, 100, 100, 50)
+            item_page, "Remove\nItem", 125, 125, 100, 50)
         self.remove_item_button.Button.clicked.connect(
             self.remove_item_to_dict)
         self.remove_item_button.Button.setToolTip(
             'Remove item from your snipe list.')
 
-        self.item_list_display = ListView(item_page, 0, 175, 225, 400)
+        self.item_list_display = ListView(item_page, 0, 200, 225, 400)
         self.item_list_display.List.itemClicked.connect(
             self.item_list_double_clicked)
 
         self.import_item_data_button = UIButtons(
-            item_page, "Import Item Data", 0, 600, 225, 50)
+            item_page, "Import Item Data", 0, 625, 225, 50)
         self.import_item_data_button.Button.clicked.connect(
             self.import_item_data)
         self.import_item_data_button.Button.setToolTip(
