@@ -179,19 +179,21 @@ class App(QMainWindow):
         self.stacked_widget.move(250, 0)
         self.stacked_widget.resize(500, 700)
 
+        home_page = QMainWindow()
         settings_page = QMainWindow()
         pet_page = QMainWindow()
         item_page = QMainWindow()
         ilvl_page = QMainWindow()
 
-        self.stacked_widget.addWidget(settings_page)
+        self.stacked_widget.addWidget(home_page)
         self.stacked_widget.addWidget(pet_page)
         self.stacked_widget.addWidget(item_page)
         self.stacked_widget.addWidget(ilvl_page)
+        self.stacked_widget.addWidget(settings_page)
 
         self.make_side_buttons()
 
-        self.make_settings_page(settings_page=settings_page)
+        self.make_home_page(home_page=home_page)
 
         self.make_pet_page(pet_page=pet_page)
 
@@ -199,15 +201,18 @@ class App(QMainWindow):
 
         self.make_ilvl_page(ilvl_page=ilvl_page)
 
+        self.make_settings_page(settings_page=settings_page)
+
+
         self.check_for_settings()
 
         self.show()
 
     def make_side_buttons(self):
-        self.go_to_settings_button = UIButtons(
-            self, "Application Settings", 25, 25, 200, 50)
-        self.go_to_settings_button.Button.clicked.connect(
-            self.go_to_settings_page)
+        self.go_to_home_button = UIButtons(
+            self, "Home Page", 25, 25, 200, 50)
+        self.go_to_home_button.Button.clicked.connect(
+            self.go_to_home_page)
 
         self.go_to_pet_button = UIButtons(
             self, "Pets", 25, 100, 200, 50)
@@ -223,6 +228,11 @@ class App(QMainWindow):
             self, "ILvl List", 25, 250, 200, 50)
         self.go_to_ilvl_button.Button.clicked.connect(
             self.go_to_ilvl_page)
+
+        self.go_to_settings_button = UIButtons(
+            self, "Application Settings", 25, 325, 200, 50)
+        self.go_to_settings_button.Button.clicked.connect(
+            self.go_to_settings_page)
 
         self.import_pbs_data_button = UIButtons(
             self, "Import PBS Data", 25, 400, 200, 50)
@@ -258,6 +268,13 @@ class App(QMainWindow):
 
         self.mega_alerts_progress = LabelText(
             self, 'Waiting for user to Start!', 25, 790, 1000, 40)
+
+    def make_home_page(self, home_page):
+        # display the icon.ico
+        self.icon = QLabel(home_page)
+        self.icon.setPixmap(QtGui.QPixmap('icon.ico'))
+        self.icon.setGeometry(0, 0, 250, 250)
+
 
     def make_settings_page(self, settings_page):
 
@@ -473,7 +490,7 @@ class App(QMainWindow):
         self.import_ilvl_data_button.Button.setToolTip(
             'Import your desired_ilvl_list.json config')
 
-    def go_to_settings_page(self):
+    def go_to_home_page(self):
         self.stacked_widget.setCurrentIndex(0)
 
     def go_to_pet_page(self):
@@ -484,6 +501,9 @@ class App(QMainWindow):
 
     def go_to_ilvl_page(self):
         self.stacked_widget.setCurrentIndex(3)
+
+    def go_to_settings_page(self):
+        self.stacked_widget.setCurrentIndex(4)
 
     def api_data_received(self, pet_statistics, item_statistics):
         self.pet_statistics = pet_statistics
