@@ -29,7 +29,6 @@ class MegaData:
         self.SCAN_TIME_MAX = self.__set_mega_vars("SCAN_TIME_MAX", raw_mega_data)
         self.REFRESH_ALERTS = self.__set_mega_vars("REFRESH_ALERTS", raw_mega_data)
         self.IMPORTANT_EMOJI = self.__set_mega_vars("IMPORTANT_EMOJI", raw_mega_data)
-        self.WOWHEAD_LINK = self.__set_mega_vars("WOWHEAD_LINK", raw_mega_data)
         self.SHOW_BIDPRICES = self.__set_mega_vars("SHOW_BID_PRICES", raw_mega_data)
         self.EXTRA_ALERTS = self.__set_mega_vars("EXTRA_ALERTS", raw_mega_data)
         self.NO_RUSSIAN_REALMS = self.__set_mega_vars(
@@ -44,6 +43,13 @@ class MegaData:
         )
         self.WEBHOOK_URL = self.__set_mega_vars("MEGA_WEBHOOK_URL", raw_mega_data, True)
         self.REGION = self.__set_mega_vars("WOW_REGION", raw_mega_data, True)
+
+        # classic regions dont have undermine exchange
+        if "CLASSIC" in self.REGION:
+            self.WOWHEAD_LINK = True
+        else:
+            self.WOWHEAD_LINK = self.__set_mega_vars("WOWHEAD_LINK", raw_mega_data)
+
         self.WOW_SERVER_NAMES = self.__set_realm_names()
         # set access token for wow api
         self.access_token_creation_unix_time = 0

@@ -331,15 +331,16 @@ class App(QMainWindow):
         )
 
     def make_home_page(self, home_page):
+        y = 100
         # display the icon.ico
         self.icon = QLabel(home_page)
         self.icon.setPixmap(QtGui.QPixmap("icon.ico"))
-        self.icon.setGeometry(100, 0, 250, 250)
+        self.icon.setGeometry(50, -25 + y, 250, 250)
 
         # add the title
         self.title = QLabel(home_page)
         self.title.setText("Azeroth Auction Ace")
-        self.title.setGeometry(50, 250, 500, 50)
+        self.title.setGeometry(50, 250 + y, 500, 50)
         self.title.setFont((QtGui.QFont("Arial", 30, QtGui.QFont.Bold)))
 
         # add link to patreon
@@ -347,7 +348,7 @@ class App(QMainWindow):
         self.patreon_link.setText(
             "<a href='https://www.patreon.com/indopan'>Support the Project on Patreon</a>"
         )
-        self.patreon_link.setGeometry(50, 300, 500, 50)
+        self.patreon_link.setGeometry(50, 300 + y, 500, 50)
         self.patreon_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.patreon_link.setOpenExternalLinks(True)
 
@@ -356,7 +357,7 @@ class App(QMainWindow):
         self.discord_link.setText(
             "<a href='https://discord.gg/9dHx2rEq9F'>Join the Discord</a>"
         )
-        self.discord_link.setGeometry(50, 350, 500, 50)
+        self.discord_link.setGeometry(50, 350 + y, 500, 50)
         self.discord_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.discord_link.setOpenExternalLinks(True)
 
@@ -365,7 +366,7 @@ class App(QMainWindow):
         self.website_link.setText(
             "<a href='https://saddlebagexchange.com'>Check out our main website: Saddlebag Exchange</a>"
         )
-        self.website_link.setGeometry(50, 400, 500, 50)
+        self.website_link.setGeometry(50, 400 + y, 500, 50)
         self.website_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.website_link.setOpenExternalLinks(True)
 
@@ -374,7 +375,7 @@ class App(QMainWindow):
         self.guides_link.setText(
             "<a href='https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki'>Check out our guides</a>"
         )
-        self.guides_link.setGeometry(50, 450, 500, 50)
+        self.guides_link.setGeometry(50, 450 + y, 500, 50)
         self.guides_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.guides_link.setOpenExternalLinks(True)
 
