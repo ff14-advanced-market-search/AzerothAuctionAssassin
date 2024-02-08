@@ -338,7 +338,7 @@ class App(QMainWindow):
 
         # add the title
         self.title = QLabel(home_page)
-        self.title.setText("Azeroth Auction Assassin")
+        self.title.setText("Azeroth Auction Ace")
         self.title.setGeometry(50, 250, 500, 50)
         self.title.setFont((QtGui.QFont("Arial", 30, QtGui.QFont.Bold)))
 
