@@ -81,15 +81,15 @@ jobs:
         [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
       shell: pwsh
 
-    - name: Sign Executable
-      run: |
-        $cert_path = "certificate.pfx"
-        $password = "${{ secrets.CERT_PASSWORD }}"
-        $timestamp_url = "http://timestamp.digicert.com"
-        $executable_path = ".\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe"
-        $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
-        & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
-      shell: pwsh
+    # - name: Sign Executable
+    #   run: |
+    #     $cert_path = "certificate.pfx"
+    #     $password = "${{ secrets.CERT_PASSWORD }}"
+    #     $timestamp_url = "http://timestamp.digicert.com"
+    #     $executable_path = ".\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe"
+    #     $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
+    #     & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
+    #   shell: pwsh
 
     - name: Create Release
       id: create_release
