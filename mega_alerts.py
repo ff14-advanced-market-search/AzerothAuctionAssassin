@@ -5,29 +5,35 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from utils.helpers import (
     create_oribos_exchange_pet_link,
-    create_oribos_exchange_item_link, get_wow_russian_realm_ids,
+    create_oribos_exchange_item_link,
+    get_wow_russian_realm_ids,
 )
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
 
 
 class Alerts(QThread):
-
     completed = pyqtSignal(int)
     progress = pyqtSignal(str)
 
-    def __init__(self, path_to_data_files=None, path_to_desired_items=None, path_to_desired_pets=None, path_to_desired_ilvl_items=None, path_to_desired_ilvl_list=None):
-        super(Alerts,self).__init__()
-        self.running=True
-        self.path_to_data_files=path_to_data_files
-        self.path_to_desired_items= path_to_desired_items
+    def __init__(
+        self,
+        path_to_data_files=None,
+        path_to_desired_items=None,
+        path_to_desired_pets=None,
+        path_to_desired_ilvl_items=None,
+        path_to_desired_ilvl_list=None,
+    ):
+        super(Alerts, self).__init__()
+        self.running = True
+        self.path_to_data_files = path_to_data_files
+        self.path_to_desired_items = path_to_desired_items
         self.path_to_desired_pets = path_to_desired_pets
         self.path_to_desired_ilvl_items = path_to_desired_ilvl_items
         self.path_to_desired_ilvl_list = path_to_desired_ilvl_list
         self.alert_record = []
 
     def run(self):
-
         #### FUNCTIONS ####
         def pull_single_realm_data(connected_id):
             auctions = mega_data.get_listings_single(connected_id)
@@ -37,7 +43,7 @@ class Alerts(QThread):
             for auction in clean_auctions:
                 if not self.running:
                     break
-            
+
                 if "itemID" in auction:
                     id_msg = f"`itemID:` {auction['itemID']}\n"
                     if "tertiary_stats" in auction:
@@ -58,21 +64,39 @@ class Alerts(QThread):
                 russian_realms = get_wow_russian_realm_ids()
 
                 # construct message
-                emoji = "🇷🇺" * 20 if auction["realmID"] in russian_realms else f"{mega_data.IMPORTANT_EMOJI * 20}"
+                emoji = (
+                    "🇷🇺" * 20
+                    if auction["realmID"] in russian_realms
+                    else f"{mega_data.IMPORTANT_EMOJI * 20}"
+                )
                 suffix = " **(RU)**\n" if auction["realmID"] in russian_realms else "\n"
-                is_russian_realm = "**(Russian Realm)**" if auction['realmID'] in russian_realms else ""
+                is_russian_realm = (
+                    "**(Russian Realm)**"
+                    if auction["realmID"] in russian_realms
+                    else ""
+                )
 
                 message = f"{emoji}\n"
                 message += f"`region:` {mega_data.REGION}`realmID:` {auction['realmID']} {is_russian_realm}{id_msg}"
                 message += f"`realmNames`: {auction['realmNames']}{suffix}"
 
                 # Add item links, if available
-                link_label = "Wowhead link" if mega_data.WOWHEAD_LINK and "itemID" in auction else "Undermine link"
-                link_url = f"https://www.wowhead.com/item={auction['itemID']}" if mega_data.WOWHEAD_LINK and "itemID" in auction else auction['itemlink']
+                link_label = (
+                    "Wowhead link"
+                    if mega_data.WOWHEAD_LINK and "itemID" in auction
+                    else "Undermine link"
+                )
+                link_url = (
+                    f"https://www.wowhead.com/item={auction['itemID']}"
+                    if mega_data.WOWHEAD_LINK and "itemID" in auction
+                    else auction["itemlink"]
+                )
                 message += f"[{link_label}]({link_url})\n"
 
                 # Add price info, if available
-                price_type = "bid_prices" if "bid_prices" in auction else "buyout_prices"
+                price_type = (
+                    "bid_prices" if "bid_prices" in auction else "buyout_prices"
+                )
                 message += f"`{price_type}`: {auction[price_type]}\n"
 
                 message += f"{emoji}\n"
@@ -135,7 +159,9 @@ class Alerts(QThread):
 
                         if "buyout" in item:
                             price = item["buyout"]
-                            add_price_to_dict(price, pet_id, pet_ah_buyouts, is_pet=True)
+                            add_price_to_dict(
+                                price, pet_id, pet_ah_buyouts, is_pet=True
+                            )
 
                 # ilvl snipe items
                 if (
@@ -177,7 +203,9 @@ class Alerts(QThread):
                 or pet_ah_bids
                 or ilvl_ah_buyouts
             ):
-                print(f"no listings found matching desires on {connected_id} of {mega_data.REGION}")
+                print(
+                    f"no listings found matching desires on {connected_id} of {mega_data.REGION}"
+                )
                 return
             else:
                 print(f"Found matches on {connected_id} of {mega_data.REGION}!!!")
@@ -272,7 +300,13 @@ class Alerts(QThread):
                 )
                 results.append(
                     results_dict(
-                        auction, itemlink, connected_id, realm_names, itemID, "itemID", "buyout"
+                        auction,
+                        itemlink,
+                        connected_id,
+                        realm_names,
+                        itemID,
+                        "itemID",
+                        "buyout",
                     )
                 )
 
@@ -283,7 +317,13 @@ class Alerts(QThread):
                 )
                 results.append(
                     results_dict(
-                        auction, itemlink, connected_id, realm_names, petID, "petID", "buyout"
+                        auction,
+                        itemlink,
+                        connected_id,
+                        realm_names,
+                        petID,
+                        "petID",
+                        "buyout",
                     )
                 )
 
@@ -295,7 +335,13 @@ class Alerts(QThread):
                 )
                 results.append(
                     ilvl_results_dict(
-                        auction, itemlink, connected_id, realm_names, itemID, "itemID", "buyout"
+                        auction,
+                        itemlink,
+                        connected_id,
+                        realm_names,
+                        itemID,
+                        "itemID",
+                        "buyout",
                     )
                 )
 
@@ -324,14 +370,22 @@ class Alerts(QThread):
                     )
                     results.append(
                         results_dict(
-                            auction, itemlink, connected_id, realm_names, petID, "petID", "bid"
+                            auction,
+                            itemlink,
+                            connected_id,
+                            realm_names,
+                            petID,
+                            "petID",
+                            "bid",
                         )
                     )
 
             # end of the line alerts go out from here
             return results
 
-        def results_dict(auction, itemlink, connected_id, realm_names, id, idType, priceType):
+        def results_dict(
+            auction, itemlink, connected_id, realm_names, id, idType, priceType
+        ):
             auction.sort()
             minPrice = auction[0]
             return {
@@ -386,7 +440,8 @@ class Alerts(QThread):
                     extra_alert_mins = json.loads(mega_data.EXTRA_ALERTS)
                     if current_min in extra_alert_mins:
                         matching_realms = [
-                            realm["dataSetID"] for realm in mega_data.get_upload_time_list()
+                            realm["dataSetID"]
+                            for realm in mega_data.get_upload_time_list()
                         ]
 
                 if matching_realms != []:
@@ -397,13 +452,15 @@ class Alerts(QThread):
                     pool.shutdown(wait=True)
 
                 else:
-                    self.progress.emit(f"The updates will come on minute {list(mega_data.get_upload_time_minutes())[0]} of each hour.")
+                    self.progress.emit(
+                        f"The updates will come on minute {list(mega_data.get_upload_time_minutes())[0]} of each hour."
+                    )
                     print(
                         f"Blizzard API data only updates 1 time per hour. The updates will come on minute {mega_data.get_upload_time_minutes()} of each hour. "
                         + f"{datetime.now()} is not the update time. "
                     )
                     time.sleep(20)
-            
+
             self.progress.emit("Stopped alerts!")
             self.completed.emit(1)
 
@@ -435,7 +492,8 @@ class Alerts(QThread):
             self.path_to_desired_items,
             self.path_to_desired_pets,
             self.path_to_desired_ilvl_items,
-            self.path_to_desired_ilvl_list)
+            self.path_to_desired_ilvl_list,
+        )
 
         if not self.running:
             self.progress.emit("Stopped alerts!")
@@ -475,7 +533,7 @@ class Alerts(QThread):
                 self.progress.emit("Stopped alerts!")
                 self.completed.emit(1)
                 return
-        
+
             # im sick of idiots asking me about the waiting time just run once on startup
             main_fast()
 
@@ -483,10 +541,11 @@ class Alerts(QThread):
                 self.progress.emit("Stopped alerts!")
                 self.completed.emit(1)
                 return
-            
+
             # then run the main loop
             main()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     fun = Alerts()
     fun.run()

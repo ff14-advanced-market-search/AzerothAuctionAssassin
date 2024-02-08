@@ -572,23 +572,23 @@ NACLASSIC_CONNECTED_REALMS_IDS = {
 }
 
 NASODCLASSIC_CONNECTED_REALMS_IDS = {
-  "Crusader Strike": 5816,
-  "Chaos Bolt": 5820,
-  "Living Flame": 5815,
-  "Lone Wolf": 5814,
-  "Lava Lash": 5819,
-  "Wild Growth": 5813,
-  "Penance (AU)": 5817,
-  "Shadowstrike (AU)": 5818
+    "Crusader Strike": 5816,
+    "Chaos Bolt": 5820,
+    "Living Flame": 5815,
+    "Lone Wolf": 5814,
+    "Lava Lash": 5819,
+    "Wild Growth": 5813,
+    "Penance (AU)": 5817,
+    "Shadowstrike (AU)": 5818,
 }
 
 EUSODCLASSIC_CONNECTED_REALMS_IDS = {
-  "Crusader Strike": 5828,
-  "Chaos Bolt": 5832,
-  "Living Flame": 5827,
-  "Lone Wolf": 5826,
-  "Lava Lash": 5831,
-  "Wild Growth": 5825,
-  "Penance (RU)": 5829,
-  "Shadowstrike (RU)": 5830
+    "Crusader Strike": 5828,
+    "Chaos Bolt": 5832,
+    "Living Flame": 5827,
+    "Lone Wolf": 5826,
+    "Lava Lash": 5831,
+    "Wild Growth": 5825,
+    "Penance (RU)": 5829,
+    "Shadowstrike (RU)": 5830,
 }

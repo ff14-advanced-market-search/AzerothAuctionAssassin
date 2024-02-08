@@ -9,12 +9,14 @@ from utils.helpers import get_wow_russian_realm_ids
 
 
 class MegaData:
-    def __init__(self, 
-                 path_to_data_files=None, 
-                 path_to_desired_items = None, 
-                 path_to_desired_pets = None,
-                 path_to_desired_ilvl_items = None,
-                 path_to_desired_ilvl_list = None,):
+    def __init__(
+        self,
+        path_to_data_files=None,
+        path_to_desired_items=None,
+        path_to_desired_pets=None,
+        path_to_desired_ilvl_items=None,
+        path_to_desired_ilvl_list=None,
+    ):
         # the raw file users can write their input into
         if path_to_data_files == None:
             raw_mega_data = json.load(open("AzerothAuctionAssassinData/mega_data.json"))
@@ -27,10 +29,11 @@ class MegaData:
         self.SCAN_TIME_MAX = self.__set_mega_vars("SCAN_TIME_MAX", raw_mega_data)
         self.REFRESH_ALERTS = self.__set_mega_vars("REFRESH_ALERTS", raw_mega_data)
         self.IMPORTANT_EMOJI = self.__set_mega_vars("IMPORTANT_EMOJI", raw_mega_data)
-        self.WOWHEAD_LINK = self.__set_mega_vars("WOWHEAD_LINK", raw_mega_data)
         self.SHOW_BIDPRICES = self.__set_mega_vars("SHOW_BID_PRICES", raw_mega_data)
         self.EXTRA_ALERTS = self.__set_mega_vars("EXTRA_ALERTS", raw_mega_data)
-        self.NO_RUSSIAN_REALMS = self.__set_mega_vars("NO_RUSSIAN_REALMS", raw_mega_data)
+        self.NO_RUSSIAN_REALMS = self.__set_mega_vars(
+            "NO_RUSSIAN_REALMS", raw_mega_data
+        )
         self.DEBUG = self.__set_mega_vars("DEBUG", raw_mega_data)
 
         # set required env vars
@@ -40,15 +43,28 @@ class MegaData:
         )
         self.WEBHOOK_URL = self.__set_mega_vars("MEGA_WEBHOOK_URL", raw_mega_data, True)
         self.REGION = self.__set_mega_vars("WOW_REGION", raw_mega_data, True)
+
+        # classic regions dont have undermine exchange
+        if "CLASSIC" in self.REGION:
+            self.WOWHEAD_LINK = True
+        else:
+            self.WOWHEAD_LINK = self.__set_mega_vars("WOWHEAD_LINK", raw_mega_data)
+
         self.WOW_SERVER_NAMES = self.__set_realm_names()
         # set access token for wow api
         self.access_token_creation_unix_time = 0
         self.access_token = self.check_access_token()
 
         # setup items to snipe
-        self.DESIRED_ITEMS = self.__set_desired_items("desired_items", path_to_desired_items)
-        self.DESIRED_PETS = self.__set_desired_items("desired_pets", path_to_desired_pets)
-        self.DESIRED_ILVL_ITEMS, self.min_ilvl = self.__set_desired_ilvl_single(path_to_desired_ilvl_items)
+        self.DESIRED_ITEMS = self.__set_desired_items(
+            "desired_items", path_to_desired_items
+        )
+        self.DESIRED_PETS = self.__set_desired_items(
+            "desired_pets", path_to_desired_pets
+        )
+        self.DESIRED_ILVL_ITEMS, self.min_ilvl = self.__set_desired_ilvl_single(
+            path_to_desired_ilvl_items
+        )
         self.DESIRED_ILVL_LIST = self.__set_desired_ilvl_list(path_to_desired_ilvl_list)
         self.__validate_snipe_lists()
 
@@ -197,8 +213,9 @@ class MegaData:
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
         if path_to_data == None:
-            
-            desired_items_raw = json.load(open(f"AzerothAuctionAssassinData/{file_name}"))
+            desired_items_raw = json.load(
+                open(f"AzerothAuctionAssassinData/{file_name}")
+            )
         else:
             desired_items_raw = json.load(open(path_to_data))
         # if file is not set use env var
@@ -310,14 +327,14 @@ class MegaData:
 
     def __set_realm_names(self):
         realm_names = json.load(
-            open(f"AzerothAuctionAssassinData/{str(self.REGION).lower()}-wow-connected-realm-ids.json")
+            open(
+                f"AzerothAuctionAssassinData/{str(self.REGION).lower()}-wow-connected-realm-ids.json"
+            )
         )
         if self.NO_RUSSIAN_REALMS:
             russian_realm_ids = get_wow_russian_realm_ids()
             realm_names = {
-                k: v
-                for k, v in realm_names.items()
-                if v not in russian_realm_ids
+                k: v for k, v in realm_names.items() if v not in russian_realm_ids
             }
         return realm_names
 
@@ -379,12 +396,12 @@ class MegaData:
             f"gather data from connectedRealmId {connectedRealmId} of region {self.REGION}"
         )
 
-        endpoints = ["/2", "/6", "/7"] if 'CLASSIC' in self.REGION else [""]
+        endpoints = ["/2", "/6", "/7"] if "CLASSIC" in self.REGION else [""]
 
         all_auctions = []
         for endpoint in endpoints:
             url = self.construct_api_url(connectedRealmId, endpoint)
-            
+
             auction_info = self.make_ah_api_request(url, connectedRealmId)
             if "auctions" not in auction_info:
                 print(
@@ -397,23 +414,24 @@ class MegaData:
         return all_auctions
 
     def construct_api_url(self, connectedRealmId, endpoint):
-        
-        base_url = "https://us.api.blizzard.com" if "NA" in self.REGION else "https://eu.api.blizzard.com"
+        base_url = (
+            "https://us.api.blizzard.com"
+            if "NA" in self.REGION
+            else "https://eu.api.blizzard.com"
+        )
         namespace = "dynamic-us" if "NA" in self.REGION else "dynamic-eu"
         locale = "en_US" if "NA" in self.REGION else "en_EU"
 
-        if 'SOD' in self.REGION:
+        if "SOD" in self.REGION:
             namespace = f"dynamic-classic1x-{namespace.split('-')[-1]}"
-        elif 'CLASSIC' in self.REGION:
+        elif "CLASSIC" in self.REGION:
             namespace = f"dynamic-classic-{namespace.split('-')[-1]}"
-
 
         url = f"{base_url}/data/wow/connected-realm/{str(connectedRealmId)}/auctions{endpoint}?namespace={namespace}&locale={locale}&access_token={self.check_access_token()}"
 
         return url
 
     def make_ah_api_request(self, url, connectedRealmId):
-        
         req = requests.get(url, timeout=20)
 
         # check for api errors

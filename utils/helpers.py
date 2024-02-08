@@ -21,4 +21,3 @@ def get_wow_russian_realm_ids():
     classic_realms = [4452, 4474]
     sod_realms = [5280, 5285, 5829, 5830]
     return retail_realms + classic_realms + sod_realms
-
