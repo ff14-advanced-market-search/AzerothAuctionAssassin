@@ -169,12 +169,13 @@ namespace AzerothAuctionAssassin
         }
 
 
-        static bool ExecuteShellCommand(string fileName, string command, string appPath, bool hidden = true, bool no_window = true)
+        static bool ExecuteShellCommand(string fileName, string command, string appPath = "", bool hidden = true, bool no_window = true)
         {
             using (Process process = new Process())
             {
                 process.StartInfo.FileName = fileName;
                 process.StartInfo.Arguments = command;
+                // setting the python process working Directory to be the same as the app dir.
                 process.StartInfo.WorkingDirectory = appPath;
               
                 //process.StartInfo.UseShellExecute = false;
