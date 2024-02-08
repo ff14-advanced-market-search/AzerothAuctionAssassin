@@ -1407,15 +1407,15 @@ class App(QMainWindow):
 
         # If all tests pass, save data to JSON.
         config_json = {
-            "MEGA_WEBHOOK_URL": self.discord_webhook_input.Text.text(),
-            "WOW_CLIENT_ID": self.wow_client_id_input.Text.text(),
-            "WOW_CLIENT_SECRET": self.wow_client_secret_input.Text.text(),
-            "AUTHENTICATION_TOKEN": self.authentication_token.Text.text(),
+            "MEGA_WEBHOOK_URL": self.discord_webhook_input.Text.text().strip(),
+            "WOW_CLIENT_ID": self.wow_client_id_input.Text.text().strip(),
+            "WOW_CLIENT_SECRET": self.wow_client_secret_input.Text.text().strip(),
+            "AUTHENTICATION_TOKEN": self.authentication_token.Text.text().strip(),
             "WOW_REGION": wow_region,
             "SHOW_BID_PRICES": show_bids,
             "MEGA_THREADS": int(mega_threads),
             "WOWHEAD_LINK": wowhead,
-            "IMPORTANT_EMOJI": self.important_emoji.Text.text(),
+            "IMPORTANT_EMOJI": self.important_emoji.Text.text().strip(),
             "DISCOUNT_PERCENT": int(self.discount_percent.Text.text()),
             "NO_RUSSIAN_REALMS": no_russians,
             "REFRESH_ALERTS": refresh_alerts,
