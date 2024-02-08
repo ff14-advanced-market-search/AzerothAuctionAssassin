@@ -670,7 +670,7 @@ class App(QMainWindow):
             or str(selected_item_id) not in self.items_list
         ):
             try:
-                discount_percent = int(self.discount_percent.Text.text()) / 100
+                discount_percent = 1 - (int(self.discount_percent.Text.text()) / 100)
                 recommended_price = str(
                     int(float(selected_item_price) * discount_percent)
                 )
@@ -697,7 +697,7 @@ class App(QMainWindow):
             or str(selected_pet_id) not in self.pet_list
         ):
             try:
-                discount_percent = int(self.discount_percent.Text.text()) / 100
+                discount_percent = 1 - (int(self.discount_percent.Text.text()) / 100)
                 recommended_price = str(
                     int(float(selected_pet_price) * discount_percent)
                 )
