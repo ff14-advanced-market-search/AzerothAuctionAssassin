@@ -151,7 +151,7 @@ class Item_And_Pet_Statistics(QThread):
             data=requests.post(
                 f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
                 headers={"Accept": "application/json"},
-                json={"region": "EU", "discount": 90},
+                json={"region": "EU", "discount": 1},
             ).json()
         )
 
@@ -159,7 +159,7 @@ class Item_And_Pet_Statistics(QThread):
             data=requests.post(
                 f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
                 headers={"Accept": "application/json"},
-                json={"region": "EU", "discount": 90, "pets": True},
+                json={"region": "EU", "discount": 1, "pets": True},
             ).json()
         )
 
@@ -449,6 +449,14 @@ class App(QMainWindow):
             "Changes the separators from ==== to whatever emoji you want."
         )
 
+        self.discount_percent = LabelTextbox(
+            settings_page, "Recommended Discount Percent", 225, 625, 200, 40
+        )
+        self.discount_percent.Text.setText("90")
+        self.discount_percent.Label.setToolTip(
+            "Set the discount percent for price recommendations.\nex:  if avg price is 100k, then 90 recommends you snipe for 10k."
+        )
+
         self.show_bid_prices = CheckBox(
             settings_page, "Show Bid Prices", 0, 375, 200, 40
         )
@@ -661,7 +669,16 @@ class App(QMainWindow):
             not self.item_price_input.Text.text()
             or str(selected_item_id) not in self.items_list
         ):
-            self.item_price_input.Text.setText(str(selected_item_price))
+            try:
+                discount_percent = int(self.discount_percent.Text.text()) / 100
+                recommended_price = str(
+                    int(float(selected_item_price) * discount_percent)
+                )
+                self.item_price_input.Text.setText(recommended_price)
+            except:
+                self.item_price_input.Text.setText("90")
+                recommended_price = str(int(float(selected_item_price) * 0.1))
+                self.item_price_input.Text.setText(recommended_price)
 
         self.item_id_input.Text.setText(str(selected_item_id))
 
@@ -679,7 +696,16 @@ class App(QMainWindow):
             not self.pet_price_input.Text.text()
             or str(selected_pet_id) not in self.pet_list
         ):
-            self.pet_price_input.Text.setText(str(selected_pet_price))
+            try:
+                discount_percent = int(self.discount_percent.Text.text()) / 100
+                recommended_price = str(
+                    int(float(selected_pet_price) * discount_percent)
+                )
+                self.pet_price_input.Text.setText(recommended_price)
+            except:
+                self.pet_price_input.Text.setText("90")
+                recommended_price = str(int(float(selected_pet_price) * 0.1))
+                self.pet_price_input.Text.setText(recommended_price)
 
         self.pet_id_input.Text.setText(str(selected_pet_id))
 
@@ -725,6 +751,9 @@ class App(QMainWindow):
 
             if "IMPORTANT_EMOJI" in raw_mega_data:
                 self.important_emoji.Text.setText(raw_mega_data["IMPORTANT_EMOJI"])
+
+            if "DISCOUNT_PERCENT" in raw_mega_data:
+                self.discount_percent.Text.setText(raw_mega_data["DISCOUNT_PERCENT"])
 
             if "NO_RUSSIAN_REALMS" in raw_mega_data:
                 self.russian_realms.Checkbox.setChecked(
@@ -1298,6 +1327,7 @@ class App(QMainWindow):
         self.number_of_mega_threads.Text.setText("48"),
         self.wow_head_link.Checkbox.setChecked(False),
         self.important_emoji.Text.setText("🔥"),
+        self.discount_percent.Text.setText("90"),
         self.russian_realms.Checkbox.setChecked(True),
         self.refresh_alerts.Checkbox.setChecked(True),
         self.scan_time_min.Text.setText("1"),
@@ -1382,6 +1412,7 @@ class App(QMainWindow):
             "MEGA_THREADS": int(mega_threads),
             "WOWHEAD_LINK": wowhead,
             "IMPORTANT_EMOJI": self.important_emoji.Text.text(),
+            "DISCOUNT_PERCENT": self.discount_percent.Text.text(),
             "NO_RUSSIAN_REALMS": no_russians,
             "REFRESH_ALERTS": refresh_alerts,
             "SCAN_TIME_MAX": int(scan_time_max),
