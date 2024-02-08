@@ -753,7 +753,7 @@ class App(QMainWindow):
                 self.important_emoji.Text.setText(raw_mega_data["IMPORTANT_EMOJI"])
 
             if "DISCOUNT_PERCENT" in raw_mega_data:
-                self.discount_percent.Text.setText(raw_mega_data["DISCOUNT_PERCENT"])
+                self.discount_percent.Text.setText(str(raw_mega_data["DISCOUNT_PERCENT"]))
 
             if "NO_RUSSIAN_REALMS" in raw_mega_data:
                 self.russian_realms.Checkbox.setChecked(
@@ -1362,12 +1362,14 @@ class App(QMainWindow):
         mega_threads = self.number_of_mega_threads.Text.text()
         scan_time_max = self.scan_time_max.Text.text()
         scan_time_min = self.scan_time_min.Text.text()
+        discount_percent = self.discount_percent.Text.text()
 
         # Check if MEGA_THREADS, SCAN_TIME_MAX, and SCAN_TIME_MIN are integers
         integer_fields = {
             "MEGA_THREADS": mega_threads,
             "SCAN_TIME_MAX": scan_time_max,
             "SCAN_TIME_MIN": scan_time_min,
+            "DISCOUNT_PERCENT": discount_percent,
         }
 
         for field, value in integer_fields.items():
@@ -1412,7 +1414,7 @@ class App(QMainWindow):
             "MEGA_THREADS": int(mega_threads),
             "WOWHEAD_LINK": wowhead,
             "IMPORTANT_EMOJI": self.important_emoji.Text.text(),
-            "DISCOUNT_PERCENT": self.discount_percent.Text.text(),
+            "DISCOUNT_PERCENT": int(self.discount_percent.Text.text()),
             "NO_RUSSIAN_REALMS": no_russians,
             "REFRESH_ALERTS": refresh_alerts,
             "SCAN_TIME_MAX": int(scan_time_max),
