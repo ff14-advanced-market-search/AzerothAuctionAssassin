@@ -4,10 +4,13 @@
 # so it can locate them before doing the other imports
 import sys
 
+windowsApp_Path = None
 try:
     if sys.argv[1] == "run-from-windows-bin":
         sys.path.append(f"{sys.argv[2]}")
         sys.path.append(f"{sys.argv[3]}")
+
+        windowsApp_Path = f"{sys.argv[2]}"
     else:
         pass
 except Exception as ex:
@@ -174,8 +177,13 @@ class App(QMainWindow):
         self.top = 0
         self.width = 750
         self.height = 800
+        icon_path = "icon.png"
 
-        icon = QIcon("icon.png")
+        # checking if the app is invoked from the windows binary and if yes then change the icon file path.
+        if windowsApp_Path is not None:
+            icon_path = f"{windowsApp_Path}\icon.png"
+
+        icon = QIcon(icon_path)
         self.setWindowIcon(icon)
 
         self.token_auth_url = "http://api.saddlebagexchange.com/api/wow/checkmegatoken"
@@ -332,9 +340,15 @@ class App(QMainWindow):
 
     def make_home_page(self, home_page):
         y = 100
+
+        # checking if the app is invoked from the windows binary and if yes then change the icon file path.
+        icon_path = "icon.ico"
+        if windowsApp_Path is not None:
+            icon_path = f"{windowsApp_Path}/icon.ico"
+
         # display the icon.ico
         self.icon = QLabel(home_page)
-        self.icon.setPixmap(QtGui.QPixmap("icon.ico"))
+        self.icon.setPixmap(QtGui.QPixmap(icon_path))
         self.icon.setGeometry(50, -25 + y, 250, 250)
 
         # add the title
