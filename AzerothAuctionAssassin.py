@@ -753,7 +753,9 @@ class App(QMainWindow):
                 self.important_emoji.Text.setText(raw_mega_data["IMPORTANT_EMOJI"])
 
             if "DISCOUNT_PERCENT" in raw_mega_data:
-                self.discount_percent.Text.setText(str(raw_mega_data["DISCOUNT_PERCENT"]))
+                self.discount_percent.Text.setText(
+                    str(raw_mega_data["DISCOUNT_PERCENT"])
+                )
 
             if "NO_RUSSIAN_REALMS" in raw_mega_data:
                 self.russian_realms.Checkbox.setChecked(
