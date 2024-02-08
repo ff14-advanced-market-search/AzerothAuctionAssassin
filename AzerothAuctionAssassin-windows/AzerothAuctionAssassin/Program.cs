@@ -165,16 +165,19 @@ namespace AzerothAuctionAssassin
         {
             string command = $"{pythonFilePath} run-from-windows-bin \"{appPath}\" \"{pythonPath}\\Lib\\site-packages\"";
             
-            ExecuteShellCommand($"{pythonPath}\\python.exe",command,false,false);
+          
+            ExecuteShellCommand($"{pythonPath}\\python.exe",command,appPath,false,false);
         }
 
 
-        static bool ExecuteShellCommand(string fileName, string command, bool hidden = true, bool no_window = true)
+        static bool ExecuteShellCommand(string fileName, string command, string appPath = "", bool hidden = true, bool no_window = true)
         {
             using (Process process = new Process())
             {
                 process.StartInfo.FileName = fileName;
                 process.StartInfo.Arguments = command;
+                // setting the python process working Directory to be the same as the app dir.
+               // process.StartInfo.WorkingDirectory = appPath;
               
                 //process.StartInfo.UseShellExecute = false;
                 //process.StartInfo.RedirectStandardOutput = true;
