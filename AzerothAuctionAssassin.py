@@ -450,7 +450,7 @@ class App(QMainWindow):
         )
 
         self.discount_percent = LabelTextbox(
-            settings_page, "Recommended Discount Percent", 225, 625, 200, 40
+            settings_page, "Discount Percent", 225, 625, 200, 40
         )
         self.discount_percent.Text.setText("90")
         self.discount_percent.Label.setToolTip(
