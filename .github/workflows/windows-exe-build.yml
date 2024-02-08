@@ -67,7 +67,7 @@ jobs:
 
     - name: update version number
       run: |
-        echo 1.0.8.1 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+        echo 1.0.8.2 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
 
     - name: Build EXE
       run: |
@@ -97,8 +97,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.8.1
-        release_name: Release v1.0.8.1
+        tag_name: v1.0.8.2
+        release_name: Release v1.0.8.2
         draft: true
         prerelease: true
 
