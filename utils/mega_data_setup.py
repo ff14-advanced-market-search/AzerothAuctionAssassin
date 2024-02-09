@@ -4,7 +4,7 @@ import json, requests, os, time
 from datetime import datetime
 from tenacity import retry, stop_after_attempt
 from utils.api_requests import send_discord_message, get_itemnames, get_ilvl_items
-from utils.bonus_ids import get_bonus_id_sets
+from utils.bonus_ids import get_bonus_id_sets, get_secondary_stats
 from utils.helpers import get_wow_russian_realm_ids
 
 
@@ -81,6 +81,12 @@ class MegaData:
             self.ilvl_addition,
             # self.ilvl_base,
         ) = get_bonus_id_sets()
+        (
+            self.haste_ids,
+            self.crit_ids,
+            self.mastery_ids,
+            self.versatility_ids,
+        ) = get_secondary_stats()
 
         # get item names from desired ilvl entries
         self.DESIRED_ILVL_NAMES = {}
@@ -303,13 +309,16 @@ class MegaData:
             "item_ids": [12345, 67890],
         }
 
-        if ilvl_info.keys() != example.keys():
+        # make sure all required keys are present
+        if set(ilvl_info.keys()) & set(example.keys()) != set(example.keys()):
             raise Exception(
                 f"error missing required keys {set(example.keys())} from info:\n{ilvl_info}"
             )
 
         snipe_info = {}
-        bool_vars = ["sockets", "speed", "leech", "avoidance"]
+        tertiarly_stat_names = ["sockets", "speed", "leech", "avoidance"]
+        secondary_stat_names = ["haste", "crit", "mastery", "versatility"]
+        bool_vars = tertiarly_stat_names + secondary_stat_names
         int_vars = ["ilvl", "buyout"]
         for key, value in ilvl_info.items():
             if key in bool_vars:

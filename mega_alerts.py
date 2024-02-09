@@ -170,10 +170,6 @@ class Alerts(QThread):
                 ):
                     ilvl_item_info = check_tertiary_stats_generic(
                         item,
-                        mega_data.socket_ids,
-                        mega_data.leech_ids,
-                        mega_data.avoidance_ids,
-                        mega_data.speed_ids,
                         mega_data.ilvl_addition,
                         mega_data.DESIRED_ILVL_ITEMS,
                         mega_data.min_ilvl,
@@ -185,10 +181,6 @@ class Alerts(QThread):
                     if item_id in desired_ilvl_item["item_ids"]:
                         ilvl_item_info = check_tertiary_stats_generic(
                             item,
-                            mega_data.socket_ids,
-                            mega_data.leech_ids,
-                            mega_data.avoidance_ids,
-                            mega_data.speed_ids,
                             mega_data.ilvl_addition,
                             desired_ilvl_item,
                             desired_ilvl_item["ilvl"],
@@ -220,10 +212,6 @@ class Alerts(QThread):
 
         def check_tertiary_stats_generic(
             auction,
-            socket_ids,
-            leech_ids,
-            avoidance_ids,
-            speed_ids,
             ilvl_addition,
             DESIRED_ILVL_ITEMS,
             min_ilvl,
@@ -233,10 +221,17 @@ class Alerts(QThread):
             item_bonus_ids = set(auction["item"]["bonus_lists"])
             # look for intersection of bonus_ids and any other lists
             tertiary_stats = {
-                "sockets": len(item_bonus_ids & socket_ids) != 0,
-                "leech": len(item_bonus_ids & leech_ids) != 0,
-                "avoidance": len(item_bonus_ids & avoidance_ids) != 0,
-                "speed": len(item_bonus_ids & speed_ids) != 0,
+                "sockets": len(item_bonus_ids & mega_data.socket_ids) != 0,
+                "leech": len(item_bonus_ids & mega_data.leech_ids) != 0,
+                "avoidance": len(item_bonus_ids & mega_data.avoidance_ids) != 0,
+                "speed": len(item_bonus_ids & mega_data.speed_ids) != 0,
+            }
+
+            secondary_stats = {
+                "haste": len(item_bonus_ids & mega_data.haste_ids) != 0,
+                "crit": len(item_bonus_ids & mega_data.crit_ids) != 0,
+                "mastery": len(item_bonus_ids & mega_data.mastery_ids) != 0,
+                "versatility": len(item_bonus_ids & mega_data.versatility_ids) != 0,
             }
 
             desired_tertiary_stats = {
@@ -253,6 +248,14 @@ class Alerts(QThread):
                 for stat, desired in desired_tertiary_stats.items():
                     if desired and not tertiary_stats.get(stat, False):
                         return False
+
+            # if we're looking for secondary stats make sure its on there
+            for stat_name in secondary_stats.keys():
+                if stat_name in DESIRED_ILVL_ITEMS.keys():
+                    if secondary_stats[stat_name] != DESIRED_ILVL_ITEMS[stat_name]:
+                        return False
+                    else:
+                        a = 1
 
             # get ilvl
             base_ilvl = DESIRED_ILVL_ITEMS["base_ilvls"][auction["item"]["id"]]
@@ -479,7 +482,7 @@ class Alerts(QThread):
 
         self.progress.emit("Setting data and config variables!")
         print("Sleep 10 sec on start to avoid spamming the api")
-        time.sleep(10)
+        # time.sleep(10)
 
         if not self.running:
             self.progress.emit("Stopped alerts!")
