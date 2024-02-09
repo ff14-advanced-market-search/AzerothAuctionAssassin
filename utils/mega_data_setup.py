@@ -113,8 +113,15 @@ class MegaData:
             var_value = None
 
         # need to do this no matter where we get the region from
-        if var_name == "REGION":
-            if var_value not in ["EU", "NA", "NACLASSIC", "NASODCLASSIC", "EUCLASSIC"]:
+        if var_name == "WOW_REGION":
+            if var_value not in [
+                "EU",
+                "NA",
+                "NACLASSIC",
+                "NASODCLASSIC",
+                "EUCLASSIC",
+                "EUSODCLASSIC",
+            ]:
                 raise Exception(f"error {var_value} not a valid region")
 
         # default to 48 threads if not set
