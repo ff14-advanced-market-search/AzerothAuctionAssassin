@@ -172,7 +172,7 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.9"
+        self.title = "Azeroth Auction Assassin v1.0.9.2"
         self.left = 0
         self.top = 0
         self.width = 750
@@ -215,7 +215,7 @@ class App(QMainWindow):
             "eusodclassic-wow-connected-realm-ids.json",
         )
 
-        # default to 90% discount, just use EU for now for less data
+        # default to 10% discount, just use EU for now for less data
         self.api_data_thread = Item_And_Pet_Statistics()
         self.api_data_thread.start()
         self.api_data_thread.completed.connect(self.api_data_received)
@@ -464,11 +464,13 @@ class App(QMainWindow):
         )
 
         self.discount_percent = LabelTextbox(
-            settings_page, "Discount Percent", 225, 625, 200, 40
+            settings_page, "Discount vs Average", 225, 625, 200, 40
         )
-        self.discount_percent.Text.setText("90")
+        self.discount_percent.Text.setText("10")
         self.discount_percent.Label.setToolTip(
-            "Set the discount percent for price recommendations.\nex:  if avg price is 100k, then 90 recommends you snipe for 10k."
+            "Set the price recommendation discount\n"
+            + "1 to 100, smaller number means a better price.\n"
+            + "ex: if you set 10 pecent and avg price is 100k, it recommends you snipe for 10k."
         )
 
         self.show_bid_prices = CheckBox(
@@ -684,13 +686,13 @@ class App(QMainWindow):
             or str(selected_item_id) not in self.items_list
         ):
             try:
-                discount_percent = 1 - (int(self.discount_percent.Text.text()) / 100)
+                discount_percent = int(self.discount_percent.Text.text()) / 100
                 recommended_price = str(
                     int(float(selected_item_price) * discount_percent)
                 )
                 self.item_price_input.Text.setText(recommended_price)
             except:
-                self.item_price_input.Text.setText("90")
+                self.item_price_input.Text.setText("10")
                 recommended_price = str(int(float(selected_item_price) * 0.1))
                 self.item_price_input.Text.setText(recommended_price)
 
@@ -711,13 +713,13 @@ class App(QMainWindow):
             or str(selected_pet_id) not in self.pet_list
         ):
             try:
-                discount_percent = 1 - (int(self.discount_percent.Text.text()) / 100)
+                discount_percent = int(self.discount_percent.Text.text()) / 100
                 recommended_price = str(
                     int(float(selected_pet_price) * discount_percent)
                 )
                 self.pet_price_input.Text.setText(recommended_price)
             except:
-                self.pet_price_input.Text.setText("90")
+                self.pet_price_input.Text.setText("10")
                 recommended_price = str(int(float(selected_pet_price) * 0.1))
                 self.pet_price_input.Text.setText(recommended_price)
 
@@ -1343,7 +1345,7 @@ class App(QMainWindow):
         self.number_of_mega_threads.Text.setText("48"),
         self.wow_head_link.Checkbox.setChecked(False),
         self.important_emoji.Text.setText("🔥"),
-        self.discount_percent.Text.setText("90"),
+        self.discount_percent.Text.setText("10"),
         self.russian_realms.Checkbox.setChecked(True),
         self.refresh_alerts.Checkbox.setChecked(True),
         self.scan_time_min.Text.setText("1"),
