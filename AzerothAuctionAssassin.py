@@ -504,8 +504,15 @@ class App(QMainWindow):
             "Trigger a scan on all realms once.\nUse this to test make sure your data is working."
         )
 
+        self.faction_label = LabelText(settings_page, "Faction AH", 0, 560, 200, 40)
+        self.faction = ComboBoxes(settings_page, 0, 560, 200, 40)
+        self.faction.Combo.addItems(["all", "horde", "alliance", "booty bay"])
+        self.faction_label.Label.setToolTip(
+            "Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
+        )
+
         self.import_config_button = UIButtons(
-            settings_page, "Import Config", 0, 550, 200, 50
+            settings_page, "Import Config", 0, 625, 200, 50
         )
         self.import_config_button.Button.clicked.connect(self.import_configs)
         self.import_config_button.Button.setToolTip(
@@ -751,6 +758,11 @@ class App(QMainWindow):
                 index = self.wow_region.Combo.findText(raw_mega_data["WOW_REGION"])
                 if index >= 0:
                     self.wow_region.Combo.setCurrentIndex(index)
+
+            if "FACTION" in raw_mega_data:
+                index = self.faction.Combo.findText(raw_mega_data["FACTION"])
+                if index >= 0:
+                    self.faction.Combo.setCurrentIndex(index)
 
             if "SHOW_BID_PRICES" in raw_mega_data:
                 self.show_bid_prices.Checkbox.setChecked(
@@ -1381,6 +1393,7 @@ class App(QMainWindow):
         scan_time_max = self.scan_time_max.Text.text()
         scan_time_min = self.scan_time_min.Text.text()
         discount_percent = self.discount_percent.Text.text()
+        faction = self.faction.Combo.currentText()
 
         # Check if MEGA_THREADS, SCAN_TIME_MAX, and SCAN_TIME_MIN are integers
         integer_fields = {
@@ -1438,6 +1451,7 @@ class App(QMainWindow):
             "SCAN_TIME_MAX": int(scan_time_max),
             "SCAN_TIME_MIN": int(scan_time_min),
             "DEBUG": debug,
+            "FACTION": faction,
         }
 
         # Save JSON files
