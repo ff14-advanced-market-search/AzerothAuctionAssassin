@@ -1503,7 +1503,8 @@ class App(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Auction Assassin Token",
-                "Your Auction Assassin token is incorrect or expired!",
+                "Your Auction Assassin token is incorrect or expired!\n\n"
+                + "You must run the bot command once every 14 days to get a new token.",
             )
             return
 
