@@ -1219,9 +1219,12 @@ class App(QMainWindow):
                 if item["itemName"].lower() in pbs_names
             }
             for key, value in self.items_list.items():
+                discount_price = round(
+                    float(value) * (1 / int(self.discount_percent.Text.text())), 4
+                )
                 self.item_list_display.List.insertItem(
                     self.item_list_display.List.count(),
-                    f"Item ID: {key}, Price: {value}",
+                    f"Item ID: {key}, Price: {discount_price}",
                 )
         except ValueError as ve:
             QMessageBox.critical(self, "Invalid Value", str(ve))
