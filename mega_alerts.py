@@ -92,6 +92,7 @@ class Alerts(QThread):
                     else auction["itemlink"]
                 )
                 message += f"[{link_label}]({link_url})\n"
+                message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{auction['itemID']})\n"
 
                 # Add price info, if available
                 price_type = (
