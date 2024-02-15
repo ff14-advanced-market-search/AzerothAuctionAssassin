@@ -172,7 +172,7 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.10"
+        self.title = "Azeroth Auction Assassin v1.0.10.1"
         self.left = 0
         self.top = 0
         self.width = 750
@@ -948,11 +948,11 @@ class App(QMainWindow):
                 )
 
                 # Check if all items are between 100k and 500k
-                if any(not 100000 <= item_id <= 500000 for item_id in item_ids_list):
+                if any(not 1 <= item_id <= 500000 for item_id in item_ids_list):
                     QMessageBox.critical(
                         self,
                         "Invalid Item ID",
-                        "All item IDs should be between 100k and 500k.",
+                        "All item IDs should be between 1 and 500k.",
                     )
                     return False
             except ValueError:
@@ -1219,9 +1219,12 @@ class App(QMainWindow):
                 if item["itemName"].lower() in pbs_names
             }
             for key, value in self.items_list.items():
+                discount_price = round(
+                    float(value) * (1 / int(self.discount_percent.Text.text())), 4
+                )
                 self.item_list_display.List.insertItem(
                     self.item_list_display.List.count(),
-                    f"Item ID: {key}, Price: {value}",
+                    f"Item ID: {key}, Price: {discount_price}",
                 )
         except ValueError as ve:
             QMessageBox.critical(self, "Invalid Value", str(ve))
@@ -1370,7 +1373,7 @@ class App(QMainWindow):
 
         self.save_data_to_json()
 
-    def save_data_to_json(self):
+    def validate_application_settings(self):
         wow_region = self.wow_region.Combo.currentText()
 
         # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC'
@@ -1388,6 +1391,25 @@ class App(QMainWindow):
                 "WOW region must be either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'EUSODCLASSIC or 'NASODCLASSIC'.",
             )
             return False
+
+        required_fields = {
+            "MEGA_WEBHOOK_URL": self.discord_webhook_input.Text.text().strip(),
+            "WOW_CLIENT_ID": self.wow_client_id_input.Text.text().strip(),
+            "WOW_CLIENT_SECRET": self.wow_client_secret_input.Text.text().strip(),
+        }
+
+        for field, value in required_fields.items():
+            if not value:
+                QMessageBox.critical(self, "Empty Field", f"{field} cannot be empty.")
+                return False
+            if len(value) < 20:
+                QMessageBox.critical(
+                    self,
+                    "Required Field Error",
+                    f"{field} value {value} is invalid. "
+                    + "Contact the devs on discord.",
+                )
+                return False
 
         mega_threads = self.number_of_mega_threads.Text.text()
         scan_time_max = self.scan_time_max.Text.text()
@@ -1436,9 +1458,9 @@ class App(QMainWindow):
 
         # If all tests pass, save data to JSON.
         config_json = {
-            "MEGA_WEBHOOK_URL": self.discord_webhook_input.Text.text().strip(),
-            "WOW_CLIENT_ID": self.wow_client_id_input.Text.text().strip(),
-            "WOW_CLIENT_SECRET": self.wow_client_secret_input.Text.text().strip(),
+            "MEGA_WEBHOOK_URL": required_fields["MEGA_WEBHOOK_URL"],
+            "WOW_CLIENT_ID": required_fields["WOW_CLIENT_ID"],
+            "WOW_CLIENT_SECRET": required_fields["WOW_CLIENT_SECRET"],
             "AUTHENTICATION_TOKEN": self.authentication_token.Text.text().strip(),
             "WOW_REGION": wow_region,
             "SHOW_BID_PRICES": show_bids,
@@ -1453,6 +1475,71 @@ class App(QMainWindow):
             "DEBUG": debug,
             "FACTION": faction,
         }
+        return config_json
+
+    def validate_item_lists(self):
+        # Check if items_list and pet_list are not empty
+        if (
+            len(self.items_list) == 0
+            and len(self.pet_list) == 0
+            and len(self.ilvl_list) == 0
+        ):
+            QMessageBox.critical(
+                self,
+                "Empty Lists",
+                "Please add items, pets or ilvl data to the lists. All appear to be empty.",
+            )
+            return False
+
+        # Check if all item IDs are valid integers
+        if not all(1 <= int(key) <= 500000 for key in self.items_list.keys()):
+            QMessageBox.critical(
+                self,
+                "Invalid Item ID",
+                "All item IDs should be integers between 1 and 500000.",
+            )
+            return False
+
+        # Check if all pet IDs are valid integers
+        if not all(1 <= int(key) <= 10000 for key in self.pet_list.keys()):
+            QMessageBox.critical(
+                self,
+                "Invalid Pet ID",
+                "All pet IDs should be integers between 1 and 10000.",
+            )
+            return False
+
+        # Check if all ilvl data is valid
+        for ilvl_dict_data in self.ilvl_list:
+            if not (ilvl_dict_data["ilvl"] <= 1000):
+                QMessageBox.critical(
+                    self,
+                    "Invalid ILvl",
+                    "All ilvl values should be integers below 1000.",
+                )
+                return False
+
+            if not all(
+                1 <= item_id <= 500000 for item_id in ilvl_dict_data["item_ids"]
+            ):
+                QMessageBox.critical(
+                    self,
+                    "Invalid Item ID",
+                    "All item IDs should be integers between 1 and 500,000.",
+                )
+                return False
+
+        return True
+
+    def save_data_to_json(self):
+        # Validate application settings
+        config_json = self.validate_application_settings()
+        if not config_json:
+            return False
+
+        # validate pet or item and ilvl data
+        if not self.validate_item_lists():
+            return False
 
         # Save JSON files
         self.save_json_file(self.path_to_data, config_json)
@@ -1508,9 +1595,6 @@ class App(QMainWindow):
             )
             return
 
-        self.start_button.Button.setEnabled(False)
-        self.stop_button.Button.setEnabled(True)
-
         if not self.save_data_to_json():
             QMessageBox.critical(
                 self,
@@ -1518,6 +1602,9 @@ class App(QMainWindow):
                 "Could not save data to JSON.\nAbort scan.\nYour inputs may be invalid",
             )
             return
+
+        self.start_button.Button.setEnabled(False)
+        self.stop_button.Button.setEnabled(True)
 
         self.alerts_thread = Alerts(
             path_to_data_files=self.path_to_data,
