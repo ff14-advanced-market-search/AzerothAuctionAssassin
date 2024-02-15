@@ -1219,9 +1219,8 @@ class App(QMainWindow):
                 if item["itemName"].lower() in pbs_names
             }
             for key, value in self.items_list.items():
-                discount_price = round(
-                    float(value) * (1 / int(self.discount_percent.Text.text())), 4
-                )
+                discount_percent = int(self.discount_percent.Text.text()) / 100
+                discount_price = round(float(value) * discount_percent, 4)
                 self.item_list_display.List.insertItem(
                     self.item_list_display.List.count(),
                     f"Item ID: {key}, Price: {discount_price}",
