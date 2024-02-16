@@ -305,13 +305,13 @@ class App(QMainWindow):
         self.line.setGeometry(25, 385, 200, 5)
         self.line.setStyleSheet("background-color: white")
 
-        self.import_pbs_data_button = UIButtons(
-            self, "Import PBS Data", 25, 400, 200, 50
-        )
-        self.import_pbs_data_button.Button.clicked.connect(self.import_pbs_data)
-        self.import_pbs_data_button.Button.setToolTip(
-            "Import your Point Blank Sniper text files"
-        )
+        # self.import_pbs_data_button = UIButtons(
+        #     self, "Import PBS Data", 25, 400, 200, 50
+        # )
+        # self.import_pbs_data_button.Button.clicked.connect(self.import_pbs_data)
+        # self.import_pbs_data_button.Button.setToolTip(
+        #     "Import your Point Blank Sniper text files"
+        # )
 
         self.save_data_button = UIButtons(self, "Save Data", 25, 475, 200, 50)
         self.save_data_button.Button.clicked.connect(self.save_data_to_json)
@@ -580,11 +580,19 @@ class App(QMainWindow):
         self.item_list_display.List.itemClicked.connect(self.item_list_double_clicked)
 
         self.import_item_data_button = UIButtons(
-            item_page, "Import Item Data", 0, 625, 225, 50
+            item_page, "Import\nItem Data", 0, 625, 75, 60
         )
         self.import_item_data_button.Button.clicked.connect(self.import_item_data)
         self.import_item_data_button.Button.setToolTip(
             "Import your desired_items.json config"
+        )
+
+        self.import_pbs_data_button = UIButtons(
+            item_page, "Import\nPBS Data", 85, 625, 75, 60
+        )
+        self.import_pbs_data_button.Button.clicked.connect(self.import_pbs_data)
+        self.import_pbs_data_button.Button.setToolTip(
+            "Import your Point Blank Sniper text files"
         )
 
     def make_ilvl_page(self, ilvl_page):
