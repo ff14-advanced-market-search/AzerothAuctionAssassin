@@ -81,15 +81,15 @@ jobs:
         [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
       shell: pwsh
 
-    # - name: Sign Executable
-    #   run: |
-    #     $cert_path = "certificate.pfx"
-    #     $password = "${{ secrets.CERT_PASSWORD }}"
-    #     $timestamp_url = "http://timestamp.digicert.com"
-    #     $executable_path = ".\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe"
-    #     $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
-    #     & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
-    #   shell: pwsh
+    - name: Sign Executable
+      run: |
+        $cert_path = "certificate.pfx"
+        $password = "${{ secrets.CERT_PASSWORD }}"
+        $timestamp_url = "http://timestamp.digicert.com"
+        $executable_path = ".\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe"
+        $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
+        & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
+      shell: pwsh
 
     - name: Create Release
       id: create_release
@@ -112,55 +112,6 @@ jobs:
         asset_name: AzerothAuctionAssassin.exe
         asset_content_type: application/octet-stream
 
-    # Save the upload_url as an environment variable
-    - name: Set upload_url environment variable
-      run: echo "UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
-
-### something is broken with the needs.build-windows.steps.create_release.outputs.upload_url
-  build-mac:
-   needs: build-windows
-   runs-on: macos-latest
-
-   steps:
-   - name: Checkout code
-     uses: actions/checkout@v2
-
-   - name: Set up Python
-     uses: actions/setup-python@v2
-     with:
-       python-version: 3.11
-
-   - name: Install dependencies
-     run: pip install -r requirements.txt
-
-   - name: Build macOS executable
-     run: |
-       python -m pip install pyinstaller
-       pyinstaller --onefile --add-data "AzerothAuctionAssassinData:./AzerothAuctionAssassinData" --add-data "utils:./utils" AzerothAuctionAssassin.py
-
-   #- name: Decode macOS Certificate
-   #  run: |
-   #    echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
-
-   ### broken probably needs a different cert
-   # - name: Sign macOS Executable
-   #   run: |
-   #     security create-keychain -p ""  build.keychain
-   #     security default-keychain -s build.keychain
-   #     security unlock-keychain -p "" build.keychain
-   #     security import certificate.p12 -k build.keychain -P ${{ secrets.CERT_PASSWORD }} -T /usr/bin/codesign
-   #     codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/AzerothAuctionAssassin
-
-   - name: Upload macOS Executable to Release
-     uses: actions/upload-release-asset@v1
-     env:
-       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       UPLOAD_URL: ${{ needs.build-windows.outputs.upload_url }} # Access the upload_url environment variable from build-windows job
-     with:
-       upload_url: ${{ env.UPLOAD_URL }}
-       asset_path: ./dist/AzerothAuctionAssassin
-       asset_name: AzerothAuctionAssassin-macOS
-       asset_content_type: application/octet-stream
 #### something is broken with the needs.build-windows.steps.create_release.outputs.upload_url
 #  build-mac:
 #    needs: build-windows
