@@ -1,10 +1,12 @@
 name: Build MacOSX Executable
 
 on:
-  workflow_dispatch:
-  # push:
-  #   branches:
-  #     - main
+  workflow_run:
+    workflows: ["Build Windows Executable"]
+    branches: [main]
+    types: 
+      - completed
+
 
 jobs:
   build-mac:
