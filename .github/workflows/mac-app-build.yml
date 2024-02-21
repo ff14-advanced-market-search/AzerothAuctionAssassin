@@ -51,3 +51,9 @@ jobs:
         asset_path: ./dist/AzerothAuctionAssassin
         asset_name: AzerothAuctionAssassin-macOS
         asset_content_type: application/octet-stream
+        
+  standalone-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Do something
+        run: echo "This job do nothing, but without dependencies!"
