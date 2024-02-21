@@ -155,9 +155,9 @@ jobs:
      uses: actions/upload-release-asset@v1
      env:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       UPLOAD_URL: ${{ env.UPLOAD_URL }} # Access the upload_url environment variable from build-windows job
+       UPLOAD_URL: ${{ needs.build-windows.outputs.upload_url }} # Access the upload_url environment variable from build-windows job
      with:
-       upload_url: ${{ needs.build-windows.steps.create_release.outputs.upload_url }}
+       upload_url: ${{ env.UPLOAD_URL }}
        asset_path: ./dist/AzerothAuctionAssassin
        asset_name: AzerothAuctionAssassin-macOS
        asset_content_type: application/octet-stream
