@@ -47,8 +47,10 @@ class MegaData:
         # classic regions dont have undermine exchange
         if "CLASSIC" in self.REGION:
             self.WOWHEAD_LINK = True
+            self.FACTION = self.__set_mega_vars("FACTION", raw_mega_data)
         else:
             self.WOWHEAD_LINK = self.__set_mega_vars("WOWHEAD_LINK", raw_mega_data)
+            self.FACTION = "all"
 
         self.WOW_SERVER_NAMES = self.__set_realm_names()
         # set access token for wow api
@@ -113,9 +115,29 @@ class MegaData:
             var_value = None
 
         # need to do this no matter where we get the region from
-        if var_name == "REGION":
-            if var_value not in ["EU", "NA", "NACLASSIC", "NASODCLASSIC", "EUCLASSIC"]:
+        if var_name == "WOW_REGION":
+            if var_value not in [
+                "EU",
+                "NA",
+                "NACLASSIC",
+                "NASODCLASSIC",
+                "EUCLASSIC",
+                "EUSODCLASSIC",
+            ]:
                 raise Exception(f"error {var_value} not a valid region")
+
+        # default to all but change for classic
+        if var_name == "FACTION":
+            if not var_value:
+                var_value = "all"
+            if var_value not in [
+                "all",
+                "horde",
+                "alliance",
+                "booty bay",
+            ]:
+                print(f"error {var_value} not a valid faction, default to scan all")
+                var_value = "all"
 
         # default to 48 threads if not set
         if var_name == "MEGA_THREADS":
@@ -396,7 +418,17 @@ class MegaData:
             f"gather data from connectedRealmId {connectedRealmId} of region {self.REGION}"
         )
 
-        endpoints = ["/2", "/6", "/7"] if "CLASSIC" in self.REGION else [""]
+        if "CLASSIC" in self.REGION:
+            if self.FACTION == "alliance":
+                endpoints = ["/2"]
+            elif self.FACTION == "horde":
+                endpoints = ["/6"]
+            elif self.FACTION == "booty bay":
+                endpoints = ["/7"]
+            else:
+                endpoints = ["/2", "/6", "/7"]
+        else:
+            endpoints = [""]
 
         all_auctions = []
         for endpoint in endpoints:

@@ -4,7 +4,7 @@ def create_oribos_exchange_pet_link(realm_name, pet_id, region):
         url_region = "us"
     else:
         url_region = "eu"
-    return f"https://oribos.exchange/#{url_region}-{fixed_realm_name}/82800-{pet_id}"
+    return f"https://undermine.exchange/#{url_region}-{fixed_realm_name}/82800-{pet_id}"
 
 
 def create_oribos_exchange_item_link(realm_name, item_id, region):
@@ -13,7 +13,11 @@ def create_oribos_exchange_item_link(realm_name, item_id, region):
         url_region = "us"
     else:
         url_region = "eu"
-    return f"https://oribos.exchange/#{url_region}-{fixed_realm_name}/{item_id}"
+    return f"https://undermine.exchange/#{url_region}-{fixed_realm_name}/{item_id}"
+
+
+def create_saddlebag_link(item_id):
+    return f"https://saddlebagexchange.com/wow/item-data/{item_id}"
 
 
 def get_wow_russian_realm_ids():

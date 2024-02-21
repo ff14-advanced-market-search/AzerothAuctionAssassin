@@ -92,6 +92,7 @@ class Alerts(QThread):
                     else auction["itemlink"]
                 )
                 message += f"[{link_label}]({link_url})\n"
+                message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{auction['itemID']})\n"
 
                 # Add price info, if available
                 price_type = (
@@ -503,7 +504,7 @@ class Alerts(QThread):
         # show details on run
         print(
             f"Blizzard API data only updates 1 time per hour.\n"
-            + f"The updates for region '{mega_data.REGION}' will come on minute {mega_data.get_upload_time_minutes()} of each hour.\n"
+            + f"The updates for region '{mega_data.REGION}' for '{mega_data.FACTION}' faction AH will come on minute {mega_data.get_upload_time_minutes()} of each hour.\n"
             + f"{datetime.now()} may not the update time. "
             + "But we will run once to get the current data so no one asks me about the waiting time.\n"
             + "After the first run we will trigger once per hour when the new data updates.\n"

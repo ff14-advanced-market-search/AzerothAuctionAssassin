@@ -172,7 +172,7 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.9"
+        self.title = "Azeroth Auction Assassin v1.0.10.1"
         self.left = 0
         self.top = 0
         self.width = 750
@@ -215,7 +215,7 @@ class App(QMainWindow):
             "eusodclassic-wow-connected-realm-ids.json",
         )
 
-        # default to 90% discount, just use EU for now for less data
+        # default to 10% discount, just use EU for now for less data
         self.api_data_thread = Item_And_Pet_Statistics()
         self.api_data_thread.start()
         self.api_data_thread.completed.connect(self.api_data_received)
@@ -305,13 +305,13 @@ class App(QMainWindow):
         self.line.setGeometry(25, 385, 200, 5)
         self.line.setStyleSheet("background-color: white")
 
-        self.import_pbs_data_button = UIButtons(
-            self, "Import PBS Data", 25, 400, 200, 50
-        )
-        self.import_pbs_data_button.Button.clicked.connect(self.import_pbs_data)
-        self.import_pbs_data_button.Button.setToolTip(
-            "Import your Point Blank Sniper text files"
-        )
+        # self.import_pbs_data_button = UIButtons(
+        #     self, "Import PBS Data", 25, 400, 200, 50
+        # )
+        # self.import_pbs_data_button.Button.clicked.connect(self.import_pbs_data)
+        # self.import_pbs_data_button.Button.setToolTip(
+        #     "Import your Point Blank Sniper text files"
+        # )
 
         self.save_data_button = UIButtons(self, "Save Data", 25, 475, 200, 50)
         self.save_data_button.Button.clicked.connect(self.save_data_to_json)
@@ -464,11 +464,13 @@ class App(QMainWindow):
         )
 
         self.discount_percent = LabelTextbox(
-            settings_page, "Discount Percent", 225, 625, 200, 40
+            settings_page, "Discount vs Average", 225, 625, 200, 40
         )
-        self.discount_percent.Text.setText("90")
+        self.discount_percent.Text.setText("10")
         self.discount_percent.Label.setToolTip(
-            "Set the discount percent for price recommendations.\nex:  if avg price is 100k, then 90 recommends you snipe for 10k."
+            "Set the price recommendation discount\n"
+            + "1 to 100, smaller number means a better price.\n"
+            + "ex: if you set 10 pecent and avg price is 100k, it recommends you snipe for 10k."
         )
 
         self.show_bid_prices = CheckBox(
@@ -502,8 +504,15 @@ class App(QMainWindow):
             "Trigger a scan on all realms once.\nUse this to test make sure your data is working."
         )
 
+        self.faction_label = LabelText(settings_page, "Faction AH", 0, 560, 200, 40)
+        self.faction = ComboBoxes(settings_page, 0, 560, 200, 40)
+        self.faction.Combo.addItems(["all", "horde", "alliance", "booty bay"])
+        self.faction_label.Label.setToolTip(
+            "Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
+        )
+
         self.import_config_button = UIButtons(
-            settings_page, "Import Config", 0, 550, 200, 50
+            settings_page, "Import Config", 0, 625, 200, 50
         )
         self.import_config_button.Button.clicked.connect(self.import_configs)
         self.import_config_button.Button.setToolTip(
@@ -571,11 +580,19 @@ class App(QMainWindow):
         self.item_list_display.List.itemClicked.connect(self.item_list_double_clicked)
 
         self.import_item_data_button = UIButtons(
-            item_page, "Import Item Data", 0, 625, 225, 50
+            item_page, "Import\nItem Data", 0, 625, 75, 60
         )
         self.import_item_data_button.Button.clicked.connect(self.import_item_data)
         self.import_item_data_button.Button.setToolTip(
             "Import your desired_items.json config"
+        )
+
+        self.import_pbs_data_button = UIButtons(
+            item_page, "Import\nPBS Data", 85, 625, 75, 60
+        )
+        self.import_pbs_data_button.Button.clicked.connect(self.import_pbs_data)
+        self.import_pbs_data_button.Button.setToolTip(
+            "Import your Point Blank Sniper text files"
         )
 
     def make_ilvl_page(self, ilvl_page):
@@ -684,13 +701,13 @@ class App(QMainWindow):
             or str(selected_item_id) not in self.items_list
         ):
             try:
-                discount_percent = 1 - (int(self.discount_percent.Text.text()) / 100)
+                discount_percent = int(self.discount_percent.Text.text()) / 100
                 recommended_price = str(
                     int(float(selected_item_price) * discount_percent)
                 )
                 self.item_price_input.Text.setText(recommended_price)
             except:
-                self.item_price_input.Text.setText("90")
+                self.item_price_input.Text.setText("10")
                 recommended_price = str(int(float(selected_item_price) * 0.1))
                 self.item_price_input.Text.setText(recommended_price)
 
@@ -711,13 +728,13 @@ class App(QMainWindow):
             or str(selected_pet_id) not in self.pet_list
         ):
             try:
-                discount_percent = 1 - (int(self.discount_percent.Text.text()) / 100)
+                discount_percent = int(self.discount_percent.Text.text()) / 100
                 recommended_price = str(
                     int(float(selected_pet_price) * discount_percent)
                 )
                 self.pet_price_input.Text.setText(recommended_price)
             except:
-                self.pet_price_input.Text.setText("90")
+                self.pet_price_input.Text.setText("10")
                 recommended_price = str(int(float(selected_pet_price) * 0.1))
                 self.pet_price_input.Text.setText(recommended_price)
 
@@ -749,6 +766,11 @@ class App(QMainWindow):
                 index = self.wow_region.Combo.findText(raw_mega_data["WOW_REGION"])
                 if index >= 0:
                     self.wow_region.Combo.setCurrentIndex(index)
+
+            if "FACTION" in raw_mega_data:
+                index = self.faction.Combo.findText(raw_mega_data["FACTION"])
+                if index >= 0:
+                    self.faction.Combo.setCurrentIndex(index)
 
             if "SHOW_BID_PRICES" in raw_mega_data:
                 self.show_bid_prices.Checkbox.setChecked(
@@ -934,11 +956,11 @@ class App(QMainWindow):
                 )
 
                 # Check if all items are between 100k and 500k
-                if any(not 100000 <= item_id <= 500000 for item_id in item_ids_list):
+                if any(not 1 <= item_id <= 500000 for item_id in item_ids_list):
                     QMessageBox.critical(
                         self,
                         "Invalid Item ID",
-                        "All item IDs should be between 100k and 500k.",
+                        "All item IDs should be between 1 and 500k.",
                     )
                     return False
             except ValueError:
@@ -1199,16 +1221,20 @@ class App(QMainWindow):
                     for item in file.read().split("^")
                 ]
 
-            self.items_list = {
+            temp_items_list = {
                 str(item["itemID"]): item["desiredPrice"]
                 for index, item in self.item_statistics.iterrows()
                 if item["itemName"].lower() in pbs_names
             }
-            for key, value in self.items_list.items():
+            self.items_list = {}
+            for key, value in temp_items_list.items():
+                discount_percent = int(self.discount_percent.Text.text()) / 100
+                discount_price = round(float(value) * discount_percent, 4)
                 self.item_list_display.List.insertItem(
                     self.item_list_display.List.count(),
-                    f"Item ID: {key}, Price: {value}",
+                    f"Item ID: {key}, Price: {discount_price}",
                 )
+                self.items_list[str(key)] = discount_price
         except ValueError as ve:
             QMessageBox.critical(self, "Invalid Value", str(ve))
         except Exception as e:
@@ -1343,7 +1369,7 @@ class App(QMainWindow):
         self.number_of_mega_threads.Text.setText("48"),
         self.wow_head_link.Checkbox.setChecked(False),
         self.important_emoji.Text.setText("🔥"),
-        self.discount_percent.Text.setText("90"),
+        self.discount_percent.Text.setText("10"),
         self.russian_realms.Checkbox.setChecked(True),
         self.refresh_alerts.Checkbox.setChecked(True),
         self.scan_time_min.Text.setText("1"),
@@ -1356,7 +1382,7 @@ class App(QMainWindow):
 
         self.save_data_to_json()
 
-    def save_data_to_json(self):
+    def validate_application_settings(self):
         wow_region = self.wow_region.Combo.currentText()
 
         # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC'
@@ -1375,10 +1401,30 @@ class App(QMainWindow):
             )
             return False
 
+        required_fields = {
+            "MEGA_WEBHOOK_URL": self.discord_webhook_input.Text.text().strip(),
+            "WOW_CLIENT_ID": self.wow_client_id_input.Text.text().strip(),
+            "WOW_CLIENT_SECRET": self.wow_client_secret_input.Text.text().strip(),
+        }
+
+        for field, value in required_fields.items():
+            if not value:
+                QMessageBox.critical(self, "Empty Field", f"{field} cannot be empty.")
+                return False
+            if len(value) < 20:
+                QMessageBox.critical(
+                    self,
+                    "Required Field Error",
+                    f"{field} value {value} is invalid. "
+                    + "Contact the devs on discord.",
+                )
+                return False
+
         mega_threads = self.number_of_mega_threads.Text.text()
         scan_time_max = self.scan_time_max.Text.text()
         scan_time_min = self.scan_time_min.Text.text()
         discount_percent = self.discount_percent.Text.text()
+        faction = self.faction.Combo.currentText()
 
         # Check if MEGA_THREADS, SCAN_TIME_MAX, and SCAN_TIME_MIN are integers
         integer_fields = {
@@ -1421,9 +1467,9 @@ class App(QMainWindow):
 
         # If all tests pass, save data to JSON.
         config_json = {
-            "MEGA_WEBHOOK_URL": self.discord_webhook_input.Text.text().strip(),
-            "WOW_CLIENT_ID": self.wow_client_id_input.Text.text().strip(),
-            "WOW_CLIENT_SECRET": self.wow_client_secret_input.Text.text().strip(),
+            "MEGA_WEBHOOK_URL": required_fields["MEGA_WEBHOOK_URL"],
+            "WOW_CLIENT_ID": required_fields["WOW_CLIENT_ID"],
+            "WOW_CLIENT_SECRET": required_fields["WOW_CLIENT_SECRET"],
             "AUTHENTICATION_TOKEN": self.authentication_token.Text.text().strip(),
             "WOW_REGION": wow_region,
             "SHOW_BID_PRICES": show_bids,
@@ -1436,7 +1482,73 @@ class App(QMainWindow):
             "SCAN_TIME_MAX": int(scan_time_max),
             "SCAN_TIME_MIN": int(scan_time_min),
             "DEBUG": debug,
+            "FACTION": faction,
         }
+        return config_json
+
+    def validate_item_lists(self):
+        # Check if items_list and pet_list are not empty
+        if (
+            len(self.items_list) == 0
+            and len(self.pet_list) == 0
+            and len(self.ilvl_list) == 0
+        ):
+            QMessageBox.critical(
+                self,
+                "Empty Lists",
+                "Please add items, pets or ilvl data to the lists. All appear to be empty.",
+            )
+            return False
+
+        # Check if all item IDs are valid integers
+        if not all(1 <= int(key) <= 500000 for key in self.items_list.keys()):
+            QMessageBox.critical(
+                self,
+                "Invalid Item ID",
+                "All item IDs should be integers between 1 and 500000.",
+            )
+            return False
+
+        # Check if all pet IDs are valid integers
+        if not all(1 <= int(key) <= 10000 for key in self.pet_list.keys()):
+            QMessageBox.critical(
+                self,
+                "Invalid Pet ID",
+                "All pet IDs should be integers between 1 and 10000.",
+            )
+            return False
+
+        # Check if all ilvl data is valid
+        for ilvl_dict_data in self.ilvl_list:
+            if not (ilvl_dict_data["ilvl"] <= 1000):
+                QMessageBox.critical(
+                    self,
+                    "Invalid ILvl",
+                    "All ilvl values should be integers below 1000.",
+                )
+                return False
+
+            if not all(
+                1 <= item_id <= 500000 for item_id in ilvl_dict_data["item_ids"]
+            ):
+                QMessageBox.critical(
+                    self,
+                    "Invalid Item ID",
+                    "All item IDs should be integers between 1 and 500,000.",
+                )
+                return False
+
+        return True
+
+    def save_data_to_json(self):
+        # Validate application settings
+        config_json = self.validate_application_settings()
+        if not config_json:
+            return False
+
+        # validate pet or item and ilvl data
+        if not self.validate_item_lists():
+            return False
 
         # Save JSON files
         self.save_json_file(self.path_to_data, config_json)
@@ -1487,12 +1599,10 @@ class App(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Auction Assassin Token",
-                "Your Auction Assassin token is incorrect or expired!",
+                "Your Auction Assassin token is incorrect or expired!\n\n"
+                + "You must run the bot command once every 14 days to get a new token.",
             )
             return
-
-        self.start_button.Button.setEnabled(False)
-        self.stop_button.Button.setEnabled(True)
 
         if not self.save_data_to_json():
             QMessageBox.critical(
@@ -1501,6 +1611,9 @@ class App(QMainWindow):
                 "Could not save data to JSON.\nAbort scan.\nYour inputs may be invalid",
             )
             return
+
+        self.start_button.Button.setEnabled(False)
+        self.stop_button.Button.setEnabled(True)
 
         self.alerts_thread = Alerts(
             path_to_data_files=self.path_to_data,
