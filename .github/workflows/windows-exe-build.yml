@@ -111,6 +111,11 @@ jobs:
         asset_path: .\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe
         asset_name: AzerothAuctionAssassin.exe
         asset_content_type: application/octet-stream
+
+    # Save the upload_url as an environment variable
+    - name: Set upload_url environment variable
+      run: echo "UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
+
 ### something is broken with the needs.build-windows.steps.create_release.outputs.upload_url
   build-mac:
    needs: build-windows
@@ -150,6 +155,7 @@ jobs:
      uses: actions/upload-release-asset@v1
      env:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       UPLOAD_URL: ${{ env.UPLOAD_URL }} # Access the upload_url environment variable from build-windows job
      with:
        upload_url: ${{ needs.build-windows.steps.create_release.outputs.upload_url }}
        asset_path: ./dist/AzerothAuctionAssassin
