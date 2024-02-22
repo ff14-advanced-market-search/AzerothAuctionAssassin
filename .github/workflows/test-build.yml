@@ -133,9 +133,9 @@ jobs:
         python -m pip install pyinstaller
         pyinstaller --onefile --add-data "AzerothAuctionAssassinData:./AzerothAuctionAssassinData" --add-data "utils:./utils" AzerothAuctionAssassin.py
 
-    - name: Decode macOS Certificate
-      run: |
-        echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
+    # - name: Decode macOS Certificate
+    #   run: |
+    #     echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
 
     ### broken probably needs a different cert
     # - name: Sign macOS Executable
@@ -146,12 +146,22 @@ jobs:
     #     security import certificate.p12 -k build.keychain -P ${{ secrets.CERT_PASSWORD }} -T /usr/bin/codesign
     #     codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/AzerothAuctionAssassin
 
+    # - name: Upload macOS Executable to Release
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ needs.build-windows.steps.create_release.outputs.upload_url }}
+    #     asset_path: ./dist/AzerothAuctionAssassin
+    #     asset_name: AzerothAuctionAssassin-macOS
+    #     asset_content_type: application/octet-stream
+
     - name: Upload macOS Executable to Release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ needs.build-windows.steps.create_release.outputs.upload_url }}
+        upload_url: ${{ needs.build-windows.outputs.create_release.upload_url }}
         asset_path: ./dist/AzerothAuctionAssassin
         asset_name: AzerothAuctionAssassin-macOS
         asset_content_type: application/octet-stream
