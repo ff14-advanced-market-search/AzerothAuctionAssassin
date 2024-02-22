@@ -75,23 +75,23 @@ jobs:
       run: |
         msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln -restore -t:Publish /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
 
-    - name: Decode Certificate
-      run: |
-        $cert_content = '${{ secrets.CERT_BASE64 }}'
-        $cert_bytes = [Convert]::FromBase64String($cert_content)
-        $cert_path = "certificate.pfx"
-        [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
-      shell: pwsh
+    # - name: Decode Certificate
+    #   run: |
+    #     $cert_content = '${{ secrets.CERT_BASE64 }}'
+    #     $cert_bytes = [Convert]::FromBase64String($cert_content)
+    #     $cert_path = "certificate.pfx"
+    #     [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
+    #   shell: pwsh
 
-    - name: Sign Executable
-      run: |
-        $cert_path = "certificate.pfx"
-        $password = "${{ secrets.CERT_PASSWORD }}"
-        $timestamp_url = "http://timestamp.digicert.com"
-        $executable_path = ".\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe"
-        $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
-        & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
-      shell: pwsh
+    # - name: Sign Executable
+    #   run: |
+    #     $cert_path = "certificate.pfx"
+    #     $password = "${{ secrets.CERT_PASSWORD }}"
+    #     $timestamp_url = "http://timestamp.digicert.com"
+    #     $executable_path = ".\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe"
+    #     $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
+    #     & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
+    #   shell: pwsh
 
     - name: Create Release
       id: create_release
@@ -135,9 +135,9 @@ jobs:
         python -m pip install pyinstaller
         pyinstaller --onefile --add-data "AzerothAuctionAssassinData:./AzerothAuctionAssassinData" --add-data "utils:./utils" AzerothAuctionAssassin.py
 
-    - name: Decode macOS Certificate
-      run: |
-        echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
+    # - name: Decode macOS Certificate
+    #   run: |
+    #     echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
 
     ### broken probably needs a different cert
     # - name: Sign macOS Executable
