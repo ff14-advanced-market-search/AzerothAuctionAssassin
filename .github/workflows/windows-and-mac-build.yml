@@ -26,19 +26,14 @@ jobs:
         If (-Not (Test-Path $pythonEmbeddedDir)) {
             New-Item -ItemType Directory -Force -Path $pythonEmbeddedDir
         }
-
         # Download the embedded Python zip
         curl https://www.python.org/ftp/python/3.11.4/python-3.11.4-embed-win32.zip -o "python.zip"
-
         # Extract the Python zip
         Expand-Archive -Path "python.zip" -DestinationPath $pythonEmbeddedDir -Force
-
         # Download pip.pyz
         curl https://bootstrap.pypa.io/pip/pip.pyz -o "$pythonEmbeddedDir\pip.pyz"
-
         # Install packages from requirements.txt using the embedded Python and pip.pyz
         & "$pythonEmbeddedDir\python.exe" "$pythonEmbeddedDir\pip.pyz" install -r .\requirements.txt --target=".\Lib\site-packages\"
-
         Remove-Item -Recurse -Force .\python-embedded
         Remove-Item -Force python.zip
       shell: pwsh
@@ -48,33 +43,26 @@ jobs:
         Compress-Archive -Path .\Lib -DestinationPath Lib.zip
         Move-Item -Path Lib.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\Lib.zip -Force
         Remove-Item -Recurse -Force .\Lib
-
     - name: Zip Project Files
       run: |
         $DirToCompress = ".\"
         $ZipFileResult = "..\app.zip"
         $DirsToExclude = @("AzerothAuctionAssassin-windows", ".git", ".github", "__pycache__")
         $FilesToExclude = @(".gitignore")
-
         # Get all directories that are not in the exclude list and compress them
         Get-ChildItem -Path $DirToCompress -Directory | Where-Object { $_.Name -notin $DirsToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
-
         # Get all Files that are not in the exclude list and compress them
         Get-ChildItem -Path $DirToCompress -File | Where-Object { $_.Name -notin $FilesToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
-
         
         Move-Item -Path ..\app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
-
       shell: pwsh
 
     - name: update version number
       run: |
-        echo 1.0.10.6 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
-
+        echo 1.0.10.2 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
     - name: Build EXE
       run: |
         msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln -restore -t:Publish /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
-
     - name: Decode Certificate
       run: |
         $cert_content = '${{ secrets.CERT_BASE64 }}'
@@ -99,10 +87,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.10.6
-        release_name: Release v1.0.10.6
-        draft: false
-        prerelease: false
+        tag_name: v1.0.10.2
+        release_name: Release v1.0.10.2
+        draft: true
+        prerelease: true
 
     - name: Upload Executable to Release
       uses: actions/upload-release-asset@v1
@@ -134,12 +122,10 @@ jobs:
       run: |
         python -m pip install pyinstaller
         pyinstaller --onefile --add-data "AzerothAuctionAssassinData:./AzerothAuctionAssassinData" --add-data "utils:./utils" AzerothAuctionAssassin.py
-
     - name: Decode macOS Certificate
       run: |
         echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
-
-    ### broken probably needs a different cert
+    # ## broken probably needs a different cert
     # - name: Sign macOS Executable
     #   run: |
     #     security create-keychain -p ""  build.keychain
