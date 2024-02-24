@@ -1,4 +1,4 @@
-name: Build Windows Executable
+name: Build Windows and Mac Executables
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      upload_url_base64: ${{ steps.b64encode_upload_url.outputs.upload_url_base64 }}
 
     steps:
     - name: Checkout code
@@ -43,6 +43,7 @@ jobs:
         Compress-Archive -Path .\Lib -DestinationPath Lib.zip
         Move-Item -Path Lib.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\Lib.zip -Force
         Remove-Item -Recurse -Force .\Lib
+
     - name: Zip Project Files
       run: |
         $DirToCompress = ".\"
@@ -60,9 +61,11 @@ jobs:
     - name: update version number
       run: |
         echo 1.0.11 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+
     - name: Build EXE
       run: |
         msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln -restore -t:Publish /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
+
     - name: Decode Certificate
       run: |
         $cert_content = '${{ secrets.CERT_BASE64 }}'
@@ -91,6 +94,10 @@ jobs:
         release_name: Release v1.0.11
         draft: false
         prerelease: false
+
+    - name: Encode and Save Upload URL as Base64
+      id: b64encode_upload_url
+      run: echo "::set-output name=upload_url_base64::$(echo -n '${{ steps.create_release.outputs.upload_url }}' | base64 --wrap=0)"
 
     - name: Upload Executable to Release
       uses: actions/upload-release-asset@v1
@@ -123,10 +130,12 @@ jobs:
         python -m pip install pyinstaller
         pyinstaller --onefile --add-data "AzerothAuctionAssassinData:./AzerothAuctionAssassinData" --add-data "utils:./utils" --add-data "icon.png:." --icon=icon.ico AzerothAuctionAssassin.py
         chmod +x ./dist/AzerothAuctionAssassin
+
     - name: Decode macOS Certificate
       run: |
         echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
-    # ## broken probably needs a different cert
+
+    ### broken probably needs a different cert
     # - name: Sign macOS Executable
     #   run: |
     #     security create-keychain -p ""  build.keychain
@@ -145,12 +154,17 @@ jobs:
     #     asset_name: AzerothAuctionAssassin-macOS
     #     asset_content_type: application/octet-stream
 
+    # Step to decode Base64 upload URL
+    - name: Decode Upload URL
+      run: |
+        echo "decoded_upload_url=$(echo ${{ needs.build-windows.outputs.upload_url_base64 }} | base64 --decode)" >> $GITHUB_ENV
+
     - name: Upload macOS Executable to Release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ needs.build-windows.outputs.upload_url }}
+        upload_url: ${{ env.decoded_upload_url }}
         asset_path: ./dist/AzerothAuctionAssassin
         asset_name: AzerothAuctionAssassin-macOS
         asset_content_type: application/octet-stream
