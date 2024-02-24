@@ -10,7 +10,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     outputs:
-      upload_url_base64: ${{ steps.create_release.outputs.upload_url }}
+      upload_url_base64: ${{ steps.b64encode_upload_url.outputs.upload_url_base64 }}
 
     steps:
     - name: Checkout code
@@ -95,7 +95,8 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Encode and Save Upload URL
+    - name: Encode and Save Upload URL as Base64
+      id: b64encode_upload_url
       run: echo "::set-output name=upload_url_base64::$(echo -n '${{ steps.create_release.outputs.upload_url }}' | base64 --wrap=0)"
 
     - name: Upload Executable to Release
@@ -155,17 +156,15 @@ jobs:
 
     # Step to decode Base64 upload URL
     - name: Decode Upload URL
-      id: decode_upload_url
       run: |
-        echo "Decoded URL:" $(echo ${{ needs.build-windows.outputs.upload_url_base64 }} | base64 --decode)
-        echo "decoded_url=$(echo ${{ needs.build-windows.outputs.upload_url_base64 }} | base64 --decode)" >> $GITHUB_ENV
+        echo "decoded_upload_url=$(echo ${{ needs.build-windows.outputs.upload_url_base64 }} | base64 --decode)" >> $GITHUB_ENV
 
     - name: Upload macOS Executable to Release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ env.decoded_url }}
+        upload_url: ${{ env.decoded_upload_url }}
         asset_path: ./dist/AzerothAuctionAssassin
         asset_name: AzerothAuctionAssassin-macOS
         asset_content_type: application/octet-stream
