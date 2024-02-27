@@ -17,6 +17,17 @@ except Exception as ex:
     pass
 # i hate the way that looks but if it isnt broken dont fix it
 
+import breeze_resources
+import ctypes
+import pandas as pd
+from mega_alerts import Alerts
+import json
+from sys import exit
+import requests
+import os
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QThread, pyqtSignal, QFile, QTextStream
+from PyQt5 import QtGui
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QStackedWidget,
@@ -32,18 +43,6 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QWidget,
 )
-from PyQt5 import QtGui
-from PyQt5.QtCore import QThread, pyqtSignal, QFile, QTextStream
-from PyQt5.QtGui import QIcon
-import sys
-import os
-import requests
-from sys import exit
-import json
-from mega_alerts import Alerts
-import pandas as pd
-import ctypes
-import breeze_resources
 
 if sys.platform == "win32":
     myappid = "mycompany.myproduct.subproduct.version"  # arbitrary string
@@ -172,7 +171,7 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.11"
+        self.title = "Azeroth Auction Assassin v1.0.12"
         self.left = 0
         self.top = 0
         self.width = 750
@@ -259,12 +258,14 @@ class App(QMainWindow):
         pet_page = QMainWindow()
         item_page = QMainWindow()
         ilvl_page = QMainWindow()
+        realms_page = QMainWindow()
 
         self.stacked_widget.addWidget(home_page)
         self.stacked_widget.addWidget(pet_page)
         self.stacked_widget.addWidget(item_page)
         self.stacked_widget.addWidget(ilvl_page)
         self.stacked_widget.addWidget(settings_page)
+        self.stacked_widget.addWidget(realms_page)
 
         self.make_side_buttons()
 
@@ -278,9 +279,53 @@ class App(QMainWindow):
 
         self.make_settings_page(settings_page=settings_page)
 
+        self.make_realm_page(realm_page=realms_page)
+
         self.check_for_settings()
 
         self.show()
+
+    def make_realm_page(self, realm_page):
+        self.realm_name_input = LabelTextbox(realm_page, "Realm Name", 0, 25, 100, 40)
+        self.realm_name_input.Label.setToolTip("")
+
+        self.realm_id_input = LabelTextbox(realm_page, "Realm ID", 0, 100, 100, 40)
+        self.realm_id_input.Label.setToolTip("")
+
+        self.realm_realm_name_label = LabelText(
+            realm_page, "Select Realm", 0, 175, 200, 40
+        )
+        self.realm_name_combobox = ComboBoxes(realm_page, 0, 175, 100, 40)
+        self.realm_name_combobox.Combo.setEnabled(False)
+
+        self.realm_region_label = LabelText(realm_page, "Wow Region", 0, 325, 200, 40)
+        self.realm_region = ComboBoxes(realm_page, 0, 325, 100, 40)
+        self.realm_region.Combo.addItems(
+            ["", "EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
+        )
+        self.realm_region_label.Label.setToolTip("")
+        self.realm_region.Combo.currentIndexChanged.connect(
+            self.on_combo_box_region_changed
+        )
+
+        self.add_realm_button = UIButtons(realm_page, "Add Realm", 0, 425, 100, 50)
+        self.add_realm_button.Button.clicked.connect(self.add_realm_to_list)
+        self.add_realm_button.Button.setToolTip("Add item to your snipe list.")
+
+        self.reset_realm_button = UIButtons(
+            realm_page, "Reset\nRealm List", 0, 575, 100, 50
+        )
+        self.reset_realm_button.Button.clicked.connect(self.reset_realm_list)
+        self.reset_realm_button.Button.setToolTip("")
+
+        self.remove_realm_button = UIButtons(
+            realm_page, "Remove\nRealm", 0, 500, 100, 50
+        )
+        self.remove_realm_button.Button.clicked.connect(self.remove_realm_to_list)
+        self.remove_realm_button.Button.setToolTip("Remove item from your snipe list.")
+
+        self.realm_list_display = ListView(realm_page, 125, 25, 300, 550)
+        self.realm_list_display.List.itemClicked.connect(self.realm_list_clicked)
 
     def make_side_buttons(self):
         self.go_to_home_button = UIButtons(self, "Home Page", 25, 25, 200, 50)
@@ -299,6 +344,9 @@ class App(QMainWindow):
             self, "Application Settings", 25, 325, 200, 50
         )
         self.go_to_settings_button.Button.clicked.connect(self.go_to_settings_page)
+
+        self.go_to_realm_button = UIButtons(self, "Realm Lists", 25, 400, 200, 50)
+        self.go_to_realm_button.Button.clicked.connect(self.go_to_realms_page)
 
         # add a line to separate the buttons from the rest of the UI
         self.line = QLabel(self)
@@ -659,6 +707,9 @@ class App(QMainWindow):
     def go_to_settings_page(self):
         self.stacked_widget.setCurrentIndex(4)
 
+    def go_to_realms_page(self):
+        self.stacked_widget.setCurrentIndex(5)
+
     def api_data_received(self, pet_statistics, item_statistics):
         self.pet_statistics = pet_statistics
         self.item_statistics = item_statistics
@@ -739,6 +790,251 @@ class App(QMainWindow):
                 self.pet_price_input.Text.setText(recommended_price)
 
         self.pet_id_input.Text.setText(str(selected_pet_id))
+
+    def on_combo_box_region_changed(self, index):
+        self.realm_list_display.List.clear()
+        self.realm_name_combobox.Combo.clear()
+        selected_realm = self.realm_region.Combo.currentText()
+        match selected_realm:
+            case "EU":
+                from utils.realm_data import EU_CONNECTED_REALMS_IDS as realm_list
+
+                data_to_insert = self.eu_connected_realms
+
+            case "NA":
+                from utils.realm_data import NA_CONNECTED_REALMS_IDS as realm_list
+
+                data_to_insert = self.na_connected_realms
+
+            case "EUCLASSIC":
+                from utils.realm_data import (
+                    EUCLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+                data_to_insert = self.EUCLASSIC_connected_realms
+
+            case "NACLASSIC":
+                from utils.realm_data import (
+                    NACLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+                data_to_insert = self.NACLASSIC_connected_realms
+
+            case "NASODCLASSIC":
+                from utils.realm_data import (
+                    NASODCLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+                data_to_insert = self.NASODCLASSIC_connected_realms
+
+            case "EUSODCLASSIC":
+                from utils.realm_data import (
+                    EUSODCLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+                data_to_insert = self.EUSODCLASSIC_connected_realms
+
+            case _:
+                QMessageBox.critical(self, "Region List", "Select valid region.")
+                return False
+
+        with open(data_to_insert, "r") as f:
+            data = json.load(f)
+
+        self.realm_name_combobox.Combo.addItems(list(realm_list.keys()))
+        self.realm_name_combobox.Combo.setEditable(True)
+        self.realm_name_combobox.Combo.setInsertPolicy(QComboBox.NoInsert)
+        self.realm_name_combobox.Combo.completer()
+        self.realm_name_combobox.Combo.currentIndexChanged.connect(
+            self.on_combo_box_realm_name_changed
+        )
+        self.realm_name_combobox.Combo.setEnabled(True)
+
+        for key, value in data.items():
+            self.realm_list_display.List.insertItem(
+                self.realm_list_display.List.count(), f"Name: {key}; ID: {value};"
+            )
+
+    def on_combo_box_realm_name_changed(self, index):
+        selected_realm_name = self.realm_name_combobox.Combo.currentText()
+        if selected_realm_name == "":
+            return 0
+        selected_realm = self.realm_region.Combo.currentText()
+        match selected_realm:
+            case "EU":
+                from utils.realm_data import EU_CONNECTED_REALMS_IDS as realm_list
+
+            case "NA":
+                from utils.realm_data import NA_CONNECTED_REALMS_IDS as realm_list
+
+            case "EUCLASSIC":
+                from utils.realm_data import (
+                    EUCLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+            case "NACLASSIC":
+                from utils.realm_data import (
+                    NACLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+            case "NASODCLASSIC":
+                from utils.realm_data import (
+                    NASODCLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+            case "EUSODCLASSIC":
+                from utils.realm_data import (
+                    EUSODCLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+            case _:
+                QMessageBox.critical(self, "Region List", "Select valid region.")
+                return False
+
+        self.realm_name_input.Text.setText(selected_realm_name)
+        self.realm_id_input.Text.setText(str(realm_list[selected_realm_name]))
+
+    def add_realm_to_list(self):
+        if self.realm_name_input.Text.text() == "":
+            return 0
+
+        selected_realm = self.realm_region.Combo.currentText()
+        match selected_realm:
+            case "EU":
+                data_to_insert = self.eu_connected_realms
+
+            case "NA":
+                data_to_insert = self.na_connected_realms
+
+            case "EUCLASSIC":
+                data_to_insert = self.EUCLASSIC_connected_realms
+
+            case "NACLASSIC":
+                data_to_insert = self.NACLASSIC_connected_realms
+
+            case "NASODCLASSIC":
+                data_to_insert = self.NASODCLASSIC_connected_realms
+
+            case "EUSODCLASSIC":
+                data_to_insert = self.EUSODCLASSIC_connected_realms
+
+            case _:
+                QMessageBox.critical(self, "Region List", "Select valid region.")
+                return False
+
+        with open(data_to_insert, "r") as f:
+            data = json.load(f)
+
+        data[self.realm_name_input.Text.text()] = int(self.realm_id_input.Text.text())
+
+        self.realm_list_display.List.clear()
+
+        for key, value in data.items():
+            self.realm_list_display.List.insertItem(
+                self.realm_list_display.List.count(), f"Name: {key}; ID: {value};"
+            )
+
+        self.save_json_file(data_to_insert, data)
+
+    def remove_realm_to_list(self):
+        if self.realm_name_input.Text.text() == "":
+            return 0
+
+        selected_realm = self.realm_region.Combo.currentText()
+        match selected_realm:
+            case "EU":
+                data_to_insert = self.eu_connected_realms
+
+            case "NA":
+                data_to_insert = self.na_connected_realms
+
+            case "EUCLASSIC":
+                data_to_insert = self.EUCLASSIC_connected_realms
+
+            case "NACLASSIC":
+                data_to_insert = self.NACLASSIC_connected_realms
+
+            case "NASODCLASSIC":
+                data_to_insert = self.NASODCLASSIC_connected_realms
+
+            case "EUSODCLASSIC":
+                data_to_insert = self.EUSODCLASSIC_connected_realms
+
+            case _:
+                QMessageBox.critical(self, "Region List", "Select valid region.")
+                return False
+
+        with open(data_to_insert, "r") as f:
+            data = json.load(f)
+
+        del data[self.realm_name_input.Text.text()]
+
+        self.realm_list_display.List.clear()
+
+        for key, value in data.items():
+            self.realm_list_display.List.insertItem(
+                self.realm_list_display.List.count(), f"Name: {key}; ID: {value};"
+            )
+
+        self.realm_name_input.Text.setText("")
+        self.realm_id_input.Text.setText("")
+
+        self.save_json_file(data_to_insert, data)
+
+    def reset_realm_list(self):
+        selected_realm = self.realm_region.Combo.currentText()
+        match selected_realm:
+            case "EU":
+                from utils.realm_data import EU_CONNECTED_REALMS_IDS as realm_list
+
+                data_to_insert = self.eu_connected_realms
+
+            case "NA":
+                from utils.realm_data import NA_CONNECTED_REALMS_IDS as realm_list
+
+                data_to_insert = self.na_connected_realms
+
+            case "EUCLASSIC":
+                from utils.realm_data import (
+                    EUCLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+                data_to_insert = self.EUCLASSIC_connected_realms
+
+            case "NACLASSIC":
+                from utils.realm_data import (
+                    NACLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+                data_to_insert = self.NACLASSIC_connected_realms
+
+            case "NASODCLASSIC":
+                from utils.realm_data import (
+                    NASODCLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+                data_to_insert = self.NASODCLASSIC_connected_realms
+
+            case "EUSODCLASSIC":
+                from utils.realm_data import (
+                    EUSODCLASSIC_CONNECTED_REALMS_IDS as realm_list,
+                )
+
+                data_to_insert = self.EUSODCLASSIC_connected_realms
+
+            case _:
+                QMessageBox.critical(self, "Region List", "Select valid region.")
+                return False
+
+        with open(data_to_insert, "w") as json_file:
+            json.dump(realm_list, json_file, indent=4)
+
+        self.realm_list_display.List.clear()
+
+        for key, value in realm_list.items():
+            self.realm_list_display.List.insertItem(
+                self.realm_list_display.List.count(), f"Name: {key}; ID: {value};"
+            )
 
     def check_config_file(self, path_to_config):
         try:
@@ -909,6 +1205,15 @@ class App(QMainWindow):
         self.ilvl_avoidance.Checkbox.setChecked(avoidance == "True")
 
         self.ilvl_input.Text.setText(ilvl)
+
+    def realm_list_clicked(self, item):
+        realm_split = item.text().split(":")
+        realm_name = realm_split[1].split(";")[0][1::]
+        realm_id = realm_split[2].split(";")[0][1::]
+
+        self.realm_name_input.Text.setText(realm_name)
+
+        self.realm_id_input.Text.setText(realm_id)
 
     def add_ilvl_to_list(self):
         ilvl = self.ilvl_input.Text.text()
