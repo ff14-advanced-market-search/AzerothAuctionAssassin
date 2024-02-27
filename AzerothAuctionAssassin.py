@@ -967,7 +967,16 @@ class App(QMainWindow):
         with open(data_to_insert, "r") as f:
             data = json.load(f)
 
-        del data[self.realm_name_input.Text.text()]
+        try:
+            del data[self.realm_name_input.Text.text()]
+
+        except KeyError as e:
+            QMessageBox.critical(
+            self,
+            "Removing Realm Error",
+            f"Realm already not in the list",
+            )
+            return 0
 
         self.realm_list_display.List.clear()
 
