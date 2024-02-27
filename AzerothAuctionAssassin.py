@@ -662,7 +662,7 @@ class App(QMainWindow):
             self.item_list_double_clicked)
 
         self.import_item_data_button = UIButtons(
-            item_page, "Import\nItem Data", 0, 625, 80, 60
+            item_page, "Import\nItem Data", 0, 625, 75, 60
         )
         self.import_item_data_button.Button.clicked.connect(
             self.import_item_data)
@@ -671,7 +671,7 @@ class App(QMainWindow):
         )
 
         self.import_pbs_data_button = UIButtons(
-            item_page, "Import\nPBS Data", 85, 625, 80, 60
+            item_page, "Import\nPBS Data", 85, 625, 75, 60
         )
         self.import_pbs_data_button.Button.clicked.connect(
             self.import_pbs_data)
