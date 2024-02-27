@@ -2,6 +2,21 @@
 # to tell the script that is being invoked from the windows c# binary
 # so it knows from where to load the pre-installed packages
 # so it can locate them before doing the other imports
+import sys
+
+windowsApp_Path = None
+try:
+    if sys.argv[1] == "run-from-windows-bin":
+        sys.path.append(f"{sys.argv[2]}")
+        sys.path.append(f"{sys.argv[3]}")
+
+        windowsApp_Path = f"{sys.argv[2]}"
+    else:
+        pass
+except Exception as ex:
+    pass
+# i hate the way that looks but if it isnt broken dont fix it
+
 import breeze_resources
 import ctypes
 import pandas as pd
@@ -28,21 +43,6 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QWidget,
 )
-import sys
-
-windowsApp_Path = None
-try:
-    if sys.argv[1] == "run-from-windows-bin":
-        sys.path.append(f"{sys.argv[2]}")
-        sys.path.append(f"{sys.argv[3]}")
-
-        windowsApp_Path = f"{sys.argv[2]}"
-    else:
-        pass
-except Exception as ex:
-    pass
-# i hate the way that looks but if it isnt broken dont fix it
-
 
 if sys.platform == "win32":
     myappid = "mycompany.myproduct.subproduct.version"  # arbitrary string
