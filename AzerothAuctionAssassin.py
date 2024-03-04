@@ -26,11 +26,9 @@ from sys import exit
 import requests
 import os
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QThread, pyqtSignal, QFile, QTextStream, Qt
+from PyQt5.QtCore import QThread, pyqtSignal, QFile, QTextStream
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (
-    QVBoxLayout,
-    QHBoxLayout,
     QGridLayout,
     QStackedWidget,
     QMainWindow,
