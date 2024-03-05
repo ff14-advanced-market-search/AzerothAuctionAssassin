@@ -46,6 +46,7 @@ class Alerts(QThread):
 
                 if "itemID" in auction:
                     id_msg = f"`itemID:` {auction['itemID']}\n"
+                    saddlebag_link_id = auction["itemID"]
                     if "tertiary_stats" in auction:
                         item_name = mega_data.DESIRED_ILVL_NAMES[auction["itemID"]]
                         id_msg += f"`Name:` {item_name}\n"
@@ -57,6 +58,7 @@ class Alerts(QThread):
                         id_msg += f"`Name:` {item_name}\n"
                 else:
                     id_msg = f"`petID:` {auction['petID']}\n"
+                    saddlebag_link_id = auction["petID"]
                     if auction["petID"] in mega_data.PET_NAMES:
                         pet_name = mega_data.PET_NAMES[auction["petID"]]
                         id_msg += f"`Name:` {pet_name}\n"
@@ -92,7 +94,7 @@ class Alerts(QThread):
                     else auction["itemlink"]
                 )
                 message += f"[{link_label}]({link_url})\n"
-                message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{auction['itemID']})\n"
+                message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{saddlebag_link_id})\n"
 
                 # Add price info, if available
                 price_type = (
