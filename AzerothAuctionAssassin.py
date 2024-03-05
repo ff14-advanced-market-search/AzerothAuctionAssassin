@@ -79,11 +79,11 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.12"
+        self.title = "Azeroth Auction Assassin v1.0.13"
         self.left = 100
         self.top = 100
         self.width = 550
-        self.height = 490
+        self.height = 650
         icon_path = "icon.png"
 
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
@@ -161,7 +161,7 @@ class App(QMainWindow):
         self.setCentralWidget(central_widget)
 
         self.layout_area = QGridLayout(central_widget)
-        
+
         self.make_side_buttons()
 
         self.stacked_widget = QStackedWidget(self)
@@ -209,7 +209,9 @@ class App(QMainWindow):
 
         # Create a QScrollArea and set its widget to be the container
         scrollArea = QScrollArea()
-        scrollArea.setWidgetResizable(True)  # Important to make the scroll area adapt to the content
+        scrollArea.setWidgetResizable(
+            True
+        )  # Important to make the scroll area adapt to the content
         scrollArea.setWidget(central_widget)
 
         # Set the QScrollArea as the central widget of the main window
@@ -221,31 +223,25 @@ class App(QMainWindow):
 
         self.realm_name_input = QLineEdit(realm_page)
         self.realm_name_input_label = QLabel("Realm Name", realm_page)
-        self.realm_name_input_label.setToolTip(
-            ""
-        )
+        self.realm_name_input_label.setToolTip("")
         self.realm_name_input_label.setFixedHeight(10)
-        self.realms_page_layout.addWidget(self.realm_name_input_label, 0 ,0, 1, 1)
-        self.realms_page_layout.addWidget(self.realm_name_input, 1 ,0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_name_input_label, 0, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_name_input, 1, 0, 1, 1)
 
         self.realm_id_input = QLineEdit(realm_page)
         self.realm_id_input_label = QLabel("Realm ID", realm_page)
-        self.realm_id_input_label.setToolTip(
-            ""
-        )
+        self.realm_id_input_label.setToolTip("")
         self.realm_id_input_label.setFixedHeight(10)
-        self.realms_page_layout.addWidget(self.realm_id_input_label, 2 ,0, 1, 1)
-        self.realms_page_layout.addWidget(self.realm_id_input, 3 ,0, 1, 1)
-
+        self.realms_page_layout.addWidget(self.realm_id_input_label, 2, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_id_input, 3, 0, 1, 1)
 
         self.realm_name_combobox = QComboBox(realm_page)
         self.realm_name_combobox.setEnabled(False)
         self.realm_realm_name_label = QLabel("Realm ID", realm_page)
         self.realm_realm_name_label.setToolTip("")
         self.realm_realm_name_label.setFixedHeight(10)
-        self.realms_page_layout.addWidget(self.realm_realm_name_label, 4 ,0, 1, 1)
-        self.realms_page_layout.addWidget(self.realm_name_combobox, 5 ,0, 1, 1)
-
+        self.realms_page_layout.addWidget(self.realm_realm_name_label, 4, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_name_combobox, 5, 0, 1, 1)
 
         self.realm_region = QComboBox(realm_page)
         self.realm_region_label = QLabel("Wow Region", realm_page)
@@ -254,68 +250,58 @@ class App(QMainWindow):
         self.realm_region.addItems(
             ["", "EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
         )
-        self.realm_region.currentIndexChanged.connect(
-            self.on_combo_box_region_changed
-        )
-        self.realms_page_layout.addWidget(self.realm_region_label, 6 ,0, 1, 1)
-        self.realms_page_layout.addWidget(self.realm_region, 7 ,0, 1, 1)
+        self.realm_region.currentIndexChanged.connect(self.on_combo_box_region_changed)
+        self.realms_page_layout.addWidget(self.realm_region_label, 6, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_region, 7, 0, 1, 1)
 
         self.add_realm_button = QPushButton("Add Realm")
-        self.add_realm_button.setToolTip(
-            ""
-        )
+        self.add_realm_button.setToolTip("")
         self.add_realm_button.clicked.connect(self.add_realm_to_list)
-        self.realms_page_layout.addWidget(self.add_realm_button, 8 , 0, 1, 1)
+        self.realms_page_layout.addWidget(self.add_realm_button, 8, 0, 1, 1)
 
         self.reset_realm_button = QPushButton("Reset Realm List")
-        self.reset_realm_button.setToolTip(
-            ""
-        )
+        self.reset_realm_button.setToolTip("")
         self.reset_realm_button.clicked.connect(self.reset_realm_list)
-        self.realms_page_layout.addWidget(self.reset_realm_button, 9 , 0, 1, 1)
+        self.realms_page_layout.addWidget(self.reset_realm_button, 9, 0, 1, 1)
 
         self.remove_realm_button = QPushButton("Remove Realm")
-        self.remove_realm_button.setToolTip(
-            ""
-        )
+        self.remove_realm_button.setToolTip("")
         self.remove_realm_button.clicked.connect(self.remove_realm_to_list)
-        self.realms_page_layout.addWidget(self.remove_realm_button, 10 , 0, 1, 1)
+        self.realms_page_layout.addWidget(self.remove_realm_button, 10, 0, 1, 1)
 
         self.realm_list_display = QListWidget(realm_page)
         self.realm_list_display.itemClicked.connect(self.realm_list_clicked)
-        self.realms_page_layout.addWidget(self.realm_list_display, 0 , 1, 11, 2)
+        self.realms_page_layout.addWidget(self.realm_list_display, 0, 1, 11, 2)
 
     def make_side_buttons(self):
         self.go_to_home_button = QPushButton("Home Page")
         self.go_to_home_button.clicked.connect(self.go_to_home_page)
-        self.layout_area.addWidget(self.go_to_home_button, 0 , 0)
+        self.layout_area.addWidget(self.go_to_home_button, 0, 0)
 
         self.go_to_pet_button = QPushButton("Pets")
         self.go_to_pet_button.clicked.connect(self.go_to_pet_page)
-        self.layout_area.addWidget(self.go_to_pet_button, 1 , 0)
+        self.layout_area.addWidget(self.go_to_pet_button, 1, 0)
 
         self.go_to_item_button = QPushButton("Items")
         self.go_to_item_button.clicked.connect(self.go_to_item_page)
-        self.layout_area.addWidget(self.go_to_item_button, 2 , 0)
+        self.layout_area.addWidget(self.go_to_item_button, 2, 0)
 
         self.go_to_ilvl_button = QPushButton("ILvl List")
         self.go_to_ilvl_button.clicked.connect(self.go_to_ilvl_page)
-        self.layout_area.addWidget(self.go_to_ilvl_button, 3 , 0)
+        self.layout_area.addWidget(self.go_to_ilvl_button, 3, 0)
 
-        self.go_to_settings_button = QPushButton(
-            "Application Settings"
-        )
+        self.go_to_settings_button = QPushButton("Application Settings")
         self.go_to_settings_button.clicked.connect(self.go_to_settings_page)
-        self.layout_area.addWidget(self.go_to_settings_button, 4 , 0)
+        self.layout_area.addWidget(self.go_to_settings_button, 4, 0)
 
         self.go_to_realm_button = QPushButton("Realm Lists")
         self.go_to_realm_button.clicked.connect(self.go_to_realms_page)
-        self.layout_area.addWidget(self.go_to_realm_button, 5 , 0)
+        self.layout_area.addWidget(self.go_to_realm_button, 5, 0)
 
         # add a line to separate the buttons from the rest of the UI
         self.line = QLabel(self)
         self.line.setStyleSheet("background-color: white")
-        self.layout_area.addWidget(self.line, 6 , 0)
+        self.layout_area.addWidget(self.line, 6, 0)
 
         # self.import_pbs_data_button = UIButtons(
         #     self, "Import PBS Data", 25, 400, 200, 50
@@ -328,19 +314,19 @@ class App(QMainWindow):
         self.save_data_button = QPushButton("Save Data")
         self.save_data_button.clicked.connect(self.save_data_to_json)
         self.save_data_button.setToolTip("Save data without starting a scan.")
-        self.layout_area.addWidget(self.save_data_button, 7 , 0)
+        self.layout_area.addWidget(self.save_data_button, 7, 0)
 
         self.reset_data_button = QPushButton("Reset Data")
         self.reset_data_button.clicked.connect(self.reset_app_data)
         self.reset_data_button.setToolTip("Erase all data and reset the app.")
-        self.layout_area.addWidget(self.reset_data_button, 8 , 0)
+        self.layout_area.addWidget(self.reset_data_button, 8, 0)
 
         self.start_button = QPushButton("Start Alerts")
         self.start_button.clicked.connect(self.start_alerts)
         self.start_button.setToolTip(
             "Start the scan! Runs once on start and then waits for new data to send more alerts."
         )
-        self.layout_area.addWidget(self.start_button, 9 ,0)
+        self.layout_area.addWidget(self.start_button, 9, 0)
 
         self.stop_button = QPushButton("Stop Alerts")
         self.stop_button.clicked.connect(self.stop_alerts)
@@ -348,10 +334,10 @@ class App(QMainWindow):
         self.stop_button.setToolTip(
             "Gracefully stop the alerts.\nThis will not stop alerts in progress.\nYou may need to kill the process for a force stop."
         )
-        self.layout_area.addWidget(self.stop_button, 10 , 0)
+        self.layout_area.addWidget(self.stop_button, 10, 0)
 
         self.mega_alerts_progress = QLabel("Waiting for user to Start!")
-        self.layout_area.addWidget(self.mega_alerts_progress, 11 , 0)
+        self.layout_area.addWidget(self.mega_alerts_progress, 11, 0)
 
     def make_home_page(self, home_page):
 
@@ -363,13 +349,13 @@ class App(QMainWindow):
         # display the icon.ico
         self.icon = QLabel(home_page)
         self.icon.setPixmap(QtGui.QPixmap(icon_path))
-        self.home_page_layout.addWidget(self.icon, 0 , 0)
+        self.home_page_layout.addWidget(self.icon, 0, 0)
 
         # add the title
         self.title = QLabel(home_page)
         self.title.setText("Azeroth Auction Ace")
         self.title.setFont((QtGui.QFont("Arial", 30, QtGui.QFont.Bold)))
-        self.home_page_layout.addWidget(self.title, 1 , 0)
+        self.home_page_layout.addWidget(self.title, 1, 0)
 
         # add link to patreon
         self.patreon_link = QLabel(home_page)
@@ -378,8 +364,7 @@ class App(QMainWindow):
         )
         self.patreon_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.patreon_link.setOpenExternalLinks(True)
-        self.home_page_layout.addWidget(self.patreon_link, 2 , 0)
-        
+        self.home_page_layout.addWidget(self.patreon_link, 2, 0)
 
         # add discord link
         self.discord_link = QLabel(home_page)
@@ -388,7 +373,7 @@ class App(QMainWindow):
         )
         self.discord_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.discord_link.setOpenExternalLinks(True)
-        self.home_page_layout.addWidget(self.discord_link, 3 , 0)
+        self.home_page_layout.addWidget(self.discord_link, 3, 0)
 
         # add main website link
         self.website_link = QLabel(home_page)
@@ -397,7 +382,7 @@ class App(QMainWindow):
         )
         self.website_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.website_link.setOpenExternalLinks(True)
-        self.home_page_layout.addWidget(self.website_link, 4 , 0)
+        self.home_page_layout.addWidget(self.website_link, 4, 0)
 
         # add a guides link
         self.guides_link = QLabel(home_page)
@@ -406,7 +391,7 @@ class App(QMainWindow):
         )
         self.guides_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.guides_link.setOpenExternalLinks(True)
-        self.home_page_layout.addWidget(self.guides_link, 5 , 0)
+        self.home_page_layout.addWidget(self.guides_link, 5, 0)
 
     def make_settings_page(self, settings_page):
 
@@ -415,32 +400,38 @@ class App(QMainWindow):
         self.discord_webhook_input_label.setToolTip(
             "Setup a discord channel with a webhook url for sending the alert messages."
         )
-        self.settings_page_layout.addWidget(self.discord_webhook_input_label, 0 ,0, 1, 2)
-        self.settings_page_layout.addWidget(self.discord_webhook_input, 1 ,0, 1, 2)
+        self.settings_page_layout.addWidget(
+            self.discord_webhook_input_label, 0, 0, 1, 2
+        )
+        self.settings_page_layout.addWidget(self.discord_webhook_input, 1, 0, 1, 2)
 
         self.wow_client_id_input = QLineEdit(settings_page)
         self.wow_client_id_input_label = QLabel("WoW Client ID", settings_page)
         self.wow_client_id_input_label.setToolTip(
             "Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids."
         )
-        self.settings_page_layout.addWidget(self.wow_client_id_input_label, 2 ,0, 1, 2)
-        self.settings_page_layout.addWidget(self.wow_client_id_input, 3 ,0, 1, 2)
+        self.settings_page_layout.addWidget(self.wow_client_id_input_label, 2, 0, 1, 2)
+        self.settings_page_layout.addWidget(self.wow_client_id_input, 3, 0, 1, 2)
 
         self.wow_client_secret_input = QLineEdit(settings_page)
         self.wow_client_secret_input_label = QLabel("WoW Client Secret", settings_page)
         self.wow_client_secret_input_label.setToolTip(
             "Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids."
         )
-        self.settings_page_layout.addWidget(self.wow_client_secret_input_label, 4 ,0, 1, 2)
-        self.settings_page_layout.addWidget(self.wow_client_secret_input, 5 ,0, 1, 2)
+        self.settings_page_layout.addWidget(
+            self.wow_client_secret_input_label, 4, 0, 1, 2
+        )
+        self.settings_page_layout.addWidget(self.wow_client_secret_input, 5, 0, 1, 2)
 
         self.authentication_token = QLineEdit(settings_page)
-        self.authentication_token_label = QLabel("Auction Assassin Token", settings_page)
+        self.authentication_token_label = QLabel(
+            "Auction Assassin Token", settings_page
+        )
         self.authentication_token_label.setToolTip(
             "Go to the Saddlebag Exchange Discord and generate a token with the bot command:\n/wow auctionassassintoken"
         )
-        self.settings_page_layout.addWidget(self.authentication_token_label, 6 ,0, 1, 2)
-        self.settings_page_layout.addWidget(self.authentication_token, 7 ,0, 1, 2)
+        self.settings_page_layout.addWidget(self.authentication_token_label, 6, 0, 1, 2)
+        self.settings_page_layout.addWidget(self.authentication_token, 7, 0, 1, 2)
 
         self.wow_region = QComboBox(settings_page)
         self.wow_region.addItems(
@@ -450,9 +441,8 @@ class App(QMainWindow):
         self.wow_region_label.setToolTip(
             "Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic."
         )
-        self.settings_page_layout.addWidget(self.wow_region_label, 8 ,0, 1, 1)
-        self.settings_page_layout.addWidget(self.wow_region, 9 ,0, 1, 1)
-
+        self.settings_page_layout.addWidget(self.wow_region_label, 8, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.wow_region, 9, 0, 1, 1)
 
         self.number_of_mega_threads = QLineEdit(settings_page)
         self.number_of_mega_threads.setText("48")
@@ -460,8 +450,10 @@ class App(QMainWindow):
         self.number_of_mega_threads_label.setToolTip(
             "Change the thread count.\nDo 100 for the fastest scans, but RIP to ur CPU and MEM."
         )
-        self.settings_page_layout.addWidget(self.number_of_mega_threads_label, 8 ,1, 1, 1)
-        self.settings_page_layout.addWidget(self.number_of_mega_threads, 9 ,1, 1, 1)
+        self.settings_page_layout.addWidget(
+            self.number_of_mega_threads_label, 8, 1, 1, 1
+        )
+        self.settings_page_layout.addWidget(self.number_of_mega_threads, 9, 1, 1, 1)
 
         self.scan_time_min = QLineEdit(settings_page)
         self.scan_time_min.setText("1")
@@ -469,8 +461,8 @@ class App(QMainWindow):
         self.scan_time_min_label.setToolTip(
             "Increase or decrease the minutes before or after the data update to start timed scans."
         )
-        self.settings_page_layout.addWidget(self.scan_time_min_label, 10 ,1, 1, 1)
-        self.settings_page_layout.addWidget(self.scan_time_min, 11 ,1, 1, 1)
+        self.settings_page_layout.addWidget(self.scan_time_min_label, 10, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.scan_time_min, 11, 1, 1, 1)
 
         self.scan_time_max = QLineEdit(settings_page)
         self.scan_time_max.setText("3")
@@ -478,8 +470,8 @@ class App(QMainWindow):
         self.scan_time_max_label.setToolTip(
             "Increase or decrease the minutes before or after the data update to stop running scans."
         )
-        self.settings_page_layout.addWidget(self.scan_time_max_label, 12 ,1, 1, 1)
-        self.settings_page_layout.addWidget(self.scan_time_max, 13 ,1, 1, 1)
+        self.settings_page_layout.addWidget(self.scan_time_max_label, 12, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.scan_time_max, 13, 1, 1, 1)
 
         self.important_emoji = QLineEdit(settings_page)
         self.important_emoji.setText("🔥")
@@ -487,8 +479,8 @@ class App(QMainWindow):
         self.important_emoji_label.setToolTip(
             "Changes the separators from ==== to whatever emoji you want."
         )
-        self.settings_page_layout.addWidget(self.important_emoji_label, 14 ,1, 1, 1)
-        self.settings_page_layout.addWidget(self.important_emoji, 15 ,1, 1, 1)
+        self.settings_page_layout.addWidget(self.important_emoji_label, 14, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.important_emoji, 15, 1, 1, 1)
 
         self.discount_percent = QLineEdit(settings_page)
         self.discount_percent.setText("10")
@@ -498,165 +490,141 @@ class App(QMainWindow):
             + "1 to 100, smaller number means a better price.\n"
             + "ex: if you set 10 pecent and avg price is 100k, it recommends you snipe for 10k."
         )
-        self.settings_page_layout.addWidget(self.discount_percent_label, 16 ,1, 1, 1)
-        self.settings_page_layout.addWidget(self.discount_percent, 17 ,1, 1, 1)
+        self.settings_page_layout.addWidget(self.discount_percent_label, 16, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.discount_percent, 17, 1, 1, 1)
 
         self.show_bid_prices = QCheckBox("Show Bid Prices", settings_page)
         self.show_bid_prices.setToolTip(
-           "Show items with Bid prices below your price limit on Desired Items"
+            "Show items with Bid prices below your price limit on Desired Items"
         )
-        self.settings_page_layout.addWidget(self.show_bid_prices, 10 ,0, 1, 1)
+        self.settings_page_layout.addWidget(self.show_bid_prices, 10, 0, 1, 1)
 
         self.wow_head_link = QCheckBox("Show WoWHead Link", settings_page)
         self.wow_head_link.setToolTip(
             "Uses WoWHead links instead of Undermine and shows pictures."
         )
-        self.settings_page_layout.addWidget(self.wow_head_link, 11 ,0, 1, 1)
-
+        self.settings_page_layout.addWidget(self.wow_head_link, 11, 0, 1, 1)
 
         self.russian_realms = QCheckBox("No Russian Realms", settings_page)
         self.russian_realms.setChecked(True)
-        self.russian_realms.setToolTip(
-            "Removes alerts from Russian Realms."
-        )
-        self.settings_page_layout.addWidget(self.russian_realms, 12 ,0, 1, 1)
+        self.russian_realms.setToolTip("Removes alerts from Russian Realms.")
+        self.settings_page_layout.addWidget(self.russian_realms, 12, 0, 1, 1)
 
-        
         self.refresh_alerts = QCheckBox("Refresh Alerts", settings_page)
-        self.refresh_alerts.setToolTip(
-            "Set to true to refresh alerts every 1 hour."
-        )
+        self.refresh_alerts.setToolTip("Set to true to refresh alerts every 1 hour.")
 
-        self.settings_page_layout.addWidget(self.refresh_alerts, 13 ,0, 1, 1)
-
+        self.settings_page_layout.addWidget(self.refresh_alerts, 13, 0, 1, 1)
 
         self.debug_mode = QCheckBox("Debug Mode", settings_page)
         self.debug_mode.setToolTip(
             "Trigger a scan on all realms once.\nUse this to test make sure your data is working."
         )
 
-        self.settings_page_layout.addWidget(self.debug_mode, 14 ,0, 1, 1)
+        self.settings_page_layout.addWidget(self.debug_mode, 14, 0, 1, 1)
 
         self.faction = QComboBox(settings_page)
-        self.faction.addItems(
-            ["all", "horde", "alliance", "booty bay"]
-        )
+        self.faction.addItems(["all", "horde", "alliance", "booty bay"])
         self.faction_label = QLabel("Faction AH", settings_page)
         self.faction_label.setToolTip(
             "Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
         )
-        self.settings_page_layout.addWidget(self.faction_label, 15 ,0, 1, 1)
-        self.settings_page_layout.addWidget(self.faction, 16 ,0, 1, 1)
+        self.settings_page_layout.addWidget(self.faction_label, 15, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.faction, 16, 0, 1, 1)
 
         self.import_config_button = QPushButton("Import Config")
         self.import_config_button.clicked.connect(self.import_configs)
-        self.import_config_button.setToolTip(
-            "Import your mega_data.json config."
-        )
-        
-        self.settings_page_layout.addWidget(self.import_config_button, 17 ,0, 1, 1)
+        self.import_config_button.setToolTip("Import your mega_data.json config.")
+
+        self.settings_page_layout.addWidget(self.import_config_button, 17, 0, 1, 1)
 
     def make_pet_page(self, pet_page):
-        
+
         self.pet_id_input = QLineEdit(pet_page)
         self.pet_id_input_label = QLabel("Pet ID", pet_page)
         self.pet_id_input_label.setToolTip(
             "Add the Pet ID that you want to snipe.\nYou can find that id at the end of the undermine exchange link for the item next to 82800 (which is the item id for pet cages)\nhttps://undermine.exchange/#us-suramar/82800-3390."
         )
-        self.pet_page_layout.addWidget(self.pet_id_input_label, 0 ,0, 1, 1)
-        self.pet_page_layout.addWidget(self.pet_id_input, 1 ,0, 1, 1)
+        self.pet_page_layout.addWidget(self.pet_id_input_label, 0, 0, 1, 1)
+        self.pet_page_layout.addWidget(self.pet_id_input, 1, 0, 1, 1)
 
         self.pet_price_input = QLineEdit(pet_page)
         self.pet_price_input_label = QLabel("Price", pet_page)
         self.pet_price_input_label.setToolTip(
             "Pick a price you want to buy at or under."
         )
-        self.pet_page_layout.addWidget(self.pet_price_input_label, 0 ,1, 1, 1)
-        self.pet_page_layout.addWidget(self.pet_price_input, 1 ,1, 1, 1)
+        self.pet_page_layout.addWidget(self.pet_price_input_label, 0, 1, 1, 1)
+        self.pet_page_layout.addWidget(self.pet_price_input, 1, 1, 1, 1)
 
         self.pet_name_input = QComboBox(pet_page)
         self.pet_name_input.setEnabled(False)
-        self.pet_page_layout.addWidget(self.pet_name_input, 2 ,0, 1, 2)
+        self.pet_page_layout.addWidget(self.pet_name_input, 2, 0, 1, 2)
 
         self.add_pet_button = QPushButton("Add Pet")
-        self.add_pet_button.setToolTip(
-            "Add pet to your snipe list."
-        )
+        self.add_pet_button.setToolTip("Add pet to your snipe list.")
         self.add_pet_button.clicked.connect(self.add_pet_to_dict)
-        self.pet_page_layout.addWidget(self.add_pet_button, 3 , 0, 1, 1)
+        self.pet_page_layout.addWidget(self.add_pet_button, 3, 0, 1, 1)
 
         self.remove_pet_button = QPushButton("Remove Pet")
-        self.remove_pet_button.setToolTip(
-            "Remove pet from your snipe list."
-        )
+        self.remove_pet_button.setToolTip("Remove pet from your snipe list.")
         self.remove_pet_button.clicked.connect(self.remove_pet_to_dict)
-        self.pet_page_layout.addWidget(self.remove_pet_button, 3 , 1, 1, 1)
+        self.pet_page_layout.addWidget(self.remove_pet_button, 3, 1, 1, 1)
 
         self.pet_list_display = QListWidget(pet_page)
         self.pet_list_display.itemClicked.connect(self.pet_list_double_clicked)
-        self.pet_page_layout.addWidget(self.pet_list_display, 4 , 0, 13, 2)
+        self.pet_page_layout.addWidget(self.pet_list_display, 4, 0, 13, 2)
 
         self.import_pet_data_button = QPushButton("Import Pet Data")
-        self.import_pet_data_button.setToolTip(
-            "Import your desired_pets.json config"
-        )
+        self.import_pet_data_button.setToolTip("Import your desired_pets.json config")
         self.import_pet_data_button.clicked.connect(self.import_pet_data)
-        self.pet_page_layout.addWidget(self.import_pet_data_button, 17 , 0, 1, 2)
+        self.pet_page_layout.addWidget(self.import_pet_data_button, 17, 0, 1, 2)
 
     def make_item_page(self, item_page):
-        
+
         self.item_id_input = QLineEdit(item_page)
         self.item_id_input_label = QLabel("Item ID", item_page)
         self.item_id_input_label.setToolTip(
             "Add the item id of any item you want to buy.\nYou can search by name for them here with recommended prices\nhttps://temp.saddlebagexchange.com/megaitemnames"
         )
-        self.item_page_layout.addWidget(self.item_id_input_label, 0 ,0, 1, 1)
-        self.item_page_layout.addWidget(self.item_id_input, 1 ,0, 1, 1)
+        self.item_page_layout.addWidget(self.item_id_input_label, 0, 0, 1, 1)
+        self.item_page_layout.addWidget(self.item_id_input, 1, 0, 1, 1)
 
         self.item_price_input = QLineEdit(item_page)
         self.item_price_input_label = QLabel("Price", item_page)
         self.item_price_input_label.setToolTip(
             "Pick a price you want to buy at or under."
         )
-        self.item_page_layout.addWidget(self.item_price_input_label, 0 ,1, 1, 1)
-        self.item_page_layout.addWidget(self.item_price_input, 1 ,1, 1, 1)
+        self.item_page_layout.addWidget(self.item_price_input_label, 0, 1, 1, 1)
+        self.item_page_layout.addWidget(self.item_price_input, 1, 1, 1, 1)
 
         self.item_name_input = QComboBox(item_page)
         self.item_name_input.setEnabled(False)
-        self.item_page_layout.addWidget(self.item_name_input, 2 ,0, 1, 2)
+        self.item_page_layout.addWidget(self.item_name_input, 2, 0, 1, 2)
 
         self.add_item_button = QPushButton("Add Item")
-        self.add_item_button.setToolTip(
-            "Add item to your snipe list."
-        )
+        self.add_item_button.setToolTip("Add item to your snipe list.")
         self.add_item_button.clicked.connect(self.add_item_to_dict)
-        self.item_page_layout.addWidget(self.add_item_button, 3 , 0, 1, 1)
+        self.item_page_layout.addWidget(self.add_item_button, 3, 0, 1, 1)
 
         self.remove_item_button = QPushButton("Remove Item")
-        self.remove_item_button.setToolTip(
-            "Remove item from your snipe list."
-        )
+        self.remove_item_button.setToolTip("Remove item from your snipe list.")
         self.remove_item_button.clicked.connect(self.remove_item_to_dict)
-        self.item_page_layout.addWidget(self.remove_item_button, 3 , 1, 1, 1)
+        self.item_page_layout.addWidget(self.remove_item_button, 3, 1, 1, 1)
 
         self.item_list_display = QListWidget(item_page)
         self.item_list_display.itemClicked.connect(self.item_list_double_clicked)
-        self.item_page_layout.addWidget(self.item_list_display, 4 , 0, 13, 2)
+        self.item_page_layout.addWidget(self.item_list_display, 4, 0, 13, 2)
 
         self.import_item_data_button = QPushButton("Import Item Data")
-        self.import_item_data_button.setToolTip(
-            "Import your desired_items.json config"
-        )
+        self.import_item_data_button.setToolTip("Import your desired_items.json config")
         self.import_item_data_button.clicked.connect(self.import_item_data)
-        self.item_page_layout.addWidget(self.import_item_data_button, 17 , 0, 1, 1)
-
+        self.item_page_layout.addWidget(self.import_item_data_button, 17, 0, 1, 1)
 
         self.import_pbs_data_button = QPushButton("Import PBS Data")
         self.import_pbs_data_button.setToolTip(
             "Import your Point Blank Sniper text files"
         )
         self.import_pbs_data_button.clicked.connect(self.import_pbs_data)
-        self.item_page_layout.addWidget(self.import_pbs_data_button, 17 , 1, 1, 1)
+        self.item_page_layout.addWidget(self.import_pbs_data_button, 17, 1, 1, 1)
 
     def make_ilvl_page(self, ilvl_page):
 
@@ -666,8 +634,8 @@ class App(QMainWindow):
             "Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420"
         )
         self.ilvl_item_input_label.setFixedHeight(10)
-        self.ilvl_page_layout.addWidget(self.ilvl_item_input_label, 0 ,0, 1, 1)
-        self.ilvl_page_layout.addWidget(self.ilvl_item_input, 1 ,0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_item_input_label, 0, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_item_input, 1, 0, 1, 1)
 
         self.ilvl_input = QLineEdit(ilvl_page)
         self.ilvl_input_label = QLabel("Item level", ilvl_page)
@@ -675,8 +643,8 @@ class App(QMainWindow):
             "Set the minimum item level you want to snipe."
         )
         self.ilvl_input_label.setFixedHeight(10)
-        self.ilvl_page_layout.addWidget(self.ilvl_input_label, 2 ,0, 1, 1)
-        self.ilvl_page_layout.addWidget(self.ilvl_input, 3 ,0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_input_label, 2, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_input, 3, 0, 1, 1)
 
         self.ilvl_price_input = QLineEdit(ilvl_page)
         self.ilvl_price_input_label = QLabel("Buyout", ilvl_page)
@@ -684,59 +652,45 @@ class App(QMainWindow):
             "Set the maximum buyout you want to snipe."
         )
         self.ilvl_price_input_label.setFixedHeight(10)
-        self.ilvl_page_layout.addWidget(self.ilvl_price_input_label, 4 ,0, 1, 1)
-        self.ilvl_page_layout.addWidget(self.ilvl_price_input, 5 ,0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_price_input_label, 4, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_price_input, 5, 0, 1, 1)
 
         self.ilvl_sockets = QCheckBox("Sockets", ilvl_page)
-        self.ilvl_sockets.setToolTip(
-           "Do you want the item to have Sockets?"
-        )
-        self.ilvl_page_layout.addWidget(self.ilvl_sockets, 6 ,0, 1, 1)
+        self.ilvl_sockets.setToolTip("Do you want the item to have Sockets?")
+        self.ilvl_page_layout.addWidget(self.ilvl_sockets, 6, 0, 1, 1)
 
         self.ilvl_speed = QCheckBox("Speed", ilvl_page)
-        self.ilvl_speed.setToolTip(
-           "Do you want the item to have Speed?"
-        )
-        self.ilvl_page_layout.addWidget(self.ilvl_speed, 7 ,0, 1, 1)
+        self.ilvl_speed.setToolTip("Do you want the item to have Speed?")
+        self.ilvl_page_layout.addWidget(self.ilvl_speed, 7, 0, 1, 1)
 
         self.ilvl_leech = QCheckBox("Leech", ilvl_page)
-        self.ilvl_leech.setToolTip(
-           "Do you want the item to have Leech?"
-        )
-        self.ilvl_page_layout.addWidget(self.ilvl_leech, 8 ,0, 1, 1)
+        self.ilvl_leech.setToolTip("Do you want the item to have Leech?")
+        self.ilvl_page_layout.addWidget(self.ilvl_leech, 8, 0, 1, 1)
 
         self.ilvl_avoidance = QCheckBox("Avoidance", ilvl_page)
-        self.ilvl_avoidance.setToolTip(
-           "Do you want the item to have Avoidance?"
-        )
-        self.ilvl_page_layout.addWidget(self.ilvl_avoidance, 9 ,0, 1, 1)
+        self.ilvl_avoidance.setToolTip("Do you want the item to have Avoidance?")
+        self.ilvl_page_layout.addWidget(self.ilvl_avoidance, 9, 0, 1, 1)
 
         self.add_ilvl_button = QPushButton("Add Item", ilvl_page)
-        self.add_ilvl_button.setToolTip(
-            "Add item to your snipe list."
-        )
+        self.add_ilvl_button.setToolTip("Add item to your snipe list.")
         self.add_ilvl_button.clicked.connect(self.add_ilvl_to_list)
-        self.ilvl_page_layout.addWidget(self.add_ilvl_button, 10 , 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.add_ilvl_button, 10, 0, 1, 1)
 
         self.remove_ilvl_button = QPushButton("Remove Item", ilvl_page)
-        self.remove_ilvl_button.setToolTip(
-            "Remove item from your snipe list."
-        )
+        self.remove_ilvl_button.setToolTip("Remove item from your snipe list.")
         self.remove_ilvl_button.clicked.connect(self.remove_ilvl_to_list)
-        self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 11 , 0, 1, 1)
-
+        self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 11, 0, 1, 1)
 
         self.ilvl_list_display = QListWidget(ilvl_page)
         self.ilvl_list_display.itemClicked.connect(self.ilvl_list_double_clicked)
-        self.ilvl_page_layout.addWidget(self.ilvl_list_display, 0 , 1, 11, 2)
-
+        self.ilvl_page_layout.addWidget(self.ilvl_list_display, 0, 1, 11, 2)
 
         self.import_ilvl_data_button = QPushButton("Import Desired ILvl List Data")
         self.import_ilvl_data_button.setToolTip(
             "Import your desired_ilvl_list.json config"
         )
         self.import_ilvl_data_button.clicked.connect(self.import_ilvl_data)
-        self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 11 , 1, 1, 2)
+        self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 11, 1, 1, 2)
 
     def go_to_home_page(self):
         self.stacked_widget.setCurrentIndex(0)
@@ -766,9 +720,7 @@ class App(QMainWindow):
         self.pet_name_input.setEditable(True)
         self.pet_name_input.setInsertPolicy(QComboBox.NoInsert)
         self.pet_name_input.completer()
-        self.pet_name_input.currentIndexChanged.connect(
-            self.on_combo_box_pet_changed
-        )
+        self.pet_name_input.currentIndexChanged.connect(self.on_combo_box_pet_changed)
 
         self.item_name_input.addItems(
             self.item_statistics.sort_values(by="itemName")["itemName"].tolist()
@@ -776,9 +728,7 @@ class App(QMainWindow):
         self.item_name_input.setEditable(True)
         self.item_name_input.setInsertPolicy(QComboBox.NoInsert)
         self.item_name_input.completer()
-        self.item_name_input.currentIndexChanged.connect(
-            self.on_combo_box_item_changed
-        )
+        self.item_name_input.currentIndexChanged.connect(self.on_combo_box_item_changed)
 
         self.item_name_input.setEnabled(True)
         self.item_name_input.setStyleSheet(
@@ -830,10 +780,7 @@ class App(QMainWindow):
         selected_pet_price = selected_pet_stats["desiredPrice"].iloc[0]
 
         # if the user has not set a price for the item, set the price from TSM stats
-        if (
-            not self.pet_price_input.text()
-            or str(selected_pet_id) not in self.pet_list
-        ):
+        if not self.pet_price_input.text() or str(selected_pet_id) not in self.pet_list:
             try:
                 discount_percent = int(self.discount_percent.text()) / 100
                 recommended_price = str(
@@ -1033,9 +980,9 @@ class App(QMainWindow):
 
         except KeyError as e:
             QMessageBox.critical(
-            self,
-            "Removing Realm Error",
-            f"Realm already not in the list",
+                self,
+                "Removing Realm Error",
+                f"Realm already not in the list",
             )
             return 0
 
@@ -1111,22 +1058,16 @@ class App(QMainWindow):
             with open(path_to_config, encoding="utf-8") as json_file:
                 raw_mega_data = json.load(json_file)
             if "MEGA_WEBHOOK_URL" in raw_mega_data:
-                self.discord_webhook_input.setText(
-                    raw_mega_data["MEGA_WEBHOOK_URL"]
-                )
+                self.discord_webhook_input.setText(raw_mega_data["MEGA_WEBHOOK_URL"])
 
             if "WOW_CLIENT_ID" in raw_mega_data:
                 self.wow_client_id_input.setText(raw_mega_data["WOW_CLIENT_ID"])
 
             if "WOW_CLIENT_SECRET" in raw_mega_data:
-                self.wow_client_secret_input.setText(
-                    raw_mega_data["WOW_CLIENT_SECRET"]
-                )
+                self.wow_client_secret_input.setText(raw_mega_data["WOW_CLIENT_SECRET"])
 
             if "AUTHENTICATION_TOKEN" in raw_mega_data:
-                self.authentication_token.setText(
-                    raw_mega_data["AUTHENTICATION_TOKEN"]
-                )
+                self.authentication_token.setText(raw_mega_data["AUTHENTICATION_TOKEN"])
 
             if "WOW_REGION" in raw_mega_data:
                 index = self.wow_region.findText(raw_mega_data["WOW_REGION"])
@@ -1139,14 +1080,10 @@ class App(QMainWindow):
                     self.faction.setCurrentIndex(index)
 
             if "SHOW_BID_PRICES" in raw_mega_data:
-                self.show_bid_prices.setChecked(
-                    raw_mega_data["SHOW_BID_PRICES"]
-                )
+                self.show_bid_prices.setChecked(raw_mega_data["SHOW_BID_PRICES"])
 
             if "MEGA_THREADS" in raw_mega_data:
-                self.number_of_mega_threads.setText(
-                    str(raw_mega_data["MEGA_THREADS"])
-                )
+                self.number_of_mega_threads.setText(str(raw_mega_data["MEGA_THREADS"]))
 
             if "WOWHEAD_LINK" in raw_mega_data:
                 self.wow_head_link.setChecked(raw_mega_data["WOWHEAD_LINK"])
@@ -1155,14 +1092,10 @@ class App(QMainWindow):
                 self.important_emoji.setText(raw_mega_data["IMPORTANT_EMOJI"])
 
             if "DISCOUNT_PERCENT" in raw_mega_data:
-                self.discount_percent.setText(
-                    str(raw_mega_data["DISCOUNT_PERCENT"])
-                )
+                self.discount_percent.setText(str(raw_mega_data["DISCOUNT_PERCENT"]))
 
             if "NO_RUSSIAN_REALMS" in raw_mega_data:
-                self.russian_realms.setChecked(
-                    raw_mega_data["NO_RUSSIAN_REALMS"]
-                )
+                self.russian_realms.setChecked(raw_mega_data["NO_RUSSIAN_REALMS"])
 
             if "REFRESH_ALERTS" in raw_mega_data:
                 self.refresh_alerts.setChecked(raw_mega_data["REFRESH_ALERTS"])
