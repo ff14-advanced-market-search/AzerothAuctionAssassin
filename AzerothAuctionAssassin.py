@@ -1173,8 +1173,8 @@ class App(QMainWindow):
         if os.path.exists(self.path_to_desired_items):
             self.items_list = json.load(open(self.path_to_desired_items))
             for key, value in self.items_list.items():
-                self.item_list_display.List.insertItem(
-                    self.item_list_display.List.count(),
+                self.item_list_display.insertItem(
+                    self.item_list_display.count(),
                     f"Item ID: {key}, Price: {value}",
                 )
 
@@ -1184,8 +1184,8 @@ class App(QMainWindow):
                 if "item_ids" not in ilvl_dict_data:
                     ilvl_dict_data["item_ids"] = []
                 string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
-                self.ilvl_list_display.List.insertItem(
-                    self.ilvl_list_display.List.count(), string_with_data
+                self.ilvl_list_display.insertItem(
+                    self.ilvl_list_display.count(), string_with_data
                 )
 
     def ilvl_list_double_clicked(self, item):
