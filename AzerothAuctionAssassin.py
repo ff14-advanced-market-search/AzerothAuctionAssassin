@@ -79,7 +79,7 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.13"
+        self.title = "Azeroth Auction Assassin v1.0.14"
         self.left = 100
         self.top = 100
         self.width = 550
@@ -270,6 +270,7 @@ class App(QMainWindow):
         self.realms_page_layout.addWidget(self.remove_realm_button, 10, 0, 1, 1)
 
         self.realm_list_display = QListWidget(realm_page)
+        self.realm_list_display.setSortingEnabled(True)
         self.realm_list_display.itemClicked.connect(self.realm_list_clicked)
         self.realms_page_layout.addWidget(self.realm_list_display, 0, 1, 11, 2)
 
@@ -570,6 +571,9 @@ class App(QMainWindow):
         self.pet_page_layout.addWidget(self.remove_pet_button, 3, 1, 1, 1)
 
         self.pet_list_display = QListWidget(pet_page)
+
+        self.pet_list_display.setSortingEnabled(True)
+
         self.pet_list_display.itemClicked.connect(self.pet_list_double_clicked)
         self.pet_page_layout.addWidget(self.pet_list_display, 4, 0, 13, 2)
 
@@ -611,6 +615,8 @@ class App(QMainWindow):
         self.item_page_layout.addWidget(self.remove_item_button, 3, 1, 1, 1)
 
         self.item_list_display = QListWidget(item_page)
+        self.item_list_display.setSortingEnabled(True)
+
         self.item_list_display.itemClicked.connect(self.item_list_double_clicked)
         self.item_page_layout.addWidget(self.item_list_display, 4, 0, 13, 2)
 
@@ -682,6 +688,8 @@ class App(QMainWindow):
         self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 11, 0, 1, 1)
 
         self.ilvl_list_display = QListWidget(ilvl_page)
+        self.ilvl_list_display.setSortingEnabled(True)
+
         self.ilvl_list_display.itemClicked.connect(self.ilvl_list_double_clicked)
         self.ilvl_page_layout.addWidget(self.ilvl_list_display, 0, 1, 11, 2)
 
@@ -745,12 +753,16 @@ class App(QMainWindow):
 
     def on_combo_box_item_changed(self, index):
         # This function will be called whenever the user selects a different item
+
         selected_item = self.item_name_input.currentText()
         selected_item_stats = self.item_statistics[
             self.item_statistics["itemName"] == selected_item
         ]
         selected_item_id = selected_item_stats["itemID"].iloc[0]
-        selected_item_price = selected_item_stats["desiredPrice"].iloc[0]
+        if str(selected_item_id) in self.items_list.keys():
+            selected_item_price = self.items_list[str(selected_item_id)]
+        else:
+            selected_item_price = selected_item_stats["desiredPrice"].iloc[0]
 
         # if the user has not set a price for the item, set the price from TSM stats
         if (
@@ -768,6 +780,9 @@ class App(QMainWindow):
                 recommended_price = str(int(float(selected_item_price) * 0.1))
                 self.item_price_input.setText(recommended_price)
 
+        else:
+            self.item_price_input.setText(selected_item_price)
+
         self.item_id_input.setText(str(selected_item_id))
 
     def on_combo_box_pet_changed(self, index):
@@ -777,7 +792,10 @@ class App(QMainWindow):
             self.pet_statistics["itemName"] == selected_pet
         ]
         selected_pet_id = selected_pet_stats["itemID"].iloc[0]
-        selected_pet_price = selected_pet_stats["desiredPrice"].iloc[0]
+        if str(selected_pet_id) in self.pet_list.keys():
+            selected_pet_price = self.pet_list[str(selected_pet_id)]
+        else:
+            selected_pet_price = selected_pet_stats["desiredPrice"].iloc[0]
 
         # if the user has not set a price for the item, set the price from TSM stats
         if not self.pet_price_input.text() or str(selected_pet_id) not in self.pet_list:
@@ -791,6 +809,9 @@ class App(QMainWindow):
                 self.pet_price_input.setText("10")
                 recommended_price = str(int(float(selected_pet_price) * 0.1))
                 self.pet_price_input.setText(recommended_price)
+
+        else:
+            self.pet_price_input.setText(selected_pet_price)
 
         self.pet_id_input.setText(str(selected_pet_id))
 
