@@ -783,7 +783,6 @@ class App(QMainWindow):
         else:
             self.item_price_input.setText(selected_item_price)
 
-
         self.item_id_input.setText(str(selected_item_id))
 
     def on_combo_box_pet_changed(self, index):
@@ -813,7 +812,6 @@ class App(QMainWindow):
 
         else:
             self.pet_price_input.setText(selected_pet_price)
-
 
         self.pet_id_input.setText(str(selected_pet_id))
 
