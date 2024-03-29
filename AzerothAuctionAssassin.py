@@ -276,32 +276,40 @@ class App(QMainWindow):
 
     def make_side_buttons(self):
         self.go_to_home_button = QPushButton("Home Page")
+        self.go_to_home_button.setFixedSize(150,25)
         self.go_to_home_button.clicked.connect(self.go_to_home_page)
         self.layout_area.addWidget(self.go_to_home_button, 0, 0)
 
         self.go_to_pet_button = QPushButton("Pets")
+        self.go_to_pet_button.setFixedSize(150,25)
         self.go_to_pet_button.clicked.connect(self.go_to_pet_page)
         self.layout_area.addWidget(self.go_to_pet_button, 1, 0)
 
         self.go_to_item_button = QPushButton("Items")
+        self.go_to_item_button.setFixedSize(150,25)
         self.go_to_item_button.clicked.connect(self.go_to_item_page)
         self.layout_area.addWidget(self.go_to_item_button, 2, 0)
 
         self.go_to_ilvl_button = QPushButton("ILvl List")
+        self.go_to_ilvl_button.setFixedSize(150,25)
         self.go_to_ilvl_button.clicked.connect(self.go_to_ilvl_page)
         self.layout_area.addWidget(self.go_to_ilvl_button, 3, 0)
 
         self.go_to_settings_button = QPushButton("Application Settings")
+        self.go_to_settings_button.setFixedSize(150,25)
         self.go_to_settings_button.clicked.connect(self.go_to_settings_page)
         self.layout_area.addWidget(self.go_to_settings_button, 4, 0)
 
         self.go_to_realm_button = QPushButton("Realm Lists")
+        self.go_to_realm_button.setFixedSize(150,25)
         self.go_to_realm_button.clicked.connect(self.go_to_realms_page)
         self.layout_area.addWidget(self.go_to_realm_button, 5, 0)
 
         # add a line to separate the buttons from the rest of the UI
         self.line = QLabel(self)
         self.line.setStyleSheet("background-color: white")
+        self.line.setFixedSize(150,25)
+
         self.layout_area.addWidget(self.line, 6, 0)
 
         # self.import_pbs_data_button = UIButtons(
@@ -313,16 +321,19 @@ class App(QMainWindow):
         # )
 
         self.save_data_button = QPushButton("Save Data")
+        self.save_data_button.setFixedSize(150,25)
         self.save_data_button.clicked.connect(self.save_data_to_json)
         self.save_data_button.setToolTip("Save data without starting a scan.")
         self.layout_area.addWidget(self.save_data_button, 7, 0)
 
         self.reset_data_button = QPushButton("Reset Data")
+        self.reset_data_button.setFixedSize(150,25)
         self.reset_data_button.clicked.connect(self.reset_app_data)
         self.reset_data_button.setToolTip("Erase all data and reset the app.")
         self.layout_area.addWidget(self.reset_data_button, 8, 0)
 
         self.start_button = QPushButton("Start Alerts")
+        self.start_button.setFixedSize(150,25)
         self.start_button.clicked.connect(self.start_alerts)
         self.start_button.setToolTip(
             "Start the scan! Runs once on start and then waits for new data to send more alerts."
@@ -330,6 +341,7 @@ class App(QMainWindow):
         self.layout_area.addWidget(self.start_button, 9, 0)
 
         self.stop_button = QPushButton("Stop Alerts")
+        self.stop_button.setFixedSize(150,25)
         self.stop_button.clicked.connect(self.stop_alerts)
         self.stop_button.setEnabled(False)
         self.stop_button.setToolTip(
@@ -338,6 +350,7 @@ class App(QMainWindow):
         self.layout_area.addWidget(self.stop_button, 10, 0)
 
         self.mega_alerts_progress = QLabel("Waiting for user to Start!")
+        self.mega_alerts_progress.setFixedSize(150,25)
         self.layout_area.addWidget(self.mega_alerts_progress, 11, 0)
 
     def make_home_page(self, home_page):
@@ -639,7 +652,8 @@ class App(QMainWindow):
         self.ilvl_item_input_label.setToolTip(
             "Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420"
         )
-        self.ilvl_item_input_label.setFixedHeight(10)
+        self.ilvl_item_input_label.setFixedSize(75,15)
+        self.ilvl_item_input.setFixedSize(75,25)
         self.ilvl_page_layout.addWidget(self.ilvl_item_input_label, 0, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_item_input, 1, 0, 1, 1)
 
@@ -648,7 +662,8 @@ class App(QMainWindow):
         self.ilvl_input_label.setToolTip(
             "Set the minimum item level you want to snipe."
         )
-        self.ilvl_input_label.setFixedHeight(10)
+        self.ilvl_input_label.setFixedSize(75,15)
+        self.ilvl_input.setFixedSize(75,25)
         self.ilvl_page_layout.addWidget(self.ilvl_input_label, 2, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_input, 3, 0, 1, 1)
 
@@ -657,7 +672,8 @@ class App(QMainWindow):
         self.ilvl_price_input_label.setToolTip(
             "Set the maximum buyout you want to snipe."
         )
-        self.ilvl_price_input_label.setFixedHeight(10)
+        self.ilvl_price_input_label.setFixedSize(75,15)
+        self.ilvl_price_input.setFixedSize(75,25)
         self.ilvl_page_layout.addWidget(self.ilvl_price_input_label, 4, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_price_input, 5, 0, 1, 1)
 
