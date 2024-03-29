@@ -79,7 +79,7 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.13"
+        self.title = "Azeroth Auction Assassin v1.0.14"
         self.left = 100
         self.top = 100
         self.width = 550
@@ -799,7 +799,6 @@ class App(QMainWindow):
         else:
             self.item_price_input.setText(selected_item_price)
 
-
         self.item_id_input.setText(str(selected_item_id))
 
     def on_combo_box_pet_changed(self, index):
@@ -829,7 +828,6 @@ class App(QMainWindow):
 
         else:
             self.pet_price_input.setText(selected_pet_price)
-
 
         self.pet_id_input.setText(str(selected_pet_id))
 
