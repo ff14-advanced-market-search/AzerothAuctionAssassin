@@ -29,7 +29,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QThread, pyqtSignal, QFile, QTextStream
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (
-    QVBoxLayout,
+    QGridLayout,
     QStackedWidget,
     QMainWindow,
     QApplication,
@@ -42,104 +42,12 @@ from PyQt5.QtWidgets import (
     QCheckBox,
     QFileDialog,
     QWidget,
+    QScrollArea,
 )
 
 if sys.platform == "win32":
     myappid = "mycompany.myproduct.subproduct.version"  # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-
-
-class LabelTextbox(QMainWindow):
-    def __init__(
-        self,
-        parent=None,
-        labeltext=None,
-        xposition=None,
-        yposition=None,
-        width=None,
-        height=None,
-    ):
-        super(LabelTextbox, self).__init__()
-        self.Label = QLabel(parent)
-        self.Label.setText(labeltext)
-        self.Label.move(xposition, yposition - 30)
-        self.Label.resize(width, height)
-        self.Label.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
-        self.Text = QLineEdit(parent)
-        self.Text.move(xposition, yposition)
-        self.Text.resize(width, height)
-        self.Text.setFont((QtGui.QFont("Arial", 12)))
-
-
-class UIButtons(QMainWindow):
-    def __init__(
-        self,
-        parent=None,
-        title=None,
-        xposition=None,
-        yposition=None,
-        width=None,
-        heigth=None,
-    ):
-        super(UIButtons, self).__init__()
-        self.Button = QPushButton(title, parent)
-        self.Button.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
-        self.Button.move(xposition, yposition)
-        self.Button.resize(width, heigth)
-
-
-class ComboBoxes(QMainWindow):
-    def __init__(
-        self, parent=None, xposition=None, yposition=None, width=None, height=None
-    ):
-        super(ComboBoxes, self).__init__()
-        self.Combo = QComboBox(parent)
-        self.Combo.setGeometry(xposition, yposition, width, height)
-
-
-class LabelText(QMainWindow):
-    def __init__(
-        self,
-        parent=None,
-        labeltext=None,
-        xposition=None,
-        yposition=None,
-        width=None,
-        height=None,
-    ):
-        super(LabelText, self).__init__()
-        self.Label = QLabel(parent)
-        self.Label.setText(labeltext)
-        self.Label.move(xposition, yposition - 30)
-        self.Label.resize(width, height)
-        self.Label.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
-
-
-class ListView(QMainWindow):
-    def __init__(
-        self, parent=None, xposition=None, yposition=None, width=None, height=None
-    ):
-        super(ListView, self).__init__()
-        self.List = QListWidget(parent)
-        self.List.move(xposition, yposition)
-        self.List.resize(width, height)
-        self.List.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
-
-
-class CheckBox(QMainWindow):
-    def __init__(
-        self,
-        parent=None,
-        labeltext=None,
-        xposition=None,
-        yposition=None,
-        width=None,
-        height=None,
-    ):
-        super(CheckBox, self).__init__()
-        self.Checkbox = QCheckBox(labeltext, parent)
-        self.Checkbox.setGeometry(xposition, yposition, width, height)
-        self.Checkbox.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
 
 
 class Item_And_Pet_Statistics(QThread):
@@ -171,11 +79,11 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.12"
-        self.left = 0
-        self.top = 0
-        self.width = 750
-        self.height = 800
+        self.title = "Azeroth Auction Assassin v1.0.13"
+        self.left = 100
+        self.top = 100
+        self.width = 550
+        self.height = 650
         icon_path = "icon.png"
 
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
@@ -249,16 +157,32 @@ class App(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        self.stacked_widget = QStackedWidget(self)
-        self.stacked_widget.move(250, 0)
-        self.stacked_widget.resize(500, 700)
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
 
-        home_page = QMainWindow()
-        settings_page = QMainWindow()
-        pet_page = QMainWindow()
-        item_page = QMainWindow()
-        ilvl_page = QMainWindow()
-        realms_page = QMainWindow()
+        self.layout_area = QGridLayout(central_widget)
+
+        self.make_side_buttons()
+
+        self.stacked_widget = QStackedWidget(self)
+
+        home_page = QWidget()
+        self.home_page_layout = QGridLayout(home_page)
+
+        settings_page = QWidget()
+        self.settings_page_layout = QGridLayout(settings_page)
+
+        pet_page = QWidget()
+        self.pet_page_layout = QGridLayout(pet_page)
+
+        item_page = QWidget()
+        self.item_page_layout = QGridLayout(item_page)
+
+        ilvl_page = QWidget()
+        self.ilvl_page_layout = QGridLayout(ilvl_page)
+
+        realms_page = QWidget()
+        self.realms_page_layout = QGridLayout(realms_page)
 
         self.stacked_widget.addWidget(home_page)
         self.stacked_widget.addWidget(pet_page)
@@ -267,7 +191,7 @@ class App(QMainWindow):
         self.stacked_widget.addWidget(settings_page)
         self.stacked_widget.addWidget(realms_page)
 
-        self.make_side_buttons()
+        self.layout_area.addWidget(self.stacked_widget, 0, 1, 17, 2)
 
         self.make_home_page(home_page=home_page)
 
@@ -283,111 +207,139 @@ class App(QMainWindow):
 
         self.check_for_settings()
 
+        # Create a QScrollArea and set its widget to be the container
+        scrollArea = QScrollArea()
+        scrollArea.setWidgetResizable(
+            True
+        )  # Important to make the scroll area adapt to the content
+        scrollArea.setWidget(central_widget)
+
+        # Set the QScrollArea as the central widget of the main window
+        self.setCentralWidget(scrollArea)
+
         self.show()
 
     def make_realm_page(self, realm_page):
-        self.realm_name_input = LabelTextbox(realm_page, "Realm Name", 0, 25, 100, 40)
-        self.realm_name_input.Label.setToolTip("")
 
-        self.realm_id_input = LabelTextbox(realm_page, "Realm ID", 0, 100, 100, 40)
-        self.realm_id_input.Label.setToolTip("")
+        self.realm_name_input = QLineEdit(realm_page)
+        self.realm_name_input_label = QLabel("Realm Name", realm_page)
+        self.realm_name_input_label.setToolTip("")
+        self.realm_name_input_label.setFixedHeight(10)
+        self.realms_page_layout.addWidget(self.realm_name_input_label, 0, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_name_input, 1, 0, 1, 1)
 
-        self.realm_realm_name_label = LabelText(
-            realm_page, "Select Realm", 0, 175, 200, 40
-        )
-        self.realm_name_combobox = ComboBoxes(realm_page, 0, 175, 100, 40)
-        self.realm_name_combobox.Combo.setEnabled(False)
+        self.realm_id_input = QLineEdit(realm_page)
+        self.realm_id_input_label = QLabel("Realm ID", realm_page)
+        self.realm_id_input_label.setToolTip("")
+        self.realm_id_input_label.setFixedHeight(10)
+        self.realms_page_layout.addWidget(self.realm_id_input_label, 2, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_id_input, 3, 0, 1, 1)
 
-        self.realm_region_label = LabelText(realm_page, "Wow Region", 0, 325, 200, 40)
-        self.realm_region = ComboBoxes(realm_page, 0, 325, 100, 40)
-        self.realm_region.Combo.addItems(
+        self.realm_name_combobox = QComboBox(realm_page)
+        self.realm_name_combobox.setEnabled(False)
+        self.realm_realm_name_label = QLabel("Realm ID", realm_page)
+        self.realm_realm_name_label.setToolTip("")
+        self.realm_realm_name_label.setFixedHeight(10)
+        self.realms_page_layout.addWidget(self.realm_realm_name_label, 4, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_name_combobox, 5, 0, 1, 1)
+
+        self.realm_region = QComboBox(realm_page)
+        self.realm_region_label = QLabel("Wow Region", realm_page)
+        self.realm_region_label.setToolTip("")
+        self.realm_region_label.setFixedHeight(10)
+        self.realm_region.addItems(
             ["", "EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
         )
-        self.realm_region_label.Label.setToolTip("")
-        self.realm_region.Combo.currentIndexChanged.connect(
-            self.on_combo_box_region_changed
-        )
+        self.realm_region.currentIndexChanged.connect(self.on_combo_box_region_changed)
+        self.realms_page_layout.addWidget(self.realm_region_label, 6, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_region, 7, 0, 1, 1)
 
-        self.add_realm_button = UIButtons(realm_page, "Add Realm", 0, 425, 100, 50)
-        self.add_realm_button.Button.clicked.connect(self.add_realm_to_list)
-        self.add_realm_button.Button.setToolTip("Add item to your snipe list.")
+        self.add_realm_button = QPushButton("Add Realm")
+        self.add_realm_button.setToolTip("")
+        self.add_realm_button.clicked.connect(self.add_realm_to_list)
+        self.realms_page_layout.addWidget(self.add_realm_button, 8, 0, 1, 1)
 
-        self.reset_realm_button = UIButtons(
-            realm_page, "Reset\nRealm List", 0, 575, 100, 50
-        )
-        self.reset_realm_button.Button.clicked.connect(self.reset_realm_list)
-        self.reset_realm_button.Button.setToolTip("")
+        self.reset_realm_button = QPushButton("Reset Realm List")
+        self.reset_realm_button.setToolTip("")
+        self.reset_realm_button.clicked.connect(self.reset_realm_list)
+        self.realms_page_layout.addWidget(self.reset_realm_button, 9, 0, 1, 1)
 
-        self.remove_realm_button = UIButtons(
-            realm_page, "Remove\nRealm", 0, 500, 100, 50
-        )
-        self.remove_realm_button.Button.clicked.connect(self.remove_realm_to_list)
-        self.remove_realm_button.Button.setToolTip("Remove item from your snipe list.")
+        self.remove_realm_button = QPushButton("Remove Realm")
+        self.remove_realm_button.setToolTip("")
+        self.remove_realm_button.clicked.connect(self.remove_realm_to_list)
+        self.realms_page_layout.addWidget(self.remove_realm_button, 10, 0, 1, 1)
 
-        self.realm_list_display = ListView(realm_page, 125, 25, 300, 550)
-        self.realm_list_display.List.itemClicked.connect(self.realm_list_clicked)
+        self.realm_list_display = QListWidget(realm_page)
+        self.realm_list_display.itemClicked.connect(self.realm_list_clicked)
+        self.realms_page_layout.addWidget(self.realm_list_display, 0, 1, 11, 2)
 
     def make_side_buttons(self):
-        self.go_to_home_button = UIButtons(self, "Home Page", 25, 25, 200, 50)
-        self.go_to_home_button.Button.clicked.connect(self.go_to_home_page)
+        self.go_to_home_button = QPushButton("Home Page")
+        self.go_to_home_button.clicked.connect(self.go_to_home_page)
+        self.layout_area.addWidget(self.go_to_home_button, 0, 0)
 
-        self.go_to_pet_button = UIButtons(self, "Pets", 25, 100, 200, 50)
-        self.go_to_pet_button.Button.clicked.connect(self.go_to_pet_page)
+        self.go_to_pet_button = QPushButton("Pets")
+        self.go_to_pet_button.clicked.connect(self.go_to_pet_page)
+        self.layout_area.addWidget(self.go_to_pet_button, 1, 0)
 
-        self.go_to_item_button = UIButtons(self, "Items", 25, 175, 200, 50)
-        self.go_to_item_button.Button.clicked.connect(self.go_to_item_page)
+        self.go_to_item_button = QPushButton("Items")
+        self.go_to_item_button.clicked.connect(self.go_to_item_page)
+        self.layout_area.addWidget(self.go_to_item_button, 2, 0)
 
-        self.go_to_ilvl_button = UIButtons(self, "ILvl List", 25, 250, 200, 50)
-        self.go_to_ilvl_button.Button.clicked.connect(self.go_to_ilvl_page)
+        self.go_to_ilvl_button = QPushButton("ILvl List")
+        self.go_to_ilvl_button.clicked.connect(self.go_to_ilvl_page)
+        self.layout_area.addWidget(self.go_to_ilvl_button, 3, 0)
 
-        self.go_to_settings_button = UIButtons(
-            self, "Application Settings", 25, 325, 200, 50
-        )
-        self.go_to_settings_button.Button.clicked.connect(self.go_to_settings_page)
+        self.go_to_settings_button = QPushButton("Application Settings")
+        self.go_to_settings_button.clicked.connect(self.go_to_settings_page)
+        self.layout_area.addWidget(self.go_to_settings_button, 4, 0)
 
-        self.go_to_realm_button = UIButtons(self, "Realm Lists", 25, 400, 200, 50)
-        self.go_to_realm_button.Button.clicked.connect(self.go_to_realms_page)
+        self.go_to_realm_button = QPushButton("Realm Lists")
+        self.go_to_realm_button.clicked.connect(self.go_to_realms_page)
+        self.layout_area.addWidget(self.go_to_realm_button, 5, 0)
 
         # add a line to separate the buttons from the rest of the UI
         self.line = QLabel(self)
-        self.line.setGeometry(25, 385, 200, 5)
         self.line.setStyleSheet("background-color: white")
+        self.layout_area.addWidget(self.line, 6, 0)
 
         # self.import_pbs_data_button = UIButtons(
         #     self, "Import PBS Data", 25, 400, 200, 50
         # )
-        # self.import_pbs_data_button.Button.clicked.connect(self.import_pbs_data)
-        # self.import_pbs_data_button.Button.setToolTip(
+        # self.import_pbs_data_button.clicked.connect(self.import_pbs_data)
+        # self.import_pbs_data_button.setToolTip(
         #     "Import your Point Blank Sniper text files"
         # )
 
-        self.save_data_button = UIButtons(self, "Save Data", 25, 475, 200, 50)
-        self.save_data_button.Button.clicked.connect(self.save_data_to_json)
-        self.save_data_button.Button.setToolTip("Save data without starting a scan.")
+        self.save_data_button = QPushButton("Save Data")
+        self.save_data_button.clicked.connect(self.save_data_to_json)
+        self.save_data_button.setToolTip("Save data without starting a scan.")
+        self.layout_area.addWidget(self.save_data_button, 7, 0)
 
-        self.reset_data_button = UIButtons(self, "Reset Data", 25, 550, 200, 50)
-        self.reset_data_button.Button.clicked.connect(self.reset_app_data)
-        self.reset_data_button.Button.setToolTip("Erase all data and reset the app.")
+        self.reset_data_button = QPushButton("Reset Data")
+        self.reset_data_button.clicked.connect(self.reset_app_data)
+        self.reset_data_button.setToolTip("Erase all data and reset the app.")
+        self.layout_area.addWidget(self.reset_data_button, 8, 0)
 
-        self.start_button = UIButtons(self, "Start Alerts", 25, 625, 200, 50)
-        self.start_button.Button.clicked.connect(self.start_alerts)
-        self.start_button.Button.setToolTip(
+        self.start_button = QPushButton("Start Alerts")
+        self.start_button.clicked.connect(self.start_alerts)
+        self.start_button.setToolTip(
             "Start the scan! Runs once on start and then waits for new data to send more alerts."
         )
+        self.layout_area.addWidget(self.start_button, 9, 0)
 
-        self.stop_button = UIButtons(self, "Stop Alerts", 25, 700, 200, 50)
-        self.stop_button.Button.clicked.connect(self.stop_alerts)
-        self.stop_button.Button.setEnabled(False)
-        self.stop_button.Button.setToolTip(
+        self.stop_button = QPushButton("Stop Alerts")
+        self.stop_button.clicked.connect(self.stop_alerts)
+        self.stop_button.setEnabled(False)
+        self.stop_button.setToolTip(
             "Gracefully stop the alerts.\nThis will not stop alerts in progress.\nYou may need to kill the process for a force stop."
         )
+        self.layout_area.addWidget(self.stop_button, 10, 0)
 
-        self.mega_alerts_progress = LabelText(
-            self, "Waiting for user to Start!", 25, 790, 1000, 40
-        )
+        self.mega_alerts_progress = QLabel("Waiting for user to Start!")
+        self.layout_area.addWidget(self.mega_alerts_progress, 11, 0)
 
     def make_home_page(self, home_page):
-        y = 100
 
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
         icon_path = "icon.ico"
@@ -397,300 +349,348 @@ class App(QMainWindow):
         # display the icon.ico
         self.icon = QLabel(home_page)
         self.icon.setPixmap(QtGui.QPixmap(icon_path))
-        self.icon.setGeometry(50, -25 + y, 250, 250)
+        self.home_page_layout.addWidget(self.icon, 0, 0)
 
         # add the title
         self.title = QLabel(home_page)
         self.title.setText("Azeroth Auction Ace")
-        self.title.setGeometry(50, 250 + y, 500, 50)
         self.title.setFont((QtGui.QFont("Arial", 30, QtGui.QFont.Bold)))
+        self.home_page_layout.addWidget(self.title, 1, 0)
 
         # add link to patreon
         self.patreon_link = QLabel(home_page)
         self.patreon_link.setText(
-            "<a href='https://www.patreon.com/indopan'>Support the Project on Patreon</a>"
+            "<a href='https://www.patreon.com/indopan' style='color: white;'>Support the Project on Patreon</a>"
         )
-        self.patreon_link.setGeometry(50, 300 + y, 500, 50)
         self.patreon_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.patreon_link.setOpenExternalLinks(True)
+        self.home_page_layout.addWidget(self.patreon_link, 2, 0)
 
         # add discord link
         self.discord_link = QLabel(home_page)
         self.discord_link.setText(
-            "<a href='https://discord.gg/9dHx2rEq9F'>Join the Discord</a>"
+            "<a href='https://discord.gg/9dHx2rEq9F' style='color: white;'>Join the Discord</a>"
         )
-        self.discord_link.setGeometry(50, 350 + y, 500, 50)
         self.discord_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.discord_link.setOpenExternalLinks(True)
+        self.home_page_layout.addWidget(self.discord_link, 3, 0)
 
         # add main website link
         self.website_link = QLabel(home_page)
         self.website_link.setText(
-            "<a href='https://saddlebagexchange.com'>Check out our main website: Saddlebag Exchange</a>"
+            "<a href='https://saddlebagexchange.com' style='color: white;'>Check out our main website: Saddlebag Exchange</a>"
         )
-        self.website_link.setGeometry(50, 400 + y, 500, 50)
         self.website_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.website_link.setOpenExternalLinks(True)
+        self.home_page_layout.addWidget(self.website_link, 4, 0)
 
         # add a guides link
         self.guides_link = QLabel(home_page)
         self.guides_link.setText(
-            "<a href='https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki'>Check out our guides</a>"
+            "<a href='https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki' style='color: white;'>Check out our guides</a>"
         )
-        self.guides_link.setGeometry(50, 450 + y, 500, 50)
         self.guides_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.guides_link.setOpenExternalLinks(True)
+        self.home_page_layout.addWidget(self.guides_link, 5, 0)
 
     def make_settings_page(self, settings_page):
-        self.discord_webhook_input = LabelTextbox(
-            settings_page, "Discord Webhook", 0, 25, 425, 40
-        )
-        self.discord_webhook_input.Label.setToolTip(
+
+        self.discord_webhook_input = QLineEdit(settings_page)
+        self.discord_webhook_input_label = QLabel("Discord Webhook", settings_page)
+        self.discord_webhook_input_label.setToolTip(
             "Setup a discord channel with a webhook url for sending the alert messages."
         )
-
-        self.wow_client_id_input = LabelTextbox(
-            settings_page, "WoW Client ID", 0, 100, 425, 40
+        self.settings_page_layout.addWidget(
+            self.discord_webhook_input_label, 0, 0, 1, 2
         )
-        self.wow_client_id_input.Label.setToolTip(
+        self.settings_page_layout.addWidget(self.discord_webhook_input, 1, 0, 1, 2)
+
+        self.wow_client_id_input = QLineEdit(settings_page)
+        self.wow_client_id_input_label = QLabel("WoW Client ID", settings_page)
+        self.wow_client_id_input_label.setToolTip(
             "Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids."
         )
+        self.settings_page_layout.addWidget(self.wow_client_id_input_label, 2, 0, 1, 2)
+        self.settings_page_layout.addWidget(self.wow_client_id_input, 3, 0, 1, 2)
 
-        self.wow_client_secret_input = LabelTextbox(
-            settings_page, "WoW Client Secret", 0, 175, 425, 40
-        )
-        self.wow_client_secret_input.Label.setToolTip(
+        self.wow_client_secret_input = QLineEdit(settings_page)
+        self.wow_client_secret_input_label = QLabel("WoW Client Secret", settings_page)
+        self.wow_client_secret_input_label.setToolTip(
             "Go to https://develop.battle.net/access/clients\nand create a client, get the blizzard oauth client and secret ids."
         )
-
-        self.authentication_token = LabelTextbox(
-            settings_page, "Auction Assassin Token", 0, 250, 425, 40
+        self.settings_page_layout.addWidget(
+            self.wow_client_secret_input_label, 4, 0, 1, 2
         )
-        self.authentication_token.Label.setToolTip(
+        self.settings_page_layout.addWidget(self.wow_client_secret_input, 5, 0, 1, 2)
+
+        self.authentication_token = QLineEdit(settings_page)
+        self.authentication_token_label = QLabel(
+            "Auction Assassin Token", settings_page
+        )
+        self.authentication_token_label.setToolTip(
             "Go to the Saddlebag Exchange Discord and generate a token with the bot command:\n/wow auctionassassintoken"
         )
+        self.settings_page_layout.addWidget(self.authentication_token_label, 6, 0, 1, 2)
+        self.settings_page_layout.addWidget(self.authentication_token, 7, 0, 1, 2)
 
-        self.wow_region_label = LabelText(settings_page, "Wow Region", 0, 325, 200, 40)
-        self.wow_region = ComboBoxes(settings_page, 0, 325, 200, 40)
-        self.wow_region.Combo.addItems(
+        self.wow_region = QComboBox(settings_page)
+        self.wow_region.addItems(
             ["EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
         )
-        self.wow_region_label.Label.setToolTip(
+        self.wow_region_label = QLabel("Auction Assassin Token", settings_page)
+        self.wow_region_label.setToolTip(
             "Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic."
         )
+        self.settings_page_layout.addWidget(self.wow_region_label, 8, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.wow_region, 9, 0, 1, 1)
 
-        self.number_of_mega_threads = LabelTextbox(
-            settings_page, "Number of Threads", 225, 325, 200, 40
-        )
-        self.number_of_mega_threads.Text.setText("48")
-        self.number_of_mega_threads.Label.setToolTip(
+        self.number_of_mega_threads = QLineEdit(settings_page)
+        self.number_of_mega_threads.setText("48")
+        self.number_of_mega_threads_label = QLabel("Number of Threads", settings_page)
+        self.number_of_mega_threads_label.setToolTip(
             "Change the thread count.\nDo 100 for the fastest scans, but RIP to ur CPU and MEM."
         )
-
-        self.scan_time_min = LabelTextbox(
-            settings_page, "Scan Time Min", 225, 400, 200, 40
+        self.settings_page_layout.addWidget(
+            self.number_of_mega_threads_label, 8, 1, 1, 1
         )
-        self.scan_time_min.Text.setText("1")
-        self.scan_time_min.Label.setToolTip(
+        self.settings_page_layout.addWidget(self.number_of_mega_threads, 9, 1, 1, 1)
+
+        self.scan_time_min = QLineEdit(settings_page)
+        self.scan_time_min.setText("1")
+        self.scan_time_min_label = QLabel("Scan Time Min", settings_page)
+        self.scan_time_min_label.setToolTip(
             "Increase or decrease the minutes before or after the data update to start timed scans."
         )
+        self.settings_page_layout.addWidget(self.scan_time_min_label, 10, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.scan_time_min, 11, 1, 1, 1)
 
-        self.scan_time_max = LabelTextbox(
-            settings_page, "Scan Time Max", 225, 475, 200, 40
-        )
-        self.scan_time_max.Text.setText("3")
-        self.scan_time_max.Label.setToolTip(
+        self.scan_time_max = QLineEdit(settings_page)
+        self.scan_time_max.setText("3")
+        self.scan_time_max_label = QLabel("Scan Time Max", settings_page)
+        self.scan_time_max_label.setToolTip(
             "Increase or decrease the minutes before or after the data update to stop running scans."
         )
+        self.settings_page_layout.addWidget(self.scan_time_max_label, 12, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.scan_time_max, 13, 1, 1, 1)
 
-        self.important_emoji = LabelTextbox(
-            settings_page, "Important Emoji", 225, 550, 200, 40
-        )
-        self.important_emoji.Text.setText("🔥")
-        self.important_emoji.Label.setToolTip(
+        self.important_emoji = QLineEdit(settings_page)
+        self.important_emoji.setText("🔥")
+        self.important_emoji_label = QLabel("Important Emoji", settings_page)
+        self.important_emoji_label.setToolTip(
             "Changes the separators from ==== to whatever emoji you want."
         )
+        self.settings_page_layout.addWidget(self.important_emoji_label, 14, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.important_emoji, 15, 1, 1, 1)
 
-        self.discount_percent = LabelTextbox(
-            settings_page, "Discount vs Average", 225, 625, 200, 40
-        )
-        self.discount_percent.Text.setText("10")
-        self.discount_percent.Label.setToolTip(
+        self.discount_percent = QLineEdit(settings_page)
+        self.discount_percent.setText("10")
+        self.discount_percent_label = QLabel("Discount vs Average", settings_page)
+        self.discount_percent_label.setToolTip(
             "Set the price recommendation discount\n"
             + "1 to 100, smaller number means a better price.\n"
             + "ex: if you set 10 pecent and avg price is 100k, it recommends you snipe for 10k."
         )
+        self.settings_page_layout.addWidget(self.discount_percent_label, 16, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.discount_percent, 17, 1, 1, 1)
 
-        self.show_bid_prices = CheckBox(
-            settings_page, "Show Bid Prices", 0, 375, 200, 40
-        )
-        self.show_bid_prices.Checkbox.setToolTip(
+        self.show_bid_prices = QCheckBox("Show Bid Prices", settings_page)
+        self.show_bid_prices.setToolTip(
             "Show items with Bid prices below your price limit on Desired Items"
         )
+        self.settings_page_layout.addWidget(self.show_bid_prices, 10, 0, 1, 1)
 
-        self.wow_head_link = CheckBox(
-            settings_page, "Show WoWHead Link", 0, 405, 200, 40
-        )
-        self.wow_head_link.Checkbox.setToolTip(
+        self.wow_head_link = QCheckBox("Show WoWHead Link", settings_page)
+        self.wow_head_link.setToolTip(
             "Uses WoWHead links instead of Undermine and shows pictures."
         )
+        self.settings_page_layout.addWidget(self.wow_head_link, 11, 0, 1, 1)
 
-        self.russian_realms = CheckBox(
-            settings_page, "No Russian Realms", 0, 435, 200, 40
-        )
-        self.russian_realms.Checkbox.setChecked(True)
-        self.russian_realms.Checkbox.setToolTip("Removes alerts from Russian Realms.")
+        self.russian_realms = QCheckBox("No Russian Realms", settings_page)
+        self.russian_realms.setChecked(True)
+        self.russian_realms.setToolTip("Removes alerts from Russian Realms.")
+        self.settings_page_layout.addWidget(self.russian_realms, 12, 0, 1, 1)
 
-        self.refresh_alerts = CheckBox(settings_page, "Refresh Alerts", 0, 465, 200, 40)
-        self.refresh_alerts.Checkbox.setChecked(True)
-        self.refresh_alerts.Checkbox.setToolTip(
-            "Set to true to refresh alerts every 1 hour."
-        )
+        self.refresh_alerts = QCheckBox("Refresh Alerts", settings_page)
+        self.refresh_alerts.setToolTip("Set to true to refresh alerts every 1 hour.")
 
-        self.debug_mode = CheckBox(settings_page, "Debug Mode", 0, 495, 200, 40)
-        self.debug_mode.Checkbox.setToolTip(
+        self.settings_page_layout.addWidget(self.refresh_alerts, 13, 0, 1, 1)
+
+        self.debug_mode = QCheckBox("Debug Mode", settings_page)
+        self.debug_mode.setToolTip(
             "Trigger a scan on all realms once.\nUse this to test make sure your data is working."
         )
 
-        self.faction_label = LabelText(settings_page, "Faction AH", 0, 560, 200, 40)
-        self.faction = ComboBoxes(settings_page, 0, 560, 200, 40)
-        self.faction.Combo.addItems(["all", "horde", "alliance", "booty bay"])
-        self.faction_label.Label.setToolTip(
+        self.settings_page_layout.addWidget(self.debug_mode, 14, 0, 1, 1)
+
+        self.faction = QComboBox(settings_page)
+        self.faction.addItems(["all", "horde", "alliance", "booty bay"])
+        self.faction_label = QLabel("Faction AH", settings_page)
+        self.faction_label.setToolTip(
             "Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
         )
+        self.settings_page_layout.addWidget(self.faction_label, 15, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.faction, 16, 0, 1, 1)
 
-        self.import_config_button = UIButtons(
-            settings_page, "Import Config", 0, 625, 200, 50
-        )
-        self.import_config_button.Button.clicked.connect(self.import_configs)
-        self.import_config_button.Button.setToolTip(
-            "Import your mega_data.json config."
-        )
+        self.import_config_button = QPushButton("Import Config")
+        self.import_config_button.clicked.connect(self.import_configs)
+        self.import_config_button.setToolTip("Import your mega_data.json config.")
+
+        self.settings_page_layout.addWidget(self.import_config_button, 17, 0, 1, 1)
 
     def make_pet_page(self, pet_page):
-        self.pet_name_input = ComboBoxes(pet_page, 0, 75, 225, 40)
-        self.pet_name_input.Combo.setEnabled(False)
 
-        self.pet_id_input = LabelTextbox(pet_page, "Pet ID", 0, 25, 100, 40)
-        self.pet_id_input.Label.setToolTip(
+        self.pet_id_input = QLineEdit(pet_page)
+        self.pet_id_input_label = QLabel("Pet ID", pet_page)
+        self.pet_id_input_label.setToolTip(
             "Add the Pet ID that you want to snipe.\nYou can find that id at the end of the undermine exchange link for the item next to 82800 (which is the item id for pet cages)\nhttps://undermine.exchange/#us-suramar/82800-3390."
         )
+        self.pet_page_layout.addWidget(self.pet_id_input_label, 0, 0, 1, 1)
+        self.pet_page_layout.addWidget(self.pet_id_input, 1, 0, 1, 1)
 
-        self.pet_price_input = LabelTextbox(pet_page, "Price", 125, 25, 100, 40)
-        self.pet_price_input.Label.setToolTip(
+        self.pet_price_input = QLineEdit(pet_page)
+        self.pet_price_input_label = QLabel("Price", pet_page)
+        self.pet_price_input_label.setToolTip(
             "Pick a price you want to buy at or under."
         )
+        self.pet_page_layout.addWidget(self.pet_price_input_label, 0, 1, 1, 1)
+        self.pet_page_layout.addWidget(self.pet_price_input, 1, 1, 1, 1)
 
-        self.add_pet_button = UIButtons(pet_page, "Add Pet", 0, 125, 100, 50)
-        self.add_pet_button.Button.clicked.connect(self.add_pet_to_dict)
-        self.add_pet_button.Button.setToolTip("Add pet to your snipe list.")
+        self.pet_name_input = QComboBox(pet_page)
+        self.pet_name_input.setEnabled(False)
+        self.pet_page_layout.addWidget(self.pet_name_input, 2, 0, 1, 2)
 
-        self.remove_pet_button = UIButtons(pet_page, "Remove\nPet", 125, 125, 100, 50)
-        self.remove_pet_button.Button.clicked.connect(self.remove_pet_to_dict)
-        self.remove_pet_button.Button.setToolTip("Remove pet from your snipe list.")
+        self.add_pet_button = QPushButton("Add Pet")
+        self.add_pet_button.setToolTip("Add pet to your snipe list.")
+        self.add_pet_button.clicked.connect(self.add_pet_to_dict)
+        self.pet_page_layout.addWidget(self.add_pet_button, 3, 0, 1, 1)
 
-        self.pet_list_display = ListView(pet_page, 0, 200, 225, 400)
-        self.pet_list_display.List.itemClicked.connect(self.pet_list_double_clicked)
+        self.remove_pet_button = QPushButton("Remove Pet")
+        self.remove_pet_button.setToolTip("Remove pet from your snipe list.")
+        self.remove_pet_button.clicked.connect(self.remove_pet_to_dict)
+        self.pet_page_layout.addWidget(self.remove_pet_button, 3, 1, 1, 1)
 
-        self.import_pet_data_button = UIButtons(
-            pet_page, "Import Pet Data", 0, 625, 225, 50
-        )
-        self.import_pet_data_button.Button.clicked.connect(self.import_pet_data)
-        self.import_pet_data_button.Button.setToolTip(
-            "Import your desired_pets.json config"
-        )
+        self.pet_list_display = QListWidget(pet_page)
+        self.pet_list_display.itemClicked.connect(self.pet_list_double_clicked)
+        self.pet_page_layout.addWidget(self.pet_list_display, 4, 0, 13, 2)
+
+        self.import_pet_data_button = QPushButton("Import Pet Data")
+        self.import_pet_data_button.setToolTip("Import your desired_pets.json config")
+        self.import_pet_data_button.clicked.connect(self.import_pet_data)
+        self.pet_page_layout.addWidget(self.import_pet_data_button, 17, 0, 1, 2)
 
     def make_item_page(self, item_page):
-        self.item_name_input = ComboBoxes(item_page, 0, 75, 225, 40)
-        self.item_name_input.Combo.setEnabled(False)
 
-        self.item_id_input = LabelTextbox(item_page, "Item ID", 0, 25, 100, 40)
-        self.item_id_input.Label.setToolTip(
+        self.item_id_input = QLineEdit(item_page)
+        self.item_id_input_label = QLabel("Item ID", item_page)
+        self.item_id_input_label.setToolTip(
             "Add the item id of any item you want to buy.\nYou can search by name for them here with recommended prices\nhttps://temp.saddlebagexchange.com/megaitemnames"
         )
+        self.item_page_layout.addWidget(self.item_id_input_label, 0, 0, 1, 1)
+        self.item_page_layout.addWidget(self.item_id_input, 1, 0, 1, 1)
 
-        self.item_price_input = LabelTextbox(item_page, "Price", 125, 25, 100, 40)
-        self.item_price_input.Label.setToolTip(
+        self.item_price_input = QLineEdit(item_page)
+        self.item_price_input_label = QLabel("Price", item_page)
+        self.item_price_input_label.setToolTip(
             "Pick a price you want to buy at or under."
         )
+        self.item_page_layout.addWidget(self.item_price_input_label, 0, 1, 1, 1)
+        self.item_page_layout.addWidget(self.item_price_input, 1, 1, 1, 1)
 
-        self.add_item_button = UIButtons(item_page, "Add Item", 0, 125, 100, 50)
-        self.add_item_button.Button.clicked.connect(self.add_item_to_dict)
-        self.add_item_button.Button.setToolTip("Add item to your snipe list.")
+        self.item_name_input = QComboBox(item_page)
+        self.item_name_input.setEnabled(False)
+        self.item_page_layout.addWidget(self.item_name_input, 2, 0, 1, 2)
 
-        self.remove_item_button = UIButtons(
-            item_page, "Remove\nItem", 125, 125, 100, 50
-        )
-        self.remove_item_button.Button.clicked.connect(self.remove_item_to_dict)
-        self.remove_item_button.Button.setToolTip("Remove item from your snipe list.")
+        self.add_item_button = QPushButton("Add Item")
+        self.add_item_button.setToolTip("Add item to your snipe list.")
+        self.add_item_button.clicked.connect(self.add_item_to_dict)
+        self.item_page_layout.addWidget(self.add_item_button, 3, 0, 1, 1)
 
-        self.item_list_display = ListView(item_page, 0, 200, 225, 400)
-        self.item_list_display.List.itemClicked.connect(self.item_list_double_clicked)
+        self.remove_item_button = QPushButton("Remove Item")
+        self.remove_item_button.setToolTip("Remove item from your snipe list.")
+        self.remove_item_button.clicked.connect(self.remove_item_to_dict)
+        self.item_page_layout.addWidget(self.remove_item_button, 3, 1, 1, 1)
 
-        self.import_item_data_button = UIButtons(
-            item_page, "Import\nItem Data", 0, 625, 80, 60
-        )
-        self.import_item_data_button.Button.clicked.connect(self.import_item_data)
-        self.import_item_data_button.Button.setToolTip(
-            "Import your desired_items.json config"
-        )
+        self.item_list_display = QListWidget(item_page)
+        self.item_list_display.itemClicked.connect(self.item_list_double_clicked)
+        self.item_page_layout.addWidget(self.item_list_display, 4, 0, 13, 2)
 
-        self.import_pbs_data_button = UIButtons(
-            item_page, "Import\nPBS Data", 85, 625, 80, 60
-        )
-        self.import_pbs_data_button.Button.clicked.connect(self.import_pbs_data)
-        self.import_pbs_data_button.Button.setToolTip(
+        self.import_item_data_button = QPushButton("Import Item Data")
+        self.import_item_data_button.setToolTip("Import your desired_items.json config")
+        self.import_item_data_button.clicked.connect(self.import_item_data)
+        self.item_page_layout.addWidget(self.import_item_data_button, 17, 0, 1, 1)
+
+        self.import_pbs_data_button = QPushButton("Import PBS Data")
+        self.import_pbs_data_button.setToolTip(
             "Import your Point Blank Sniper text files"
         )
+        self.import_pbs_data_button.clicked.connect(self.import_pbs_data)
+        self.item_page_layout.addWidget(self.import_pbs_data_button, 17, 1, 1, 1)
 
     def make_ilvl_page(self, ilvl_page):
-        self.ilvl_item_input = LabelTextbox(ilvl_page, "Item ID(s)", 0, 25, 100, 40)
-        self.ilvl_item_input.Label.setToolTip(
+
+        self.ilvl_item_input = QLineEdit(ilvl_page)
+        self.ilvl_item_input_label = QLabel("Item ID(s)", ilvl_page)
+        self.ilvl_item_input_label.setToolTip(
             "Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420"
         )
+        self.ilvl_item_input_label.setFixedHeight(10)
+        self.ilvl_page_layout.addWidget(self.ilvl_item_input_label, 0, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_item_input, 1, 0, 1, 1)
 
-        self.ilvl_input = LabelTextbox(ilvl_page, "Item level", 0, 100, 100, 40)
-        self.ilvl_input.Label.setToolTip(
+        self.ilvl_input = QLineEdit(ilvl_page)
+        self.ilvl_input_label = QLabel("Item level", ilvl_page)
+        self.ilvl_input_label.setToolTip(
             "Set the minimum item level you want to snipe."
         )
+        self.ilvl_input_label.setFixedHeight(10)
+        self.ilvl_page_layout.addWidget(self.ilvl_input_label, 2, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_input, 3, 0, 1, 1)
 
-        self.ilvl_price_input = LabelTextbox(ilvl_page, "Buyout", 0, 175, 100, 40)
-        self.ilvl_price_input.Label.setToolTip(
+        self.ilvl_price_input = QLineEdit(ilvl_page)
+        self.ilvl_price_input_label = QLabel("Buyout", ilvl_page)
+        self.ilvl_price_input_label.setToolTip(
             "Set the maximum buyout you want to snipe."
         )
+        self.ilvl_price_input_label.setFixedHeight(10)
+        self.ilvl_page_layout.addWidget(self.ilvl_price_input_label, 4, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_price_input, 5, 0, 1, 1)
 
-        self.ilvl_sockets = CheckBox(ilvl_page, "Sockets", 0, 225, 100, 40)
-        self.ilvl_sockets.Checkbox.setToolTip("Do you want the item to have Sockets?")
+        self.ilvl_sockets = QCheckBox("Sockets", ilvl_page)
+        self.ilvl_sockets.setToolTip("Do you want the item to have Sockets?")
+        self.ilvl_page_layout.addWidget(self.ilvl_sockets, 6, 0, 1, 1)
 
-        self.ilvl_speed = CheckBox(ilvl_page, "Speed", 0, 275, 100, 40)
-        self.ilvl_speed.Checkbox.setToolTip("Do you want the item to have Speed?")
+        self.ilvl_speed = QCheckBox("Speed", ilvl_page)
+        self.ilvl_speed.setToolTip("Do you want the item to have Speed?")
+        self.ilvl_page_layout.addWidget(self.ilvl_speed, 7, 0, 1, 1)
 
-        self.ilvl_leech = CheckBox(ilvl_page, "Leech", 0, 325, 100, 40)
-        self.ilvl_leech.Checkbox.setToolTip("Do you want the item to have Leech?")
+        self.ilvl_leech = QCheckBox("Leech", ilvl_page)
+        self.ilvl_leech.setToolTip("Do you want the item to have Leech?")
+        self.ilvl_page_layout.addWidget(self.ilvl_leech, 8, 0, 1, 1)
 
-        self.ilvl_avoidance = CheckBox(ilvl_page, "Avoidance", 0, 375, 100, 40)
-        self.ilvl_avoidance.Checkbox.setToolTip(
-            "Do you want the item to have Avoidance?"
-        )
+        self.ilvl_avoidance = QCheckBox("Avoidance", ilvl_page)
+        self.ilvl_avoidance.setToolTip("Do you want the item to have Avoidance?")
+        self.ilvl_page_layout.addWidget(self.ilvl_avoidance, 9, 0, 1, 1)
 
-        self.add_ilvl_button = UIButtons(ilvl_page, "Add Item", 0, 425, 100, 50)
-        self.add_ilvl_button.Button.clicked.connect(self.add_ilvl_to_list)
-        self.add_ilvl_button.Button.setToolTip("Add item to your snipe list.")
+        self.add_ilvl_button = QPushButton("Add Item", ilvl_page)
+        self.add_ilvl_button.setToolTip("Add item to your snipe list.")
+        self.add_ilvl_button.clicked.connect(self.add_ilvl_to_list)
+        self.ilvl_page_layout.addWidget(self.add_ilvl_button, 10, 0, 1, 1)
 
-        self.remove_ilvl_button = UIButtons(ilvl_page, "Remove\nItem", 0, 500, 100, 50)
-        self.remove_ilvl_button.Button.clicked.connect(self.remove_ilvl_to_list)
-        self.remove_ilvl_button.Button.setToolTip("Remove item from your snipe list.")
+        self.remove_ilvl_button = QPushButton("Remove Item", ilvl_page)
+        self.remove_ilvl_button.setToolTip("Remove item from your snipe list.")
+        self.remove_ilvl_button.clicked.connect(self.remove_ilvl_to_list)
+        self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 11, 0, 1, 1)
 
-        self.ilvl_list_display = ListView(ilvl_page, 125, 25, 300, 550)
-        self.ilvl_list_display.List.itemClicked.connect(self.ilvl_list_double_clicked)
+        self.ilvl_list_display = QListWidget(ilvl_page)
+        self.ilvl_list_display.itemClicked.connect(self.ilvl_list_double_clicked)
+        self.ilvl_page_layout.addWidget(self.ilvl_list_display, 0, 1, 11, 2)
 
-        self.import_ilvl_data_button = UIButtons(
-            ilvl_page, "Import Desired ILvl List Data", 125, 600, 300, 50
-        )
-        self.import_ilvl_data_button.Button.clicked.connect(self.import_ilvl_data)
-        self.import_ilvl_data_button.Button.setToolTip(
+        self.import_ilvl_data_button = QPushButton("Import Desired ILvl List Data")
+        self.import_ilvl_data_button.setToolTip(
             "Import your desired_ilvl_list.json config"
         )
+        self.import_ilvl_data_button.clicked.connect(self.import_ilvl_data)
+        self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 11, 1, 1, 2)
 
     def go_to_home_page(self):
         self.stacked_widget.setCurrentIndex(0)
@@ -714,32 +714,38 @@ class App(QMainWindow):
         self.pet_statistics = pet_statistics
         self.item_statistics = item_statistics
 
-        self.pet_name_input.Combo.addItems(
+        self.pet_name_input.addItems(
             self.pet_statistics.sort_values(by="itemName")["itemName"].tolist()
         )
-        self.pet_name_input.Combo.setEditable(True)
-        self.pet_name_input.Combo.setInsertPolicy(QComboBox.NoInsert)
-        self.pet_name_input.Combo.completer()
-        self.pet_name_input.Combo.currentIndexChanged.connect(
-            self.on_combo_box_pet_changed
-        )
+        self.pet_name_input.setEditable(True)
+        self.pet_name_input.setInsertPolicy(QComboBox.NoInsert)
+        self.pet_name_input.completer()
+        self.pet_name_input.currentIndexChanged.connect(self.on_combo_box_pet_changed)
 
-        self.item_name_input.Combo.addItems(
+        self.item_name_input.addItems(
             self.item_statistics.sort_values(by="itemName")["itemName"].tolist()
         )
-        self.item_name_input.Combo.setEditable(True)
-        self.item_name_input.Combo.setInsertPolicy(QComboBox.NoInsert)
-        self.item_name_input.Combo.completer()
-        self.item_name_input.Combo.currentIndexChanged.connect(
-            self.on_combo_box_item_changed
-        )
+        self.item_name_input.setEditable(True)
+        self.item_name_input.setInsertPolicy(QComboBox.NoInsert)
+        self.item_name_input.completer()
+        self.item_name_input.currentIndexChanged.connect(self.on_combo_box_item_changed)
 
-        self.item_name_input.Combo.setEnabled(True)
-        self.pet_name_input.Combo.setEnabled(True)
+        self.item_name_input.setEnabled(True)
+        self.item_name_input.setStyleSheet(
+            "QComboBox { background-color: #1D2023; color: white; }"
+            "QComboBox::editable { background: #1D2023; color: white; }"
+            "QComboBox::drop-down { border: 0px; }"
+        )
+        self.pet_name_input.setEnabled(True)
+        self.pet_name_input.setStyleSheet(
+            "QComboBox { background-color: #1D2023; color: white; }"
+            "QComboBox::editable { background: #1D2023; color: white; }"
+            "QComboBox::drop-down { border: 0px; }"
+        )
 
     def on_combo_box_item_changed(self, index):
         # This function will be called whenever the user selects a different item
-        selected_item = self.item_name_input.Combo.currentText()
+        selected_item = self.item_name_input.currentText()
         selected_item_stats = self.item_statistics[
             self.item_statistics["itemName"] == selected_item
         ]
@@ -748,25 +754,25 @@ class App(QMainWindow):
 
         # if the user has not set a price for the item, set the price from TSM stats
         if (
-            not self.item_price_input.Text.text()
+            not self.item_price_input.text()
             or str(selected_item_id) not in self.items_list
         ):
             try:
-                discount_percent = int(self.discount_percent.Text.text()) / 100
+                discount_percent = int(self.discount_percent.text()) / 100
                 recommended_price = str(
                     int(float(selected_item_price) * discount_percent)
                 )
-                self.item_price_input.Text.setText(recommended_price)
+                self.item_price_input.setText(recommended_price)
             except:
-                self.item_price_input.Text.setText("10")
+                self.item_price_input.setText("10")
                 recommended_price = str(int(float(selected_item_price) * 0.1))
-                self.item_price_input.Text.setText(recommended_price)
+                self.item_price_input.setText(recommended_price)
 
-        self.item_id_input.Text.setText(str(selected_item_id))
+        self.item_id_input.setText(str(selected_item_id))
 
     def on_combo_box_pet_changed(self, index):
         # This function will be called whenever the user selects a different item
-        selected_pet = self.pet_name_input.Combo.currentText()
+        selected_pet = self.pet_name_input.currentText()
         selected_pet_stats = self.pet_statistics[
             self.pet_statistics["itemName"] == selected_pet
         ]
@@ -774,27 +780,24 @@ class App(QMainWindow):
         selected_pet_price = selected_pet_stats["desiredPrice"].iloc[0]
 
         # if the user has not set a price for the item, set the price from TSM stats
-        if (
-            not self.pet_price_input.Text.text()
-            or str(selected_pet_id) not in self.pet_list
-        ):
+        if not self.pet_price_input.text() or str(selected_pet_id) not in self.pet_list:
             try:
-                discount_percent = int(self.discount_percent.Text.text()) / 100
+                discount_percent = int(self.discount_percent.text()) / 100
                 recommended_price = str(
                     int(float(selected_pet_price) * discount_percent)
                 )
-                self.pet_price_input.Text.setText(recommended_price)
+                self.pet_price_input.setText(recommended_price)
             except:
-                self.pet_price_input.Text.setText("10")
+                self.pet_price_input.setText("10")
                 recommended_price = str(int(float(selected_pet_price) * 0.1))
-                self.pet_price_input.Text.setText(recommended_price)
+                self.pet_price_input.setText(recommended_price)
 
-        self.pet_id_input.Text.setText(str(selected_pet_id))
+        self.pet_id_input.setText(str(selected_pet_id))
 
     def on_combo_box_region_changed(self, index):
-        self.realm_list_display.List.clear()
-        self.realm_name_combobox.Combo.clear()
-        selected_realm = self.realm_region.Combo.currentText()
+        self.realm_list_display.clear()
+        self.realm_name_combobox.clear()
+        selected_realm = self.realm_region.currentText()
         match selected_realm:
             case "EU":
                 from utils.realm_data import EU_CONNECTED_REALMS_IDS as realm_list
@@ -841,25 +844,30 @@ class App(QMainWindow):
         with open(data_to_insert, "r") as f:
             data = json.load(f)
 
-        self.realm_name_combobox.Combo.addItems(list(realm_list.keys()))
-        self.realm_name_combobox.Combo.setEditable(True)
-        self.realm_name_combobox.Combo.setInsertPolicy(QComboBox.NoInsert)
-        self.realm_name_combobox.Combo.completer()
-        self.realm_name_combobox.Combo.currentIndexChanged.connect(
+        self.realm_name_combobox.addItems(list(realm_list.keys()))
+        self.realm_name_combobox.setEditable(True)
+        self.realm_name_combobox.setInsertPolicy(QComboBox.NoInsert)
+        self.realm_name_combobox.completer()
+        self.realm_name_combobox.currentIndexChanged.connect(
             self.on_combo_box_realm_name_changed
         )
-        self.realm_name_combobox.Combo.setEnabled(True)
+        self.realm_name_combobox.setStyleSheet(
+            "QComboBox { background-color: #1D2023; color: white; }"
+            "QComboBox::editable { background: #1D2023; color: white; }"
+            "QComboBox::drop-down { border: 0px; }"
+        )
+        self.realm_name_combobox.setEnabled(True)
 
         for key, value in data.items():
-            self.realm_list_display.List.insertItem(
-                self.realm_list_display.List.count(), f"Name: {key}; ID: {value};"
+            self.realm_list_display.insertItem(
+                self.realm_list_display.count(), f"Name: {key}; ID: {value};"
             )
 
     def on_combo_box_realm_name_changed(self, index):
-        selected_realm_name = self.realm_name_combobox.Combo.currentText()
+        selected_realm_name = self.realm_name_combobox.currentText()
         if selected_realm_name == "":
             return 0
-        selected_realm = self.realm_region.Combo.currentText()
+        selected_realm = self.realm_region.currentText()
         match selected_realm:
             case "EU":
                 from utils.realm_data import EU_CONNECTED_REALMS_IDS as realm_list
@@ -891,14 +899,14 @@ class App(QMainWindow):
                 QMessageBox.critical(self, "Region List", "Select valid region.")
                 return False
 
-        self.realm_name_input.Text.setText(selected_realm_name)
-        self.realm_id_input.Text.setText(str(realm_list[selected_realm_name]))
+        self.realm_name_input.setText(selected_realm_name)
+        self.realm_id_input.setText(str(realm_list[selected_realm_name]))
 
     def add_realm_to_list(self):
-        if self.realm_name_input.Text.text() == "":
+        if self.realm_name_input.text() == "":
             return 0
 
-        selected_realm = self.realm_region.Combo.currentText()
+        selected_realm = self.realm_region.currentText()
         match selected_realm:
             case "EU":
                 data_to_insert = self.eu_connected_realms
@@ -925,22 +933,22 @@ class App(QMainWindow):
         with open(data_to_insert, "r") as f:
             data = json.load(f)
 
-        data[self.realm_name_input.Text.text()] = int(self.realm_id_input.Text.text())
+        data[self.realm_name_input.text()] = int(self.realm_id_input.text())
 
-        self.realm_list_display.List.clear()
+        self.realm_list_display.clear()
 
         for key, value in data.items():
-            self.realm_list_display.List.insertItem(
-                self.realm_list_display.List.count(), f"Name: {key}; ID: {value};"
+            self.realm_list_display.insertItem(
+                self.realm_list_display.count(), f"Name: {key}; ID: {value};"
             )
 
         self.save_json_file(data_to_insert, data)
 
     def remove_realm_to_list(self):
-        if self.realm_name_input.Text.text() == "":
+        if self.realm_name_input.text() == "":
             return 0
 
-        selected_realm = self.realm_region.Combo.currentText()
+        selected_realm = self.realm_region.currentText()
         match selected_realm:
             case "EU":
                 data_to_insert = self.eu_connected_realms
@@ -968,30 +976,30 @@ class App(QMainWindow):
             data = json.load(f)
 
         try:
-            del data[self.realm_name_input.Text.text()]
+            del data[self.realm_name_input.text()]
 
         except KeyError as e:
             QMessageBox.critical(
-            self,
-            "Removing Realm Error",
-            f"Realm already not in the list",
+                self,
+                "Removing Realm Error",
+                f"Realm already not in the list",
             )
             return 0
 
-        self.realm_list_display.List.clear()
+        self.realm_list_display.clear()
 
         for key, value in data.items():
-            self.realm_list_display.List.insertItem(
-                self.realm_list_display.List.count(), f"Name: {key}; ID: {value};"
+            self.realm_list_display.insertItem(
+                self.realm_list_display.count(), f"Name: {key}; ID: {value};"
             )
 
-        self.realm_name_input.Text.setText("")
-        self.realm_id_input.Text.setText("")
+        self.realm_name_input.setText("")
+        self.realm_id_input.setText("")
 
         self.save_json_file(data_to_insert, data)
 
     def reset_realm_list(self):
-        selected_realm = self.realm_region.Combo.currentText()
+        selected_realm = self.realm_region.currentText()
         match selected_realm:
             case "EU":
                 from utils.realm_data import EU_CONNECTED_REALMS_IDS as realm_list
@@ -1038,11 +1046,11 @@ class App(QMainWindow):
         with open(data_to_insert, "w") as json_file:
             json.dump(realm_list, json_file, indent=4)
 
-        self.realm_list_display.List.clear()
+        self.realm_list_display.clear()
 
         for key, value in realm_list.items():
-            self.realm_list_display.List.insertItem(
-                self.realm_list_display.List.count(), f"Name: {key}; ID: {value};"
+            self.realm_list_display.insertItem(
+                self.realm_list_display.count(), f"Name: {key}; ID: {value};"
             )
 
     def check_config_file(self, path_to_config):
@@ -1050,70 +1058,56 @@ class App(QMainWindow):
             with open(path_to_config, encoding="utf-8") as json_file:
                 raw_mega_data = json.load(json_file)
             if "MEGA_WEBHOOK_URL" in raw_mega_data:
-                self.discord_webhook_input.Text.setText(
-                    raw_mega_data["MEGA_WEBHOOK_URL"]
-                )
+                self.discord_webhook_input.setText(raw_mega_data["MEGA_WEBHOOK_URL"])
 
             if "WOW_CLIENT_ID" in raw_mega_data:
-                self.wow_client_id_input.Text.setText(raw_mega_data["WOW_CLIENT_ID"])
+                self.wow_client_id_input.setText(raw_mega_data["WOW_CLIENT_ID"])
 
             if "WOW_CLIENT_SECRET" in raw_mega_data:
-                self.wow_client_secret_input.Text.setText(
-                    raw_mega_data["WOW_CLIENT_SECRET"]
-                )
+                self.wow_client_secret_input.setText(raw_mega_data["WOW_CLIENT_SECRET"])
 
             if "AUTHENTICATION_TOKEN" in raw_mega_data:
-                self.authentication_token.Text.setText(
-                    raw_mega_data["AUTHENTICATION_TOKEN"]
-                )
+                self.authentication_token.setText(raw_mega_data["AUTHENTICATION_TOKEN"])
 
             if "WOW_REGION" in raw_mega_data:
-                index = self.wow_region.Combo.findText(raw_mega_data["WOW_REGION"])
+                index = self.wow_region.findText(raw_mega_data["WOW_REGION"])
                 if index >= 0:
-                    self.wow_region.Combo.setCurrentIndex(index)
+                    self.wow_region.setCurrentIndex(index)
 
             if "FACTION" in raw_mega_data:
-                index = self.faction.Combo.findText(raw_mega_data["FACTION"])
+                index = self.faction.findText(raw_mega_data["FACTION"])
                 if index >= 0:
-                    self.faction.Combo.setCurrentIndex(index)
+                    self.faction.setCurrentIndex(index)
 
             if "SHOW_BID_PRICES" in raw_mega_data:
-                self.show_bid_prices.Checkbox.setChecked(
-                    raw_mega_data["SHOW_BID_PRICES"]
-                )
+                self.show_bid_prices.setChecked(raw_mega_data["SHOW_BID_PRICES"])
 
             if "MEGA_THREADS" in raw_mega_data:
-                self.number_of_mega_threads.Text.setText(
-                    str(raw_mega_data["MEGA_THREADS"])
-                )
+                self.number_of_mega_threads.setText(str(raw_mega_data["MEGA_THREADS"]))
 
             if "WOWHEAD_LINK" in raw_mega_data:
-                self.wow_head_link.Checkbox.setChecked(raw_mega_data["WOWHEAD_LINK"])
+                self.wow_head_link.setChecked(raw_mega_data["WOWHEAD_LINK"])
 
             if "IMPORTANT_EMOJI" in raw_mega_data:
-                self.important_emoji.Text.setText(raw_mega_data["IMPORTANT_EMOJI"])
+                self.important_emoji.setText(raw_mega_data["IMPORTANT_EMOJI"])
 
             if "DISCOUNT_PERCENT" in raw_mega_data:
-                self.discount_percent.Text.setText(
-                    str(raw_mega_data["DISCOUNT_PERCENT"])
-                )
+                self.discount_percent.setText(str(raw_mega_data["DISCOUNT_PERCENT"]))
 
             if "NO_RUSSIAN_REALMS" in raw_mega_data:
-                self.russian_realms.Checkbox.setChecked(
-                    raw_mega_data["NO_RUSSIAN_REALMS"]
-                )
+                self.russian_realms.setChecked(raw_mega_data["NO_RUSSIAN_REALMS"])
 
             if "REFRESH_ALERTS" in raw_mega_data:
-                self.refresh_alerts.Checkbox.setChecked(raw_mega_data["REFRESH_ALERTS"])
+                self.refresh_alerts.setChecked(raw_mega_data["REFRESH_ALERTS"])
 
             if "SCAN_TIME_MAX" in raw_mega_data:
-                self.scan_time_max.Text.setText(str(raw_mega_data["SCAN_TIME_MAX"]))
+                self.scan_time_max.setText(str(raw_mega_data["SCAN_TIME_MAX"]))
 
             if "SCAN_TIME_MIN" in raw_mega_data:
-                self.scan_time_min.Text.setText(str(raw_mega_data["SCAN_TIME_MIN"]))
+                self.scan_time_min.setText(str(raw_mega_data["SCAN_TIME_MIN"]))
 
             if "DEBUG" in raw_mega_data:
-                self.debug_mode.Checkbox.setChecked(raw_mega_data["DEBUG"])
+                self.debug_mode.setChecked(raw_mega_data["DEBUG"])
         except json.JSONDecodeError:
             QMessageBox.critical(
                 self, "Parsing Error", f"Could not parse JSON data in {path_to_config}"
@@ -1172,15 +1166,15 @@ class App(QMainWindow):
         if os.path.exists(self.path_to_desired_pets):
             self.pet_list = json.load(open(self.path_to_desired_pets))
             for key, value in self.pet_list.items():
-                self.pet_list_display.List.insertItem(
-                    self.pet_list_display.List.count(), f"Pet ID: {key}, Price: {value}"
+                self.pet_list_display.insertItem(
+                    self.pet_list_display.count(), f"Pet ID: {key}, Price: {value}"
                 )
 
         if os.path.exists(self.path_to_desired_items):
             self.items_list = json.load(open(self.path_to_desired_items))
             for key, value in self.items_list.items():
-                self.item_list_display.List.insertItem(
-                    self.item_list_display.List.count(),
+                self.item_list_display.insertItem(
+                    self.item_list_display.count(),
                     f"Item ID: {key}, Price: {value}",
                 )
 
@@ -1190,8 +1184,8 @@ class App(QMainWindow):
                 if "item_ids" not in ilvl_dict_data:
                     ilvl_dict_data["item_ids"] = []
                 string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
-                self.ilvl_list_display.List.insertItem(
-                    self.ilvl_list_display.List.count(), string_with_data
+                self.ilvl_list_display.insertItem(
+                    self.ilvl_list_display.count(), string_with_data
                 )
 
     def ilvl_list_double_clicked(self, item):
@@ -1205,28 +1199,28 @@ class App(QMainWindow):
         leech = item_split[6].split(";")[0]
         avoidance = item_split[7]
 
-        self.ilvl_item_input.Text.setText(item_id)
-        self.ilvl_price_input.Text.setText(buyout)
+        self.ilvl_item_input.setText(item_id)
+        self.ilvl_price_input.setText(buyout)
 
-        self.ilvl_sockets.Checkbox.setChecked(sockets == "True")
-        self.ilvl_speed.Checkbox.setChecked(speed == "True")
-        self.ilvl_leech.Checkbox.setChecked(leech == "True")
-        self.ilvl_avoidance.Checkbox.setChecked(avoidance == "True")
+        self.ilvl_sockets.setChecked(sockets == "True")
+        self.ilvl_speed.setChecked(speed == "True")
+        self.ilvl_leech.setChecked(leech == "True")
+        self.ilvl_avoidance.setChecked(avoidance == "True")
 
-        self.ilvl_input.Text.setText(ilvl)
+        self.ilvl_input.setText(ilvl)
 
     def realm_list_clicked(self, item):
         realm_split = item.text().split(":")
         realm_name = realm_split[1].split(";")[0][1::]
         realm_id = realm_split[2].split(";")[0][1::]
 
-        self.realm_name_input.Text.setText(realm_name)
+        self.realm_name_input.setText(realm_name)
 
-        self.realm_id_input.Text.setText(realm_id)
+        self.realm_id_input.setText(realm_id)
 
     def add_ilvl_to_list(self):
-        ilvl = self.ilvl_input.Text.text()
-        price = self.ilvl_price_input.Text.text()
+        ilvl = self.ilvl_input.text()
+        price = self.ilvl_price_input.text()
 
         if ilvl == "" or price == "":
             QMessageBox.critical(
@@ -1259,7 +1253,7 @@ class App(QMainWindow):
             )
             return False
 
-        item_ids_text = self.ilvl_item_input.Text.text()
+        item_ids_text = self.ilvl_item_input.text()
         if item_ids_text == "":
             item_ids_list = []
         else:
@@ -1287,53 +1281,53 @@ class App(QMainWindow):
         ilvl_dict_data = {
             "ilvl": ilvl_int,
             "buyout": price_int,
-            "sockets": self.ilvl_sockets.Checkbox.isChecked(),
-            "speed": self.ilvl_speed.Checkbox.isChecked(),
-            "leech": self.ilvl_leech.Checkbox.isChecked(),
-            "avoidance": self.ilvl_avoidance.Checkbox.isChecked(),
+            "sockets": self.ilvl_sockets.isChecked(),
+            "speed": self.ilvl_speed.isChecked(),
+            "leech": self.ilvl_leech.isChecked(),
+            "avoidance": self.ilvl_avoidance.isChecked(),
             "item_ids": item_ids_list,
         }
 
         if ilvl_dict_data not in self.ilvl_list:
             self.ilvl_list.append(ilvl_dict_data)
-            self.ilvl_list_display.List.insertItem(
-                self.ilvl_list_display.List.count(),
+            self.ilvl_list_display.insertItem(
+                self.ilvl_list_display.count(),
                 f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}",
             )
 
         return True
 
     def remove_ilvl_to_list(self):
-        if len(self.ilvl_input.Text.text()) == 0:
+        if len(self.ilvl_input.text()) == 0:
             QMessageBox.critical(
                 self,
                 "Ilvl Removal Issue",
                 "Please double click an ilvl json to remove it!",
             )
             return
-        if self.ilvl_item_input.Text.text() == "":
+        if self.ilvl_item_input.text() == "":
             item_ids_list = []
         else:
             item_ids_list = list(
-                map(int, self.ilvl_item_input.Text.text().replace(" ", "").split(","))
+                map(int, self.ilvl_item_input.text().replace(" ", "").split(","))
             )
 
         ilvl_dict_data = {
-            "ilvl": int(self.ilvl_input.Text.text()),
-            "buyout": int(self.ilvl_price_input.Text.text()),
-            "sockets": self.ilvl_sockets.Checkbox.isChecked(),
-            "speed": self.ilvl_speed.Checkbox.isChecked(),
-            "leech": self.ilvl_leech.Checkbox.isChecked(),
-            "avoidance": self.ilvl_avoidance.Checkbox.isChecked(),
+            "ilvl": int(self.ilvl_input.text()),
+            "buyout": int(self.ilvl_price_input.text()),
+            "sockets": self.ilvl_sockets.isChecked(),
+            "speed": self.ilvl_speed.isChecked(),
+            "leech": self.ilvl_leech.isChecked(),
+            "avoidance": self.ilvl_avoidance.isChecked(),
             "item_ids": item_ids_list,
         }
 
         if ilvl_dict_data in self.ilvl_list:
             string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
             print(string_with_data)
-            for x in range(self.ilvl_list_display.List.count()):
-                if self.ilvl_list_display.List.item(x).text() == string_with_data:
-                    self.ilvl_list_display.List.takeItem(x)
+            for x in range(self.ilvl_list_display.count()):
+                if self.ilvl_list_display.item(x).text() == string_with_data:
+                    self.ilvl_list_display.takeItem(x)
                     self.ilvl_list.remove(ilvl_dict_data)
                     return
 
@@ -1342,7 +1336,7 @@ class App(QMainWindow):
         if not pathname or pathname == "":
             return
 
-        self.ilvl_list_display.List.clear()
+        self.ilvl_list_display.clear()
         self.ilvl_list = {}
 
         try:
@@ -1393,8 +1387,8 @@ class App(QMainWindow):
                     )
 
                 string_with_data = f"Item ID: {','.join(map(str, item_ids))}; Price: {buyout_price}; ILvl: {ilvl}; Sockets: {sockets}; Speed: {speed}; Leech: {leech}; Avoidance: {avoidance}"
-                self.ilvl_list_display.List.insertItem(
-                    self.ilvl_list_display.List.count(), string_with_data
+                self.ilvl_list_display.insertItem(
+                    self.ilvl_list_display.count(), string_with_data
                 )
 
         except json.JSONDecodeError:
@@ -1409,22 +1403,22 @@ class App(QMainWindow):
     def item_list_double_clicked(self, item):
         item_split = item.text().replace(" ", "").split(":")
         item_id = item_split[1].split(",")[0]
-        self.item_id_input.Text.setText(item_id)
-        self.item_price_input.Text.setText(item_split[2])
+        self.item_id_input.setText(item_id)
+        self.item_price_input.setText(item_split[2])
         # find the itemName value from item_id in the item_statistics
         try:
             item_name = self.item_statistics[
                 self.item_statistics["itemID"] == int(item_id)
             ].iloc[0]["itemName"]
-            index = self.item_name_input.Combo.findText(item_name)
-            self.item_name_input.Combo.setCurrentIndex(index)
+            index = self.item_name_input.findText(item_name)
+            self.item_name_input.setCurrentIndex(index)
 
         except:
-            self.item_name_input.Combo.setCurrentText("Item ID not found")
+            self.item_name_input.setCurrentText("Item ID not found")
 
     def add_item_to_dict(self):
-        item_id = self.item_id_input.Text.text()
-        item_price = self.item_price_input.Text.text()
+        item_id = self.item_id_input.text()
+        item_price = self.item_price_input.text()
 
         if item_id == "" or item_price == "":
             QMessageBox.critical(
@@ -1457,32 +1451,32 @@ class App(QMainWindow):
 
         # If item is already in the items_list, remove it
         if item_id in self.items_list:
-            for existing_item in range(self.item_list_display.List.count()):
+            for existing_item in range(self.item_list_display.count()):
                 if (
-                    self.item_list_display.List.item(existing_item).text()
+                    self.item_list_display.item(existing_item).text()
                     == f"Item ID: {item_id}, Price: {self.items_list[item_id]}"
                 ):
-                    self.item_list_display.List.takeItem(existing_item)
+                    self.item_list_display.takeItem(existing_item)
                     break
 
         # Add or Update item in the items_list
         self.items_list[item_id] = item_price
-        self.item_list_display.List.insertItem(
-            self.item_list_display.List.count(),
+        self.item_list_display.insertItem(
+            self.item_list_display.count(),
             f"Item ID: {item_id}, Price: {item_price}",
         )
 
         return True
 
     def remove_item_to_dict(self):
-        if self.item_id_input.Text.text() in self.items_list:
-            for x in range(self.item_list_display.List.count()):
+        if self.item_id_input.text() in self.items_list:
+            for x in range(self.item_list_display.count()):
                 if (
-                    self.item_list_display.List.item(x).text()
-                    == f"Item ID: {self.item_id_input.Text.text()}, Price: {self.items_list[self.item_id_input.Text.text()]}"
+                    self.item_list_display.item(x).text()
+                    == f"Item ID: {self.item_id_input.text()}, Price: {self.items_list[self.item_id_input.text()]}"
                 ):
-                    self.item_list_display.List.takeItem(x)
-                    del self.items_list[self.item_id_input.Text.text()]
+                    self.item_list_display.takeItem(x)
+                    del self.items_list[self.item_id_input.text()]
                     return
 
     def import_item_data(self):
@@ -1490,7 +1484,7 @@ class App(QMainWindow):
         if not pathname or pathname == "":
             return
 
-        self.item_list_display.List.clear()
+        self.item_list_display.clear()
         self.items_list = {}
 
         try:
@@ -1505,8 +1499,8 @@ class App(QMainWindow):
                     raise ValueError(
                         f"Invalid price {value} for item ID {key}.\nPrices must be integers between 0-10,000,000."
                     )
-                self.item_list_display.List.insertItem(
-                    self.item_list_display.List.count(),
+                self.item_list_display.insertItem(
+                    self.item_list_display.count(),
                     f"Item ID: {key}, Price: {value}",
                 )
 
@@ -1524,7 +1518,7 @@ class App(QMainWindow):
         if not pathname or pathname == "":
             return
 
-        self.item_list_display.List.clear()
+        self.item_list_display.clear()
         self.items_list = {}
 
         try:
@@ -1542,10 +1536,10 @@ class App(QMainWindow):
             }
             self.items_list = {}
             for key, value in temp_items_list.items():
-                discount_percent = int(self.discount_percent.Text.text()) / 100
+                discount_percent = int(self.discount_percent.text()) / 100
                 discount_price = round(float(value) * discount_percent, 4)
-                self.item_list_display.List.insertItem(
-                    self.item_list_display.List.count(),
+                self.item_list_display.insertItem(
+                    self.item_list_display.count(),
                     f"Item ID: {key}, Price: {discount_price}",
                 )
                 self.items_list[str(key)] = discount_price
@@ -1557,21 +1551,21 @@ class App(QMainWindow):
     def pet_list_double_clicked(self, item):
         item_split = item.text().replace(" ", "").split(":")
         pet_id = item_split[1].split(",")[0]
-        self.pet_id_input.Text.setText(pet_id)
-        self.pet_price_input.Text.setText(item_split[2])
+        self.pet_id_input.setText(pet_id)
+        self.pet_price_input.setText(item_split[2])
         # find the itemName value from item_id in the item_statistics
         try:
             pet_name = self.pet_statistics[
                 self.pet_statistics["itemID"] == int(pet_id)
             ].iloc[0]["itemName"]
-            index = self.pet_name_input.Combo.findText(pet_name)
-            self.pet_name_input.Combo.setCurrentIndex(index)
+            index = self.pet_name_input.findText(pet_name)
+            self.pet_name_input.setCurrentIndex(index)
         except:
-            self.pet_name_input.Combo.setCurrentText("Item ID not found")
+            self.pet_name_input.setCurrentText("Item ID not found")
 
     def add_pet_to_dict(self):
-        pet_id = self.pet_id_input.Text.text()
-        pet_price = self.pet_price_input.Text.text()
+        pet_id = self.pet_id_input.text()
+        pet_price = self.pet_price_input.text()
 
         if pet_id == "" or pet_price == "":
             QMessageBox.critical(
@@ -1604,32 +1598,32 @@ class App(QMainWindow):
 
         # If pet_id is already in the list, remove it
         if pet_id in self.pet_list:
-            for existing_entry in range(self.pet_list_display.List.count()):
+            for existing_entry in range(self.pet_list_display.count()):
                 if (
-                    self.pet_list_display.List.item(existing_entry).text()
+                    self.pet_list_display.item(existing_entry).text()
                     == f"Pet ID: {pet_id}, Price: {self.pet_list[pet_id]}"
                 ):
-                    self.pet_list_display.List.takeItem(existing_entry)
+                    self.pet_list_display.takeItem(existing_entry)
                     break
 
         # Add or replace an item in pet_list
         self.pet_list[pet_id] = pet_price
         # Add new item to the display list
-        self.pet_list_display.List.insertItem(
-            self.pet_list_display.List.count(), f"Pet ID: {pet_id}, Price: {pet_price}"
+        self.pet_list_display.insertItem(
+            self.pet_list_display.count(), f"Pet ID: {pet_id}, Price: {pet_price}"
         )
 
         return True
 
     def remove_pet_to_dict(self):
-        if self.pet_id_input.Text.text() in self.pet_list:
-            for x in range(self.pet_list_display.List.count()):
+        if self.pet_id_input.text() in self.pet_list:
+            for x in range(self.pet_list_display.count()):
                 if (
-                    self.pet_list_display.List.item(x).text()
-                    == f"Pet ID: {self.pet_id_input.Text.text()}, Price: {self.pet_list[self.pet_id_input.Text.text()]}"
+                    self.pet_list_display.item(x).text()
+                    == f"Pet ID: {self.pet_id_input.text()}, Price: {self.pet_list[self.pet_id_input.text()]}"
                 ):
-                    self.pet_list_display.List.takeItem(x)
-                    del self.pet_list[self.pet_id_input.Text.text()]
+                    self.pet_list_display.takeItem(x)
+                    del self.pet_list[self.pet_id_input.text()]
                     return
 
     def import_pet_data(self):
@@ -1637,7 +1631,7 @@ class App(QMainWindow):
         if not pathname or pathname == "":
             return
 
-        self.pet_list_display.List.clear()
+        self.pet_list_display.clear()
         self.pet_list = {}
 
         try:
@@ -1652,8 +1646,8 @@ class App(QMainWindow):
                     raise ValueError(
                         f"Invalid price {value} for pet ID {key}.\nPrices must be integers between 1-10,000,000."
                     )
-                self.pet_list_display.List.insertItem(
-                    self.pet_list_display.List.count(), f"Pet ID: {key}, Price: {value}"
+                self.pet_list_display.insertItem(
+                    self.pet_list_display.count(), f"Pet ID: {key}, Price: {value}"
                 )
         except json.JSONDecodeError:
             QMessageBox.critical(
@@ -1671,24 +1665,24 @@ class App(QMainWindow):
         self.check_config_file(pathname)
 
     def reset_app_data(self):
-        self.ilvl_list_display.List.clear()
-        self.pet_list_display.List.clear()
-        self.item_list_display.List.clear()
+        self.ilvl_list_display.clear()
+        self.pet_list_display.clear()
+        self.item_list_display.clear()
 
-        self.discord_webhook_input.Text.setText(""),
-        self.wow_client_id_input.Text.setText(""),
-        self.wow_client_secret_input.Text.setText(""),
-        self.authentication_token.Text.setText(""),
-        self.show_bid_prices.Checkbox.setChecked(False),
-        self.number_of_mega_threads.Text.setText("48"),
-        self.wow_head_link.Checkbox.setChecked(False),
-        self.important_emoji.Text.setText("🔥"),
-        self.discount_percent.Text.setText("10"),
-        self.russian_realms.Checkbox.setChecked(True),
-        self.refresh_alerts.Checkbox.setChecked(True),
-        self.scan_time_min.Text.setText("1"),
-        self.scan_time_max.Text.setText("3"),
-        self.debug_mode.Checkbox.setChecked(False)
+        self.discord_webhook_input.setText(""),
+        self.wow_client_id_input.setText(""),
+        self.wow_client_secret_input.setText(""),
+        self.authentication_token.setText(""),
+        self.show_bid_prices.setChecked(False),
+        self.number_of_mega_threads.setText("48"),
+        self.wow_head_link.setChecked(False),
+        self.important_emoji.setText("🔥"),
+        self.discount_percent.setText("10"),
+        self.russian_realms.setChecked(True),
+        self.refresh_alerts.setChecked(True),
+        self.scan_time_min.setText("1"),
+        self.scan_time_max.setText("3"),
+        self.debug_mode.setChecked(False)
 
         self.pet_list = {}
         self.items_list = {}
@@ -1697,7 +1691,7 @@ class App(QMainWindow):
         self.save_data_to_json()
 
     def validate_application_settings(self):
-        wow_region = self.wow_region.Combo.currentText()
+        wow_region = self.wow_region.currentText()
 
         # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC'
         if wow_region not in [
@@ -1716,9 +1710,9 @@ class App(QMainWindow):
             return False
 
         required_fields = {
-            "MEGA_WEBHOOK_URL": self.discord_webhook_input.Text.text().strip(),
-            "WOW_CLIENT_ID": self.wow_client_id_input.Text.text().strip(),
-            "WOW_CLIENT_SECRET": self.wow_client_secret_input.Text.text().strip(),
+            "MEGA_WEBHOOK_URL": self.discord_webhook_input.text().strip(),
+            "WOW_CLIENT_ID": self.wow_client_id_input.text().strip(),
+            "WOW_CLIENT_SECRET": self.wow_client_secret_input.text().strip(),
         }
 
         for field, value in required_fields.items():
@@ -1734,11 +1728,11 @@ class App(QMainWindow):
                 )
                 return False
 
-        mega_threads = self.number_of_mega_threads.Text.text()
-        scan_time_max = self.scan_time_max.Text.text()
-        scan_time_min = self.scan_time_min.Text.text()
-        discount_percent = self.discount_percent.Text.text()
-        faction = self.faction.Combo.currentText()
+        mega_threads = self.number_of_mega_threads.text()
+        scan_time_max = self.scan_time_max.text()
+        scan_time_min = self.scan_time_min.text()
+        discount_percent = self.discount_percent.text()
+        faction = self.faction.currentText()
 
         # Check if MEGA_THREADS, SCAN_TIME_MAX, and SCAN_TIME_MIN are integers
         integer_fields = {
@@ -1757,11 +1751,11 @@ class App(QMainWindow):
                 )
                 return False
 
-        show_bids = self.show_bid_prices.Checkbox.isChecked()
-        wowhead = self.wow_head_link.Checkbox.isChecked()
-        no_russians = self.russian_realms.Checkbox.isChecked()
-        refresh_alerts = self.refresh_alerts.Checkbox.isChecked()
-        debug = self.debug_mode.Checkbox.isChecked()
+        show_bids = self.show_bid_prices.isChecked()
+        wowhead = self.wow_head_link.isChecked()
+        no_russians = self.russian_realms.isChecked()
+        refresh_alerts = self.refresh_alerts.isChecked()
+        debug = self.debug_mode.isChecked()
 
         boolean_fields = {
             "SHOW_BID_PRICES": show_bids,
@@ -1784,13 +1778,13 @@ class App(QMainWindow):
             "MEGA_WEBHOOK_URL": required_fields["MEGA_WEBHOOK_URL"],
             "WOW_CLIENT_ID": required_fields["WOW_CLIENT_ID"],
             "WOW_CLIENT_SECRET": required_fields["WOW_CLIENT_SECRET"],
-            "AUTHENTICATION_TOKEN": self.authentication_token.Text.text().strip(),
+            "AUTHENTICATION_TOKEN": self.authentication_token.text().strip(),
             "WOW_REGION": wow_region,
             "SHOW_BID_PRICES": show_bids,
             "MEGA_THREADS": int(mega_threads),
             "WOWHEAD_LINK": wowhead,
-            "IMPORTANT_EMOJI": self.important_emoji.Text.text().strip(),
-            "DISCOUNT_PERCENT": int(self.discount_percent.Text.text()),
+            "IMPORTANT_EMOJI": self.important_emoji.text().strip(),
+            "DISCOUNT_PERCENT": int(self.discount_percent.text()),
             "NO_RUSSIAN_REALMS": no_russians,
             "REFRESH_ALERTS": refresh_alerts,
             "SCAN_TIME_MAX": int(scan_time_max),
@@ -1880,7 +1874,7 @@ class App(QMainWindow):
     def start_alerts(self):
         response = requests.post(
             self.token_auth_url,
-            json={"token": f"{self.authentication_token.Text.text()}"},
+            json={"token": f"{self.authentication_token.text()}"},
         )
 
         response_dict = response.json()
@@ -1926,8 +1920,8 @@ class App(QMainWindow):
             )
             return
 
-        self.start_button.Button.setEnabled(False)
-        self.stop_button.Button.setEnabled(True)
+        self.start_button.setEnabled(False)
+        self.stop_button.setEnabled(True)
 
         self.alerts_thread = Alerts(
             path_to_data_files=self.path_to_data,
@@ -1942,17 +1936,17 @@ class App(QMainWindow):
 
     def stop_alerts(self):
         self.alerts_thread.running = False
-        self.stop_button.Button.setText("Stopping Process")
+        self.stop_button.setText("Stopping Process")
         self.alerts_progress_changed("Stopping alerts!")
-        self.stop_button.Button.setEnabled(False)
+        self.stop_button.setEnabled(False)
 
     def alerts_thread_finished(self):
-        self.stop_button.Button.setText("Stop Alerts")
-        self.start_button.Button.setEnabled(True)
+        self.stop_button.setText("Stop Alerts")
+        self.start_button.setEnabled(True)
         self.alerts_progress_changed("Waiting for user to Start!")
 
     def alerts_progress_changed(self, progress_str):
-        self.mega_alerts_progress.Label.setText(progress_str)
+        self.mega_alerts_progress.setText(progress_str)
 
 
 if __name__ == "__main__":
