@@ -571,7 +571,9 @@ class App(QMainWindow):
         self.pet_page_layout.addWidget(self.remove_pet_button, 3, 1, 1, 1)
 
         self.pet_list_display = QListWidget(pet_page)
+
         self.pet_list_display.setSortingEnabled(True)
+
         self.pet_list_display.itemClicked.connect(self.pet_list_double_clicked)
         self.pet_page_layout.addWidget(self.pet_list_display, 4, 0, 13, 2)
 
@@ -614,6 +616,7 @@ class App(QMainWindow):
 
         self.item_list_display = QListWidget(item_page)
         self.item_list_display.setSortingEnabled(True)
+
         self.item_list_display.itemClicked.connect(self.item_list_double_clicked)
         self.item_page_layout.addWidget(self.item_list_display, 4, 0, 13, 2)
 
@@ -686,6 +689,7 @@ class App(QMainWindow):
 
         self.ilvl_list_display = QListWidget(ilvl_page)
         self.ilvl_list_display.setSortingEnabled(True)
+
         self.ilvl_list_display.itemClicked.connect(self.ilvl_list_double_clicked)
         self.ilvl_page_layout.addWidget(self.ilvl_list_display, 0, 1, 11, 2)
 
@@ -749,7 +753,7 @@ class App(QMainWindow):
 
     def on_combo_box_item_changed(self, index):
         # This function will be called whenever the user selects a different item
-        
+
         selected_item = self.item_name_input.currentText()
         selected_item_stats = self.item_statistics[
             self.item_statistics["itemName"] == selected_item
@@ -778,6 +782,7 @@ class App(QMainWindow):
 
         else:
             self.item_price_input.setText(selected_item_price)
+
 
         self.item_id_input.setText(str(selected_item_id))
 
@@ -808,6 +813,7 @@ class App(QMainWindow):
 
         else:
             self.pet_price_input.setText(selected_pet_price)
+
 
         self.pet_id_input.setText(str(selected_pet_id))
 
