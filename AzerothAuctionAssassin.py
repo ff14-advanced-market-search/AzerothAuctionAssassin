@@ -513,28 +513,32 @@ class App(QMainWindow):
         )
         self.settings_page_layout.addWidget(self.show_bid_prices, 10, 0, 1, 1)
 
-        self.wow_head_link = QCheckBox("Show WoWHead Link", settings_page)
+        self.wow_head_link = QCheckBox("Show wowhead link", settings_page)
         self.wow_head_link.setToolTip(
-            "Uses WoWHead links instead of Undermine and shows pictures."
+            "Uses wowhead links instead of Undermine and shows pictures."
         )
         self.settings_page_layout.addWidget(self.wow_head_link, 11, 0, 1, 1)
+
+        self.no_links = QCheckBox("Disable Web Links", settings_page)
+        self.no_links.setToolTip(
+            "Disable all Wowhead, undemine and saddlebag links from discord messages."
+        )
+        self.settings_page_layout.addWidget(self.no_links, 12, 0, 1, 1)
 
         self.russian_realms = QCheckBox("No Russian Realms", settings_page)
         self.russian_realms.setChecked(True)
         self.russian_realms.setToolTip("Removes alerts from Russian Realms.")
-        self.settings_page_layout.addWidget(self.russian_realms, 12, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.russian_realms, 13, 0, 1, 1)
 
         self.refresh_alerts = QCheckBox("Refresh Alerts", settings_page)
         self.refresh_alerts.setToolTip("Set to true to refresh alerts every 1 hour.")
-
-        self.settings_page_layout.addWidget(self.refresh_alerts, 13, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.refresh_alerts, 14, 0, 1, 1)
 
         self.debug_mode = QCheckBox("Debug Mode", settings_page)
         self.debug_mode.setToolTip(
             "Trigger a scan on all realms once.\nUse this to test make sure your data is working."
         )
-
-        self.settings_page_layout.addWidget(self.debug_mode, 14, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.debug_mode, 15, 0, 1, 1)
 
         self.faction = QComboBox(settings_page)
         self.faction.addItems(["all", "horde", "alliance", "booty bay"])
@@ -542,14 +546,14 @@ class App(QMainWindow):
         self.faction_label.setToolTip(
             "Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
         )
-        self.settings_page_layout.addWidget(self.faction_label, 15, 0, 1, 1)
-        self.settings_page_layout.addWidget(self.faction, 16, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.faction_label, 16, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.faction, 17, 0, 1, 1)
 
         self.import_config_button = QPushButton("Import Config")
         self.import_config_button.clicked.connect(self.import_configs)
         self.import_config_button.setToolTip("Import your mega_data.json config.")
 
-        self.settings_page_layout.addWidget(self.import_config_button, 17, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.import_config_button, 18, 0, 1, 1)
 
     def make_pet_page(self, pet_page):
 
@@ -1124,6 +1128,9 @@ class App(QMainWindow):
 
             if "WOWHEAD_LINK" in raw_mega_data:
                 self.wow_head_link.setChecked(raw_mega_data["WOWHEAD_LINK"])
+
+            if "NO_LINKS" in raw_mega_data:
+                self.no_links.setChecked(raw_mega_data["NO_LINKS"])
 
             if "IMPORTANT_EMOJI" in raw_mega_data:
                 self.important_emoji.setText(raw_mega_data["IMPORTANT_EMOJI"])
@@ -1713,6 +1720,7 @@ class App(QMainWindow):
         self.show_bid_prices.setChecked(False),
         self.number_of_mega_threads.setText("48"),
         self.wow_head_link.setChecked(False),
+        self.no_links.setChecked(False),
         self.important_emoji.setText("🔥"),
         self.discount_percent.setText("10"),
         self.russian_realms.setChecked(True),
@@ -1790,6 +1798,7 @@ class App(QMainWindow):
 
         show_bids = self.show_bid_prices.isChecked()
         wowhead = self.wow_head_link.isChecked()
+        no_links = self.no_links.isChecked()
         no_russians = self.russian_realms.isChecked()
         refresh_alerts = self.refresh_alerts.isChecked()
         debug = self.debug_mode.isChecked()
@@ -1797,6 +1806,7 @@ class App(QMainWindow):
         boolean_fields = {
             "SHOW_BID_PRICES": show_bids,
             "WOWHEAD_LINK": wowhead,
+            "NO_LINKS": no_links,
             "NO_RUSSIAN_REALMS": no_russians,
             "REFRESH_ALERTS": refresh_alerts,
             "DEBUG": debug,
@@ -1820,6 +1830,7 @@ class App(QMainWindow):
             "SHOW_BID_PRICES": show_bids,
             "MEGA_THREADS": int(mega_threads),
             "WOWHEAD_LINK": wowhead,
+            "NO_LINKS": no_links,
             "IMPORTANT_EMOJI": self.important_emoji.text().strip(),
             "DISCOUNT_PERCENT": int(self.discount_percent.text()),
             "NO_RUSSIAN_REALMS": no_russians,
