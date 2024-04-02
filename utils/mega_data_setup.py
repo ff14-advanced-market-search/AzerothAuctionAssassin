@@ -35,6 +35,7 @@ class MegaData:
             "NO_RUSSIAN_REALMS", raw_mega_data
         )
         self.DEBUG = self.__set_mega_vars("DEBUG", raw_mega_data)
+        self.NO_LINKS = self.__set_mega_vars("NO_LINKS", raw_mega_data)
 
         # set required env vars
         self.WOW_CLIENT_ID = self.__set_mega_vars("WOW_CLIENT_ID", raw_mega_data, True)
@@ -169,29 +170,48 @@ class MegaData:
             else:
                 var_value = 1
 
-        if var_name == "REFRESH_ALERTS":
-            if str(var_value).lower() == "false" or var_value == False:
-                var_value = False
-            else:
-                var_value = True
-
         if var_name == "IMPORTANT_EMOJI":
             if len(str(var_value)) != 1:
                 var_value = "🔥"
             else:
                 var_value = str(var_value)
 
-        if var_name == "NO_RUSSIAN_REALMS":
-            if var_value == "false" or var_value == False:
-                var_value = False
-            else:
-                var_value = True
+        ## save old method just incase, can probably delete it later
+        # if var_name == "DEBUG":
+        #     if str(var_value).lower() == "true" or var_value == True:
+        #         var_value = True
+        #     else:
+        #         var_value = False
 
-        if var_name == "DEBUG":
-            if str(var_value).lower() == "true" or var_value == True:
-                var_value = True
+        # if var_name == "NO_RUSSIAN_REALMS":
+        #     if var_value == "false" or var_value == False:
+        #         var_value = False
+        #     else:
+        #         var_value = True
+
+        # if var_name == "REFRESH_ALERTS":
+        #     if str(var_value).lower() == "false" or var_value == False:
+        #         var_value = False
+        #     else:
+        #         var_value = True
+
+        # handle cases where we need a default value to be true or false
+        def process_var(var_value, default_behaviour):
+            if (
+                str(var_value).lower() == str(default_behaviour).lower()
+                or var_value == default_behaviour
+            ):
+                return default_behaviour
             else:
-                var_value = False
+                return not default_behaviour
+
+        default_true = ["NO_RUSSIAN_REALMS", "REFRESH_ALERTS"]
+        default_false = ["DEBUG", "NO_LINKS"]
+
+        if var_name in default_true:
+            var_value = process_var(var_value, True)
+        if var_value in default_false:
+            var_value = process_var(var_value, False)
 
         return var_value
 
