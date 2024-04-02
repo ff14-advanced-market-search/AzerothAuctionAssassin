@@ -93,8 +93,9 @@ class Alerts(QThread):
                     if mega_data.WOWHEAD_LINK and "itemID" in auction
                     else auction["itemlink"]
                 )
-                message += f"[{link_label}]({link_url})\n"
-                message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{saddlebag_link_id})\n"
+                if not mega_data.NO_LINKS:
+                    message += f"[{link_label}]({link_url})\n"
+                    message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{saddlebag_link_id})\n"
 
                 # Add price info, if available
                 price_type = (
