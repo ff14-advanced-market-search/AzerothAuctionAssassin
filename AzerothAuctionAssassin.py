@@ -83,6 +83,7 @@ class Item_And_Pet_Statistics(QThread):
 
 class RecommendationsPage(QWidget):
     def __init__(self):
+
         super(RecommendationsPage, self).__init__()
         self.layout = QGridLayout(self)
 
@@ -587,6 +588,7 @@ class RealmPage(QWidget):
         )
         self.realm_name_combobox.setEnabled(True)
 
+
         for key, value in data.items():
             self.realm_list_display.insertItem(
                 self.realm_list_display.count(), f"Name: {key}; ID: {value};"
@@ -630,7 +632,6 @@ class RealmPage(QWidget):
 
         self.realm_name_input.setText(selected_realm_name)
         self.realm_id_input.setText(str(realm_list[selected_realm_name]))
-
 
 class PetPage(QWidget):
     def __init__(self):
@@ -1628,6 +1629,7 @@ class SettingsPage(QWidget):
 
         show_bids = self.show_bid_prices.isChecked()
         wowhead = self.wow_head_link.isChecked()
+        no_links = self.no_links.isChecked()
         no_russians = self.russian_realms.isChecked()
         refresh_alerts = self.refresh_alerts.isChecked()
         debug = self.debug_mode.isChecked()
@@ -1635,6 +1637,7 @@ class SettingsPage(QWidget):
         boolean_fields = {
             "SHOW_BID_PRICES": show_bids,
             "WOWHEAD_LINK": wowhead,
+            "NO_LINKS": no_links,
             "NO_RUSSIAN_REALMS": no_russians,
             "REFRESH_ALERTS": refresh_alerts,
             "DEBUG": debug,
@@ -1658,6 +1661,7 @@ class SettingsPage(QWidget):
             "SHOW_BID_PRICES": show_bids,
             "MEGA_THREADS": int(mega_threads),
             "WOWHEAD_LINK": wowhead,
+            "NO_LINKS": no_links,
             "IMPORTANT_EMOJI": self.important_emoji.text().strip(),
             "DISCOUNT_PERCENT": int(self.discount_percent.text()),
             "NO_RUSSIAN_REALMS": no_russians,
