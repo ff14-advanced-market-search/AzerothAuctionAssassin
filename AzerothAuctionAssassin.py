@@ -96,6 +96,7 @@ class RecommendationsRequest(QThread):
             headers={"Accept": "application/json"},
             json=self.request_data,
             ).json()
+        print(self.request_data)
 
         recommended_items = {
             str(item["itemID"]): round(item["historicPrice"] * self.l_discount_percent, 4)
@@ -369,7 +370,7 @@ class RecommendationsPage(QWidget):
         self.layout.addWidget(self.minimum_average_price_input, 1, 0, 1, 1)
 
         self.minimum_desired_sales_input = QLineEdit(self)
-        self.minimum_desired_sales_input.setText('0')
+        self.minimum_desired_sales_input.setText('0.1')
         self.minimum_desired_sales_input_label = QLabel("Minimum Desired sales per day", self)
         self.minimum_desired_sales_input_label.setToolTip("")
         self.minimum_desired_sales_input_label.setFixedHeight(20)
@@ -2080,7 +2081,7 @@ class App(QMainWindow):
         self.go_to_home_button.clicked.connect(lambda: self.go_to_page_number(0))
         self.layout_area.addWidget(self.go_to_home_button, 0, 0)
 
-        self.go_to_recommendations_button = QPushButton("Recommendations Page")
+        self.go_to_recommendations_button = QPushButton("Recommendations")
 
         self.go_to_recommendations_button.setFixedSize(150,25)
         self.go_to_recommendations_button.clicked.connect(lambda: self.go_to_page_number(6))
