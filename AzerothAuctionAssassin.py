@@ -82,15 +82,236 @@ class Item_And_Pet_Statistics(QThread):
 
 
 class RecommendationsPage(QWidget):
+    
     def __init__(self):
 
         super(RecommendationsPage, self).__init__()
         self.layout = QGridLayout(self)
+        self.eu_connected_realms = os.path.join(
+            os.getcwd(), "AzerothAuctionAssassinData", "eu-wow-connected-realm-ids.json"
+        )
+        self.na_connected_realms = os.path.join(
+            os.getcwd(), "AzerothAuctionAssassinData", "na-wow-connected-realm-ids.json"
+        )
 
+        self.eu_realms = json.load(open(self.eu_connected_realms))
+        self.na_realms = json.load(open(self.na_connected_realms))
+
+        self.item_quality_list = {
+            "Common" : 1,
+            "Uncommon" : 2,
+            "Rare" : 3,
+            "Epic" : 4,
+            "Legendary" : 5,
+            "Artifact" : 6,
+            "Heirloom" : 7,
+        }
+
+        self.item_category_list = {
+            "All": -1,
+            # "Consumable": 0,
+            "Container": 1,
+            "Weapon": 2,
+            # "Gem": 3,
+            "Armor": 4,
+            # "Tradegoods": 7,
+            # "Item Enhancement": 8,
+            "Recipe": 9,
+            "Quest Item": 12,
+            "Miscellaneous": 15,
+            # "Glyph": 16,
+            # "Battle Pet": 17,
+            "Profession": 19
+        }
+        self.item_sub_category_lists = {
+            "Consumable": {
+                "Generic": 0,
+                "Potion": 1,
+                "Elixir": 2,
+                "Flasks & Phials": 3,
+                "Food & Drink": 4,
+                "Food & Drink 2": 5,
+                "Bandage": 6,
+                "Other": 7,
+                "Other 2": 8,
+                "Vantus Rune": 9
+            },
+            "Container": {
+                "Bag": 0,
+                "Soul Bag": 1,
+                "Herb Bag": 2,
+                "Enchanting Bag": 3,
+                "Engineering Bag": 4,
+                "Gem Bag": 5,
+                "Mining Bag": 6,
+                "Leatherworking Bag": 7,
+                "Inscription Bag": 8,
+                "Tackle Box": 9,
+                "Cooking Bag": 10
+            },
+            "Weapon": {
+                "One-Handed Axes": 0,
+                "Two-Handed Axes": 1,
+                "Bows": 2,
+                "Guns": 3,
+                "One-Handed Maces": 4,
+                "Two-Handed Maces": 5,
+                "Polearms": 6,
+                "One-Handed Swords": 7,
+                "Two-Handed Swords": 8,
+                "Warglaives": 9,
+                "Staves": 10,
+                "Bear Claws": 11,
+                "CatClaws": 12,
+                "Fist Weapons": 13,
+                "Miscellaneous": 14,
+                "Daggers": 15,
+                "Thrown": 16,
+                "Crossbows": 18,
+                "Wands": 19,
+                "Fishing Poles": 20
+            },
+            "Gem": {
+                "Intellect": 0,
+                "Agility": 1,
+                "Strength": 2,
+                "Stamina": 3,
+                "Spirit": 4,
+                "Critical Strike": 5,
+                "Mastery": 6,
+                "Haste": 7,
+                "Versatility": 8,
+                "Other": 9,
+                "Multiple Stats": 10,
+                "Artifact Relic": 11
+            },
+            "Armor": {
+                "Miscellaneous: Trinkets, Rings, Necks, Spellstones, Firestones, etc.": 0,
+                "Cloth": 1,
+                "Leather": 2,
+                "Mail": 3,
+                "Plate": 4,
+                "Cosmetic": 5,
+                "Shields": 6,
+                "Librams": 7,
+                "Idols": 8,
+                "Totems": 9,
+                "Sigils": 10,
+                "Relic": 11
+            },
+            "Tradegoods": {
+                "Parts": 1,
+                "Jewelcrafting": 4,
+                "Cloth": 5,
+                "Leather": 6,
+                "Metal & Stone": 7,
+                "Cooking": 8,
+                "Herb": 9,
+                "Elemental": 10,
+                "Other": 11,
+                "Enchanting": 12,
+                "Inscription": 16,
+                "Optional Reagents": 18,
+                "Finishing Reagents": 19
+            },
+            "Item Enhancement": {
+                "Head": 0,
+                "Neck": 1,
+                "Shoulder": 2,
+                "Cloak": 3,
+                "Chest": 4,
+                "Wrist": 5,
+                "Hands": 6,
+                "Waist": 7,
+                "Legs": 8,
+                "Feet": 9,
+                "Finger": 10,
+                "One-Handed Weapon": 11,
+                "Two-Handed Weapon": 12,
+                "Shield/Off-hand": 13,
+                "Misc": 14
+            },
+            "Recipe": {
+                "Book": 0,
+                "Leatherworking": 1,
+                "Tailoring": 2,
+                "Engineering": 3,
+                "Blacksmithing": 4,
+                "Cooking": 5,
+                "Alchemy": 6,
+                "First Aid": 7,
+                "Enchanting": 8,
+                "Fishing": 9,
+                "Jewelcrafting": 10,
+                "Inscription": 11
+            },
+            "Quest Item": {
+                "Quest Item": 0
+            },
+            "Miscellaneous": {
+                "Junk": 0,
+                "Reagent": 1,
+                "Companion Pets": 2,
+                "Holiday": 3,
+                "Other": 4,
+                "Mount": 5,
+                "Mount Equipment": 6,
+                "Toys": 199
+            },
+            "Glyph": {
+                "Warrior": 1,
+                "Paladin": 2,
+                "Hunter": 3,
+                "Rogue": 4,
+                "Priest": 5,
+                "Death Knight": 6,
+                "Shaman": 7,
+                "Mage": 8,
+                "Warlock": 9,
+                "Monk": 10,
+                "Druid": 11,
+                "Demon Hunter": 12
+            },
+            "Battle Pet": {
+                "Humanoid": 0,
+                "Dragonkin": 1,
+                "Flying": 2,
+                "Undead": 3,
+                "Critter": 4,
+                "Magic": 5,
+                "Elemental": 6,
+                "Beast": 7,
+                "Aquatic": 8,
+                "Mechanical": 9
+            }, 
+            "Profession": {
+                "Blacksmithing": 0,
+                "Leatherworking": 1,
+                "Alchemy": 2,
+                "Herbalism": 3,
+                "Cooking": 4,
+                "Mining": 5,
+                "Tailoring": 6,
+                "Engineering": 7,
+                "Enchanting": 8,
+                "Fishing": 9,
+                "Skinning": 10,
+                "Jewelcrafting": 11,
+                "Inscription": 12,
+                "Archaeology": 13
+            }
+        }
+        self.pet_custom_categories = {
+            "-1": "Vendor Pets",
+            "-2": "Crafted Pets",
+            "-3": "Top rated pets from https://www.warcraftpets.com/wow-pets/top-twenty/"
+            }
+        
         self.make_page()
 
     def make_page(self):
         self.minimum_average_price_input = QLineEdit(self)
+        self.minimum_average_price_input.setText('10000')
         self.minimum_average_price_input_label = QLabel("Minimum Desired average price", self)
         self.minimum_average_price_input_label.setToolTip("")
         self.minimum_average_price_input_label.setFixedHeight(20)
@@ -98,6 +319,7 @@ class RecommendationsPage(QWidget):
         self.layout.addWidget(self.minimum_average_price_input, 1, 0, 1, 1)
 
         self.minimum_desired_sales_input = QLineEdit(self)
+        self.minimum_desired_sales_input.setText('0')
         self.minimum_desired_sales_input_label = QLabel("Minimum Desired sales per day", self)
         self.minimum_desired_sales_input_label.setToolTip("")
         self.minimum_desired_sales_input_label.setFixedHeight(20)
@@ -111,26 +333,20 @@ class RecommendationsPage(QWidget):
         self.recommendations_region.addItems(
             ["Europe", "North America"]
         )
+        self.recommendations_region.currentIndexChanged.connect(self.region_combo_changed)
         self.layout.addWidget(self.recommendations_region_label, 2, 0, 1, 1)
         self.layout.addWidget(self.recommendations_region, 3, 0, 1, 1)
 
         self.recommendations_realm_combobox = QComboBox(self)
-        self.recommendations_realm_combobox.setEnabled(False)
+        self.recommendations_realm_combobox.setEditable(True)
+        self.recommendations_realm_combobox.setInsertPolicy(QComboBox.NoInsert)
+        self.recommendations_realm_combobox.completer()
+        self.recommendations_realm_combobox.addItems(self.eu_realms)
         self.realm_recommendations_realm_label = QLabel("Search for server by name", self)
         self.realm_recommendations_realm_label.setToolTip("")
         self.realm_recommendations_realm_label.setFixedHeight(20)
         self.layout.addWidget(self.realm_recommendations_realm_label, 2, 1, 1, 1)
         self.layout.addWidget(self.recommendations_realm_combobox, 3, 1, 1, 1)
-
-        self.item_category = QComboBox(self)
-        self.item_category_label = QLabel("Item Category", self)
-        self.item_category_label.setToolTip("")
-        self.item_category_label.setFixedHeight(20)
-        self.item_category.addItems(
-            ["All", "Consumable", "Container", "Weapon", "Gem", "Armor", "Tradegoods", "Item Enhancement", "Recipe", "Quest Item", "Miscellaneous", "Glyph", "Battle Pet", "Profession"]
-        )
-        self.layout.addWidget(self.item_category_label, 4, 0, 1, 1)
-        self.layout.addWidget(self.item_category, 5, 0, 1, 1)
 
         self.item_sub_category = QComboBox(self)
         self.item_sub_category_label = QLabel("Item Sub Category", self)
@@ -142,17 +358,29 @@ class RecommendationsPage(QWidget):
         self.layout.addWidget(self.item_sub_category_label, 4, 1, 1, 1)
         self.layout.addWidget(self.item_sub_category, 5, 1, 1, 1)
 
+        self.item_category = QComboBox(self)
+        self.item_category_label = QLabel("Item Category", self)
+        self.item_category_label.setToolTip("")
+        self.item_category.currentIndexChanged.connect(self.category_combo_changed)
+        self.item_category_label.setFixedHeight(20)
+        self.item_category.addItems(
+            self.item_category_list
+        )
+        self.layout.addWidget(self.item_category_label, 4, 0, 1, 1)
+        self.layout.addWidget(self.item_category, 5, 0, 1, 1)
+
         self.item_quality = QComboBox(self)
         self.item_quality_label = QLabel("Item Quality", self)
         self.item_quality_label.setToolTip("")
         self.item_quality_label.setFixedHeight(20)
         self.item_quality.addItems(
-            ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Artifact", "Heirloom"]
+            self.item_quality_list
         )
         self.layout.addWidget(self.item_quality_label, 6, 0, 1, 1)
         self.layout.addWidget(self.item_quality, 7, 0, 1, 1)
 
         self.minimum_item_level_input = QLineEdit(self)
+        self.minimum_item_level_input.setText('-1')
         self.minimum_item_level_input_label = QLabel("Minimum Item Level (ilvl)", self)
         self.minimum_item_level_input_label.setToolTip("")
         self.minimum_item_level_input_label.setFixedHeight(20)
@@ -160,6 +388,7 @@ class RecommendationsPage(QWidget):
         self.layout.addWidget(self.minimum_item_level_input, 7, 1, 1, 1)
 
         self.minimum_required_level_input = QLineEdit(self)
+        self.minimum_required_level_input.setText('-1')
         self.minimum_required_level_input_label = QLabel("Minimum Required Level", self)
         self.minimum_required_level_input_label.setToolTip("")
         self.minimum_required_level_input_label.setFixedHeight(20)
@@ -170,13 +399,81 @@ class RecommendationsPage(QWidget):
         self.commodity_items.setToolTip("Do you want the item to have Speed?")
         self.layout.addWidget(self.commodity_items, 8, 1, 1, 1)
 
+        self.local_discount_percent = QLineEdit(self)
+        self.local_discount_percent.setText('10')
+        self.local_discount_percent_label = QLabel("Local Discount Percent", self)
+        self.local_discount_percent_label.setToolTip("")
+        self.local_discount_percent_label.setFixedHeight(20)
+        self.layout.addWidget(self.local_discount_percent_label, 10, 0, 1, 1)
+        self.layout.addWidget(self.local_discount_percent, 11, 0, 1, 1)
+
+        self.minimum_market_value = QLineEdit(self)
+        self.minimum_market_value.setText('10000')
+        self.minimum_market_value_label = QLabel("Minimum Market Value", self)
+        self.minimum_market_value_label.setToolTip("")
+        self.minimum_market_value_label.setFixedHeight(20)
+        self.layout.addWidget(self.minimum_market_value_label, 10, 1, 1, 1)
+        self.layout.addWidget(self.minimum_market_value, 11, 1, 1, 1)
+
         self.search_button = QPushButton("Search")
         self.search_button.clicked.connect(self.search)
-        self.layout.addWidget(self.search_button, 10, 0, 1, 2)
+        self.layout.addWidget(self.search_button, 12, 0, 1, 2)
+
+    def category_combo_changed(self, index):
+        selected_category = self.item_category.currentText()
+        if selected_category == 'All':
+            return
+        self.item_sub_category.clear()
+        self.item_sub_category.addItems(self.item_sub_category_lists[selected_category])
+
+    def region_combo_changed(self, index):
+        self.recommendations_realm_combobox.clear()
+        if self.recommendations_region.currentText() == 'Europe':
+            self.recommendations_realm_combobox.addItems(self.eu_realms)
+        elif self.recommendations_region.currentText() == 'North America':
+            self.recommendations_realm_combobox.addItems(self.na_realms)
+
+        self.recommendations_realm_combobox.setEnabled(True)
 
     def search(self):
-        print('here')
+        if self.recommendations_region.currentText() == 'Europe':
+            realm_id = self.eu_realms[self.recommendations_realm_combobox.currentText()]
+            region = 'EU'
+        elif self.recommendations_region.currentText() == 'North America':
+            realm_id = self.na_realms[self.recommendations_realm_combobox.currentText()]
+            region = 'NA'
 
+        item_category = self.item_category_list[self.item_category.currentText()]
+        if item_category == -1:
+            item_sub_category = -1
+
+        item_quality = self.item_quality_list[self.item_quality.currentText()]
+
+        marketshare_recommendations = requests.post(
+            f"http://api.saddlebagexchange.com/api/wow/itemstats",
+            headers={"Accept": "application/json"},
+            json={
+                "homeRealmId": realm_id,
+                "region": region,
+                "commodity": self.commodity_items.isChecked(),
+                "desired_avg_price": int(self.minimum_average_price_input.text()),
+                "desired_sales_per_day": float(self.minimum_desired_sales_input.text()),
+                "itemQuality": item_quality,
+                "required_level": int(self.minimum_required_level_input.text()),
+                "item_class": item_category,
+                "item_subclass": item_sub_category,
+                "ilvl": int(self.minimum_item_level_input.text()),
+            },
+        ).json()
+
+        l_discount_percent = int(self.local_discount_percent.text()) / 100
+        recommended_items = {
+            str(item["itemID"]): round(item["historicPrice"] * l_discount_percent, 4)
+            for item in marketshare_recommendations["data"]
+            if item["historicMarketValue"] >= int(self.minimum_market_value.text())
+        }
+
+        print(recommended_items)
 
 class HomePage(QWidget):
     def __init__(self):
@@ -237,7 +534,6 @@ class HomePage(QWidget):
         self.guides_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.guides_link.setOpenExternalLinks(True)
         self.layout.addWidget(self.guides_link, 5, 0)
-
 
 class RealmPage(QWidget):
     def __init__(self):
@@ -823,7 +1119,6 @@ class PetPage(QWidget):
 
         self.pet_id_input.setText(str(selected_pet_id))
 
-
 class ItemPage(QWidget):
     def __init__(self):
         super(ItemPage, self).__init__()
@@ -1061,7 +1356,6 @@ class ItemPage(QWidget):
             self.item_price_input.setText(selected_item_price)
 
         self.item_id_input.setText(str(selected_item_id))
-
 
 class IlvlPage(QWidget):
     def __init__(self):
@@ -1343,7 +1637,6 @@ class IlvlPage(QWidget):
             QMessageBox.critical(self, "Invalid Value", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
-
 
 class SettingsPage(QWidget):
     def __init__(self):
@@ -1672,7 +1965,6 @@ class SettingsPage(QWidget):
             "FACTION": faction,
         }
         return config_json
-
 
 class App(QMainWindow):
     def __init__(self):
@@ -2089,7 +2381,6 @@ class App(QMainWindow):
 
     def alerts_progress_changed(self, progress_str):
         self.mega_alerts_progress.setText(progress_str)
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
