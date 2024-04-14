@@ -26,7 +26,7 @@ from sys import exit
 import requests
 import os
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QThread, pyqtSignal, QFile, QTextStream
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, QFile, QTextStream
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (
     QGridLayout,
@@ -55,6 +55,54 @@ def save_json_file( path, data):
         json.dump(data, json_file, ensure_ascii=False, indent=4)
 
 
+class RecommendationsRequest(QThread):
+    completed = pyqtSignal(dict)
+
+    def __init__(self,
+                 realm_id,
+                 region,
+                 commodity,
+                 desired_avg_price,
+                 desired_sales_per_day,
+                 item_quality,
+                 required_level,
+                 item_class,
+                 item_subclass,
+                 ilvl,
+                 discount_percent,
+                 minimum_market_value
+                 ):
+        super().__init__()
+        self.request_data = {
+                "homeRealmId": realm_id,
+                "region": region,
+                "commodity": commodity,
+                "desired_avg_price": desired_avg_price,
+                "desired_sales_per_day": desired_sales_per_day,
+                "itemQuality": item_quality,
+                "required_level": required_level,
+                "item_class": item_class,
+                "item_subclass": item_subclass,
+                "ilvl": ilvl,
+            }
+        self.l_discount_percent = discount_percent
+        self.minimum_market_value = minimum_market_value
+    
+    def run(self):
+        marketshare_recommendations = requests.post(
+            f"http://api.saddlebagexchange.com/api/wow/itemstats",
+            headers={"Accept": "application/json"},
+            json=self.request_data,
+            ).json()
+
+        recommended_items = {
+            str(item["itemID"]): round(item["historicPrice"] * self.l_discount_percent, 4)
+            for item in marketshare_recommendations["data"]
+            if item["historicMarketValue"] >= self.minimum_market_value
+        }
+
+        self.completed.emit(recommended_items)
+
 class Item_And_Pet_Statistics(QThread):
     completed = pyqtSignal(pd.DataFrame, pd.DataFrame)
 
@@ -79,7 +127,6 @@ class Item_And_Pet_Statistics(QThread):
         )
 
         self.completed.emit(pet_statistics, item_statistics)
-
 
 class RecommendationsPage(QWidget):
     
@@ -2114,31 +2161,24 @@ class App(QMainWindow):
             item_sub_category = -1
 
         item_quality = self.recommendation_page.item_quality_list[self.recommendation_page.item_quality.currentText()]
+        self.recommendation_request_thread = RecommendationsRequest(
+            realm_id = realm_id,
+            region = region,
+            commodity = self.recommendation_page.commodity_items.isChecked(),
+            desired_avg_price = int(self.recommendation_page.minimum_average_price_input.text()),
+            desired_sales_per_day = float(self.recommendation_page.minimum_desired_sales_input.text()),
+            item_quality = item_quality,
+            required_level = int(self.recommendation_page.minimum_required_level_input.text()),
+            item_class = item_category,
+            item_subclass = item_sub_category,
+            ilvl = int(self.recommendation_page.minimum_item_level_input.text()),
+            discount_percent = int(self.recommendation_page.local_discount_percent.text()) / 100,
+            minimum_market_value = int(self.recommendation_page.minimum_market_value.text())
+        )
+        self.recommendation_request_thread.start()
+        self.recommendation_request_thread.completed.connect(self.recommendation_data_received)
 
-        marketshare_recommendations = requests.post(
-            f"http://api.saddlebagexchange.com/api/wow/itemstats",
-            headers={"Accept": "application/json"},
-            json={
-                "homeRealmId": realm_id,
-                "region": region,
-                "commodity": self.recommendation_page.commodity_items.isChecked(),
-                "desired_avg_price": int(self.recommendation_page.minimum_average_price_input.text()),
-                "desired_sales_per_day": float(self.recommendation_page.minimum_desired_sales_input.text()),
-                "itemQuality": item_quality,
-                "required_level": int(self.recommendation_page.minimum_required_level_input.text()),
-                "item_class": item_category,
-                "item_subclass": item_sub_category,
-                "ilvl": int(self.recommendation_page.minimum_item_level_input.text()),
-            },
-        ).json()
-
-        l_discount_percent = int(self.recommendation_page.local_discount_percent.text()) / 100
-        recommended_items = {
-            str(item["itemID"]): round(item["historicPrice"] * l_discount_percent, 4)
-            for item in marketshare_recommendations["data"]
-            if item["historicMarketValue"] >= int(self.recommendation_page.minimum_market_value.text())
-        }
-
+    def recommendation_data_received(self, recommended_items):
         self.item_page.item_list_display.clear()
         self.item_page.items_list = recommended_items
 
