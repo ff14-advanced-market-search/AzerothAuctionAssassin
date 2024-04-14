@@ -416,7 +416,6 @@ class RecommendationsPage(QWidget):
         self.layout.addWidget(self.minimum_market_value, 11, 1, 1, 1)
 
         self.search_button = QPushButton("Search")
-        self.search_button.clicked.connect(self.search)
         self.layout.addWidget(self.search_button, 12, 0, 1, 2)
 
     def category_combo_changed(self, index):
@@ -434,46 +433,6 @@ class RecommendationsPage(QWidget):
             self.recommendations_realm_combobox.addItems(self.na_realms)
 
         self.recommendations_realm_combobox.setEnabled(True)
-
-    def search(self):
-        if self.recommendations_region.currentText() == 'Europe':
-            realm_id = self.eu_realms[self.recommendations_realm_combobox.currentText()]
-            region = 'EU'
-        elif self.recommendations_region.currentText() == 'North America':
-            realm_id = self.na_realms[self.recommendations_realm_combobox.currentText()]
-            region = 'NA'
-
-        item_category = self.item_category_list[self.item_category.currentText()]
-        if item_category == -1:
-            item_sub_category = -1
-
-        item_quality = self.item_quality_list[self.item_quality.currentText()]
-
-        marketshare_recommendations = requests.post(
-            f"http://api.saddlebagexchange.com/api/wow/itemstats",
-            headers={"Accept": "application/json"},
-            json={
-                "homeRealmId": realm_id,
-                "region": region,
-                "commodity": self.commodity_items.isChecked(),
-                "desired_avg_price": int(self.minimum_average_price_input.text()),
-                "desired_sales_per_day": float(self.minimum_desired_sales_input.text()),
-                "itemQuality": item_quality,
-                "required_level": int(self.minimum_required_level_input.text()),
-                "item_class": item_category,
-                "item_subclass": item_sub_category,
-                "ilvl": int(self.minimum_item_level_input.text()),
-            },
-        ).json()
-
-        l_discount_percent = int(self.local_discount_percent.text()) / 100
-        recommended_items = {
-            str(item["itemID"]): round(item["historicPrice"] * l_discount_percent, 4)
-            for item in marketshare_recommendations["data"]
-            if item["historicMarketValue"] >= int(self.minimum_market_value.text())
-        }
-
-        print(recommended_items)
 
 class HomePage(QWidget):
     def __init__(self):
@@ -2051,6 +2010,8 @@ class App(QMainWindow):
         # Set the QScrollArea as the central widget of the main window
         self.setCentralWidget(scrollArea)
 
+        self.recommendation_page.search_button.clicked.connect(self.search)
+
         self.show()
 
     def make_side_buttons(self):
@@ -2139,6 +2100,61 @@ class App(QMainWindow):
 
     def go_to_page_number(self, index):
         self.stacked_widget.setCurrentIndex(index)
+
+    def search(self):
+        if self.recommendation_page.recommendations_region.currentText() == 'Europe':
+            realm_id = self.recommendation_page.eu_realms[self.recommendation_page.recommendations_realm_combobox.currentText()]
+            region = 'EU'
+        elif self.recommendation_page.recommendations_region.currentText() == 'North America':
+            realm_id = self.recommendation_page.na_realms[self.recommendation_page.recommendations_realm_combobox.currentText()]
+            region = 'NA'
+
+        item_category = self.recommendation_page.item_category_list[self.recommendation_page.item_category.currentText()]
+        if item_category == -1:
+            item_sub_category = -1
+
+        item_quality = self.recommendation_page.item_quality_list[self.recommendation_page.item_quality.currentText()]
+
+        marketshare_recommendations = requests.post(
+            f"http://api.saddlebagexchange.com/api/wow/itemstats",
+            headers={"Accept": "application/json"},
+            json={
+                "homeRealmId": realm_id,
+                "region": region,
+                "commodity": self.recommendation_page.commodity_items.isChecked(),
+                "desired_avg_price": int(self.recommendation_page.minimum_average_price_input.text()),
+                "desired_sales_per_day": float(self.recommendation_page.minimum_desired_sales_input.text()),
+                "itemQuality": item_quality,
+                "required_level": int(self.recommendation_page.minimum_required_level_input.text()),
+                "item_class": item_category,
+                "item_subclass": item_sub_category,
+                "ilvl": int(self.recommendation_page.minimum_item_level_input.text()),
+            },
+        ).json()
+
+        l_discount_percent = int(self.recommendation_page.local_discount_percent.text()) / 100
+        recommended_items = {
+            str(item["itemID"]): round(item["historicPrice"] * l_discount_percent, 4)
+            for item in marketshare_recommendations["data"]
+            if item["historicMarketValue"] >= int(self.recommendation_page.minimum_market_value.text())
+        }
+
+        self.item_page.item_list_display.clear()
+        self.item_page.items_list = recommended_items
+
+        for key, value in self.item_page.items_list.items():
+            if not (1 <= int(key) <= 500000):
+                raise ValueError(
+                    f"Invalid item ID {key}.\nIDs must be integers between 1-500,000."
+                )
+            if not (0 <= int(value) <= 10000000):
+                raise ValueError(
+                    f"Invalid price {value} for item ID {key}.\nPrices must be integers between 0-10,000,000."
+                )
+            self.item_page.item_list_display.insertItem(
+                self.item_page.item_list_display.count(),
+                f"Item ID: {key}, Price: {value}",
+            )
 
     def api_data_received(self, pet_statistics, item_statistics):
         self.pet_page.pet_statistics = pet_statistics
