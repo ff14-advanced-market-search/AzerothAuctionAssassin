@@ -1767,7 +1767,7 @@ class SettingsPage(QWidget):
         )
         self.layout.addWidget(self.wow_head_link, 11, 0, 1, 1)
 
-        self.no_links = QCheckBox("No Russian Realms", self)
+        self.no_links = QCheckBox("No Links", self)
         self.no_links.setChecked(True)
         self.no_links.setToolTip("Disable all wowhead, undermine and saddlebag links.")
         self.layout.addWidget(self.no_links, 12, 0, 1, 1)
