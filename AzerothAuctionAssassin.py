@@ -1767,22 +1767,27 @@ class SettingsPage(QWidget):
         )
         self.layout.addWidget(self.wow_head_link, 11, 0, 1, 1)
 
+        self.no_links = QCheckBox("No Russian Realms", self)
+        self.no_links.setChecked(True)
+        self.no_links.setToolTip("Disable all wowhead, undermine and saddlebag links.")
+        self.layout.addWidget(self.no_links, 12, 0, 1, 1)
+
         self.russian_realms = QCheckBox("No Russian Realms", self)
         self.russian_realms.setChecked(True)
         self.russian_realms.setToolTip("Removes alerts from Russian Realms.")
-        self.layout.addWidget(self.russian_realms, 12, 0, 1, 1)
+        self.layout.addWidget(self.russian_realms, 13, 0, 1, 1)
 
         self.refresh_alerts = QCheckBox("Refresh Alerts", self)
         self.refresh_alerts.setToolTip("Set to true to refresh alerts every 1 hour.")
 
-        self.layout.addWidget(self.refresh_alerts, 13, 0, 1, 1)
+        self.layout.addWidget(self.refresh_alerts, 14, 0, 1, 1)
 
         self.debug_mode = QCheckBox("Debug Mode", self)
         self.debug_mode.setToolTip(
             "Trigger a scan on all realms once.\nUse this to test make sure your data is working."
         )
 
-        self.layout.addWidget(self.debug_mode, 14, 0, 1, 1)
+        self.layout.addWidget(self.debug_mode, 15, 0, 1, 1)
 
         self.faction = QComboBox(self)
         self.faction.addItems(["all", "horde", "alliance", "booty bay"])
@@ -1790,14 +1795,14 @@ class SettingsPage(QWidget):
         self.faction_label.setToolTip(
             "Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
         )
-        self.layout.addWidget(self.faction_label, 15, 0, 1, 1)
-        self.layout.addWidget(self.faction, 16, 0, 1, 1)
+        self.layout.addWidget(self.faction_label, 16, 0, 1, 1)
+        self.layout.addWidget(self.faction, 17, 0, 1, 1)
 
         self.import_config_button = QPushButton("Import Config")
         self.import_config_button.clicked.connect(self.import_configs)
         self.import_config_button.setToolTip("Import your mega_data.json config.")
 
-        self.layout.addWidget(self.import_config_button, 17, 0, 1, 1)
+        self.layout.addWidget(self.import_config_button, 18, 0, 1, 1)
 
     def import_configs(self):
         pathname = QFileDialog().getOpenFileName(self)[0]
@@ -2311,6 +2316,7 @@ class App(QMainWindow):
         self.settings_page.show_bid_prices.setChecked(False),
         self.settings_page.number_of_mega_threads.setText("48"),
         self.settings_page.wow_head_link.setChecked(False),
+        self.settings_page.no_links.setChecked(False),
         self.settings_page.important_emoji.setText("🔥"),
         self.settings_page.discount_percent.setText("10"),
         self.settings_page.russian_realms.setChecked(True),
