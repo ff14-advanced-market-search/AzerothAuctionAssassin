@@ -159,6 +159,7 @@ class RecommendationsPage(QWidget):
         }
 
         self.item_category_list = {
+            "Recipe": 9,
             "All": -1,
             # "Consumable": 0,
             "Container": 1,
@@ -167,7 +168,6 @@ class RecommendationsPage(QWidget):
             "Armor": 4,
             # "Tradegoods": 7,
             # "Item Enhancement": 8,
-            "Recipe": 9,
             "Quest Item": 12,
             "Miscellaneous": 15,
             # "Glyph": 16,
@@ -377,7 +377,7 @@ class RecommendationsPage(QWidget):
 
     def make_page(self):
         self.minimum_average_price_input = QLineEdit(self)
-        self.minimum_average_price_input.setText('10000')
+        self.minimum_average_price_input.setText('2000')
         self.minimum_average_price_input_label = QLabel("Minimum Desired average price", self)
         self.minimum_average_price_input_label.setToolTip("")
         self.minimum_average_price_input_label.setFixedHeight(20)
@@ -447,7 +447,7 @@ class RecommendationsPage(QWidget):
 
         self.minimum_item_level_input = QLineEdit(self)
         self.minimum_item_level_input.setText('-1')
-        self.minimum_item_level_input_label = QLabel("Minimum Item Level (ilvl)", self)
+        self.minimum_item_level_input_label = QLabel("Minimum Base Item Level (ilvl)", self)
         self.minimum_item_level_input_label.setToolTip("")
         self.minimum_item_level_input_label.setFixedHeight(20)
         self.layout.addWidget(self.minimum_item_level_input_label, 6, 1, 1, 1)
@@ -462,21 +462,21 @@ class RecommendationsPage(QWidget):
         self.layout.addWidget(self.minimum_required_level_input, 9, 0, 1, 1)
 
         self.commodity_items = QCheckBox("Commodity items", self)
-        self.commodity_items.setToolTip("Do you want the item to have Speed?")
+        self.commodity_items.setToolTip("DO NOT USE, WILL ADD THIS LATER")
         self.layout.addWidget(self.commodity_items, 8, 1, 1, 1)
 
         self.local_discount_percent = QLineEdit(self)
-        self.local_discount_percent.setText('10')
+        self.local_discount_percent.setText('50')
         self.local_discount_percent_label = QLabel("Local Discount Percent", self)
-        self.local_discount_percent_label.setToolTip("")
+        self.local_discount_percent_label.setToolTip("What percent of normal price do you want it?\nex: if it sells for 10k and we pick 30% then we try too snipe at 3k.")
         self.local_discount_percent_label.setFixedHeight(20)
         self.layout.addWidget(self.local_discount_percent_label, 10, 0, 1, 1)
         self.layout.addWidget(self.local_discount_percent, 11, 0, 1, 1)
 
         self.minimum_market_value = QLineEdit(self)
-        self.minimum_market_value.setText('10000')
+        self.minimum_market_value.setText('5000')
         self.minimum_market_value_label = QLabel("Minimum Market Value", self)
-        self.minimum_market_value_label.setToolTip("")
+        self.minimum_market_value_label.setToolTip("Minimum gold an item earns per day on any average server.")
         self.minimum_market_value_label.setFixedHeight(20)
         self.layout.addWidget(self.minimum_market_value_label, 10, 1, 1, 1)
         self.layout.addWidget(self.minimum_market_value, 11, 1, 1, 1)
