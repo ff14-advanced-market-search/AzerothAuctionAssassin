@@ -2002,7 +2002,7 @@ class SettingsPage(QWidget):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.14"
+        self.title = "Azeroth Auction Assassin v1.1.0"
         self.left = 100
         self.top = 100
         self.width = 550
