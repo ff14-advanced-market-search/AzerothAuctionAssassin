@@ -2200,7 +2200,8 @@ class App(QMainWindow):
             realm_id = realm_id,
             region = region,
             commodity = self.recommendation_page.commodity_items.isChecked(),
-            desired_avg_price = int(self.recommendation_page.minimum_average_price_input.text()),
+            # dont ask me why i did this one in coppers instead of using floats
+            desired_avg_price = int(float(self.recommendation_page.minimum_average_price_input.text())*10000),
             desired_sales_per_day = float(self.recommendation_page.minimum_desired_sales_input.text()),
             item_quality = item_quality,
             required_level = int(self.recommendation_page.minimum_required_level_input.text()),
