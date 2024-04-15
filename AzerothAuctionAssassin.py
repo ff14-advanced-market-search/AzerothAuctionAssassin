@@ -2005,7 +2005,7 @@ class App(QMainWindow):
         self.title = "Azeroth Auction Assassin v1.1.0"
         self.left = 100
         self.top = 100
-        self.width = 550
+        self.width = 620
         self.height = 650
         icon_path = "icon.png"
 
