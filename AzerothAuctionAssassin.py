@@ -175,7 +175,11 @@ class RecommendationsPage(QWidget):
             "Profession": 19
         }
         self.item_sub_category_lists = {
+            "All": {
+                "All": -1
+            },
             "Consumable": {
+                "All": -1,
                 "Generic": 0,
                 "Potion": 1,
                 "Elixir": 2,
@@ -188,6 +192,7 @@ class RecommendationsPage(QWidget):
                 "Vantus Rune": 9
             },
             "Container": {
+                "All": -1,
                 "Bag": 0,
                 "Soul Bag": 1,
                 "Herb Bag": 2,
@@ -201,6 +206,7 @@ class RecommendationsPage(QWidget):
                 "Cooking Bag": 10
             },
             "Weapon": {
+                "All": -1,
                 "One-Handed Axes": 0,
                 "Two-Handed Axes": 1,
                 "Bows": 2,
@@ -223,6 +229,7 @@ class RecommendationsPage(QWidget):
                 "Fishing Poles": 20
             },
             "Gem": {
+                "All": -1,
                 "Intellect": 0,
                 "Agility": 1,
                 "Strength": 2,
@@ -237,6 +244,7 @@ class RecommendationsPage(QWidget):
                 "Artifact Relic": 11
             },
             "Armor": {
+                "All": -1,
                 "Miscellaneous: Trinkets, Rings, Necks, Spellstones, Firestones, etc.": 0,
                 "Cloth": 1,
                 "Leather": 2,
@@ -251,6 +259,7 @@ class RecommendationsPage(QWidget):
                 "Relic": 11
             },
             "Tradegoods": {
+                "All": -1,
                 "Parts": 1,
                 "Jewelcrafting": 4,
                 "Cloth": 5,
@@ -266,6 +275,7 @@ class RecommendationsPage(QWidget):
                 "Finishing Reagents": 19
             },
             "Item Enhancement": {
+                "All": -1,
                 "Head": 0,
                 "Neck": 1,
                 "Shoulder": 2,
@@ -283,6 +293,7 @@ class RecommendationsPage(QWidget):
                 "Misc": 14
             },
             "Recipe": {
+                "All": -1,
                 "Book": 0,
                 "Leatherworking": 1,
                 "Tailoring": 2,
@@ -300,6 +311,7 @@ class RecommendationsPage(QWidget):
                 "Quest Item": 0
             },
             "Miscellaneous": {
+                "All": -1,
                 "Junk": 0,
                 "Reagent": 1,
                 "Companion Pets": 2,
@@ -310,6 +322,7 @@ class RecommendationsPage(QWidget):
                 "Toys": 199
             },
             "Glyph": {
+                "All": -1,
                 "Warrior": 1,
                 "Paladin": 2,
                 "Hunter": 3,
@@ -324,6 +337,7 @@ class RecommendationsPage(QWidget):
                 "Demon Hunter": 12
             },
             "Battle Pet": {
+                "All": -1,
                 "Humanoid": 0,
                 "Dragonkin": 1,
                 "Flying": 2,
@@ -336,6 +350,7 @@ class RecommendationsPage(QWidget):
                 "Mechanical": 9
             }, 
             "Profession": {
+                "All": -1,
                 "Blacksmithing": 0,
                 "Leatherworking": 1,
                 "Alchemy": 2,
@@ -2191,9 +2206,12 @@ class App(QMainWindow):
             realm_id = self.recommendation_page.na_realms[self.recommendation_page.recommendations_realm_combobox.currentText()]
             region = 'NA'
 
-        item_category = self.recommendation_page.item_category_list[self.recommendation_page.item_category.currentText()]
+        item_category_name = self.recommendation_page.item_category.currentText()
+        item_category = self.recommendation_page.item_category_list[item_category_name]
         if item_category == -1:
             item_sub_category = -1
+        else:
+            item_sub_category = self.recommendation_page.item_sub_category_lists[item_category_name][self.recommendation_page.item_sub_category.currentText()]
 
         item_quality = self.recommendation_page.item_quality_list[self.recommendation_page.item_quality.currentText()]
         self.recommendation_request_thread = RecommendationsRequest(
