@@ -50,6 +50,10 @@ if sys.platform == "win32":
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 
+# make directory if it does not exist
+data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
+if not os.path.exists(data_folder):
+    os.makedirs(data_folder)
 
 def save_json_file( path, data):
 
