@@ -592,8 +592,9 @@ class RealmPage(QWidget):
         )
 
         # make directory if it does not exist
-        if not os.path.exists(os.path.join(os.getcwd(), "AzerothAuctionAssassinData")):
-            os.makedirs(os.path.join(os.getcwd(), "AzerothAuctionAssassinData"))
+        data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
+        if not os.path.exists(data_folder):
+            os.makedirs(data_folder)
 
         if not os.path.exists(self.eu_connected_realms):
             from utils.realm_data import EU_CONNECTED_REALMS_IDS
