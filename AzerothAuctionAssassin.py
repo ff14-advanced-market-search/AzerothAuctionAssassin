@@ -591,6 +591,10 @@ class RealmPage(QWidget):
             "eusodclassic-wow-connected-realm-ids.json",
         )
 
+        # make directory if it does not exist
+        if not os.path.exists(os.path.join(os.getcwd(), "AzerothAuctionAssassinData")):
+            os.makedirs(os.path.join(os.getcwd(), "AzerothAuctionAssassinData"))
+
         if not os.path.exists(self.eu_connected_realms):
             from utils.realm_data import EU_CONNECTED_REALMS_IDS
 
