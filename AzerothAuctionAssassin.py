@@ -595,47 +595,6 @@ class RealmPage(QWidget):
             "eusodclassic-wow-connected-realm-ids.json",
         )
 
-        # make directory if it does not exist
-        data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
-        if not os.path.exists(data_folder):
-            os.makedirs(data_folder)
-
-        if not os.path.exists(self.eu_connected_realms):
-            from utils.realm_data import EU_CONNECTED_REALMS_IDS
-
-            with open(self.eu_connected_realms, "w") as json_file:
-                json.dump(EU_CONNECTED_REALMS_IDS, json_file, indent=4)
-
-        if not os.path.exists(self.na_connected_realms):
-            from utils.realm_data import NA_CONNECTED_REALMS_IDS
-
-            with open(self.na_connected_realms, "w") as json_file:
-                json.dump(NA_CONNECTED_REALMS_IDS, json_file, indent=4)
-
-        if not os.path.exists(self.EUCLASSIC_connected_realms):
-            from utils.realm_data import EUCLASSIC_CONNECTED_REALMS_IDS
-
-            with open(self.EUCLASSIC_connected_realms, "w") as json_file:
-                json.dump(EUCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
-
-        if not os.path.exists(self.NACLASSIC_connected_realms):
-            from utils.realm_data import NACLASSIC_CONNECTED_REALMS_IDS
-
-            with open(self.NACLASSIC_connected_realms, "w") as json_file:
-                json.dump(NACLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
-
-        if not os.path.exists(self.NASODCLASSIC_connected_realms):
-            from utils.realm_data import NASODCLASSIC_CONNECTED_REALMS_IDS
-
-            with open(self.NASODCLASSIC_connected_realms, "w") as json_file:
-                json.dump(NASODCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
-
-        if not os.path.exists(self.EUSODCLASSIC_connected_realms):
-            from utils.realm_data import EUSODCLASSIC_CONNECTED_REALMS_IDS
-
-            with open(self.EUSODCLASSIC_connected_realms, "w") as json_file:
-                json.dump(EUSODCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
-
         self.make_page()
 
     def make_page(self):
@@ -2048,6 +2007,33 @@ class App(QMainWindow):
             os.getcwd(), "AzerothAuctionAssassinData", "desired_ilvl_list.json"
         )
 
+        self.eu_connected_realms = os.path.join(
+            os.getcwd(), "AzerothAuctionAssassinData", "eu-wow-connected-realm-ids.json"
+        )
+        self.na_connected_realms = os.path.join(
+            os.getcwd(), "AzerothAuctionAssassinData", "na-wow-connected-realm-ids.json"
+        )
+        self.EUCLASSIC_connected_realms = os.path.join(
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "euclassic-wow-connected-realm-ids.json",
+        )
+        self.NACLASSIC_connected_realms = os.path.join(
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "naclassic-wow-connected-realm-ids.json",
+        )
+        self.NASODCLASSIC_connected_realms = os.path.join(
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "nasodclassic-wow-connected-realm-ids.json",
+        )
+        self.EUSODCLASSIC_connected_realms = os.path.join(
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "eusodclassic-wow-connected-realm-ids.json",
+        )
+
         self.initUI()
 
     def initUI(self):
@@ -2060,6 +2046,8 @@ class App(QMainWindow):
         self.layout_area = QGridLayout(central_widget)
 
         self.make_side_buttons()
+
+        self.check_for_settings()
 
         self.stacked_widget = QStackedWidget(self)
 
@@ -2081,7 +2069,6 @@ class App(QMainWindow):
 
         self.layout_area.addWidget(self.stacked_widget, 0, 1, 17, 2)
 
-        self.check_for_settings()
 
         # Create a QScrollArea and set its widget to be the container
         scrollArea = QScrollArea()
@@ -2303,6 +2290,42 @@ class App(QMainWindow):
         data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
+
+        if not os.path.exists(self.eu_connected_realms):
+            from utils.realm_data import EU_CONNECTED_REALMS_IDS
+
+            with open(self.eu_connected_realms, "w") as json_file:
+                json.dump(EU_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+        if not os.path.exists(self.na_connected_realms):
+            from utils.realm_data import NA_CONNECTED_REALMS_IDS
+
+            with open(self.na_connected_realms, "w") as json_file:
+                json.dump(NA_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+        if not os.path.exists(self.EUCLASSIC_connected_realms):
+            from utils.realm_data import EUCLASSIC_CONNECTED_REALMS_IDS
+
+            with open(self.EUCLASSIC_connected_realms, "w") as json_file:
+                json.dump(EUCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+        if not os.path.exists(self.NACLASSIC_connected_realms):
+            from utils.realm_data import NACLASSIC_CONNECTED_REALMS_IDS
+
+            with open(self.NACLASSIC_connected_realms, "w") as json_file:
+                json.dump(NACLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+        if not os.path.exists(self.NASODCLASSIC_connected_realms):
+            from utils.realm_data import NASODCLASSIC_CONNECTED_REALMS_IDS
+
+            with open(self.NASODCLASSIC_connected_realms, "w") as json_file:
+                json.dump(NASODCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+        if not os.path.exists(self.EUSODCLASSIC_connected_realms):
+            from utils.realm_data import EUSODCLASSIC_CONNECTED_REALMS_IDS
+
+            with open(self.EUSODCLASSIC_connected_realms, "w") as json_file:
+                json.dump(EUSODCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
 
         if os.path.exists(self.path_to_data):
             self.settings_page.check_config_file(self.path_to_data)
