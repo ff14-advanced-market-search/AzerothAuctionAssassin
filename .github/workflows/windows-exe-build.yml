@@ -92,8 +92,8 @@ jobs:
       with:
         tag_name: v1.1.0
         release_name: Release v1.1.0
-        draft: false
-        prerelease: false
+        draft: true
+        prerelease: true
 
     - name: Encode and Save Upload URL as Base64
       id: b64encode_upload_url
