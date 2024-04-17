@@ -2533,7 +2533,81 @@ class App(QMainWindow):
     def alerts_progress_changed(self, progress_str):
         self.mega_alerts_progress.setText(progress_str)
 
+
+
+def checking_folders_are_in_place():
+    eu_connected_realms = os.path.join(
+        os.getcwd(), "AzerothAuctionAssassinData", "eu-wow-connected-realm-ids.json"
+    )
+    na_connected_realms = os.path.join(
+        os.getcwd(), "AzerothAuctionAssassinData", "na-wow-connected-realm-ids.json"
+    )
+    EUCLASSIC_connected_realms = os.path.join(
+        os.getcwd(),
+        "AzerothAuctionAssassinData",
+        "euclassic-wow-connected-realm-ids.json",
+    )
+    NACLASSIC_connected_realms = os.path.join(
+        os.getcwd(),
+        "AzerothAuctionAssassinData",
+        "naclassic-wow-connected-realm-ids.json",
+    )
+    NASODCLASSIC_connected_realms = os.path.join(
+        os.getcwd(),
+        "AzerothAuctionAssassinData",
+        "nasodclassic-wow-connected-realm-ids.json",
+    )
+    EUSODCLASSIC_connected_realms = os.path.join(
+        os.getcwd(),
+        "AzerothAuctionAssassinData",
+        "eusodclassic-wow-connected-realm-ids.json",
+    )
+    
+    data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
+    if not os.path.exists(data_folder):
+        os.makedirs(data_folder)
+
+    if not os.path.exists(eu_connected_realms):
+        from utils.realm_data import EU_CONNECTED_REALMS_IDS
+
+        with open(eu_connected_realms, "w") as json_file:
+            json.dump(EU_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+    if not os.path.exists(na_connected_realms):
+        from utils.realm_data import NA_CONNECTED_REALMS_IDS
+
+        with open(na_connected_realms, "w") as json_file:
+            json.dump(NA_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+    if not os.path.exists(EUCLASSIC_connected_realms):
+        from utils.realm_data import EUCLASSIC_CONNECTED_REALMS_IDS
+
+        with open(EUCLASSIC_connected_realms, "w") as json_file:
+            json.dump(EUCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+    if not os.path.exists(NACLASSIC_connected_realms):
+        from utils.realm_data import NACLASSIC_CONNECTED_REALMS_IDS
+
+        with open(NACLASSIC_connected_realms, "w") as json_file:
+            json.dump(NACLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+    if not os.path.exists(NASODCLASSIC_connected_realms):
+        from utils.realm_data import NASODCLASSIC_CONNECTED_REALMS_IDS
+
+        with open(NASODCLASSIC_connected_realms, "w") as json_file:
+            json.dump(NASODCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+    if not os.path.exists(EUSODCLASSIC_connected_realms):
+        from utils.realm_data import EUSODCLASSIC_CONNECTED_REALMS_IDS
+
+        with open(EUSODCLASSIC_connected_realms, "w") as json_file:
+            json.dump(EUSODCLASSIC_CONNECTED_REALMS_IDS, json_file, indent=4)
+
+
+
+
 if __name__ == "__main__":
+    checking_folders_are_in_place()
     app = QApplication(sys.argv)
     file = QFile(":/dark/stylesheet.qss")
     file.open(QFile.ReadOnly | QFile.Text)
