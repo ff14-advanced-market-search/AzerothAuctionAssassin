@@ -2047,8 +2047,6 @@ class App(QMainWindow):
 
         self.make_side_buttons()
 
-        self.check_for_settings()
-
         self.stacked_widget = QStackedWidget(self)
 
         self.settings_page = SettingsPage()
@@ -2058,6 +2056,7 @@ class App(QMainWindow):
         self.ilvl_page = IlvlPage()
         self.realms_page = RealmPage()
         self.recommendation_page = RecommendationsPage()
+        self.check_for_settings()
 
         self.stacked_widget.addWidget(self.home_page)
         self.stacked_widget.addWidget(self.pet_page)
