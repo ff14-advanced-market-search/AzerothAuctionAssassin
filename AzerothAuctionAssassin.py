@@ -801,7 +801,7 @@ class App(QMainWindow):
                 self.item_price_input.setText(recommended_price)
 
         else:
-            self.item_price_input.setText(selected_item_price)
+            self.item_price_input.setText(str(selected_item_price))
 
         self.item_id_input.setText(str(selected_item_id))
 
