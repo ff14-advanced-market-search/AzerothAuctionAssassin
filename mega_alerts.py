@@ -457,7 +457,7 @@ class Alerts(QThread):
 
                 else:
                     self.progress.emit(
-                        f"The updates will come on minute {list(mega_data.get_upload_time_minutes())[0]} of each hour."
+                        f"The updates will come\non min {mega_data.get_upload_time_minutes()} of each hour."
                     )
                     print(
                         f"Blizzard API data only updates 1 time per hour. The updates will come on minute {mega_data.get_upload_time_minutes()} of each hour. "
@@ -481,7 +481,7 @@ class Alerts(QThread):
                 pool.submit(pull_single_realm_data, connected_id)
             pool.shutdown(wait=True)
 
-        self.progress.emit("Setting data and config variables!")
+        self.progress.emit("Setting data and\nconfig variables!")
         print("Sleep 10 sec on start to avoid spamming the api")
         time.sleep(10)
 
