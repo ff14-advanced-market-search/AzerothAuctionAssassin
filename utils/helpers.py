@@ -30,7 +30,7 @@ def get_wow_russian_realm_ids():
     return retail_realms + classic_realms + sod_realms
 
 
-def create_embed(title, description, fields=[]):
+def create_embed(title, description, fields):
     embed = {
         "title": title,
         "description": description,
@@ -43,3 +43,7 @@ def create_embed(title, description, fields=[]):
         },
     }
     return embed
+
+
+def split_list(lst, max_size):
+    return [lst[i : i + max_size] for i in range(0, len(lst), max_size)]
