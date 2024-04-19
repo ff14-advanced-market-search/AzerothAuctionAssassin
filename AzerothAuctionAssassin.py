@@ -1169,7 +1169,9 @@ class App(QMainWindow):
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
 
-        backup_data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "backup")
+        backup_data_folder = os.path.join(
+            os.getcwd(), "AzerothAuctionAssassinData", "backup"
+        )
         if not os.path.exists(backup_data_folder):
             os.makedirs(backup_data_folder)
 
@@ -1920,22 +1922,34 @@ class App(QMainWindow):
 
         # Save Backups
         time_int = (
-                datetime.now().year * 10 ** 6
-                + datetime.now().month * 10 ** 4
-                + datetime.now().day * 10 ** 2
-                + datetime.now().hour
+            datetime.now().year * 10**6
+            + datetime.now().month * 10**4
+            + datetime.now().day * 10**2
+            + datetime.now().hour
         )
         path_to_backup_mega_data = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_mega_data.json"
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "backup",
+            f"{time_int}_mega_data.json",
         )
         path_to_backup_items = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_desired_items.json"
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "backup",
+            f"{time_int}_desired_items.json",
         )
         path_to_backup_pets = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_desired_pets.json"
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "backup",
+            f"{time_int}_desired_pets.json",
         )
         path_to_backup_ilvl_list = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_desired_ilvl_list.json"
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "backup",
+            f"{time_int}_desired_ilvl_list.json",
         )
         self.save_json_file(path_to_backup_mega_data, config_json)
         self.save_json_file(path_to_backup_items, self.items_list)
