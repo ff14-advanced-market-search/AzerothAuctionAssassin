@@ -522,7 +522,7 @@ class Alerts(QThread):
 
         self.progress.emit("Setting data and\nconfig variables!")
         print("Sleep 10 sec on start to avoid spamming the api")
-        # time.sleep(10)
+        time.sleep(10)
 
         if not self.running:
             self.progress.emit("Stopped alerts!")
