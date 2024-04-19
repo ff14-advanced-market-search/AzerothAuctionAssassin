@@ -564,15 +564,11 @@ class Alerts(QThread):
             # for debugging one realm at a time
             main_single()
         else:
-            embed_fields = [
-                {
-                    "name": "🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢",
-                    "value": "Starting mega alerts and scan all AH data instantly.",
-                    "inline": True,
-                }
-            ]
-            intro_embed = create_embed("AAA", "Azeroth Auction Assassin", embed_fields)
-            mega_data.send_discord_embed(intro_embed)
+            mega_data.send_discord_message(
+                "🟢Starting mega alerts and scan all AH data instantly.🟢\n"
+                + "🟢These first few messages might be old.🟢\n"
+                + "🟢All future messages will release seconds after the new data is available.🟢"
+            )
             time.sleep(1)
 
             if not self.running:

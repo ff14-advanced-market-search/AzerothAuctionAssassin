@@ -1925,6 +1925,9 @@ class App(QMainWindow):
                 + datetime.now().day * 10 ** 2
                 + datetime.now().hour
         )
+        path_to_backup_mega_data = os.path.join(
+            os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_mega_data.json"
+        )
         path_to_backup_items = os.path.join(
             os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_desired_items.json"
         )
@@ -1934,6 +1937,7 @@ class App(QMainWindow):
         path_to_backup_ilvl_list = os.path.join(
             os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_desired_ilvl_list.json"
         )
+        self.save_json_file(path_to_backup_mega_data, config_json)
         self.save_json_file(path_to_backup_items, self.items_list)
         self.save_json_file(path_to_backup_pets, self.pet_list)
         self.save_json_file(path_to_backup_ilvl_list, self.ilvl_list)
