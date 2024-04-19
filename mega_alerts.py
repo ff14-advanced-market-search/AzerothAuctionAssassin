@@ -114,7 +114,7 @@ class Alerts(QThread):
                 if not mega_data.NO_LINKS:
                     message += f"[{link_label}]({link_url})\n"
                     message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{saddlebag_link_id})\n"
-
+                    message += f"[Where to Sell](https://saddlebagexchange.com/wow/export-search?itemId={saddlebag_link_id})\n"
                 # Add price info, if available
                 price_type = (
                     "bid_prices" if "bid_prices" in auction else "buyout_prices"
