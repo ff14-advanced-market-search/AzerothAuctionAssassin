@@ -3,6 +3,7 @@
 # so it knows from where to load the pre-installed packages
 # so it can locate them before doing the other imports
 import sys
+from datetime import datetime
 
 windowsApp_Path = None
 try:
@@ -1168,6 +1169,10 @@ class App(QMainWindow):
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
 
+        backup_data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "backup")
+        if not os.path.exists(backup_data_folder):
+            os.makedirs(backup_data_folder)
+
         if not os.path.exists(self.eu_connected_realms):
             from utils.realm_data import EU_CONNECTED_REALMS_IDS
 
@@ -1912,6 +1917,26 @@ class App(QMainWindow):
         self.save_json_file(self.path_to_desired_items, self.items_list)
         self.save_json_file(self.path_to_desired_ilvl_list, self.ilvl_list)
         self.save_json_file(self.path_to_desired_ilvl_items, self.ilvl_items)
+
+        # Save Backups
+        time_int = (
+                datetime.now().year * 10 ** 6
+                + datetime.now().month * 10 ** 4
+                + datetime.now().day * 10 ** 2
+                + datetime.now().hour
+        )
+        path_to_backup_items = os.path.join(
+            os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_desired_items.json"
+        )
+        path_to_backup_pets = os.path.join(
+            os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_desired_pets.json"
+        )
+        path_to_backup_ilvl_list = os.path.join(
+            os.getcwd(), "AzerothAuctionAssassinData", "backup", f"{time_int}_desired_ilvl_list.json"
+        )
+        self.save_json_file(path_to_backup_items, self.items_list)
+        self.save_json_file(path_to_backup_pets, self.pet_list)
+        self.save_json_file(path_to_backup_ilvl_list, self.ilvl_list)
 
         return True
 
