@@ -2,6 +2,16 @@ import requests
 from tenacity import retry, stop_after_attempt
 
 
+def send_embed_discord(embed, webhook_url):
+    # Send message
+    print(f"sending embed to discord...")
+    req = requests.post(webhook_url, json={"embeds": [embed]})
+    if req.status_code != 204 and req.status_code != 200:
+        print(f"Failed to send embed to discord: {req.status_code} - {req.text}")
+    else:
+        print(f"Embed sent successfully")
+
+
 @retry(stop=stop_after_attempt(3))
 def send_discord_message(message, webhook_url):
     try:

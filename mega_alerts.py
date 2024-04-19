@@ -7,6 +7,7 @@ from utils.helpers import (
     create_oribos_exchange_pet_link,
     create_oribos_exchange_item_link,
     get_wow_russian_realm_ids,
+    create_embed,
 )
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
@@ -483,7 +484,7 @@ class Alerts(QThread):
 
         self.progress.emit("Setting data and\nconfig variables!")
         print("Sleep 10 sec on start to avoid spamming the api")
-        time.sleep(10)
+        # time.sleep(10)
 
         if not self.running:
             self.progress.emit("Stopped alerts!")
@@ -525,12 +526,15 @@ class Alerts(QThread):
             # for debugging one realm at a time
             main_single()
         else:
-            mega_data.send_discord_message(
-                "🟢Starting mega alerts and scan all AH data instantly.🟢\n"
-                + "🟢These first few messages might be old.🟢\n"
-                + "🟢All future messages will release seconds after the new data is available.🟢"
-            )
-
+            fields = [
+                {
+                    "name": "🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢",
+                    "value": "Starting mega alerts and scan all AH data instantly.",
+                    "inline": True,
+                }
+            ]
+            embed = create_embed("AAA", "Azeroth Auction Assassin", fields)
+            mega_data.send_discord_embed(embed)
             time.sleep(1)
 
             if not self.running:

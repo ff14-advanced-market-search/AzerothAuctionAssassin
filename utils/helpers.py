@@ -1,3 +1,6 @@
+import time
+
+
 def create_oribos_exchange_pet_link(realm_name, pet_id, region):
     fixed_realm_name = realm_name.lower().replace("'", "").replace(" ", "-")
     if region == "NA":
@@ -25,3 +28,18 @@ def get_wow_russian_realm_ids():
     classic_realms = [4452, 4474]
     sod_realms = [5280, 5285, 5829, 5830]
     return retail_realms + classic_realms + sod_realms
+
+
+def create_embed(title, description, fields=[]):
+    embed = {
+        "title": title,
+        "description": description,
+        "color": 0x7289DA,  # Blurple color code
+        "fields": fields,
+        "footer": {
+            "text": time.strftime(
+                "%m/%d/%Y %I:%M %p", time.localtime()
+            )  # Adds current time as footer
+        },
+    }
+    return embed

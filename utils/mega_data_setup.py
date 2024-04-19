@@ -3,7 +3,12 @@ from __future__ import print_function
 import json, requests, os, time
 from datetime import datetime
 from tenacity import retry, stop_after_attempt
-from utils.api_requests import send_discord_message, get_itemnames, get_ilvl_items
+from utils.api_requests import (
+    send_discord_message,
+    get_itemnames,
+    get_ilvl_items,
+    send_embed_discord,
+)
 from utils.bonus_ids import get_bonus_id_sets
 from utils.helpers import get_wow_russian_realm_ids
 
@@ -530,3 +535,6 @@ class MegaData:
     #### GENERAL USE FUNCTIONS ####
     def send_discord_message(self, message):
         send_discord_message(message, self.WEBHOOK_URL)
+
+    def send_discord_embed(self, embed):
+        send_embed_discord(embed, self.WEBHOOK_URL)
