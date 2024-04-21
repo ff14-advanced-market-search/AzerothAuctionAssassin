@@ -1124,7 +1124,6 @@ class App(QMainWindow):
             if "NO_LINKS" in raw_mega_data:
                 self.no_links.setChecked(raw_mega_data["NO_LINKS"])
 
-
             if "DISCOUNT_PERCENT" in raw_mega_data:
                 self.discount_percent.setText(str(raw_mega_data["DISCOUNT_PERCENT"]))
 
