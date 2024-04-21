@@ -80,7 +80,7 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.17"
+        self.title = "Azeroth Auction Assassin v1.0.17.1"
         self.left = 100
         self.top = 100
         self.width = 550
