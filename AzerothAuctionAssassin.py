@@ -488,15 +488,6 @@ class App(QMainWindow):
         self.settings_page_layout.addWidget(self.scan_time_max_label, 12, 1, 1, 1)
         self.settings_page_layout.addWidget(self.scan_time_max, 13, 1, 1, 1)
 
-        self.important_emoji = QLineEdit(settings_page)
-        self.important_emoji.setText("🔥")
-        self.important_emoji_label = QLabel("Important Emoji", settings_page)
-        self.important_emoji_label.setToolTip(
-            "Changes the separators from ==== to whatever emoji you want."
-        )
-        self.settings_page_layout.addWidget(self.important_emoji_label, 14, 1, 1, 1)
-        self.settings_page_layout.addWidget(self.important_emoji, 15, 1, 1, 1)
-
         self.discount_percent = QLineEdit(settings_page)
         self.discount_percent.setText("10")
         self.discount_percent_label = QLabel("Discount vs Average", settings_page)
@@ -505,8 +496,8 @@ class App(QMainWindow):
             + "1 to 100, smaller number means a better price.\n"
             + "ex: if you set 10 pecent and avg price is 100k, it recommends you snipe for 10k."
         )
-        self.settings_page_layout.addWidget(self.discount_percent_label, 16, 1, 1, 1)
-        self.settings_page_layout.addWidget(self.discount_percent, 17, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.discount_percent_label, 14, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.discount_percent, 15, 1, 1, 1)
 
         self.show_bid_prices = QCheckBox("Show Bid Prices", settings_page)
         self.show_bid_prices.setToolTip(
@@ -1133,8 +1124,6 @@ class App(QMainWindow):
             if "NO_LINKS" in raw_mega_data:
                 self.no_links.setChecked(raw_mega_data["NO_LINKS"])
 
-            if "IMPORTANT_EMOJI" in raw_mega_data:
-                self.important_emoji.setText(raw_mega_data["IMPORTANT_EMOJI"])
 
             if "DISCOUNT_PERCENT" in raw_mega_data:
                 self.discount_percent.setText(str(raw_mega_data["DISCOUNT_PERCENT"]))
@@ -1728,7 +1717,6 @@ class App(QMainWindow):
         self.number_of_mega_threads.setText("48"),
         self.wow_head_link.setChecked(False),
         self.no_links.setChecked(False),
-        self.important_emoji.setText("🔥"),
         self.discount_percent.setText("10"),
         self.russian_realms.setChecked(True),
         self.refresh_alerts.setChecked(True),
@@ -1838,7 +1826,6 @@ class App(QMainWindow):
             "MEGA_THREADS": int(mega_threads),
             "WOWHEAD_LINK": wowhead,
             "NO_LINKS": no_links,
-            "IMPORTANT_EMOJI": self.important_emoji.text().strip(),
             "DISCOUNT_PERCENT": int(self.discount_percent.text()),
             "NO_RUSSIAN_REALMS": no_russians,
             "REFRESH_ALERTS": refresh_alerts,
