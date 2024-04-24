@@ -222,13 +222,20 @@ class App(QMainWindow):
 
     def make_realm_page(self, realm_page):
 
-
         self.realm_region = QComboBox(realm_page)
         self.realm_region_label = QLabel("WoW Region", realm_page)
         self.realm_region_label.setToolTip("")
         self.realm_region_label.setFixedHeight(10)
         self.realm_region.addItems(
-            ["Click this!!!", "EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
+            [
+                "Click this!!!",
+                "EU",
+                "NA",
+                "EUCLASSIC",
+                "NACLASSIC",
+                "NASODCLASSIC",
+                "EUSODCLASSIC",
+            ]
         )
         self.realm_region.currentIndexChanged.connect(self.on_combo_box_region_changed)
         self.realms_page_layout.addWidget(self.realm_region_label, 0, 0, 1, 1)
