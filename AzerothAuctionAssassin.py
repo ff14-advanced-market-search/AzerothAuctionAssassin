@@ -577,8 +577,8 @@ class App(QMainWindow):
         self.pet_name_input.setEnabled(False)
         self.pet_page_layout.addWidget(self.pet_name_input, 2, 0, 1, 2)
 
-        self.add_pet_button = QPushButton("Add Pet")
-        self.add_pet_button.setToolTip("Add pet to your snipe list.")
+        self.add_pet_button = QPushButton("Add/Update Pet")
+        self.add_pet_button.setToolTip("Add/Update pet to your snipe list.")
         self.add_pet_button.clicked.connect(self.add_pet_to_dict)
         self.pet_page_layout.addWidget(self.add_pet_button, 3, 0, 1, 1)
 
@@ -621,8 +621,8 @@ class App(QMainWindow):
         self.item_name_input.setEnabled(False)
         self.item_page_layout.addWidget(self.item_name_input, 2, 0, 1, 2)
 
-        self.add_item_button = QPushButton("Add Item")
-        self.add_item_button.setToolTip("Add item to your snipe list.")
+        self.add_item_button = QPushButton("Add/Update Item")
+        self.add_item_button.setToolTip("Add/Update item to your snipe list.")
         self.add_item_button.clicked.connect(self.add_item_to_dict)
         self.item_page_layout.addWidget(self.add_item_button, 3, 0, 1, 1)
 
@@ -697,8 +697,8 @@ class App(QMainWindow):
         self.ilvl_avoidance.setToolTip("Do you want the item to have Avoidance?")
         self.ilvl_page_layout.addWidget(self.ilvl_avoidance, 9, 0, 1, 1)
 
-        self.add_ilvl_button = QPushButton("Add Item", ilvl_page)
-        self.add_ilvl_button.setToolTip("Add item to your snipe list.")
+        self.add_ilvl_button = QPushButton("Add/Update Item", ilvl_page)
+        self.add_ilvl_button.setToolTip("Add/Update item to your snipe list.")
         self.add_ilvl_button.clicked.connect(self.add_ilvl_to_list)
         self.ilvl_page_layout.addWidget(self.add_ilvl_button, 10, 0, 1, 1)
 
