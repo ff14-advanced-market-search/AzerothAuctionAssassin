@@ -80,7 +80,7 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.17.1"
+        self.title = "Azeroth Auction Assassin v1.0.17.2"
         self.left = 100
         self.top = 100
         self.width = 550
@@ -222,38 +222,39 @@ class App(QMainWindow):
 
     def make_realm_page(self, realm_page):
 
-        self.realm_name_input = QLineEdit(realm_page)
-        self.realm_name_input_label = QLabel("Realm Name", realm_page)
-        self.realm_name_input_label.setToolTip("")
-        self.realm_name_input_label.setFixedHeight(10)
-        self.realms_page_layout.addWidget(self.realm_name_input_label, 0, 0, 1, 1)
-        self.realms_page_layout.addWidget(self.realm_name_input, 1, 0, 1, 1)
-
-        self.realm_id_input = QLineEdit(realm_page)
-        self.realm_id_input_label = QLabel("Realm ID", realm_page)
-        self.realm_id_input_label.setToolTip("")
-        self.realm_id_input_label.setFixedHeight(10)
-        self.realms_page_layout.addWidget(self.realm_id_input_label, 2, 0, 1, 1)
-        self.realms_page_layout.addWidget(self.realm_id_input, 3, 0, 1, 1)
-
-        self.realm_name_combobox = QComboBox(realm_page)
-        self.realm_name_combobox.setEnabled(False)
-        self.realm_realm_name_label = QLabel("Realm ID", realm_page)
-        self.realm_realm_name_label.setToolTip("")
-        self.realm_realm_name_label.setFixedHeight(10)
-        self.realms_page_layout.addWidget(self.realm_realm_name_label, 4, 0, 1, 1)
-        self.realms_page_layout.addWidget(self.realm_name_combobox, 5, 0, 1, 1)
 
         self.realm_region = QComboBox(realm_page)
-        self.realm_region_label = QLabel("Wow Region", realm_page)
+        self.realm_region_label = QLabel("WoW Region", realm_page)
         self.realm_region_label.setToolTip("")
         self.realm_region_label.setFixedHeight(10)
         self.realm_region.addItems(
-            ["", "EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
+            ["Click this!!!", "EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
         )
         self.realm_region.currentIndexChanged.connect(self.on_combo_box_region_changed)
-        self.realms_page_layout.addWidget(self.realm_region_label, 6, 0, 1, 1)
-        self.realms_page_layout.addWidget(self.realm_region, 7, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_region_label, 0, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_region, 1, 0, 1, 1)
+
+        self.realm_name_combobox = QComboBox(realm_page)
+        self.realm_name_combobox.setEnabled(False)
+        self.realm_realm_name_label = QLabel("Realm Name", realm_page)
+        self.realm_realm_name_label.setToolTip("")
+        self.realm_realm_name_label.setFixedHeight(10)
+        self.realms_page_layout.addWidget(self.realm_realm_name_label, 2, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_name_combobox, 3, 0, 1, 1)
+
+        self.realm_name_input = QLineEdit(realm_page)
+        self.realm_name_input_label = QLabel("Add Realm Name", realm_page)
+        self.realm_name_input_label.setToolTip("")
+        self.realm_name_input_label.setFixedHeight(10)
+        self.realms_page_layout.addWidget(self.realm_name_input_label, 4, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_name_input, 5, 0, 1, 1)
+
+        self.realm_id_input = QLineEdit(realm_page)
+        self.realm_id_input_label = QLabel("Add Realm ID", realm_page)
+        self.realm_id_input_label.setToolTip("")
+        self.realm_id_input_label.setFixedHeight(10)
+        self.realms_page_layout.addWidget(self.realm_id_input_label, 6, 0, 1, 1)
+        self.realms_page_layout.addWidget(self.realm_id_input, 7, 0, 1, 1)
 
         self.add_realm_button = QPushButton("Add Realm")
         self.add_realm_button.setToolTip("")
