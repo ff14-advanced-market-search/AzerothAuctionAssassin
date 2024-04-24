@@ -3,6 +3,7 @@ AzerothAuctionAssassinData/desired_ilvl_list.json
 AzerothAuctionAssassinData/desired_items.json
 AzerothAuctionAssassinData/desired_pets.json
 AzerothAuctionAssassinData/mega_data.json
+AzerothAuctionAssassinData/backup/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

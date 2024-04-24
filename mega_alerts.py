@@ -7,6 +7,8 @@ from utils.helpers import (
     create_oribos_exchange_pet_link,
     create_oribos_exchange_item_link,
     get_wow_russian_realm_ids,
+    create_embed,
+    split_list,
 )
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
@@ -38,8 +40,24 @@ class Alerts(QThread):
         def pull_single_realm_data(connected_id):
             auctions = mega_data.get_listings_single(connected_id)
             clean_auctions = clean_listing_data(auctions, connected_id)
-            if not clean_auctions:
+            if not clean_auctions or len(clean_auctions) == 0:
                 return
+
+            russian_realms = get_wow_russian_realm_ids()
+            # construct message
+            suffix = (
+                " **(RU)**\n"
+                if clean_auctions[0]["realmID"] in russian_realms
+                else "\n"
+            )
+            is_russian_realm = (
+                "**(Russian Realm)**"
+                if clean_auctions[0]["realmID"] in russian_realms
+                else ""
+            )
+
+            # add details on each snipe to the message
+            embed_fields = []
             for auction in clean_auctions:
                 if not self.running:
                     break
@@ -49,38 +67,38 @@ class Alerts(QThread):
                     saddlebag_link_id = auction["itemID"]
                     if "tertiary_stats" in auction:
                         item_name = mega_data.DESIRED_ILVL_NAMES[auction["itemID"]]
-                        id_msg += f"`Name:` {item_name}\n"
+                        # old method
+                        # id_msg += f"`Name:` {item_name}\n"
                         id_msg += f"`ilvl:` {auction['ilvl']}\n"
                         id_msg += f"`tertiary_stats:` {auction['tertiary_stats']}\n"
                         id_msg += f"`bonus_ids:` {list(auction['bonus_ids'])}\n"
                     elif auction["itemID"] in mega_data.ITEM_NAMES:
                         item_name = mega_data.ITEM_NAMES[auction["itemID"]]
-                        id_msg += f"`Name:` {item_name}\n"
+                        # old method
+                        # id_msg += f"`Name:` {item_name}\n"
+                    else:
+                        item_name = "Unknown Item"
+                        # old method
+                        # id_msg += f"`Name:` {item_name}\n"
+                    embed_name = item_name
                 else:
                     id_msg = f"`petID:` {auction['petID']}\n"
                     saddlebag_link_id = auction["petID"]
                     if auction["petID"] in mega_data.PET_NAMES:
                         pet_name = mega_data.PET_NAMES[auction["petID"]]
-                        id_msg += f"`Name:` {pet_name}\n"
+                        # old method
+                        # id_msg += f"`Name:` {pet_name}\n"
+                    else:
+                        pet_name = "Unknown Pet"
+                        # old method
+                        # id_msg += f"`Name:` {pet_name}\n"
+                    embed_name = pet_name
 
-                russian_realms = get_wow_russian_realm_ids()
-
-                # construct message
-                emoji = (
-                    "🇷🇺" * 20
-                    if auction["realmID"] in russian_realms
-                    else f"{mega_data.IMPORTANT_EMOJI * 20}"
-                )
-                suffix = " **(RU)**\n" if auction["realmID"] in russian_realms else "\n"
-                is_russian_realm = (
-                    "**(Russian Realm)**"
-                    if auction["realmID"] in russian_realms
-                    else ""
-                )
-
-                message = f"{emoji}\n"
-                message += f"`region:` {mega_data.REGION}`realmID:` {auction['realmID']} {is_russian_realm}{id_msg}"
-                message += f"`realmNames`: {auction['realmNames']}{suffix}"
+                message = ""
+                # old method
+                # message += f"`region:` {mega_data.REGION}` realmID:` {auction['realmID']} {is_russian_realm}\n"
+                # message += f"`realmNames`: {auction['realmNames']}{suffix}\n"
+                message += id_msg
 
                 # Add item links, if available
                 link_label = (
@@ -96,21 +114,42 @@ class Alerts(QThread):
                 if not mega_data.NO_LINKS:
                     message += f"[{link_label}]({link_url})\n"
                     message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{saddlebag_link_id})\n"
-
+                    message += f"[Where to Sell](https://saddlebagexchange.com/wow/export-search?itemId={saddlebag_link_id})\n"
                 # Add price info, if available
                 price_type = (
                     "bid_prices" if "bid_prices" in auction else "buyout_prices"
                 )
                 message += f"`{price_type}`: {auction[price_type]}\n"
 
-                message += f"{emoji}\n"
-
                 # send alerts
                 if auction not in self.alert_record:
-                    mega_data.send_discord_message(message)
+                    # # old method one message per item
+                    # mega_data.send_discord_message(message)
+                    embed_fields.append(
+                        {
+                            "name": embed_name,
+                            "value": message,
+                            "inline": True,
+                        }
+                    )
                     self.alert_record.append(auction)
                 else:
                     print(f"Already sent this alert {auction}")
+
+            if len(embed_fields) != 0:
+                # new embed method one message per realm
+                desc = f"**region:** {mega_data.REGION}\n"
+                desc += (
+                    f"**realmID:** {clean_auctions[0]['realmID']} {is_russian_realm}\n"
+                )
+                desc += f"**realmNames:** {clean_auctions[0]['realmNames']}{suffix}"
+
+                # split it up so message is not too long
+                for chunk in split_list(embed_fields, 10):
+                    item_embed = create_embed(
+                        f"{mega_data.REGION} SNIPE FOUND!", desc, chunk
+                    )
+                    mega_data.send_discord_embed(item_embed)
 
         def clean_listing_data(auctions, connected_id):
             all_ah_buyouts = {}
@@ -530,7 +569,6 @@ class Alerts(QThread):
                 + "🟢These first few messages might be old.🟢\n"
                 + "🟢All future messages will release seconds after the new data is available.🟢"
             )
-
             time.sleep(1)
 
             if not self.running:
