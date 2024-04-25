@@ -649,6 +649,11 @@ class App(QMainWindow):
         self.import_pbs_data_button.clicked.connect(self.import_pbs_data)
         self.item_page_layout.addWidget(self.import_pbs_data_button, 17, 1, 1, 1)
 
+        self.erase_item_data_button = QPushButton("Erase Item Data")
+        self.erase_item_data_button.setToolTip("Erase your desired_items.json config")
+        self.erase_item_data_button.clicked.connect(self.erase_item_data)
+        self.item_page_layout.addWidget(self.erase_item_data_button, 18, 0, 1, 1)
+
     def make_ilvl_page(self, ilvl_page):
 
         self.ilvl_item_input = QLineEdit(ilvl_page)
@@ -1526,17 +1531,23 @@ class App(QMainWindow):
                     del self.items_list[self.item_id_input.text()]
                     return
 
+    def erase_item_data(self):
+        self.item_list_display.clear()
+        self.items_list = {}
+
     def import_item_data(self):
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
             return
 
         self.item_list_display.clear()
-        self.items_list = {}
+        ## if we want to erase everything before importing
+        # self.items_list = {}
 
         try:
+            existing_items = self.items_list.keys()
             with open(pathname) as file:
-                self.items_list = json.load(file)
+                self.items_list.update(json.load(file))
             for key, value in self.items_list.items():
                 if not (1 <= int(key) <= 500000):
                     raise ValueError(
