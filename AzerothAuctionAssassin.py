@@ -599,6 +599,11 @@ class App(QMainWindow):
         self.import_pet_data_button.clicked.connect(self.import_pet_data)
         self.pet_page_layout.addWidget(self.import_pet_data_button, 17, 0, 1, 2)
 
+        self.erase_pet_data_button = QPushButton("Erase Pet Data")
+        self.erase_pet_data_button.setToolTip("Erase your pet list")
+        self.erase_pet_data_button.clicked.connect(self.erase_pet_data)
+        self.pet_page_layout.addWidget(self.erase_pet_data_button, 18, 0, 1, 2)
+
     def make_item_page(self, item_page):
 
         self.item_id_input = QLineEdit(item_page)
@@ -725,6 +730,13 @@ class App(QMainWindow):
         self.import_ilvl_data_button.clicked.connect(self.import_ilvl_data)
         self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 11, 1, 1, 2)
 
+        self.erase_ilvl_data_button = QPushButton("erase Desired ILvl List Data")
+        self.erase_ilvl_data_button.setToolTip(
+            "erase your desired_ilvl_list.json config"
+        )
+        self.erase_ilvl_data_button.clicked.connect(self.erase_ilvl_data)
+        self.ilvl_page_layout.addWidget(self.erase_ilvl_data_button, 12, 1, 1, 2)
+
     def go_to_home_page(self):
         self.stacked_widget.setCurrentIndex(0)
 
@@ -836,7 +848,7 @@ class App(QMainWindow):
                 self.pet_price_input.setText(recommended_price)
 
         else:
-            self.pet_price_input.setText(selected_pet_price)
+            self.pet_price_input.setText(str(selected_pet_price))
 
         self.pet_id_input.setText(str(selected_pet_id))
 
@@ -945,7 +957,7 @@ class App(QMainWindow):
                 QMessageBox.critical(self, "Region List", "Select valid region.")
                 return False
 
-        self.realm_name_input.setText(selected_realm_name)
+        self.realm_name_input.setText(str(selected_realm_name))
         self.realm_id_input.setText(str(realm_list[selected_realm_name]))
 
     def add_realm_to_list(self):
@@ -1383,21 +1395,25 @@ class App(QMainWindow):
                     self.ilvl_list.remove(ilvl_dict_data)
                     return
 
+    def erase_ilvl_data(self):
+        self.ilvl_list_display.clear()
+        self.ilvl_list = []
+
     def import_ilvl_data(self):
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
             return
 
-        self.ilvl_list_display.clear()
-        self.ilvl_list = {}
-
         try:
             with open(pathname) as file:
-                self.ilvl_list = json.load(file)
+                a = self.ilvl_list
+                self.ilvl_list += json.load(file)
             if not isinstance(self.ilvl_list, list):
                 raise ValueError(
                     "Invalid JSON file.\nFile should contain a list of Desired Ilvl Objects."
                 )
+            # clear display before inserting new data
+            self.ilvl_list_display.clear()
             for ilvl_dict_data in self.ilvl_list:
                 if "item_ids" not in ilvl_dict_data:
                     item_ids = []
@@ -1541,11 +1557,8 @@ class App(QMainWindow):
             return
 
         self.item_list_display.clear()
-        ## if we want to erase everything before importing
-        # self.items_list = {}
 
         try:
-            existing_items = self.items_list.keys()
             with open(pathname) as file:
                 self.items_list.update(json.load(file))
             for key, value in self.items_list.items():
@@ -1577,7 +1590,6 @@ class App(QMainWindow):
             return
 
         self.item_list_display.clear()
-        self.items_list = {}
 
         try:
             # open and read the text file
@@ -1592,7 +1604,6 @@ class App(QMainWindow):
                 for index, item in self.item_statistics.iterrows()
                 if item["itemName"].lower() in pbs_names
             }
-            self.items_list = {}
             for key, value in temp_items_list.items():
                 discount_percent = int(self.discount_percent.text()) / 100
                 discount_price = round(float(value) * discount_percent, 4)
@@ -1684,17 +1695,20 @@ class App(QMainWindow):
                     del self.pet_list[self.pet_id_input.text()]
                     return
 
+    def erase_pet_data(self):
+        self.pet_list_display.clear()
+        self.pet_list = {}
+
     def import_pet_data(self):
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
             return
 
         self.pet_list_display.clear()
-        self.pet_list = {}
 
         try:
             with open(pathname) as file:
-                self.pet_list = json.load(file)
+                self.pet_list.update(json.load(file))
             for key, value in self.pet_list.items():
                 if not (1 <= int(key) <= 10000):
                     raise ValueError(
