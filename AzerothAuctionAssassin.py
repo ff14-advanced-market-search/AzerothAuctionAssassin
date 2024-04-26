@@ -1183,6 +1183,82 @@ class App(QMainWindow):
         self.search_button = QPushButton("Search")
         self.recommendations_page_layout.addWidget(self.search_button, 12, 0, 1, 2)
 
+        def recommendation_data_received(self, recommended_items):
+            self.item_page.item_list_display.clear()
+            self.item_page.items_list = recommended_items
+
+            for key, value in self.item_page.items_list.items():
+                if not (1 <= int(key) <= 500000):
+                    raise ValueError(
+                        f"Invalid item ID {key}.\nIDs must be integers between 1-500,000."
+                    )
+                if not (0 <= int(value) <= 10000000):
+                    raise ValueError(
+                        f"Invalid price {value} for item ID {key}.\nPrices must be integers between 0-10,000,000."
+                    )
+                self.item_page.item_list_display.insertItem(
+                    self.item_page.item_list_display.count(),
+                    f"Item ID: {key}, Price: {value}",
+                )
+        def search(self):
+            if self.recommendation_page.recommendations_region.currentText() == "Europe":
+                realm_id = self.recommendation_page.eu_realms[
+                    self.recommendation_page.recommendations_realm_combobox.currentText()
+                ]
+                region = "EU"
+            elif (
+                self.recommendation_page.recommendations_region.currentText()
+                == "North America"
+            ):
+                realm_id = self.recommendation_page.na_realms[
+                    self.recommendation_page.recommendations_realm_combobox.currentText()
+                ]
+                region = "NA"
+            else:
+                return
+
+            item_category_name = self.recommendation_page.item_category.currentText()
+            item_category = self.recommendation_page.item_category_list[item_category_name]
+            if item_category == -1:
+                item_sub_category = -1
+            else:
+                item_sub_category = self.recommendation_page.item_sub_category_lists[
+                    item_category_name
+                ][self.recommendation_page.item_sub_category.currentText()]
+
+            item_quality = self.recommendation_page.item_quality_list[
+                self.recommendation_page.item_quality.currentText()
+            ]
+            self.recommendation_request_thread = RecommendationsRequest(
+                realm_id=realm_id,
+                region=region,
+                commodity=self.recommendation_page.commodity_items.isChecked(),
+                # dont ask me why i did this one in coppers instead of using floats
+                desired_avg_price=int(
+                    float(self.recommendation_page.minimum_average_price_input.text())
+                    * 10000
+                ),
+                desired_sales_per_day=float(
+                    self.recommendation_page.minimum_desired_sales_input.text()
+                ),
+                item_quality=item_quality,
+                required_level=int(
+                    self.recommendation_page.minimum_required_level_input.text()
+                ),
+                item_class=item_category,
+                item_subclass=item_sub_category,
+                ilvl=int(self.recommendation_page.minimum_item_level_input.text()),
+                discount_percent=int(self.recommendation_page.local_discount_percent.text())
+                / 100,
+                minimum_market_value=int(
+                    self.recommendation_page.minimum_market_value.text()
+                ),
+            )
+            self.recommendation_request_thread.start()
+            self.recommendation_request_thread.completed.connect(
+                self.recommendation_data_received
+            )
+
     def category_combo_changed(self, index):
         selected_category = self.item_category.currentText()
         if selected_category == "All":
