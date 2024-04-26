@@ -1290,7 +1290,7 @@ class App(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Incomplete Information",
-                "Both ilvl and price fields are required.",
+                "Both ilvl and buyout fields are required.",
             )
             return False
 
