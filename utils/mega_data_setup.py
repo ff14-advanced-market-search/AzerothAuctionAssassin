@@ -438,11 +438,18 @@ class MegaData:
     #### AH API CALLS ####
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
     def get_listings_single(self, connectedRealmId: int):
-        print("==========================================")
-        print(
-            f"gather data from connectedRealmId {connectedRealmId} of region {self.REGION}"
-        )
+        if connectedRealmId in [-1, -2]:
+            print("==========================================")
+            print(f"gather data from {self.REGION} commodities")
+            auction_info = self.make_commodity_ah_api_request()
+            return auction_info["auctions"]
+        else:
+            print("==========================================")
+            print(
+                f"gather data from connectedRealmId {connectedRealmId} of region {self.REGION}"
+            )
 
+        all_auctions = []
         if "CLASSIC" in self.REGION:
             if self.FACTION == "alliance":
                 endpoints = ["/2"]
@@ -455,7 +462,6 @@ class MegaData:
         else:
             endpoints = [""]
 
-        all_auctions = []
         for endpoint in endpoints:
             url = self.construct_api_url(connectedRealmId, endpoint)
 
@@ -515,8 +521,16 @@ class MegaData:
         return auction_info
 
     def update_local_timers(self, dataSetID, lastUploadTimeRaw):
-        tableName = f"{dataSetID}_singleMinPrices"
-        dataSetName = self.get_realm_names(dataSetID)
+        if dataSetID == -1:
+            tableName = f"{self.REGION}_retail_commodityListings"
+            dataSetName = [f"{self.REGION} Commodities"]
+        elif dataSetID == -2:
+            tableName = f"{self.REGION}_retail_commodityListings"
+            dataSetName = [f"{self.REGION} Commodities"]
+        else:
+            tableName = f"{dataSetID}_singleMinPrices"
+            dataSetName = self.get_realm_names(dataSetID)
+
         lastUploadMinute = int(lastUploadTimeRaw.split(":")[1])
         lastUploadUnix = int(
             datetime.strptime(lastUploadTimeRaw, "%a, %d %b %Y %H:%M:%S %Z").timestamp()
@@ -531,6 +545,40 @@ class MegaData:
             "tableName": tableName,
         }
         self.upload_timers[dataSetID] = new_realm_time
+
+    def make_commodity_ah_api_request(self):
+        if self.REGION == "NA":
+            url = f"https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US&access_token={self.check_access_token()}"
+            connectedRealmId = -1
+        elif self.REGION == "EU":
+            url = f"https://eu.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-eu&locale=en_EU&access_token={self.check_access_token()}"
+            connectedRealmId = -2
+        else:
+            raise Exception(
+                f"invalid region {self.REGION} passed to get_raw_commodity_listings()"
+            )
+        req = requests.get(url, timeout=20)
+
+        # check for api errors
+        if req.status_code == 429:
+            print(
+                f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, sleep 30 min and exit"
+            )
+            time.sleep(30 * 60)
+            exit(1)
+        elif req.status_code != 200:
+            print(f"{req} BLIZZARD error getting {self.REGION} commodities data")
+            exit(1)
+
+        if "Last-Modified" in dict(req.headers):
+            try:
+                lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
+                self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
+            except Exception as ex:
+                print(f"The exception was:", ex)
+
+        auction_info = req.json()
+        return auction_info
 
     #### GENERAL USE FUNCTIONS ####
     def send_discord_message(self, message):
