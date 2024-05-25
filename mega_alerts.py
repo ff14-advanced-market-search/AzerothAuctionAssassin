@@ -190,6 +190,10 @@ class Alerts(QThread):
                         price = item["buyout"]
                         add_price_to_dict(price, item_id, all_ah_buyouts)
 
+                    if "unit_price" in item:
+                        price = item["unit_price"]
+                        add_price_to_dict(price, item_id, all_ah_buyouts)
+
                 # all caged battle pets have item id 82800
                 elif item_id == 82800:
                     if item["item"]["pet_species_id"] in mega_data.DESIRED_PETS:
