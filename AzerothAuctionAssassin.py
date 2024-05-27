@@ -5,6 +5,8 @@
 import sys
 from datetime import datetime
 
+AAA_VERSION = "1.0.19.1"
+
 windowsApp_Path = None
 try:
     if sys.argv[1] == "run-from-windows-bin":
@@ -80,7 +82,7 @@ class Item_And_Pet_Statistics(QThread):
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        self.title = "Azeroth Auction Assassin v1.0.19"
+        self.title = f"Azeroth Auction Assassin v{AAA_VERSION}"
         self.left = 100
         self.top = 100
         self.width = 550
