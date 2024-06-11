@@ -466,7 +466,7 @@ class MegaData:
             url = self.construct_api_url(connectedRealmId, endpoint)
 
             auction_info = self.make_ah_api_request(url, connectedRealmId)
-            if "auctions" not in auction_info:
+            if auction_info == None or "auctions" not in auction_info:
                 print(
                     f"{self.REGION} {str(connectedRealmId)} realm data, no auctions found"
                 )
@@ -494,21 +494,21 @@ class MegaData:
 
         return url
 
+    @retry(stop=stop_after_attempt(3))
     def make_ah_api_request(self, url, connectedRealmId):
         req = requests.get(url, timeout=20)
 
         # check for api errors
         if req.status_code == 429:
-            print(
-                f"{req} BLIZZARD too many requests error on {self.REGION} {str(connectedRealmId)} realm data, sleep 30 min and exit"
-            )
+            error_message = f"{req} BLIZZARD too many requests error on {self.REGION} {str(connectedRealmId)} realm data, sleep 30 min and exit"
+            print(error_message)
             time.sleep(30 * 60)
-            exit(1)
+            raise Exception(error_message)
         elif req.status_code != 200:
-            print(
-                f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
-            )
-            exit(1)
+            error_message = f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
+            print(error_message)
+            time.sleep(1)
+            raise Exception(error_message)
 
         if "Last-Modified" in dict(req.headers):
             try:
@@ -546,6 +546,7 @@ class MegaData:
         }
         self.upload_timers[dataSetID] = new_realm_time
 
+    @retry(stop=stop_after_attempt(3))
     def make_commodity_ah_api_request(self):
         if self.REGION == "NA":
             url = f"https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US&access_token={self.check_access_token()}"
@@ -561,14 +562,15 @@ class MegaData:
 
         # check for api errors
         if req.status_code == 429:
-            print(
-                f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, sleep 30 min and exit"
-            )
+            error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, sleep 30 min and exit"
+            print(error_message)
             time.sleep(30 * 60)
-            exit(1)
+            raise Exception(error_message)
         elif req.status_code != 200:
-            print(f"{req} BLIZZARD error getting {self.REGION} commodities data")
-            exit(1)
+            error_message = f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
+            print(error_message)
+            time.sleep(1)
+            raise Exception(error_message)
 
         if "Last-Modified" in dict(req.headers):
             try:
