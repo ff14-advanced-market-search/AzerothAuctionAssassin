@@ -91,7 +91,7 @@ class App(QMainWindow):
 
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
         if windowsApp_Path is not None:
-            icon_path = f"{windowsApp_Path}\icon.png"
+            icon_path = f"{windowsApp_Path}\{icon_path}"
 
         icon = QIcon(icon_path)
         self.setWindowIcon(icon)

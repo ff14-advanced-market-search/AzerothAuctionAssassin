@@ -1,5 +1,4 @@
 {
-    "EU Commodities": -2,
     "Khadgar": 1080,
     "Bloodhoof": 1080,
     "Dentarg": 1084,
@@ -266,5 +265,6 @@
     "Nethersturm": 3696,
     "Alexstrasza": 3696,
     "Madmortem": 3696,
-    "Proudmoore": 3696
+    "Proudmoore": 3696,
+    "EU Commodities": -2
 }

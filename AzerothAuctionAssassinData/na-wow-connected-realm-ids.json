@@ -1,5 +1,4 @@
 {
-    "NA Commodities": -1,
     "Azjol-Nerub": 121,
     "Muradin": 121,
     "Nordrassil": 121,
@@ -245,5 +244,6 @@
     "Gundrak": 3725,
     "Khaz'goroth": 3726,
     "Aman'Thul": 3726,
-    "Dath'Remar": 3726
+    "Dath'Remar": 3726,
+    "NA Commodities": -1
 }
