@@ -2495,6 +2495,7 @@ class App(QMainWindow):
 
         return True
 
+
 def checking_folders_are_in_place():
     eu_connected_realms = os.path.join(
         os.getcwd(), "AzerothAuctionAssassinData", "eu-wow-connected-realm-ids.json"
