@@ -11,6 +11,7 @@ from utils.api_requests import (
 )
 from utils.bonus_ids import get_bonus_id_sets
 from utils.helpers import get_wow_russian_realm_ids
+from collections import defaultdict
 
 
 class MegaData:
@@ -322,14 +323,28 @@ class MegaData:
             else:
                 print(f"skipping {item_list_name} its not set in file or env var")
                 return []
+
+        # Group items by ilvl
+        ilvl_groups = defaultdict(list)
+        for item in ilvl_info:
+            ilvl_groups[item["ilvl"]].append(item["item_ids"])
+
         DESIRED_ILVL_LIST = []
-        for ilvl_info_single in ilvl_info:
-            snipe_info, min_ilvl = self.__set_desired_ilvl(ilvl_info_single)
-            DESIRED_ILVL_LIST.append(snipe_info)
+        for ilvl, item_id_groups in ilvl_groups.items():
+            # Flatten the list of item ids
+            all_item_ids = [item_id for group in item_id_groups for item_id in group]
+            item_names, item_ids, base_ilvls = get_ilvl_items(ilvl, all_item_ids)
+
+            for item in ilvl_info:
+                if item["ilvl"] == ilvl:
+                    snipe_info, min_ilvl = self.__set_desired_ilvl(
+                        item, item_names, base_ilvls
+                    )
+                    DESIRED_ILVL_LIST.append(snipe_info)
+
         return DESIRED_ILVL_LIST
 
-    def __set_desired_ilvl(self, ilvl_info):
-        # add empty item_ids if not set
+    def __set_desired_ilvl(self, ilvl_info, item_names, base_ilvls):
         if "item_ids" not in ilvl_info.keys():
             ilvl_info["item_ids"] = []
 
@@ -363,12 +378,13 @@ class MegaData:
                 else:
                     raise Exception(f"error in ilvl info '{key}' must be an int")
 
-        # get names and ids of items
-        (
-            snipe_info["item_names"],
-            snipe_info["item_ids"],
-            snipe_info["base_ilvls"],
-        ) = get_ilvl_items(ilvl_info["ilvl"], ilvl_info["item_ids"])
+        snipe_info["item_names"] = {
+            item_id: item_names[item_id] for item_id in ilvl_info["item_ids"]
+        }
+        snipe_info["item_ids"] = set(ilvl_info["item_ids"])
+        snipe_info["base_ilvls"] = {
+            item_id: base_ilvls[item_id] for item_id in ilvl_info["item_ids"]
+        }
 
         return snipe_info, ilvl_info["ilvl"]
 
