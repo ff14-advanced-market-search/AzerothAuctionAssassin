@@ -33,6 +33,13 @@ https://www.patreon.com/indopan
 
 # [Guides](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki)
 
+# [Azeroth Auction Target - Automatic Recommended Snipe Lists](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Azeroth-Auction-Target-%E2%80%90-Automatic-Recommended-Snipe-Lists)
+
+
+
+<img width="550" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/653e383f-c875-4195-878c-b481c03dcb79">
+
+
 - [Video Guides](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Video-Guides)
 - [Installation](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Installation-Guide)
 - [How to update the app](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/How-to-update)
