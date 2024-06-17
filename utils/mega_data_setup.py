@@ -102,7 +102,9 @@ class MegaData:
                 self.DESIRED_ILVL_NAMES[k] = v
 
         # get upload times once from api and then we get it dynamically from each scan
-        self.upload_timers = self.__set_upload_timers()
+        self.upload_timers = {}
+        # # no longer need this it works better without using upload timers from the api
+        # self.upload_timers = self.__set_upload_timers()
 
     #### VARIABLE RELATED FUNCTIONS ####
     @staticmethod
