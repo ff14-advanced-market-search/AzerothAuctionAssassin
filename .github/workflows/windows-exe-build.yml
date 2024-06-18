@@ -112,62 +112,63 @@ jobs:
         asset_name: AzerothAuctionAssassin.exe
         asset_content_type: application/octet-stream
 
-  # build-mac:
-  #   needs: build-windows
-  #   runs-on: macos-latest
+  
+  build-mac:
+    needs: build-windows
+    runs-on: macos-latest
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v2
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-  #   - name: Set up Python
-  #     uses: actions/setup-python@v2
-  #     with:
-  #       python-version: 3.11
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
 
-  #   - name: Install dependencies
-  #     run: pip install -r requirements.txt
+    - name: Install dependencies
+      run: pip install -r requirements.txt
 
-  #   - name: Build macOS executable
-  #     run: |
-  #       python -m pip install pyinstaller
-  #       pyinstaller --onefile --add-data "AzerothAuctionAssassinData:./AzerothAuctionAssassinData" --add-data "utils:./utils" --add-data "icon.png:." --icon=icon.ico AzerothAuctionAssassin.py
-  #       chmod +x ./dist/AzerothAuctionAssassin
+    - name: Build macOS executable
+      run: |
+        python -m pip install pyinstaller
+        pyinstaller --onefile --add-data "AzerothAuctionAssassinData:./AzerothAuctionAssassinData" --add-data "utils:./utils" --add-data "icon.png:." --icon=icon.ico AzerothAuctionAssassin.py
+        chmod +x ./dist/AzerothAuctionAssassin
 
-  #   - name: Decode macOS Certificate
-  #     run: |
-  #       echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
+    - name: Decode macOS Certificate
+      run: |
+        echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.p12
 
-  #   ### broken probably needs a different cert
-  #   # - name: Sign macOS Executable
-  #   #   run: |
-  #   #     security create-keychain -p ""  build.keychain
-  #   #     security default-keychain -s build.keychain
-  #   #     security unlock-keychain -p "" build.keychain
-  #   #     security import certificate.p12 -k build.keychain -P ${{ secrets.CERT_PASSWORD }} -T /usr/bin/codesign
-  #   #     codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/AzerothAuctionAssassin
+    ### broken probably needs a different cert
+    # - name: Sign macOS Executable
+    #   run: |
+    #     security create-keychain -p ""  build.keychain
+    #     security default-keychain -s build.keychain
+    #     security unlock-keychain -p "" build.keychain
+    #     security import certificate.p12 -k build.keychain -P ${{ secrets.CERT_PASSWORD }} -T /usr/bin/codesign
+    #     codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/AzerothAuctionAssassin
 
-  #   # - name: Upload macOS Executable to Release
-  #   #   uses: actions/upload-release-asset@v1
-  #   #   env:
-  #   #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #   #   with:
-  #   #     upload_url: ${{ needs.build-windows.steps.create_release.outputs.upload_url }}
-  #   #     asset_path: ./dist/AzerothAuctionAssassin
-  #   #     asset_name: AzerothAuctionAssassin-macOS
-  #   #     asset_content_type: application/octet-stream
+    # - name: Upload macOS Executable to Release
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ needs.build-windows.steps.create_release.outputs.upload_url }}
+    #     asset_path: ./dist/AzerothAuctionAssassin
+    #     asset_name: AzerothAuctionAssassin-macOS
+    #     asset_content_type: application/octet-stream
 
-  #   # Step to decode Base64 upload URL
-  #   - name: Decode Upload URL
-  #     run: |
-  #       echo "decoded_upload_url=$(echo ${{ needs.build-windows.outputs.upload_url_base64 }} | base64 --decode)" >> $GITHUB_ENV
+    # Step to decode Base64 upload URL
+    - name: Decode Upload URL
+      run: |
+        echo "decoded_upload_url=$(echo ${{ needs.build-windows.outputs.upload_url_base64 }} | base64 --decode)" >> $GITHUB_ENV
 
-  #   - name: Upload macOS Executable to Release
-  #     uses: actions/upload-release-asset@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       upload_url: ${{ env.decoded_upload_url }}
-  #       asset_path: ./dist/AzerothAuctionAssassin
-  #       asset_name: AzerothAuctionAssassin-macOS
-  #       asset_content_type: application/octet-stream
+    - name: Upload macOS Executable to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ env.decoded_upload_url }}
+        asset_path: ./dist/AzerothAuctionAssassin
+        asset_name: AzerothAuctionAssassin-macOS
+        asset_content_type: application/octet-stream
