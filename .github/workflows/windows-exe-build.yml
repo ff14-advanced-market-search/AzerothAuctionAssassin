@@ -1,7 +1,7 @@
 name: Build Windows Executable
 
 env:
-  AAA_VERSION: "1.1.0"
+  AAA_VERSION: "1.1.1"
 
 on:
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
             New-Item -ItemType Directory -Force -Path $pythonEmbeddedDir
         }
         # Download the embedded Python zip
-        curl https://www.python.org/ftp/python/3.11.4/python-3.11.4-embed-win32.zip -o "python.zip"
+        curl https://www.python.org/ftp/python/3.12.1/python-3.12.1-embed-amd64.zip -o "python.zip"
         # Extract the Python zip
         Expand-Archive -Path "python.zip" -DestinationPath $pythonEmbeddedDir -Force
         # Download pip.pyz
@@ -38,7 +38,7 @@ jobs:
         # Install packages from requirements.txt using the embedded Python and pip.pyz
         & "$pythonEmbeddedDir\python.exe" "$pythonEmbeddedDir\pip.pyz" install -r .\requirements.txt --target=".\Lib\site-packages\"
         Remove-Item -Recurse -Force .\python-embedded
-        Remove-Item -Force python.zip
+        Move-Item -Path python.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\python.zip -Force
       shell: pwsh
 
     - name: Zip python packages
@@ -63,7 +63,8 @@ jobs:
 
     - name: update version number
       run: |
-        echo $AAA_VERSION > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+        echo $env:AAA_VERSION > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+      shell: pwsh
 
     - name: Build EXE
       run: |
@@ -111,6 +112,7 @@ jobs:
         asset_path: .\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe
         asset_name: AzerothAuctionAssassin.exe
         asset_content_type: application/octet-stream
+
 
   # build-mac:
   #   needs: build-windows

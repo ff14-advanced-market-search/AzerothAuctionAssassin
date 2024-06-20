@@ -120,7 +120,7 @@ namespace AzerothAuctionAssassin
 
 
             string downloadPath = Path.Combine(Path.GetTempPath(), "python.zip");
-            File.WriteAllBytes(downloadPath, Properties.Resources.python_3_11_4_embed_win32);
+            File.WriteAllBytes(downloadPath, Properties.Resources.python);
 
 
             UnzipToFolder(downloadPath, pythonInstallPath);
