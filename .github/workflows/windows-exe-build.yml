@@ -63,7 +63,8 @@ jobs:
 
     - name: update version number
       run: |
-        echo 1.2.1 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+        echo $env:AAA_VERSION > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+      shell: pwsh
 
     - name: Build EXE
       run: |
