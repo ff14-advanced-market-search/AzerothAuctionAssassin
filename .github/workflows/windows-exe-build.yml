@@ -30,7 +30,7 @@ jobs:
             New-Item -ItemType Directory -Force -Path $pythonEmbeddedDir
         }
         # Download the embedded Python zip
-        curl https://www.python.org/ftp/python/3.12.1/python-3.12.1-embed-win64.zip -o "python.zip"
+        curl https://www.python.org/ftp/python/3.12.1/python-3.12.1-embed-amd64.zip -o "python.zip"
         # Extract the Python zip
         Expand-Archive -Path "python.zip" -DestinationPath $pythonEmbeddedDir -Force
         # Download pip.pyz
