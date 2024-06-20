@@ -1,7 +1,7 @@
 name: Build Windows Executable
 
 env:
-  AAA_VERSION: "1.2.0"
+  AAA_VERSION: "1.2.1"
 
 on:
   workflow_dispatch:
@@ -63,7 +63,7 @@ jobs:
 
     - name: update version number
       run: |
-        echo 1.2.0 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+        echo 1.2.1 > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
 
     - name: Build EXE
       run: |
