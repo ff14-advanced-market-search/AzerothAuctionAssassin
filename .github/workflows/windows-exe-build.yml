@@ -38,7 +38,7 @@ jobs:
         # Install packages from requirements.txt using the embedded Python and pip.pyz
         & "$pythonEmbeddedDir\python.exe" "$pythonEmbeddedDir\pip.pyz" install -r .\requirements.txt --target=".\Lib\site-packages\"
         Remove-Item -Recurse -Force .\python-embedded
-         Move-Item -Path python.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\python.zip -Force
+        Move-Item -Path python.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\python.zip -Force
       shell: pwsh
 
     - name: Zip python packages
