@@ -125,7 +125,10 @@ class Item_Statistics(QThread):
     completed = pyqtSignal(pd.DataFrame)
 
     def __init__(self):
-        super(Item_Statistics, self).__init__()
+        # # old way
+        # super(Item_Statistics, self).__init__()
+        # # coderabbit says do this
+        super().__init__()
 
     def run(self):
         item_statistics = pd.DataFrame(
