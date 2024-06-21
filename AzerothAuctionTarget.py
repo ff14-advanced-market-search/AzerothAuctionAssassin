@@ -1058,9 +1058,6 @@ class App(QMainWindow):
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
 
-        if os.path.exists(self.path_to_data):
-            self.settings_page.check_config_file(self.path_to_data)
-
         if os.path.exists(self.path_to_desired_items):
             self.item_page.items_list = json.load(open(self.path_to_desired_items))
             for key, value in self.item_page.items_list.items():
