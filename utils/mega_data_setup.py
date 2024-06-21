@@ -328,10 +328,16 @@ class MegaData:
 
         # Group items by ilvl
         ilvl_groups = defaultdict(list)
+        broad_groups = []
         for item in ilvl_info:
-            ilvl_groups[item["ilvl"]].append(item["item_ids"])
+            if len(item["item_ids"]) == 0:
+                broad_groups.append(item)
+            else:
+                ilvl_groups[item["ilvl"]].append(item["item_ids"])
 
         DESIRED_ILVL_LIST = []
+
+        # groups with user defined ilvls
         for ilvl, item_id_groups in ilvl_groups.items():
             # Flatten the list of item ids
             all_item_ids = [item_id for group in item_id_groups for item_id in group]
@@ -343,6 +349,18 @@ class MegaData:
                         item, item_names, base_ilvls
                     )
                     DESIRED_ILVL_LIST.append(snipe_info)
+
+        # broad groups
+        if broad_groups:
+            # with a broad group we dont care about ilvl or item_ids
+            # its the same generic info for all of them
+            item_names, item_ids, base_ilvls = get_ilvl_items()
+            # add the item names an base ilvl to each broad group
+            for item in broad_groups:
+                snipe_info, min_ilvl = self.__set_desired_ilvl(
+                    item, item_names, base_ilvls
+                )
+                DESIRED_ILVL_LIST.append(snipe_info)
 
         return DESIRED_ILVL_LIST
 
@@ -380,13 +398,9 @@ class MegaData:
                 else:
                     raise Exception(f"error in ilvl info '{key}' must be an int")
 
-        snipe_info["item_names"] = {
-            item_id: item_names[item_id] for item_id in ilvl_info["item_ids"]
-        }
-        snipe_info["item_ids"] = set(ilvl_info["item_ids"])
-        snipe_info["base_ilvls"] = {
-            item_id: base_ilvls[item_id] for item_id in ilvl_info["item_ids"]
-        }
+        snipe_info["item_names"] = item_names
+        snipe_info["item_ids"] = set(item_names.keys())
+        snipe_info["base_ilvls"] = base_ilvls
 
         return snipe_info, ilvl_info["ilvl"]
 
