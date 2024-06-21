@@ -27,7 +27,7 @@ from sys import exit
 import requests
 import os
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import  QThread, pyqtSignal, QFile, QTextStream
+from PyQt5.QtCore import QThread, pyqtSignal, QFile, QTextStream
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (
     QGridLayout,
@@ -568,6 +568,7 @@ class HomePage(QWidget):
         self.guides_link.setFont((QtGui.QFont("Arial", 12, QtGui.QFont.Bold)))
         self.guides_link.setOpenExternalLinks(True)
         self.layout.addWidget(self.guides_link, 5, 0)
+
 
 class ItemPage(QWidget):
     def __init__(self):
