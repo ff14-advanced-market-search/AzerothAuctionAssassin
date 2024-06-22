@@ -1,7 +1,7 @@
 name: Build Windows Executable
 
 env:
-  AAA_VERSION: "1.1.6"
+  AAA_VERSION: "1.1.7"
 
 on:
   workflow_dispatch:
@@ -125,7 +125,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.11
+        python-version: 3.12
 
     - name: Install dependencies
       run: pip install -r requirements.txt
