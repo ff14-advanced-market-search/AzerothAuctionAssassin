@@ -398,9 +398,18 @@ class MegaData:
                 else:
                     raise Exception(f"error in ilvl info '{key}' must be an int")
 
-        snipe_info["item_names"] = item_names
-        snipe_info["item_ids"] = set(item_names.keys())
-        snipe_info["base_ilvls"] = base_ilvls
+        if ilvl_info["item_ids"] == []:
+            snipe_info["item_names"] = item_names
+            snipe_info["item_ids"] = set(item_names.keys())
+            snipe_info["base_ilvls"] = base_ilvls
+        else:
+            snipe_info["item_names"] = {
+                item_id: item_names[item_id] for item_id in ilvl_info["item_ids"]
+            }
+            snipe_info["item_ids"] = set(ilvl_info["item_ids"])
+            snipe_info["base_ilvls"] = {
+                item_id: base_ilvls[item_id] for item_id in ilvl_info["item_ids"]
+            }
 
         return snipe_info, ilvl_info["ilvl"]
 
