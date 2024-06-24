@@ -8,6 +8,9 @@ This tool enables you to quickly find the most amazing deals **across all realms
 
 [Older Versions available here](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/releases)
 
+If the EXE doesnt install right try the [Installation with python](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Install-with-Python).
+
+
 # Desktop GUI 
 
 <img width="500" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/9f1c7e15-6b07-4b56-83ba-b14b998d6ec7">
