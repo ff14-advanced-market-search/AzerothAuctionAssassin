@@ -21,6 +21,8 @@ Latest version:
 
 <img width="543" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/c3d93a48-9c5f-4ab4-9d9b-1dbcbcce0d4e">
 
+<img width="1013" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/760e8491-1861-4ee5-91ef-ffcddacbac43">
+
 Old message format, but cheap Lariat Sniping:
 
 <img width="601" alt="image" src="https://user-images.githubusercontent.com/17516896/224507162-53513e8a-69ab-41e2-a5d5-ea4e51a9fc89.png">
