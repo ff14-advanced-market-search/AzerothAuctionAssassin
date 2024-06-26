@@ -15,13 +15,13 @@ If the EXE doesnt install right try the [Installation with python](https://githu
 
 <img width="500" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/9f1c7e15-6b07-4b56-83ba-b14b998d6ec7">
 
+<img width="500" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/760e8491-1861-4ee5-91ef-ffcddacbac43">
+
 # Alert Example
 
 Latest version:
 
 <img width="543" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/c3d93a48-9c5f-4ab4-9d9b-1dbcbcce0d4e">
-
-<img width="1013" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/760e8491-1861-4ee5-91ef-ffcddacbac43">
 
 Old message format, but cheap Lariat Sniping:
 
