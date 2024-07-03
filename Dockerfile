@@ -3,7 +3,7 @@
 # Alpine is chosen for its small footprint
 # compared to Ubuntu
 
-FROM python:slim-bookworm
+FROM python:3.12.4-slim-bookworm
 
 # install packages
 RUN pip3 install tenacity requests PyQt5 \
