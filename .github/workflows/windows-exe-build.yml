@@ -1,7 +1,7 @@
 name: Build Windows Executable
 
 env:
-  AAA_VERSION: "1.1.5"
+  AAA_VERSION: "1.1.8"
 
 on:
   workflow_dispatch:
@@ -22,71 +22,71 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2  #using Microsoft's setup-msbuild action
 
-    - name: Install python packages
-      run: |
-        # Create the python-embedded directory if it doesn't exist
-        $pythonEmbeddedDir = ".\python-embedded"
-        If (-Not (Test-Path $pythonEmbeddedDir)) {
-            New-Item -ItemType Directory -Force -Path $pythonEmbeddedDir
-        }
-        # Download the embedded Python zip
-        curl https://www.python.org/ftp/python/3.12.1/python-3.12.1-embed-amd64.zip -o "python.zip"
-        # Extract the Python zip
-        Expand-Archive -Path "python.zip" -DestinationPath $pythonEmbeddedDir -Force
-        # Download pip.pyz
-        curl https://bootstrap.pypa.io/pip/pip.pyz -o "$pythonEmbeddedDir\pip.pyz"
-        # Install packages from requirements.txt using the embedded Python and pip.pyz
-        & "$pythonEmbeddedDir\python.exe" "$pythonEmbeddedDir\pip.pyz" install -r .\requirements.txt --target=".\Lib\site-packages\"
-        Remove-Item -Recurse -Force .\python-embedded
-        Move-Item -Path python.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\python.zip -Force
-      shell: pwsh
+    # - name: Install python packages
+    #   run: |
+    #     # Create the python-embedded directory if it doesn't exist
+    #     $pythonEmbeddedDir = ".\python-embedded"
+    #     If (-Not (Test-Path $pythonEmbeddedDir)) {
+    #         New-Item -ItemType Directory -Force -Path $pythonEmbeddedDir
+    #     }
+    #     # Download the embedded Python zip
+    #     curl https://www.python.org/ftp/python/3.12.1/python-3.12.1-embed-amd64.zip -o "python.zip"
+    #     # Extract the Python zip
+    #     Expand-Archive -Path "python.zip" -DestinationPath $pythonEmbeddedDir -Force
+    #     # Download pip.pyz
+    #     curl https://bootstrap.pypa.io/pip/pip.pyz -o "$pythonEmbeddedDir\pip.pyz"
+    #     # Install packages from requirements.txt using the embedded Python and pip.pyz
+    #     & "$pythonEmbeddedDir\python.exe" "$pythonEmbeddedDir\pip.pyz" install -r .\requirements.txt --target=".\Lib\site-packages\"
+    #     Remove-Item -Recurse -Force .\python-embedded
+    #     Move-Item -Path python.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\python.zip -Force
+    #   shell: pwsh
 
-    - name: Zip python packages
-      run: |
-        Compress-Archive -Path .\Lib -DestinationPath Lib.zip
-        Move-Item -Path Lib.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\Lib.zip -Force
-        Remove-Item -Recurse -Force .\Lib
+    # - name: Zip python packages
+    #   run: |
+    #     Compress-Archive -Path .\Lib -DestinationPath Lib.zip
+    #     Move-Item -Path Lib.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\Lib.zip -Force
+    #     Remove-Item -Recurse -Force .\Lib
 
-    - name: Zip Project Files
-      run: |
-        $DirToCompress = ".\"
-        $ZipFileResult = "..\app.zip"
-        $DirsToExclude = @("AzerothAuctionAssassin-windows", ".git", ".github", "__pycache__")
-        $FilesToExclude = @(".gitignore")
-        # Get all directories that are not in the exclude list and compress them
-        Get-ChildItem -Path $DirToCompress -Directory | Where-Object { $_.Name -notin $DirsToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
-        # Get all Files that are not in the exclude list and compress them
-        Get-ChildItem -Path $DirToCompress -File | Where-Object { $_.Name -notin $FilesToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
+    # - name: Zip Project Files
+    #   run: |
+    #     $DirToCompress = ".\"
+    #     $ZipFileResult = "..\app.zip"
+    #     $DirsToExclude = @("AzerothAuctionAssassin-windows", ".git", ".github", "__pycache__")
+    #     $FilesToExclude = @(".gitignore")
+    #     # Get all directories that are not in the exclude list and compress them
+    #     Get-ChildItem -Path $DirToCompress -Directory | Where-Object { $_.Name -notin $DirsToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
+    #     # Get all Files that are not in the exclude list and compress them
+    #     Get-ChildItem -Path $DirToCompress -File | Where-Object { $_.Name -notin $FilesToExclude } | Compress-Archive -DestinationPath $ZipFileResult -Update
         
-        Move-Item -Path ..\app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
-      shell: pwsh
+    #     Move-Item -Path ..\app.zip -Destination AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\app.zip -Force
+    #   shell: pwsh
 
-    - name: update version number
-      run: |
-        echo $env:AAA_VERSION > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
-      shell: pwsh
+    # - name: update version number
+    #   run: |
+    #     echo $env:AAA_VERSION > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
+    #   shell: pwsh
 
-    - name: Build EXE
-      run: |
-        msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln -restore -t:Publish /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
+    # - name: Build EXE
+    #   run: |
+    #     msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln -restore -t:Publish /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
 
-    - name: Decode Certificate
-      run: |
-        $cert_content = '${{ secrets.CERT_BASE64 }}'
-        $cert_bytes = [Convert]::FromBase64String($cert_content)
-        $cert_path = "certificate.pfx"
-        [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
-      shell: pwsh
+    # - name: Decode Certificate
+    #   run: |
+    #     $cert_content = '${{ secrets.CERT_BASE64 }}'
+    #     $cert_bytes = [Convert]::FromBase64String($cert_content)
+    #     $cert_path = "certificate.pfx"
+    #     [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
+    #   shell: pwsh
 
-    - name: Sign Executable
-      run: |
-        $cert_path = "certificate.pfx"
-        $password = "${{ secrets.CERT_PASSWORD }}"
-        $timestamp_url = "http://timestamp.digicert.com"
-        $executable_path = ".\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe"
-        $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
-        & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
-      shell: pwsh
+    # - name: Sign Executable
+    #   run: |
+    #     $cert_path = "certificate.pfx"
+    #     $password = "${{ secrets.CERT_PASSWORD }}"
+    #     $timestamp_url = "http://timestamp.digicert.com"
+    #     $executable_path = ".\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe"
+    #     $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
+    #     & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
+    #   shell: pwsh
 
     - name: Create Release
       id: create_release
@@ -128,7 +128,7 @@ jobs:
         python-version: 3.11
 
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements.in
 
     - name: Build macOS executable
       run: |
