@@ -103,15 +103,15 @@ jobs:
       id: b64encode_upload_url
       run: echo "::set-output name=upload_url_base64::$(echo -n '${{ steps.create_release.outputs.upload_url }}' | base64 --wrap=0)"
 
-    - name: Upload Executable to Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: .\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe
-        asset_name: AzerothAuctionAssassin.exe
-        asset_content_type: application/octet-stream
+    # - name: Upload Executable to Release
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: .\AzerothAuctionAssassin-windows\AzerothAuctionAssassin\bin\Release\net8.0-windows\publish\win-x86\AzerothAuctionAssassin.exe
+    #     asset_name: AzerothAuctionAssassin.exe
+    #     asset_content_type: application/octet-stream
 
 
   build-mac:
