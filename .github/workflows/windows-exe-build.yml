@@ -1,7 +1,7 @@
 name: Build Windows Executable
 
 env:
-  AAA_VERSION: "1.1.5"
+  AAA_VERSION: "1.1.6"
 
 on:
   workflow_dispatch:
@@ -128,7 +128,7 @@ jobs:
         python-version: 3.11
 
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements.in
 
     - name: Build macOS executable
       run: |
