@@ -1,10 +1,8 @@
 reviews:
   enabled: true
   review_status: true
-  branches:
-    include:
-      - '*'
-    exclude:
-      - 'main'  # Adjust this to your default branch if needed
+  auto_review:
+    enabled: true
 
 # You can add more configurations as needed
+
