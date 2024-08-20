@@ -1,0 +1,10 @@
+reviews:
+  enabled: true
+  review_status: true
+  branches:
+    include:
+      - '*'
+    exclude:
+      - 'main'  # Adjust this to your default branch if needed
+
+# You can add more configurations as needed
