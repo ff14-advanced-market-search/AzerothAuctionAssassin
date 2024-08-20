@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.2.0"
+AAA_VERSION = "1.2.1"
 
 windowsApp_Path = None
 try:
@@ -660,6 +660,14 @@ class App(QMainWindow):
         self.erase_item_data_button.setToolTip("Erase your desired_items.json config")
         self.erase_item_data_button.clicked.connect(self.erase_item_data)
         self.item_page_layout.addWidget(self.erase_item_data_button, 18, 0, 1, 1)
+
+        # Add the button to convert AAA JSON to PBS
+        self.convert_to_pbs_button = QPushButton("Convert AAA to PBS")
+        self.convert_to_pbs_button.setToolTip(
+            "Convert your AAA JSON list to PBS format."
+        )
+        self.convert_to_pbs_button.clicked.connect(self.convert_to_pbs)
+        self.item_page_layout.addWidget(self.convert_to_pbs_button, 18, 1, 1, 1)
 
     def make_ilvl_page(self, ilvl_page):
 
@@ -1606,7 +1614,7 @@ class App(QMainWindow):
                 item_name = parts[0].strip().lower()
                 if len(parts) > 1:
                     price_parts = parts[1].split(";")
-                    item_price = (
+                    item_price = float(
                         float(price_parts[-1]) if price_parts[-1].isdigit() else None
                     )
                     pbs_prices[item_name] = item_price
@@ -1642,6 +1650,42 @@ class App(QMainWindow):
             QMessageBox.critical(self, "Invalid Value", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
+
+    def convert_to_pbs(self):
+        try:
+            # Assuming `self.items_list` is the AAA JSON list of items and prices
+            pbs_string = self.convert_aaa_json_to_pbs(self.items_list)
+
+            # Copy to clipboard
+            clipboard = QApplication.clipboard()
+            clipboard.setText(pbs_string)
+
+            QMessageBox.information(
+                self, "Success", "Converted PBS string copied to clipboard."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Conversion Error", str(e))
+
+    def convert_aaa_json_to_pbs(self, json_data):
+        # Prepare the PBS list
+        pbs_list = []
+
+        for item_id, price in json_data.items():
+            # Find the item name by matching the itemID in item_statistics
+            item_name = self.item_statistics.loc[
+                self.item_statistics["itemID"] == int(item_id), "itemName"
+            ].values[0]
+
+            # Construct the PBS entry
+            pbs_entry = f"Snipe^{item_name};;0;0;0;0;0;0;0;{int(float(price))};;#;;"
+
+            # Append the PBS entry to the list
+            pbs_list.append(pbs_entry)
+
+        # Join the PBS entries into a single string
+        pbs_string = "".join(pbs_list)
+
+        return pbs_string
 
     def pet_list_double_clicked(self, item):
         item_split = item.text().replace(" ", "").split(":")
