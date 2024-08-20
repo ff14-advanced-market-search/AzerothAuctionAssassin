@@ -1595,6 +1595,7 @@ class App(QMainWindow):
 
         try:
             # open and read the text file
+            # ref: https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/issues/122
             with open(pathname, "r") as file:
                 pbs_names = [
                     item.split(";;")[0].lower().replace("\n", "")
