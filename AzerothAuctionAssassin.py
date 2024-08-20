@@ -1643,6 +1643,25 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
 
+    def convert_aaa_json_to_pbs(json_data, item_statistics):
+        # Prepare the PBS list
+        pbs_list = []
+
+        for item_id, price in json_data.items():
+            # Find the item name by matching the itemID in item_statistics
+            item_name = item_statistics.loc[item_statistics['itemID'] == int(item_id), 'itemName'].values[0]
+
+            # Construct the PBS entry
+            pbs_entry = f"Snipe^{item_name};;0;0;0;0;0;0;0;{int(price)};;#;;"
+
+            # Append the PBS entry to the list
+            pbs_list.append(pbs_entry)
+
+        # Join the PBS entries into a single string
+        pbs_string = ''.join(pbs_list)
+
+        return pbs_string
+
     def pet_list_double_clicked(self, item):
         item_split = item.text().replace(" ", "").split(":")
         pet_id = item_split[1].split(",")[0]
