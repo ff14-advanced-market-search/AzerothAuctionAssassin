@@ -661,6 +661,12 @@ class App(QMainWindow):
         self.erase_item_data_button.clicked.connect(self.erase_item_data)
         self.item_page_layout.addWidget(self.erase_item_data_button, 18, 0, 1, 1)
 
+        # Add the button to convert AAA JSON to PBS
+        self.convert_to_pbs_button = QPushButton("Convert AAA to PBS")
+        self.convert_to_pbs_button.setToolTip("Convert your AAA JSON list to PBS format.")
+        self.convert_to_pbs_button.clicked.connect(self.convert_to_pbs)
+        self.item_page_layout.addWidget(self.convert_to_pbs_button, 18, 1, 1, 1)
+
     def make_ilvl_page(self, ilvl_page):
 
         self.ilvl_item_input = QLineEdit(ilvl_page)
@@ -1643,13 +1649,26 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
 
-    def convert_aaa_json_to_pbs(json_data, item_statistics):
+    def convert_to_pbs(self):
+        try:
+            # Assuming `self.items_list` is the AAA JSON list of items and prices
+            pbs_string = self.convert_aaa_json_to_pbs(self.items_list)
+
+            # Copy to clipboard
+            clipboard = QApplication.clipboard()
+            clipboard.setText(pbs_string)
+
+            QMessageBox.information(self, "Success", "Converted PBS string copied to clipboard.")
+        except Exception as e:
+            QMessageBox.critical(self, "Conversion Error", str(e))
+
+    def convert_aaa_json_to_pbs(self, json_data):
         # Prepare the PBS list
         pbs_list = []
 
         for item_id, price in json_data.items():
             # Find the item name by matching the itemID in item_statistics
-            item_name = item_statistics.loc[item_statistics['itemID'] == int(item_id), 'itemName'].values[0]
+            item_name = self.item_statistics.loc[self.item_statistics['itemID'] == int(item_id), 'itemName'].values[0]
 
             # Construct the PBS entry
             pbs_entry = f"Snipe^{item_name};;0;0;0;0;0;0;0;{int(price)};;#;;"
