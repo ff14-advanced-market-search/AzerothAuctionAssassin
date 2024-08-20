@@ -1596,24 +1596,48 @@ class App(QMainWindow):
         try:
             # open and read the text file
             with open(pathname, "r") as file:
-                pbs_names = [
-                    item.split(";;")[0].lower().replace("\n", "")
-                    for item in file.read().split("^")
-                ]
+                pbs_data = file.read().split("^")
 
-            temp_items_list = {
-                str(item["itemID"]): item["desiredPrice"]
-                for index, item in self.item_statistics.iterrows()
-                if item["itemName"].lower() in pbs_names
-            }
+            # Create a dictionary to map item names to prices from the PBS data
+            pbs_prices = {}
+            for item in pbs_data:
+                # parts will be like ['Skullflame shield', '0;0;0;0;0;50000', '#', '']
+                parts = item.split(";;")
+                item_name = parts[0].strip().lower()
+                if len(parts) > 1:
+                    price_parts = parts[1].split(";")
+                    item_price = (
+                        float(price_parts[-1]) if price_parts[-1].isdigit() else None
+                    )
+                    pbs_prices[item_name] = item_price
+                else:
+                    pbs_prices[item_name] = None
+
+            temp_items_list = {}
+            for _index, item in self.item_statistics.iterrows():
+                item_name_lower = item["itemName"].lower()
+                if item_name_lower in pbs_prices:
+                    price = pbs_prices[item_name_lower]
+                    if price is not None:
+                        temp_items_list[str(item["itemID"])] = pbs_prices[
+                            item_name_lower
+                        ]
+                    else:
+                        # Use default behavior if price is not set in PBS
+                        default_price = item["desiredPrice"]
+                        discount_percent = int(self.discount_percent.text()) / 100
+                        discount_price = round(
+                            float(default_price) * discount_percent, 4
+                        )
+                        temp_items_list[str(item["itemID"])] = discount_price
+
             for key, value in temp_items_list.items():
-                discount_percent = int(self.discount_percent.text()) / 100
-                discount_price = round(float(value) * discount_percent, 4)
                 self.item_list_display.insertItem(
                     self.item_list_display.count(),
-                    f"Item ID: {key}, Price: {discount_price}",
+                    f"Item ID: {key}, Price: {value}",
                 )
-                self.items_list[str(key)] = discount_price
+                self.items_list[str(key)] = value
+
         except ValueError as ve:
             QMessageBox.critical(self, "Invalid Value", str(ve))
         except Exception as e:
