@@ -1,8 +1,7 @@
 reviews:
   enabled: true
   review_status: true
-  auto_review:
-    enabled: true
-
-# You can add more configurations as needed
-
+  branches:
+    include:
+      - '*'
+    exclude: []
