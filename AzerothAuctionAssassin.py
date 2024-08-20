@@ -1674,7 +1674,12 @@ class App(QMainWindow):
             # Find the item name by matching the itemID in item_statistics
             item_name = self.item_statistics.loc[
                 self.item_statistics["itemID"] == int(item_id), "itemName"
-            ].values[0]
+            ]
+
+            # not sure what up but sometimes we dont find a name i guess
+            if item_name.empty:
+                continue
+            item_name = item_name.iloc[0]
 
             # Construct the PBS entry
             pbs_entry = f"Snipe^{item_name};;0;0;0;0;0;0;0;{int(float(price))};;#;;"
