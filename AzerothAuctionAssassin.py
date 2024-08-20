@@ -1614,7 +1614,7 @@ class App(QMainWindow):
                     pbs_prices[item_name] = None
 
             temp_items_list = {}
-            for index, item in self.item_statistics.iterrows():
+            for _index, item in self.item_statistics.iterrows():
                 item_name_lower = item["itemName"].lower()
                 if item_name_lower in pbs_prices:
                     price = pbs_prices[item_name_lower]
