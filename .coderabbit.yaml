@@ -3,5 +3,5 @@ reviews:
   review_status: true
   branches:
     include:
-      - '*'
+      - '.*'
     exclude: []
