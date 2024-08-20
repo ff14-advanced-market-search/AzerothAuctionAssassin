@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.1.5"
+AAA_VERSION = "1.2.0"
 
 windowsApp_Path = None
 try:
