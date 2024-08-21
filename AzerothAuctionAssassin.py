@@ -1595,6 +1595,7 @@ class App(QMainWindow):
             QMessageBox.critical(self, "Unknown Error", str(e))
 
     def import_pbs_data(self):
+        # instead of a file allow users to paste the string in
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
             return
