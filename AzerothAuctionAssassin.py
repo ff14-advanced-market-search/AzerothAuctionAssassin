@@ -1571,18 +1571,18 @@ class App(QMainWindow):
         try:
             with open(pathname) as file:
                 self.items_list.update(json.load(file))
-            for key, value in self.items_list.items():
-                if not (1 <= int(key) <= 500000):
+            for item_id, price in self.items_list.items():
+                if not (1 <= int(item_id) <= 500000):
                     raise ValueError(
-                        f"Invalid item ID {key}.\nIDs must be integers between 1-500,000."
+                        f"Invalid item ID {item_id}.\nIDs must be integers between 1-500,000."
                     )
-                if not (0 <= int(value) <= 10000000):
+                if not (0 <= float(price) <= 10000000):
                     raise ValueError(
-                        f"Invalid price {value} for item ID {key}.\nPrices must be integers between 0-10,000,000."
+                        f"Invalid price {price} for item ID {item_id}.\nPrices must be integers between 0-10,000,000."
                     )
                 self.item_list_display.insertItem(
                     self.item_list_display.count(),
-                    f"Item ID: {key}, Price: {value}",
+                    f"Item ID: {item_id}, Price: {price}",
                 )
 
         except json.JSONDecodeError:
@@ -1719,7 +1719,7 @@ class App(QMainWindow):
 
         try:
             pet_id_int = int(pet_id)
-            pet_price_int = int(pet_price)
+            pet_price_int = float(pet_price)
         except ValueError:
             QMessageBox.critical(
                 self, "Invalid Input", "Pet ID and Price should be numbers."
@@ -1784,17 +1784,17 @@ class App(QMainWindow):
         try:
             with open(pathname) as file:
                 self.pet_list.update(json.load(file))
-            for key, value in self.pet_list.items():
-                if not (1 <= int(key) <= 10000):
+            for pet_id, price in self.pet_list.items():
+                if not (1 <= int(pet_id) <= 10000):
                     raise ValueError(
-                        f"Invalid pet ID {key}.\nIDs must be integers between 1-500,000."
+                        f"Invalid pet ID {pet_id}.\nIDs must be integers between 1-500,000."
                     )
-                if not (1 <= int(value) <= 10000000):
+                if not (1 <= int(price) <= 10000000):
                     raise ValueError(
-                        f"Invalid price {value} for pet ID {key}.\nPrices must be integers between 1-10,000,000."
+                        f"Invalid price {price} for pet ID {pet_id}.\nPrices must be integers between 1-10,000,000."
                     )
                 self.pet_list_display.insertItem(
-                    self.pet_list_display.count(), f"Pet ID: {key}, Price: {value}"
+                    self.pet_list_display.count(), f"Pet ID: {pet_id}, Price: {price}"
                 )
         except json.JSONDecodeError:
             QMessageBox.critical(
