@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.2.1"
+AAA_VERSION = "1.2.2"
 
 windowsApp_Path = None
 try:
@@ -46,6 +46,7 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QWidget,
     QScrollArea,
+    QInputDialog,
 )
 
 if sys.platform == "win32":
@@ -1595,16 +1596,18 @@ class App(QMainWindow):
             QMessageBox.critical(self, "Unknown Error", str(e))
 
     def import_pbs_data(self):
-        pathname = QFileDialog().getOpenFileName(self)[0]
-        if not pathname or pathname == "":
+        # Open a dialog to allow users to paste the PBS data
+        text, ok = QInputDialog.getMultiLineText(
+            self, "Import PBS Data", "Paste your PBS data here:"
+        )
+        if not ok or not text.strip():
             return
 
         self.item_list_display.clear()
 
         try:
-            # open and read the text file
-            with open(pathname, "r") as file:
-                pbs_data = file.read().split("^")
+            # Process the pasted PBS data
+            pbs_data = text.split("^")
 
             # Create a dictionary to map item names to prices from the PBS data
             pbs_prices = {}
