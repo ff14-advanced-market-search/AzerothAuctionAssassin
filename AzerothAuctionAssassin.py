@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.2.2"
+AAA_VERSION = "1.2.3"
 
 windowsApp_Path = None
 try:
@@ -741,9 +741,9 @@ class App(QMainWindow):
         self.import_ilvl_data_button.clicked.connect(self.import_ilvl_data)
         self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 11, 1, 1, 2)
 
-        self.erase_ilvl_data_button = QPushButton("erase Desired ILvl List Data")
+        self.erase_ilvl_data_button = QPushButton("Erase Desired ILvl List Data")
         self.erase_ilvl_data_button.setToolTip(
-            "erase your desired_ilvl_list.json config"
+            "Erase your desired_ilvl_list.json config"
         )
         self.erase_ilvl_data_button.clicked.connect(self.erase_ilvl_data)
         self.ilvl_page_layout.addWidget(self.erase_ilvl_data_button, 12, 1, 1, 2)
@@ -1407,8 +1407,16 @@ class App(QMainWindow):
                     return
 
     def erase_ilvl_data(self):
-        self.ilvl_list_display.clear()
-        self.ilvl_list = []
+        reply = QMessageBox.question(
+            self,
+            "Confirm Reset",
+            "Are you sure you want to reset all data? This action cannot be undone.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            self.ilvl_list_display.clear()
+            self.ilvl_list = []
 
     def import_ilvl_data(self):
         pathname = QFileDialog().getOpenFileName(self)[0]
@@ -1559,8 +1567,16 @@ class App(QMainWindow):
                     return
 
     def erase_item_data(self):
-        self.item_list_display.clear()
-        self.items_list = {}
+        reply = QMessageBox.question(
+            self,
+            "Confirm Reset",
+            "Are you sure you want to reset all data? This action cannot be undone.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            self.item_list_display.clear()
+            self.items_list = {}
 
     def import_item_data(self):
         pathname = QFileDialog().getOpenFileName(self)[0]
@@ -1774,8 +1790,16 @@ class App(QMainWindow):
                     return
 
     def erase_pet_data(self):
-        self.pet_list_display.clear()
-        self.pet_list = {}
+        reply = QMessageBox.question(
+            self,
+            "Confirm Reset",
+            "Are you sure you want to reset all data? This action cannot be undone.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            self.pet_list_display.clear()
+            self.pet_list = {}
 
     def import_pet_data(self):
         pathname = QFileDialog().getOpenFileName(self)[0]
@@ -1814,32 +1838,40 @@ class App(QMainWindow):
             return
         self.check_config_file(pathname)
 
-    # https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/issues/116
     def reset_app_data(self):
-        self.ilvl_list_display.clear()
-        self.pet_list_display.clear()
-        self.item_list_display.clear()
+        reply = QMessageBox.question(
+            self,
+            "Confirm Reset",
+            "Are you sure you want to reset all data? This action cannot be undone.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
 
-        self.discord_webhook_input.setText(""),
-        self.wow_client_id_input.setText(""),
-        self.wow_client_secret_input.setText(""),
-        self.authentication_token.setText(""),
-        self.show_bid_prices.setChecked(False),
-        self.number_of_mega_threads.setText("48"),
-        self.wow_head_link.setChecked(False),
-        self.no_links.setChecked(False),
-        self.discount_percent.setText("10"),
-        self.russian_realms.setChecked(True),
-        self.refresh_alerts.setChecked(True),
-        self.scan_time_min.setText("1"),
-        self.scan_time_max.setText("3"),
-        self.debug_mode.setChecked(False)
+        if reply == QMessageBox.Yes:
+            self.ilvl_list_display.clear()
+            self.pet_list_display.clear()
+            self.item_list_display.clear()
 
-        self.pet_list = {}
-        self.items_list = {}
-        self.ilvl_list = []
+            self.discord_webhook_input.setText(""),
+            self.wow_client_id_input.setText(""),
+            self.wow_client_secret_input.setText(""),
+            self.authentication_token.setText(""),
+            self.show_bid_prices.setChecked(False),
+            self.number_of_mega_threads.setText("48"),
+            self.wow_head_link.setChecked(False),
+            self.no_links.setChecked(False),
+            self.discount_percent.setText("10"),
+            self.russian_realms.setChecked(True),
+            self.refresh_alerts.setChecked(True),
+            self.scan_time_min.setText("1"),
+            self.scan_time_max.setText("3"),
+            self.debug_mode.setChecked(False)
 
-        self.save_data_to_json()
+            self.pet_list = {}
+            self.items_list = {}
+            self.ilvl_list = []
+
+            self.save_data_to_json()
 
     def validate_application_settings(self):
         wow_region = self.wow_region.currentText()
