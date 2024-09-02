@@ -1814,6 +1814,7 @@ class App(QMainWindow):
             return
         self.check_config_file(pathname)
 
+    # https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/issues/116
     def reset_app_data(self):
         self.ilvl_list_display.clear()
         self.pet_list_display.clear()
