@@ -1623,7 +1623,7 @@ class App(QMainWindow):
 
         try:
             # Process the pasted PBS data
-            pbs_data = text.split("^")
+            pbs_data = text.replace("\n", "").replace("\r", "").split("^")
 
             # Create a dictionary to map item names to prices from the PBS data
             pbs_prices = {}
@@ -1631,9 +1631,12 @@ class App(QMainWindow):
                 # parts will be like ['Skullflame shield', '0;0;0;0;0;50000', '#', '']
                 parts = item.split(";;")
                 item_name = parts[0].strip().lower()
+                # strip off " if the name begins and ends with "
+                if item_name[0] == '"' and item_name[-1] == '"':
+                    item_name = item_name[1:-1]
                 if len(parts) > 1:
                     price_parts = parts[1].split(";")
-                    item_price = float(
+                    item_price = (
                         float(price_parts[-1]) if price_parts[-1].isdigit() else None
                     )
                     pbs_prices[item_name] = item_price
@@ -1641,9 +1644,10 @@ class App(QMainWindow):
                     pbs_prices[item_name] = None
 
             temp_items_list = {}
+            pbs_item_names = list(pbs_prices.keys())
             for _index, item in self.item_statistics.iterrows():
                 item_name_lower = item["itemName"].lower()
-                if item_name_lower in pbs_prices:
+                if item_name_lower in pbs_item_names:
                     price = pbs_prices[item_name_lower]
                     if price is not None:
                         temp_items_list[str(item["itemID"])] = pbs_prices[
