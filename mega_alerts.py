@@ -277,6 +277,14 @@ class Alerts(QThread):
         ):
             if "bonus_lists" not in auction["item"]:
                 return False
+            
+            # Check for a modifier with type 9 and get its value (modifier 9 value equals playerLevel)
+            modifier_player_level_value = None
+            for modifier in auction["item"].get("modifiers", []):
+                if modifier["type"] == 9:
+                    modifier_player_level_value = modifier["value"]
+                    break
+
             item_bonus_ids = set(auction["item"]["bonus_lists"])
             # look for intersection of bonus_ids and any other lists
             tertiary_stats = {
@@ -284,6 +292,7 @@ class Alerts(QThread):
                 "leech": len(item_bonus_ids & leech_ids) != 0,
                 "avoidance": len(item_bonus_ids & avoidance_ids) != 0,
                 "speed": len(item_bonus_ids & speed_ids) != 0,
+                "lvl_70": modifier_player_level_value == 70
             }
 
             desired_tertiary_stats = {
@@ -291,6 +300,7 @@ class Alerts(QThread):
                 "leech": DESIRED_ILVL_ITEMS["leech"],
                 "avoidance": DESIRED_ILVL_ITEMS["avoidance"],
                 "speed": DESIRED_ILVL_ITEMS["speed"],
+                "lvl_70": DESIRED_ILVL_ITEMS["lvl_70"]
             }
 
             # if we're looking for sockets, leech, avoidance, or speed, skip if none of those are present

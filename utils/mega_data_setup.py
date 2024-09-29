@@ -375,6 +375,7 @@ class MegaData:
             "speed": True,
             "leech": False,
             "avoidance": False,
+            "lvl_70": True,
             "item_ids": [12345, 67890],
         }
 
@@ -384,7 +385,7 @@ class MegaData:
             )
 
         snipe_info = {}
-        bool_vars = ["sockets", "speed", "leech", "avoidance"]
+        bool_vars = ["sockets", "speed", "leech", "avoidance", "lvl_70"]
         int_vars = ["ilvl", "buyout"]
         for key, value in ilvl_info.items():
             if key in bool_vars:
