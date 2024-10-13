@@ -81,6 +81,8 @@ class Alerts(QThread):
                         # old method
                         # id_msg += f"`Name:` {item_name}\n"
                     embed_name = item_name
+                    if "required_lvl" in auction and auction["required_lvl"]:
+                        id_msg += f"`required_lvl:` {auction['required_lvl']}\n"
                 else:
                     id_msg = f"`petID:` {auction['petID']}\n"
                     saddlebag_link_id = auction["petID"]
@@ -277,6 +279,14 @@ class Alerts(QThread):
         ):
             if "bonus_lists" not in auction["item"]:
                 return False
+
+            # Check for a modifier with type 9 and get its value (modifier 9 value equals playerLevel)
+            required_min_player_level = None
+            for modifier in auction["item"].get("modifiers", []):
+                if modifier["type"] == 9:
+                    required_min_player_level = modifier["value"]
+                    break
+
             item_bonus_ids = set(auction["item"]["bonus_lists"])
             # look for intersection of bonus_ids and any other lists
             tertiary_stats = {
@@ -328,6 +338,7 @@ class Alerts(QThread):
                     "tertiary_stats": tertiary_stats,
                     "bonus_ids": item_bonus_ids,
                     "ilvl": ilvl,
+                    "required_lvl": required_min_player_level,
                 }
 
         def format_alert_messages(
@@ -462,6 +473,7 @@ class Alerts(QThread):
                 "tertiary_stats": tertiary_stats,
                 "bonus_ids": auction["bonus_ids"],
                 "ilvl": auction["ilvl"],
+                "required_lvl": auction["required_lvl"],
             }
 
         #### MAIN ####
