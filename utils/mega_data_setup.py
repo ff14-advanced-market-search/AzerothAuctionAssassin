@@ -368,6 +368,9 @@ class MegaData:
         if "item_ids" not in ilvl_info.keys():
             ilvl_info["item_ids"] = []
 
+        if "required_lvl" not in ilvl_info.keys():
+            ilvl_info["required_lvl"] = 1000
+
         example = {
             "ilvl": 360,
             "buyout": 50000,
@@ -376,6 +379,7 @@ class MegaData:
             "leech": False,
             "avoidance": False,
             "item_ids": [12345, 67890],
+            "required_lvl": 1000,
         }
 
         if ilvl_info.keys() != example.keys():
@@ -385,7 +389,7 @@ class MegaData:
 
         snipe_info = {}
         bool_vars = ["sockets", "speed", "leech", "avoidance"]
-        int_vars = ["ilvl", "buyout"]
+        int_vars = ["ilvl", "buyout", "required_lvl"]
         for key, value in ilvl_info.items():
             if key in bool_vars:
                 if isinstance(ilvl_info[key], bool):
