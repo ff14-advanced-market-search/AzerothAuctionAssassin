@@ -81,7 +81,7 @@ class Alerts(QThread):
                         # old method
                         # id_msg += f"`Name:` {item_name}\n"
                     embed_name = item_name
-                    if "required_lvl" in auction and auction["required_lvl"]:
+                    if "required_lvl" in auction and auction["required_lvl"] != None:
                         id_msg += f"`required_lvl:` {auction['required_lvl']}\n"
                 else:
                     id_msg = f"`petID:` {auction['petID']}\n"
@@ -281,10 +281,10 @@ class Alerts(QThread):
                 return False
 
             # Check for a modifier with type 9 and get its value (modifier 9 value equals playerLevel)
-            required_min_player_level = None
+            required_lvl = None
             for modifier in auction["item"].get("modifiers", []):
                 if modifier["type"] == 9:
-                    required_min_player_level = modifier["value"]
+                    required_lvl = modifier["value"]
                     break
 
             item_bonus_ids = set(auction["item"]["bonus_lists"])
@@ -338,7 +338,7 @@ class Alerts(QThread):
                     "tertiary_stats": tertiary_stats,
                     "bonus_ids": item_bonus_ids,
                     "ilvl": ilvl,
-                    "required_lvl": required_min_player_level,
+                    "required_lvl": required_lvl,
                 }
 
         def format_alert_messages(
