@@ -81,7 +81,10 @@ class Alerts(QThread):
                         # old method
                         # id_msg += f"`Name:` {item_name}\n"
                     embed_name = item_name
-                    if "required_lvl" in auction and auction["required_lvl"] is not None:
+                    if (
+                        "required_lvl" in auction
+                        and auction["required_lvl"] is not None
+                    ):
                         id_msg += f"`required_lvl:` {auction['required_lvl']}\n"
                 else:
                     id_msg = f"`petID:` {auction['petID']}\n"
