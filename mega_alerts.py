@@ -333,6 +333,10 @@ class Alerts(QThread):
             # skip if required_lvl is too high
             if required_lvl and required_lvl > DESIRED_ILVL_ITEMS["required_lvl"]:
                 return False
+            elif not required_lvl:
+                required_lvl = DESIRED_ILVL_ITEMS["base_required_levels"][
+                    auction["item"]["id"]
+                ]
 
             # if we get through everything and still haven't skipped, add to matching
             buyout = round(auction["buyout"] / 10000, 2)
