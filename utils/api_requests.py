@@ -151,7 +151,11 @@ def get_ilvl_items(ilvl=201, item_ids=[]):
     base_ilvls = {
         int(itemID): item_info["ilvl"] for itemID, item_info in results.items()
     }
-    return item_names, set(item_names.keys()), base_ilvls
+    base_required_levels = {
+        int(itemID): item_info["required_level"]
+        for itemID, item_info in results.items()
+    }
+    return item_names, set(item_names.keys()), base_ilvls, base_required_levels
 
 
 def simple_snipe(json_data):
