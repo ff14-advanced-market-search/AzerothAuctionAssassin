@@ -244,13 +244,15 @@ class MegaData:
             return self.access_token
 
     def __set_pet_names(self):
-        # # Blizzard is broken
-        # headers = {"Authorization": f"Bearer {self.access_token}"}
-        # pet_info = requests.get(
-        #     f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US",
-        #     headers,
-        # ).json()["pets"]
-        # pet_info = {int(pet["id"]): pet["name"] for pet in pet_info}
+        headers = {"Authorization": f"Bearer {self.access_token}"}
+        pet_info = requests.get(
+            f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US",
+            headers=headers,
+        ).json()["pets"]
+        pet_info = {int(pet["id"]): pet["name"] for pet in pet_info}
+        return pet_info
+
+    def __set_pet_names_backup(self):
         pet_info = requests.post(
             "http://api.saddlebagexchange.com/api/wow/itemnames",
             json={"pets": True},
@@ -546,7 +548,7 @@ class MegaData:
     @retry(stop=stop_after_attempt(3))
     def make_ah_api_request(self, url, connectedRealmId):
         headers = {"Authorization": f"Bearer {self.check_access_token()}"}
-        req = requests.get(url, headers, timeout=20)
+        req = requests.get(url, headers=headers, timeout=20)
 
         # check for api errors
         if req.status_code == 429:
@@ -609,7 +611,7 @@ class MegaData:
                 f"invalid region {self.REGION} passed to get_raw_commodity_listings()"
             )
         headers = {"Authorization": f"Bearer {self.check_access_token()}"}
-        req = requests.get(url, headers, timeout=20)
+        req = requests.get(url, headers=headers, timeout=20)
 
         # check for api errors
         if req.status_code == 429:
