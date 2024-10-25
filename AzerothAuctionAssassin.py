@@ -1425,7 +1425,6 @@ class App(QMainWindow):
 
         try:
             with open(pathname) as file:
-                a = self.ilvl_list
                 self.ilvl_list += json.load(file)
             if not isinstance(self.ilvl_list, list):
                 raise ValueError(
