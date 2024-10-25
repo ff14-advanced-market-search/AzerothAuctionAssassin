@@ -45,16 +45,18 @@ def get_listings_single(connectedRealmId: int, access_token: str, region: str):
     print("==========================================")
     print(f"gather data from connectedRealmId {connectedRealmId} of region {region}")
     if region == "NA":
-        url = f"https://us.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions?namespace=dynamic-us&locale=en_US&access_token={access_token}"
+        url = f"https://us.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions?namespace=dynamic-us&locale=en_US"
     elif region == "EU":
-        url = f"https://eu.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions?namespace=dynamic-eu&locale=en_EU&access_token={access_token}"
+        url = f"https://eu.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions?namespace=dynamic-eu&locale=en_EU"
     else:
         print(
             f"{region} is not yet supported, reach out for us to add this region option"
         )
         exit(1)
 
-    req = requests.get(url, timeout=20)
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    req = requests.get(url, headers, timeout=20)
 
     auction_info = req.json()
     return auction_info["auctions"]
@@ -100,8 +102,10 @@ def get_itemnames():
 
 def get_petnames(client_id, client_secret):
     access_token = get_wow_access_token(client_id, client_secret)
+    headers = {"Authorization": f"Bearer {access_token}"}
     pet_info = requests.get(
-        f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US&access_token={access_token}"
+        f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US",
+        headers=headers,  # Add a comma and pass headers correctly
     ).json()["pets"]
     pet_info = {pet["id"]: pet["name"] for pet in pet_info}
     return pet_info
