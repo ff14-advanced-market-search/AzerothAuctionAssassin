@@ -285,12 +285,18 @@ class Alerts(QThread):
             if "bonus_lists" not in auction["item"]:
                 return False
 
-            # Check for a modifier with type 9 and get its value (modifier 9 value equals playerLevel)
+            # Check for a modifier with type 9 and get its value (modifier 9 value equals required playerLevel)
             required_lvl = None
             for modifier in auction["item"].get("modifiers", []):
                 if modifier["type"] == 9:
                     required_lvl = modifier["value"]
                     break
+
+            # if no modifier["type"] == 9 found, use the base required level for report
+            if not required_lvl:
+                required_lvl = DESIRED_ILVL_ITEMS["base_required_levels"][
+                    auction["item"]["id"]
+                ]
 
             item_bonus_ids = set(auction["item"]["bonus_lists"])
             # look for intersection of bonus_ids and any other lists
@@ -334,18 +340,12 @@ class Alerts(QThread):
 
             #### Need to update with required_max_lvl and required_min_lvl ####
 
-            # # skip if required_lvl is too high
-            # if required_lvl and required_lvl > DESIRED_ILVL_ITEMS["required_lvl"]:
-            #     return False
-
-            # if no modifier["type"] == 9 found, use the base required level for report
-            if not required_lvl:
-                required_lvl = DESIRED_ILVL_ITEMS["base_required_levels"][
-                    auction["item"]["id"]
-                ]
-
             # skip if required_lvl is too low
-            if required_lvl < DESIRED_ILVL_ITEMS["required_lvl"]:
+            if required_lvl < DESIRED_ILVL_ITEMS["required_min_lvl"]:
+                return False
+
+            # skip if required_lvl is too high
+            if required_lvl > DESIRED_ILVL_ITEMS["required_max_lvl"]:
                 return False
 
             # if we get through everything and still haven't skipped, add to matching
