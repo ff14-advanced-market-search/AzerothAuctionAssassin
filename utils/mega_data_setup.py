@@ -244,10 +244,20 @@ class MegaData:
             return self.access_token
 
     def __set_pet_names(self):
+        headers = {"Authorization": f"Bearer {self.access_token}"}
         pet_info = requests.get(
-            f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US&access_token={self.access_token}"
+            f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US",
+            headers=headers,
         ).json()["pets"]
         pet_info = {int(pet["id"]): pet["name"] for pet in pet_info}
+        return pet_info
+
+    def __set_pet_names_backup(self):
+        pet_info = requests.post(
+            "http://api.saddlebagexchange.com/api/wow/itemnames",
+            json={"pets": True},
+        ).json()
+        pet_info = {int(k): v for k, v in pet_info.items()}
         return pet_info
 
     def __set_item_names(self):
@@ -544,13 +554,14 @@ class MegaData:
         elif "CLASSIC" in self.REGION:
             namespace = f"dynamic-classic-{namespace.split('-')[-1]}"
 
-        url = f"{base_url}/data/wow/connected-realm/{str(connectedRealmId)}/auctions{endpoint}?namespace={namespace}&locale={locale}&access_token={self.check_access_token()}"
+        url = f"{base_url}/data/wow/connected-realm/{str(connectedRealmId)}/auctions{endpoint}?namespace={namespace}&locale={locale}"
 
         return url
 
     @retry(stop=stop_after_attempt(3))
     def make_ah_api_request(self, url, connectedRealmId):
-        req = requests.get(url, timeout=20)
+        headers = {"Authorization": f"Bearer {self.check_access_token()}"}
+        req = requests.get(url, headers=headers, timeout=20)
 
         # check for api errors
         if req.status_code == 429:
@@ -603,16 +614,17 @@ class MegaData:
     @retry(stop=stop_after_attempt(3))
     def make_commodity_ah_api_request(self):
         if self.REGION == "NA":
-            url = f"https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US&access_token={self.check_access_token()}"
+            url = f"https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
             connectedRealmId = -1
         elif self.REGION == "EU":
-            url = f"https://eu.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-eu&locale=en_EU&access_token={self.check_access_token()}"
+            url = f"https://eu.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-eu&locale=en_EU"
             connectedRealmId = -2
         else:
             raise Exception(
                 f"invalid region {self.REGION} passed to get_raw_commodity_listings()"
             )
-        req = requests.get(url, timeout=20)
+        headers = {"Authorization": f"Bearer {self.check_access_token()}"}
+        req = requests.get(url, headers=headers, timeout=20)
 
         # check for api errors
         if req.status_code == 429:
