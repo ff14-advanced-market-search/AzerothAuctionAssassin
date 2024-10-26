@@ -70,8 +70,10 @@ class Alerts(QThread):
                         # old method
                         # id_msg += f"`Name:` {item_name}\n"
                         id_msg += f"`ilvl:` {auction['ilvl']}\n"
-                        id_msg += f"`tertiary_stats:` {auction['tertiary_stats']}\n"
-                        id_msg += f"`bonus_ids:` {list(auction['bonus_ids'])}\n"
+                        if auction['tertiary_stats']:
+                            id_msg += f"`tertiary_stats:` {auction['tertiary_stats']}\n"
+                        # # disable bonus_ids for now, too much text
+                        # id_msg += f"`bonus_ids:` {list(auction['bonus_ids'])}\n"
                     elif auction["itemID"] in mega_data.ITEM_NAMES:
                         item_name = mega_data.ITEM_NAMES[auction["itemID"]]
                         # old method
