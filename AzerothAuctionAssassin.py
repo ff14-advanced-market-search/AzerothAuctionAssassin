@@ -1584,10 +1584,7 @@ class App(QMainWindow):
             # clear display before inserting new data
             self.ilvl_list_display.clear()
             for ilvl_dict_data in self.ilvl_list:
-                if "item_ids" not in ilvl_dict_data:
-                    item_ids = []
-                else:
-                    item_ids = ilvl_dict_data["item_ids"]
+                item_ids = ilvl_dict_data.get("item_ids", [])
                 buyout_price = ilvl_dict_data["buyout"]
                 ilvl = ilvl_dict_data["ilvl"]
                 sockets = ilvl_dict_data["sockets"]
@@ -1615,6 +1612,20 @@ class App(QMainWindow):
                 if not (200 <= ilvl <= 1000):
                     raise ValueError(
                         f"Invalid ILvl {ilvl}.\nILvl must be an integer between 200-1000."
+                    )
+
+                # Check that min and max levels are integers within range
+                if not (1 <= required_min_lvl <= 999):
+                    raise ValueError(
+                        f"Invalid Min Level {required_min_lvl}.\nMin level must be between 1-999."
+                    )
+                if not (1 <= required_max_lvl <= 999):
+                    raise ValueError(
+                        f"Invalid Max Level {required_max_lvl}.\nMax level must be between 1-999."
+                    )
+                if required_max_lvl <= required_min_lvl:
+                    raise ValueError(
+                        f"Max level {required_max_lvl} must be greater than Min level {required_min_lvl}."
                     )
 
                 # Check that sockets, speed, leech and avoidance are booleans
