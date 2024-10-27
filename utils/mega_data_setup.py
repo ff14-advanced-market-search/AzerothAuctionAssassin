@@ -379,14 +379,9 @@ class MegaData:
     def __set_desired_ilvl(
         self, ilvl_info, item_names, base_ilvls, base_required_levels
     ):
-        if "item_ids" not in ilvl_info.keys():
-            ilvl_info["item_ids"] = []
-
-        if "required_min_lvl" not in ilvl_info.keys():
-            ilvl_info["required_min_lvl"] = 1
-
-        if "required_max_lvl" not in ilvl_info.keys():
-            ilvl_info["required_max_lvl"] = 1000
+        ilvl_info["item_ids"] = ilvl_info.get("item_ids", [])
+        ilvl_info["required_min_lvl"] = ilvl_info.get("required_min_lvl", 1)
+        ilvl_info["required_max_lvl"] = ilvl_info.get("required_max_lvl", 1000)
 
         example = {
             "ilvl": 360,
