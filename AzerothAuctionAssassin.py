@@ -612,7 +612,9 @@ class App(QMainWindow):
         self.item_id_input = QLineEdit(item_page)
         self.item_id_input_label = QLabel("Item ID", item_page)
         self.item_id_input_label.setToolTip(
-            "Add the item id of any item you want to buy.\nYou can search by name for them here with recommended prices\nhttps://temp.saddlebagexchange.com/megaitemnames"
+            "Add the item id of any item you want to buy.\n"
+            + "You can search by name for them here with recommended prices\n"
+            + "https://temp.saddlebagexchange.com/megaitemnames"
         )
         self.item_page_layout.addWidget(self.item_id_input_label, 0, 0, 1, 1)
         self.item_page_layout.addWidget(self.item_id_input, 1, 0, 1, 1)
@@ -675,7 +677,9 @@ class App(QMainWindow):
         self.ilvl_item_input = QLineEdit(ilvl_page)
         self.ilvl_item_input_label = QLabel("Item ID(s)", ilvl_page)
         self.ilvl_item_input_label.setToolTip(
-            "Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420"
+            "Leave blank to snipe all items at this Ilvl.\n"
+            + "Add the Item IDs of the BOE you want to snipe specific items separated by a comma\n"
+            + "ex: 1,2,99,420420"
         )
         self.ilvl_item_input_label.setFixedSize(120, 15)
         self.ilvl_item_input.setFixedSize(120, 25)
