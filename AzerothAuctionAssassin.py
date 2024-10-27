@@ -677,7 +677,7 @@ class App(QMainWindow):
         self.ilvl_item_input_label.setToolTip(
             "Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420"
         )
-        self.ilvl_item_input_label.setFixedSize(75, 15)
+        self.ilvl_item_input_label.setFixedSize(120, 15)
         self.ilvl_item_input.setFixedSize(120, 25)
         self.ilvl_page_layout.addWidget(self.ilvl_item_input_label, 0, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_item_input, 1, 0, 1, 1)
@@ -687,7 +687,7 @@ class App(QMainWindow):
         self.ilvl_input_label.setToolTip(
             "Set the minimum item level (ilvl) you want to snipe. Ex: 400 ilvl."
         )
-        self.ilvl_input_label.setFixedSize(75, 15)
+        self.ilvl_input_label.setFixedSize(120, 15)
         self.ilvl_input.setFixedSize(120, 25)
         self.ilvl_page_layout.addWidget(self.ilvl_input_label, 2, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_input, 3, 0, 1, 1)
@@ -697,7 +697,7 @@ class App(QMainWindow):
         self.ilvl_price_input_label.setToolTip(
             "Set the maximum buyout you want to snipe."
         )
-        self.ilvl_price_input_label.setFixedSize(75, 15)
+        self.ilvl_price_input_label.setFixedSize(120, 15)
         self.ilvl_price_input.setFixedSize(120, 25)
         self.ilvl_page_layout.addWidget(self.ilvl_price_input_label, 4, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_price_input, 5, 0, 1, 1)
