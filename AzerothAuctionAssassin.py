@@ -1298,7 +1298,7 @@ class App(QMainWindow):
                     ilvl_dict_data["required_max_lvl"] = 999
                 # Create a formatted string with the item data
                 item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
-                string_with_data = (
+                display_string = (
                     f"Item ID: {item_ids}; "
                     f"Price: {ilvl_dict_data['buyout']}; "
                     f"ILvl: {ilvl_dict_data['ilvl']}; "
@@ -1311,7 +1311,7 @@ class App(QMainWindow):
                 )
                 # Insert the string into the display list
                 self.ilvl_list_display.insertItem(
-                    self.ilvl_list_display.count(), string_with_data
+                    self.ilvl_list_display.count(), display_string
                 )
 
     def ilvl_list_double_clicked(self, item):
