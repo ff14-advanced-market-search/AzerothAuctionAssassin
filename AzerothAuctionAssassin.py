@@ -1319,7 +1319,9 @@ class App(QMainWindow):
         sockets = item_split[4].split(";")[0]
         speed = item_split[5].split(";")[0]
         leech = item_split[6].split(";")[0]
-        avoidance = item_split[7]
+        avoidance = item_split[7].split(";")[0]
+        required_min_lvl = item_split[8].split(";")[0]
+        required_max_lvl = item_split[9]
 
         self.ilvl_item_input.setText(item_id)
         self.ilvl_price_input.setText(buyout)
@@ -1330,6 +1332,8 @@ class App(QMainWindow):
         self.ilvl_avoidance.setChecked(avoidance == "True")
 
         self.ilvl_input.setText(ilvl)
+        self.ilvl_min_required_lvl_input.setText(required_min_lvl)
+        self.ilvl_max_required_lvl_input.setText(required_max_lvl)
 
     def realm_list_clicked(self, item):
         realm_split = item.text().split(":")
@@ -1586,6 +1590,8 @@ class App(QMainWindow):
                 speed = ilvl_dict_data["speed"]
                 leech = ilvl_dict_data["leech"]
                 avoidance = ilvl_dict_data["avoidance"]
+                required_min_lvl = ilvl_dict_data.get("required_min_lvl", 1)
+                required_max_lvl = ilvl_dict_data.get("required_max_lvl", 999)
 
                 # Check that all item IDs are valid integers, but allow list to be empty
                 if not all(
@@ -1615,7 +1621,17 @@ class App(QMainWindow):
                         "Sockets, speed, leech, and avoidance should be boolean values."
                     )
 
-                string_with_data = f"Item ID: {','.join(map(str, item_ids))}; Price: {buyout_price}; ILvl: {ilvl}; Sockets: {sockets}; Speed: {speed}; Leech: {leech}; Avoidance: {avoidance}"
+                string_with_data = (
+                    f"Item ID: {','.join(map(str, item_ids))}; "
+                    f"Price: {buyout_price}; "
+                    f"ILvl: {ilvl}; "
+                    f"Sockets: {sockets}; "
+                    f"Speed: {speed}; "
+                    f"Leech: {leech}; "
+                    f"Avoidance: {avoidance}; "
+                    f"MinLevel: {required_min_lvl}; "
+                    f"MaxLevel: {required_max_lvl}"
+                )
                 self.ilvl_list_display.insertItem(
                     self.ilvl_list_display.count(), string_with_data
                 )
