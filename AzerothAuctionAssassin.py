@@ -86,8 +86,8 @@ class App(QMainWindow):
         self.title = f"Azeroth Auction Assassin v{AAA_VERSION}"
         self.left = 100
         self.top = 100
-        self.width = 550
-        self.height = 650
+        self.width = 650
+        self.height = 750
         icon_path = "icon.png"
 
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
@@ -683,9 +683,9 @@ class App(QMainWindow):
         self.ilvl_page_layout.addWidget(self.ilvl_item_input, 1, 0, 1, 1)
 
         self.ilvl_input = QLineEdit(ilvl_page)
-        self.ilvl_input_label = QLabel("Item level", ilvl_page)
+        self.ilvl_input_label = QLabel("Item Level", ilvl_page)
         self.ilvl_input_label.setToolTip(
-            "Set the minimum item level you want to snipe."
+            "Set the minimum item level (ilvl) you want to snipe. Ex: 400 ilvl."
         )
         self.ilvl_input_label.setFixedSize(75, 15)
         self.ilvl_input.setFixedSize(120, 25)
@@ -718,35 +718,61 @@ class App(QMainWindow):
         self.ilvl_avoidance.setToolTip("Do you want the item to have Avoidance?")
         self.ilvl_page_layout.addWidget(self.ilvl_avoidance, 9, 0, 1, 1)
 
+        self.ilvl_min_required_lvl_input = QLineEdit(ilvl_page)
+        self.ilvl_min_required_lvl_input_label = QLabel("Min Player Level", ilvl_page)
+        self.ilvl_min_required_lvl_input_label.setToolTip(
+            "Set the minimum required character level to use gear.\n"
+            + "Ex: required level 80 for TWW items, 70 for DF items, etc."
+        )
+        self.ilvl_min_required_lvl_input_label.setFixedSize(120, 15)
+        self.ilvl_min_required_lvl_input.setFixedSize(120, 25)
+        self.ilvl_page_layout.addWidget(
+            self.ilvl_min_required_lvl_input_label, 10, 0, 1, 1
+        )
+        self.ilvl_page_layout.addWidget(self.ilvl_min_required_lvl_input, 11, 0, 1, 1)
+
+        self.ilvl_max_required_lvl_input = QLineEdit(ilvl_page)
+        self.ilvl_max_required_lvl_input_label = QLabel("Max Player Level", ilvl_page)
+        self.ilvl_max_required_lvl_input_label.setToolTip(
+            "Set the maximum required character level to use gear.\n"
+            + "Ex: required level 70 for TWW twink items, etc."
+        )
+        self.ilvl_max_required_lvl_input_label.setFixedSize(120, 15)
+        self.ilvl_max_required_lvl_input.setFixedSize(120, 25)
+        self.ilvl_page_layout.addWidget(
+            self.ilvl_max_required_lvl_input_label, 12, 0, 1, 1
+        )
+        self.ilvl_page_layout.addWidget(self.ilvl_max_required_lvl_input, 13, 0, 1, 1)
+
         self.add_ilvl_button = QPushButton("Add/Update Item", ilvl_page)
         self.add_ilvl_button.setToolTip("Add/Update item to your snipe list.")
         self.add_ilvl_button.clicked.connect(self.add_ilvl_to_list)
-        self.ilvl_page_layout.addWidget(self.add_ilvl_button, 10, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.add_ilvl_button, 11, 1, 1, 1)
 
         self.remove_ilvl_button = QPushButton("Remove Item", ilvl_page)
         self.remove_ilvl_button.setToolTip("Remove item from your snipe list.")
         self.remove_ilvl_button.clicked.connect(self.remove_ilvl_to_list)
-        self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 11, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 12, 1, 1, 1)
+
+        self.import_ilvl_data_button = QPushButton("Import ILVL Data")
+        self.import_ilvl_data_button.setToolTip(
+            "Import your desired_ilvl_list.json config"
+        )
+        self.import_ilvl_data_button.clicked.connect(self.import_ilvl_data)
+        self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 13, 1, 1, 1)
+
+        self.erase_ilvl_data_button = QPushButton("Erase ILvl Data")
+        self.erase_ilvl_data_button.setToolTip(
+            "Erase your desired_ilvl_list.json config"
+        )
+        self.erase_ilvl_data_button.clicked.connect(self.erase_ilvl_data)
+        self.ilvl_page_layout.addWidget(self.erase_ilvl_data_button, 14, 1, 1, 1)
 
         self.ilvl_list_display = QListWidget(ilvl_page)
         self.ilvl_list_display.setSortingEnabled(True)
 
         self.ilvl_list_display.itemClicked.connect(self.ilvl_list_double_clicked)
         self.ilvl_page_layout.addWidget(self.ilvl_list_display, 0, 1, 11, 2)
-
-        self.import_ilvl_data_button = QPushButton("Import Desired ILvl List Data")
-        self.import_ilvl_data_button.setToolTip(
-            "Import your desired_ilvl_list.json config"
-        )
-        self.import_ilvl_data_button.clicked.connect(self.import_ilvl_data)
-        self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 11, 1, 1, 2)
-
-        self.erase_ilvl_data_button = QPushButton("Erase Desired ILvl List Data")
-        self.erase_ilvl_data_button.setToolTip(
-            "Erase your desired_ilvl_list.json config"
-        )
-        self.erase_ilvl_data_button.clicked.connect(self.erase_ilvl_data)
-        self.ilvl_page_layout.addWidget(self.erase_ilvl_data_button, 12, 1, 1, 2)
 
     def go_to_home_page(self):
         self.stacked_widget.setCurrentIndex(0)
