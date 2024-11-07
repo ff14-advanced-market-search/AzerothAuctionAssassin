@@ -362,7 +362,8 @@ class App(QMainWindow):
         self.layout_area.addWidget(self.stop_button, 10, 0)
 
         self.mega_alerts_progress = QLabel("Waiting for user to Start!")
-        self.mega_alerts_progress.setFixedSize(150, 25)
+        # this is important, if the messages from mega alerts status are too long, it will break the UI
+        self.mega_alerts_progress.setFixedSize(150, 100)
         self.layout_area.addWidget(self.mega_alerts_progress, 11, 0)
 
     def make_home_page(self, home_page):

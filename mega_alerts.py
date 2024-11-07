@@ -531,7 +531,7 @@ class Alerts(QThread):
 
                 else:
                     self.progress.emit(
-                        f"The updates will come\non min {mega_data.get_upload_time_minutes()} of each hour."
+                        f"The updates will come\non min {mega_data.get_upload_time_minutes()}\nof each hour."
                     )
                     print(
                         f"Blizzard API data only updates 1 time per hour. The updates will come on minute {mega_data.get_upload_time_minutes()} of each hour. "
