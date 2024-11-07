@@ -70,8 +70,10 @@ class Alerts(QThread):
                         # old method
                         # id_msg += f"`Name:` {item_name}\n"
                         id_msg += f"`ilvl:` {auction['ilvl']}\n"
-                        id_msg += f"`tertiary_stats:` {auction['tertiary_stats']}\n"
-                        id_msg += f"`bonus_ids:` {list(auction['bonus_ids'])}\n"
+                        if auction["tertiary_stats"]:
+                            id_msg += f"`tertiary_stats:` {auction['tertiary_stats']}\n"
+                        # # disable bonus_ids for now, too much text
+                        # id_msg += f"`bonus_ids:` {list(auction['bonus_ids'])}\n"
                     elif auction["itemID"] in mega_data.ITEM_NAMES:
                         item_name = mega_data.ITEM_NAMES[auction["itemID"]]
                         # old method
@@ -81,6 +83,11 @@ class Alerts(QThread):
                         # old method
                         # id_msg += f"`Name:` {item_name}\n"
                     embed_name = item_name
+                    if (
+                        "required_lvl" in auction
+                        and auction["required_lvl"] is not None
+                    ):
+                        id_msg += f"`required_lvl:` {auction['required_lvl']}\n"
                 else:
                     id_msg = f"`petID:` {auction['petID']}\n"
                     saddlebag_link_id = auction["petID"]
@@ -277,6 +284,20 @@ class Alerts(QThread):
         ):
             if "bonus_lists" not in auction["item"]:
                 return False
+
+            # Check for a modifier with type 9 and get its value (modifier 9 value equals required playerLevel)
+            required_lvl = None
+            for modifier in auction["item"].get("modifiers", []):
+                if modifier["type"] == 9:
+                    required_lvl = modifier["value"]
+                    break
+
+            # if no modifier["type"] == 9 found, use the base required level for report
+            if not required_lvl:
+                required_lvl = DESIRED_ILVL_ITEMS["base_required_levels"][
+                    auction["item"]["id"]
+                ]
+
             item_bonus_ids = set(auction["item"]["bonus_lists"])
             # look for intersection of bonus_ids and any other lists
             tertiary_stats = {
@@ -317,6 +338,14 @@ class Alerts(QThread):
             if ilvl < min_ilvl:
                 return False
 
+            # skip if required_lvl is too low
+            if required_lvl < DESIRED_ILVL_ITEMS["required_min_lvl"]:
+                return False
+
+            # skip if required_lvl is too high
+            if required_lvl > DESIRED_ILVL_ITEMS["required_max_lvl"]:
+                return False
+
             # if we get through everything and still haven't skipped, add to matching
             buyout = round(auction["buyout"] / 10000, 2)
             if buyout > DESIRED_ILVL_ITEMS["buyout"]:
@@ -328,6 +357,7 @@ class Alerts(QThread):
                     "tertiary_stats": tertiary_stats,
                     "bonus_ids": item_bonus_ids,
                     "ilvl": ilvl,
+                    "required_lvl": required_lvl,
                 }
 
         def format_alert_messages(
@@ -462,6 +492,7 @@ class Alerts(QThread):
                 "tertiary_stats": tertiary_stats,
                 "bonus_ids": auction["bonus_ids"],
                 "ilvl": auction["ilvl"],
+                "required_lvl": auction["required_lvl"],
             }
 
         #### MAIN ####

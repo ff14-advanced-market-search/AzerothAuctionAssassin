@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.2.4.1"
+AAA_VERSION = "1.2.5"
 
 windowsApp_Path = None
 try:
@@ -86,8 +86,8 @@ class App(QMainWindow):
         self.title = f"Azeroth Auction Assassin v{AAA_VERSION}"
         self.left = 100
         self.top = 100
-        self.width = 550
-        self.height = 650
+        self.width = 650
+        self.height = 750
         icon_path = "icon.png"
 
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
@@ -612,7 +612,9 @@ class App(QMainWindow):
         self.item_id_input = QLineEdit(item_page)
         self.item_id_input_label = QLabel("Item ID", item_page)
         self.item_id_input_label.setToolTip(
-            "Add the item id of any item you want to buy.\nYou can search by name for them here with recommended prices\nhttps://temp.saddlebagexchange.com/megaitemnames"
+            "Add the item id of any item you want to buy.\n"
+            + "You can search by name for them here with recommended prices\n"
+            + "https://temp.saddlebagexchange.com/megaitemnames"
         )
         self.item_page_layout.addWidget(self.item_id_input_label, 0, 0, 1, 1)
         self.item_page_layout.addWidget(self.item_id_input, 1, 0, 1, 1)
@@ -675,19 +677,21 @@ class App(QMainWindow):
         self.ilvl_item_input = QLineEdit(ilvl_page)
         self.ilvl_item_input_label = QLabel("Item ID(s)", ilvl_page)
         self.ilvl_item_input_label.setToolTip(
-            "Leave blank to snipe all items at this Ilvl.\nAdd the Item IDs of the BOE you want to snipe specific items separated by a comma\nex: 1,2,99,420420"
+            "Leave blank to snipe all items at this Ilvl.\n"
+            + "Add the Item IDs of the BOE you want to snipe specific items separated by a comma\n"
+            + "ex: 1,2,99,420420"
         )
-        self.ilvl_item_input_label.setFixedSize(75, 15)
+        self.ilvl_item_input_label.setFixedSize(120, 15)
         self.ilvl_item_input.setFixedSize(120, 25)
         self.ilvl_page_layout.addWidget(self.ilvl_item_input_label, 0, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_item_input, 1, 0, 1, 1)
 
         self.ilvl_input = QLineEdit(ilvl_page)
-        self.ilvl_input_label = QLabel("Item level", ilvl_page)
+        self.ilvl_input_label = QLabel("Item Level", ilvl_page)
         self.ilvl_input_label.setToolTip(
-            "Set the minimum item level you want to snipe."
+            "Set the minimum item level (ilvl) you want to snipe. Ex: 400 ilvl."
         )
-        self.ilvl_input_label.setFixedSize(75, 15)
+        self.ilvl_input_label.setFixedSize(120, 15)
         self.ilvl_input.setFixedSize(120, 25)
         self.ilvl_page_layout.addWidget(self.ilvl_input_label, 2, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_input, 3, 0, 1, 1)
@@ -697,7 +701,7 @@ class App(QMainWindow):
         self.ilvl_price_input_label.setToolTip(
             "Set the maximum buyout you want to snipe."
         )
-        self.ilvl_price_input_label.setFixedSize(75, 15)
+        self.ilvl_price_input_label.setFixedSize(120, 15)
         self.ilvl_price_input.setFixedSize(120, 25)
         self.ilvl_page_layout.addWidget(self.ilvl_price_input_label, 4, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_price_input, 5, 0, 1, 1)
@@ -718,35 +722,61 @@ class App(QMainWindow):
         self.ilvl_avoidance.setToolTip("Do you want the item to have Avoidance?")
         self.ilvl_page_layout.addWidget(self.ilvl_avoidance, 9, 0, 1, 1)
 
+        self.ilvl_min_required_lvl_input = QLineEdit(ilvl_page)
+        self.ilvl_min_required_lvl_input_label = QLabel("Min Player Level", ilvl_page)
+        self.ilvl_min_required_lvl_input_label.setToolTip(
+            "Set the minimum required character level to use gear.\n"
+            + "Ex: required level 80 for TWW items, 70 for DF items, etc."
+        )
+        self.ilvl_min_required_lvl_input_label.setFixedSize(120, 15)
+        self.ilvl_min_required_lvl_input.setFixedSize(120, 25)
+        self.ilvl_page_layout.addWidget(
+            self.ilvl_min_required_lvl_input_label, 10, 0, 1, 1
+        )
+        self.ilvl_page_layout.addWidget(self.ilvl_min_required_lvl_input, 11, 0, 1, 1)
+
+        self.ilvl_max_required_lvl_input = QLineEdit(ilvl_page)
+        self.ilvl_max_required_lvl_input_label = QLabel("Max Player Level", ilvl_page)
+        self.ilvl_max_required_lvl_input_label.setToolTip(
+            "Set the maximum required character level to use gear.\n"
+            + "Ex: required level 70 for TWW twink items, etc."
+        )
+        self.ilvl_max_required_lvl_input_label.setFixedSize(120, 15)
+        self.ilvl_max_required_lvl_input.setFixedSize(120, 25)
+        self.ilvl_page_layout.addWidget(
+            self.ilvl_max_required_lvl_input_label, 12, 0, 1, 1
+        )
+        self.ilvl_page_layout.addWidget(self.ilvl_max_required_lvl_input, 13, 0, 1, 1)
+
         self.add_ilvl_button = QPushButton("Add/Update Item", ilvl_page)
         self.add_ilvl_button.setToolTip("Add/Update item to your snipe list.")
         self.add_ilvl_button.clicked.connect(self.add_ilvl_to_list)
-        self.ilvl_page_layout.addWidget(self.add_ilvl_button, 10, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.add_ilvl_button, 11, 1, 1, 1)
 
         self.remove_ilvl_button = QPushButton("Remove Item", ilvl_page)
         self.remove_ilvl_button.setToolTip("Remove item from your snipe list.")
         self.remove_ilvl_button.clicked.connect(self.remove_ilvl_to_list)
-        self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 11, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 12, 1, 1, 1)
+
+        self.import_ilvl_data_button = QPushButton("Import ILVL Data")
+        self.import_ilvl_data_button.setToolTip(
+            "Import your desired_ilvl_list.json config"
+        )
+        self.import_ilvl_data_button.clicked.connect(self.import_ilvl_data)
+        self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 13, 1, 1, 1)
+
+        self.erase_ilvl_data_button = QPushButton("Erase ILvl Data")
+        self.erase_ilvl_data_button.setToolTip(
+            "Erase your desired_ilvl_list.json config"
+        )
+        self.erase_ilvl_data_button.clicked.connect(self.erase_ilvl_data)
+        self.ilvl_page_layout.addWidget(self.erase_ilvl_data_button, 14, 1, 1, 1)
 
         self.ilvl_list_display = QListWidget(ilvl_page)
         self.ilvl_list_display.setSortingEnabled(True)
 
         self.ilvl_list_display.itemClicked.connect(self.ilvl_list_double_clicked)
         self.ilvl_page_layout.addWidget(self.ilvl_list_display, 0, 1, 11, 2)
-
-        self.import_ilvl_data_button = QPushButton("Import Desired ILvl List Data")
-        self.import_ilvl_data_button.setToolTip(
-            "Import your desired_ilvl_list.json config"
-        )
-        self.import_ilvl_data_button.clicked.connect(self.import_ilvl_data)
-        self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 11, 1, 1, 2)
-
-        self.erase_ilvl_data_button = QPushButton("Erase Desired ILvl List Data")
-        self.erase_ilvl_data_button.setToolTip(
-            "Erase your desired_ilvl_list.json config"
-        )
-        self.erase_ilvl_data_button.clicked.connect(self.erase_ilvl_data)
-        self.ilvl_page_layout.addWidget(self.erase_ilvl_data_button, 12, 1, 1, 2)
 
     def go_to_home_page(self):
         self.stacked_widget.setCurrentIndex(0)
@@ -1254,13 +1284,34 @@ class App(QMainWindow):
                 )
 
         if os.path.exists(self.path_to_desired_ilvl_list):
-            self.ilvl_list = json.load(open(self.path_to_desired_ilvl_list))
+            # Load item level list from file
+            with open(self.path_to_desired_ilvl_list) as file:
+                self.ilvl_list = json.load(file)
+            # Process each item level data dictionary
             for ilvl_dict_data in self.ilvl_list:
+                # Add missing 'item_ids' key if not present
                 if "item_ids" not in ilvl_dict_data:
                     ilvl_dict_data["item_ids"] = []
-                string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
+                if "required_min_lvl" not in ilvl_dict_data:
+                    ilvl_dict_data["required_min_lvl"] = 1
+                if "required_max_lvl" not in ilvl_dict_data:
+                    ilvl_dict_data["required_max_lvl"] = 999
+                # Create a formatted string with the item data
+                item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
+                display_string = (
+                    f"Item ID: {item_ids}; "
+                    f"Price: {ilvl_dict_data['buyout']}; "
+                    f"ILvl: {ilvl_dict_data['ilvl']}; "
+                    f"Sockets: {ilvl_dict_data['sockets']}; "
+                    f"Speed: {ilvl_dict_data['speed']}; "
+                    f"Leech: {ilvl_dict_data['leech']}; "
+                    f"Avoidance: {ilvl_dict_data['avoidance']}; "
+                    f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
+                    f"MaxLevel: {ilvl_dict_data['required_max_lvl']}"
+                )
+                # Insert the string into the display list
                 self.ilvl_list_display.insertItem(
-                    self.ilvl_list_display.count(), string_with_data
+                    self.ilvl_list_display.count(), display_string
                 )
 
     def ilvl_list_double_clicked(self, item):
@@ -1272,7 +1323,9 @@ class App(QMainWindow):
         sockets = item_split[4].split(";")[0]
         speed = item_split[5].split(";")[0]
         leech = item_split[6].split(";")[0]
-        avoidance = item_split[7]
+        avoidance = item_split[7].split(";")[0]
+        required_min_lvl = item_split[8].split(";")[0]
+        required_max_lvl = item_split[9]
 
         self.ilvl_item_input.setText(item_id)
         self.ilvl_price_input.setText(buyout)
@@ -1283,6 +1336,8 @@ class App(QMainWindow):
         self.ilvl_avoidance.setChecked(avoidance == "True")
 
         self.ilvl_input.setText(ilvl)
+        self.ilvl_min_required_lvl_input.setText(required_min_lvl)
+        self.ilvl_max_required_lvl_input.setText(required_max_lvl)
 
     def realm_list_clicked(self, item):
         realm_split = item.text().split(":")
@@ -1328,6 +1383,7 @@ class App(QMainWindow):
             )
             return False
 
+        # Optional ilvl inputs
         item_ids_text = self.ilvl_item_input.text()
         if item_ids_text == "":
             item_ids_list = []
@@ -1352,6 +1408,53 @@ class App(QMainWindow):
                 )
                 return False
 
+        required_min_lvl = self.ilvl_min_required_lvl_input.text()
+        if required_min_lvl == "":
+            required_min_lvl = 1
+        else:
+            # Validate min level
+            try:
+                required_min_lvl = int(required_min_lvl)
+                if not 1 <= required_min_lvl <= 999:
+                    QMessageBox.critical(
+                        self,
+                        "Invalid Min Level",
+                        "Min level must be between 1 and 999.",
+                    )
+                    return False
+            except ValueError:
+                QMessageBox.critical(
+                    self, "Invalid Input", "Min level should be a number."
+                )
+                return False
+
+        required_max_lvl = self.ilvl_max_required_lvl_input.text()
+        if required_max_lvl == "":
+            required_max_lvl = 999
+        else:
+            # Validate max level
+            try:
+                required_max_lvl = int(required_max_lvl)
+                if not 1 <= required_max_lvl <= 999:
+                    QMessageBox.critical(
+                        self,
+                        "Invalid Max Level",
+                        "Max level must be between 1 and 999.",
+                    )
+                    return False
+                elif required_max_lvl <= required_min_lvl:
+                    QMessageBox.critical(
+                        self,
+                        "Invalid Level Range",
+                        "Max level must be greater than Min level.",
+                    )
+                    return False
+            except ValueError:
+                QMessageBox.critical(
+                    self, "Invalid Input", "Max level should be a number."
+                )
+                return False
+
         # Create a dictionary with the data
         ilvl_dict_data = {
             "ilvl": ilvl_int,
@@ -1361,13 +1464,31 @@ class App(QMainWindow):
             "leech": self.ilvl_leech.isChecked(),
             "avoidance": self.ilvl_avoidance.isChecked(),
             "item_ids": item_ids_list,
+            "required_min_lvl": int(required_min_lvl),
+            "required_max_lvl": int(required_max_lvl),
         }
 
+        # Only append and display if the dictionary is not already in the list
         if ilvl_dict_data not in self.ilvl_list:
             self.ilvl_list.append(ilvl_dict_data)
+
+            # Format the display string
+            item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
+            display_string = (
+                f"Item ID: {item_ids}; "
+                f"Price: {ilvl_dict_data['buyout']}; "
+                f"ILvl: {ilvl_dict_data['ilvl']}; "
+                f"Sockets: {ilvl_dict_data['sockets']}; "
+                f"Speed: {ilvl_dict_data['speed']}; "
+                f"Leech: {ilvl_dict_data['leech']}; "
+                f"Avoidance: {ilvl_dict_data['avoidance']}; "
+                f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
+                f"MaxLevel: {ilvl_dict_data['required_max_lvl']}"
+            )
+
+            # Insert the formatted string into the display list
             self.ilvl_list_display.insertItem(
-                self.ilvl_list_display.count(),
-                f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}",
+                self.ilvl_list_display.count(), display_string
             )
 
         return True
@@ -1387,6 +1508,17 @@ class App(QMainWindow):
                 map(int, self.ilvl_item_input.text().replace(" ", "").split(","))
             )
 
+        if self.ilvl_min_required_lvl_input.text() == "":
+            required_min_lvl = 1
+        else:
+            required_min_lvl = int(self.ilvl_min_required_lvl_input.text())
+
+        if self.ilvl_max_required_lvl_input.text() == "":
+            required_max_lvl = 999
+        else:
+            required_max_lvl = int(self.ilvl_max_required_lvl_input.text())
+
+        # Create a dictionary with the data
         ilvl_dict_data = {
             "ilvl": int(self.ilvl_input.text()),
             "buyout": int(self.ilvl_price_input.text()),
@@ -1395,11 +1527,30 @@ class App(QMainWindow):
             "leech": self.ilvl_leech.isChecked(),
             "avoidance": self.ilvl_avoidance.isChecked(),
             "item_ids": item_ids_list,
+            "required_min_lvl": required_min_lvl,
+            "required_max_lvl": required_max_lvl,
         }
 
+        # Check if the item data is already in the list
         if ilvl_dict_data in self.ilvl_list:
-            string_with_data = f"Item ID: {','.join(map(str, ilvl_dict_data['item_ids']))}; Price: {ilvl_dict_data['buyout']}; ILvl: {ilvl_dict_data['ilvl']}; Sockets: {ilvl_dict_data['sockets']}; Speed: {ilvl_dict_data['speed']}; Leech: {ilvl_dict_data['leech']}; Avoidance: {ilvl_dict_data['avoidance']}"
-            print(string_with_data)
+            # Create the display string
+            item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
+            string_with_data = (
+                f"Item ID: {item_ids}; "
+                f"Price: {ilvl_dict_data['buyout']}; "
+                f"ILvl: {ilvl_dict_data['ilvl']}; "
+                f"Sockets: {ilvl_dict_data['sockets']}; "
+                f"Speed: {ilvl_dict_data['speed']}; "
+                f"Leech: {ilvl_dict_data['leech']}; "
+                f"Avoidance: {ilvl_dict_data['avoidance']}; "
+                f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
+                f"MaxLevel: {ilvl_dict_data['required_max_lvl']}"
+            )
+
+            # Print the formatted string
+            print(f"Removing | {string_with_data}")
+
+            # Remove the item from the list and display if it exists
             for x in range(self.ilvl_list_display.count()):
                 if self.ilvl_list_display.item(x).text() == string_with_data:
                     self.ilvl_list_display.takeItem(x)
@@ -1425,7 +1576,6 @@ class App(QMainWindow):
 
         try:
             with open(pathname) as file:
-                a = self.ilvl_list
                 self.ilvl_list += json.load(file)
             if not isinstance(self.ilvl_list, list):
                 raise ValueError(
@@ -1434,16 +1584,15 @@ class App(QMainWindow):
             # clear display before inserting new data
             self.ilvl_list_display.clear()
             for ilvl_dict_data in self.ilvl_list:
-                if "item_ids" not in ilvl_dict_data:
-                    item_ids = []
-                else:
-                    item_ids = ilvl_dict_data["item_ids"]
+                item_ids = ilvl_dict_data.get("item_ids", [])
                 buyout_price = ilvl_dict_data["buyout"]
                 ilvl = ilvl_dict_data["ilvl"]
                 sockets = ilvl_dict_data["sockets"]
                 speed = ilvl_dict_data["speed"]
                 leech = ilvl_dict_data["leech"]
                 avoidance = ilvl_dict_data["avoidance"]
+                required_min_lvl = ilvl_dict_data.get("required_min_lvl", 1)
+                required_max_lvl = ilvl_dict_data.get("required_max_lvl", 999)
 
                 # Check that all item IDs are valid integers, but allow list to be empty
                 if not all(
@@ -1465,6 +1614,20 @@ class App(QMainWindow):
                         f"Invalid ILvl {ilvl}.\nILvl must be an integer between 200-1000."
                     )
 
+                # Check that min and max levels are integers within range
+                if not (1 <= required_min_lvl <= 999):
+                    raise ValueError(
+                        f"Invalid Min Level {required_min_lvl}.\nMin level must be between 1-999."
+                    )
+                if not (1 <= required_max_lvl <= 999):
+                    raise ValueError(
+                        f"Invalid Max Level {required_max_lvl}.\nMax level must be between 1-999."
+                    )
+                if required_max_lvl <= required_min_lvl:
+                    raise ValueError(
+                        f"Max level {required_max_lvl} must be greater than Min level {required_min_lvl}."
+                    )
+
                 # Check that sockets, speed, leech and avoidance are booleans
                 if not all(
                     isinstance(val, bool) for val in [sockets, speed, leech, avoidance]
@@ -1473,7 +1636,17 @@ class App(QMainWindow):
                         "Sockets, speed, leech, and avoidance should be boolean values."
                     )
 
-                string_with_data = f"Item ID: {','.join(map(str, item_ids))}; Price: {buyout_price}; ILvl: {ilvl}; Sockets: {sockets}; Speed: {speed}; Leech: {leech}; Avoidance: {avoidance}"
+                string_with_data = (
+                    f"Item ID: {','.join(map(str, item_ids))}; "
+                    f"Price: {buyout_price}; "
+                    f"ILvl: {ilvl}; "
+                    f"Sockets: {sockets}; "
+                    f"Speed: {speed}; "
+                    f"Leech: {leech}; "
+                    f"Avoidance: {avoidance}; "
+                    f"MinLevel: {required_min_lvl}; "
+                    f"MaxLevel: {required_max_lvl}"
+                )
                 self.ilvl_list_display.insertItem(
                     self.ilvl_list_display.count(), string_with_data
                 )

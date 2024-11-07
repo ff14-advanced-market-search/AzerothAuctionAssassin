@@ -351,12 +351,14 @@ class MegaData:
         for ilvl, item_id_groups in ilvl_groups.items():
             # Flatten the list of item ids
             all_item_ids = [item_id for group in item_id_groups for item_id in group]
-            item_names, item_ids, base_ilvls = get_ilvl_items(ilvl, all_item_ids)
+            item_names, item_ids, base_ilvls, base_required_levels = get_ilvl_items(
+                ilvl, all_item_ids
+            )
 
             for item in ilvl_info:
                 if item["ilvl"] == ilvl:
                     snipe_info, min_ilvl = self.__set_desired_ilvl(
-                        item, item_names, base_ilvls
+                        item, item_names, base_ilvls, base_required_levels
                     )
                     DESIRED_ILVL_LIST.append(snipe_info)
 
@@ -364,19 +366,22 @@ class MegaData:
         if broad_groups:
             # with a broad group we dont care about ilvl or item_ids
             # its the same generic info for all of them
-            item_names, item_ids, base_ilvls = get_ilvl_items()
+            item_names, item_ids, base_ilvls, base_required_levels = get_ilvl_items()
             # add the item names an base ilvl to each broad group
             for item in broad_groups:
                 snipe_info, min_ilvl = self.__set_desired_ilvl(
-                    item, item_names, base_ilvls
+                    item, item_names, base_ilvls, base_required_levels
                 )
                 DESIRED_ILVL_LIST.append(snipe_info)
 
         return DESIRED_ILVL_LIST
 
-    def __set_desired_ilvl(self, ilvl_info, item_names, base_ilvls):
-        if "item_ids" not in ilvl_info.keys():
-            ilvl_info["item_ids"] = []
+    def __set_desired_ilvl(
+        self, ilvl_info, item_names, base_ilvls, base_required_levels
+    ):
+        ilvl_info["item_ids"] = ilvl_info.get("item_ids", [])
+        ilvl_info["required_min_lvl"] = ilvl_info.get("required_min_lvl", 1)
+        ilvl_info["required_max_lvl"] = ilvl_info.get("required_max_lvl", 1000)
 
         example = {
             "ilvl": 360,
@@ -386,6 +391,8 @@ class MegaData:
             "leech": False,
             "avoidance": False,
             "item_ids": [12345, 67890],
+            "required_min_lvl": 1,
+            "required_max_lvl": 1000,
         }
 
         if ilvl_info.keys() != example.keys():
@@ -395,7 +402,7 @@ class MegaData:
 
         snipe_info = {}
         bool_vars = ["sockets", "speed", "leech", "avoidance"]
-        int_vars = ["ilvl", "buyout"]
+        int_vars = ["ilvl", "buyout", "required_min_lvl", "required_max_lvl"]
         for key, value in ilvl_info.items():
             if key in bool_vars:
                 if isinstance(ilvl_info[key], bool):
@@ -412,6 +419,7 @@ class MegaData:
             snipe_info["item_names"] = item_names
             snipe_info["item_ids"] = set(item_names.keys())
             snipe_info["base_ilvls"] = base_ilvls
+            snipe_info["base_required_levels"] = base_required_levels
         else:
             snipe_info["item_names"] = {
                 item_id: item_names[item_id] for item_id in ilvl_info["item_ids"]
@@ -419,6 +427,10 @@ class MegaData:
             snipe_info["item_ids"] = set(ilvl_info["item_ids"])
             snipe_info["base_ilvls"] = {
                 item_id: base_ilvls[item_id] for item_id in ilvl_info["item_ids"]
+            }
+            snipe_info["base_required_levels"] = {
+                item_id: base_required_levels[item_id]
+                for item_id in ilvl_info["item_ids"]
             }
 
         return snipe_info, ilvl_info["ilvl"]
