@@ -531,7 +531,7 @@ class Alerts(QThread):
 
                 else:
                     self.progress.emit(
-                        f"The updates will come\non min {mega_data.get_upload_time_minutes()} of each hour."
+                        f"The updates will come\non min {mega_data.get_upload_time_minutes()}\nof each hour."
                     )
                     print(
                         f"Blizzard API data only updates 1 time per hour. The updates will come on minute {mega_data.get_upload_time_minutes()} of each hour. "
@@ -588,7 +588,7 @@ class Alerts(QThread):
             + f"Running {mega_data.THREADS} concurrent api calls\n"
             + f"checking for items {mega_data.DESIRED_ITEMS}\n"
             + f"or pets {mega_data.DESIRED_PETS}\n"
-            + f"or or ilvl items from list {mega_data.DESIRED_ILVL_LIST}\n"
+            + f"or ilvl items from list {mega_data.DESIRED_ILVL_LIST}\n"
         )
 
         # start app here
