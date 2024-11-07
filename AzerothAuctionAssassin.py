@@ -472,7 +472,7 @@ class App(QMainWindow):
         self.settings_page_layout.addWidget(self.wow_region, 9, 0, 1, 1)
 
         self.number_of_mega_threads = QLineEdit(settings_page)
-        self.number_of_mega_threads.setText("48")
+        self.number_of_mega_threads.setText("10")
         self.number_of_mega_threads_label = QLabel("Number of Threads", settings_page)
         self.number_of_mega_threads_label.setToolTip(
             "Change the thread count.\nDo 100 for the fastest scans, but RIP to ur CPU and MEM."
@@ -2035,7 +2035,7 @@ class App(QMainWindow):
             self.wow_client_secret_input.setText(""),
             self.authentication_token.setText(""),
             self.show_bid_prices.setChecked(False),
-            self.number_of_mega_threads.setText("48"),
+            self.number_of_mega_threads.setText("10"),
             self.wow_head_link.setChecked(False),
             self.no_links.setChecked(False),
             self.discount_percent.setText("10"),
