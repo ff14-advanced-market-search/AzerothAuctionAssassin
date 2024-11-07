@@ -627,7 +627,8 @@ class MegaData:
 
         # check for api errors
         if req.status_code == 429:
-            error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, sleep 30 min and exit"
+            error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, skipping"
+            # error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, sleep 30 min and exit"
 
             # # disabled because the commodity apis suck and are unpredictable
             # time.sleep(30 * 60)
