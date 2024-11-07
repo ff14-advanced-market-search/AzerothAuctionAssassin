@@ -588,7 +588,7 @@ class Alerts(QThread):
             + f"Running {mega_data.THREADS} concurrent api calls\n"
             + f"checking for items {mega_data.DESIRED_ITEMS}\n"
             + f"or pets {mega_data.DESIRED_PETS}\n"
-            + f"or or ilvl items from list {mega_data.DESIRED_ILVL_LIST}\n"
+            + f"or ilvl items from list {mega_data.DESIRED_ILVL_LIST}\n"
         )
 
         # start app here

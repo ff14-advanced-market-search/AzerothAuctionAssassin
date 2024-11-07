@@ -628,9 +628,14 @@ class MegaData:
         # check for api errors
         if req.status_code == 429:
             error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, sleep 30 min and exit"
+
+            # # disabled because the commodity apis suck and are unpredictable
+            # time.sleep(30 * 60)
+            # raise Exception(error_message)
+
+            # just send back an empty auctions list and then clean_listing_data will just skip it
             print(error_message)
-            time.sleep(30 * 60)
-            raise Exception(error_message)
+            return {"auctions": []}
         elif req.status_code != 200:
             error_message = f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
             print(error_message)
