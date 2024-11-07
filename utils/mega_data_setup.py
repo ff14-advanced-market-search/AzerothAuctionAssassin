@@ -2,7 +2,7 @@
 from __future__ import print_function
 import json, requests, os, time
 from datetime import datetime
-from tenacity import retry, stop_after_attempt
+from tenacity import retry, stop_after_attempt, retry_if_exception_type
 from utils.api_requests import (
     send_discord_message,
     get_itemnames,
@@ -224,7 +224,7 @@ class MegaData:
         return var_value
 
     # access token setter
-    @retry(stop=stop_after_attempt(3))
+    @retry(stop=stop_after_attempt(10))
     def check_access_token(self):
         # tokens are valid for 24 hours
         if (
@@ -557,16 +557,19 @@ class MegaData:
 
         return url
 
-    @retry(stop=stop_after_attempt(3))
+    @retry(
+        stop=stop_after_attempt(10),
+        retry=retry_if_exception_type(requests.RequestException),
+        retry_error_callback=lambda retry_state: {"auctions": []},
+    )
     def make_ah_api_request(self, url, connectedRealmId):
         headers = {"Authorization": f"Bearer {self.check_access_token()}"}
         req = requests.get(url, headers=headers, timeout=20)
 
         # check for api errors
         if req.status_code == 429:
-            error_message = f"{req} BLIZZARD too many requests error on {self.REGION} {str(connectedRealmId)} realm data, sleep 30 min and exit"
-            print(error_message)
-            time.sleep(30 * 60)
+            error_message = f"{req} BLIZZARD too many requests error on {self.REGION} {str(connectedRealmId)} realm data, skipping"
+            time.sleep(3)
             raise Exception(error_message)
         elif req.status_code != 200:
             error_message = f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
@@ -610,7 +613,11 @@ class MegaData:
         }
         self.upload_timers[dataSetID] = new_realm_time
 
-    @retry(stop=stop_after_attempt(3))
+    @retry(
+        stop=stop_after_attempt(10),
+        retry=retry_if_exception_type(requests.RequestException),
+        retry_error_callback=lambda retry_state: {"auctions": []},
+    )
     def make_commodity_ah_api_request(self):
         if self.REGION == "NA":
             url = f"https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
@@ -628,15 +635,8 @@ class MegaData:
         # check for api errors
         if req.status_code == 429:
             error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, skipping"
-            # error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, sleep 30 min and exit"
-
-            # # disabled because the commodity apis suck and are unpredictable
-            # time.sleep(30 * 60)
-            # raise Exception(error_message)
-
-            # just send back an empty auctions list and then clean_listing_data will just skip it
-            print(error_message)
-            return {"auctions": []}
+            time.sleep(3)
+            raise Exception(error_message)
         elif req.status_code != 200:
             error_message = f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
             print(error_message)
