@@ -569,6 +569,7 @@ class MegaData:
         # check for api errors
         if req.status_code == 429:
             error_message = f"{req} BLIZZARD too many requests error on {self.REGION} {str(connectedRealmId)} realm data, skipping"
+            print(error_message)
             time.sleep(3)
             raise Exception(error_message)
         elif req.status_code != 200:
@@ -635,6 +636,7 @@ class MegaData:
         # check for api errors
         if req.status_code == 429:
             error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, skipping"
+            print(error_message)
             time.sleep(3)
             raise Exception(error_message)
         elif req.status_code != 200:
