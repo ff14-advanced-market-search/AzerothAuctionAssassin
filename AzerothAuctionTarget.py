@@ -4,7 +4,7 @@
 # so it can locate them before doing the other imports
 import sys
 
-AAT_VERSION = "0.0.1"
+AAT_VERSION = "0.0.2"
 
 windowsApp_Path = None
 try:
@@ -80,6 +80,7 @@ class RecommendationsRequest(QThread):
         ilvl,
         discount_percent,
         minimum_market_value,
+        expansion_number,
     ):
         super().__init__()
         self.request_data = {
@@ -93,6 +94,7 @@ class RecommendationsRequest(QThread):
             "item_class": item_class,
             "item_subclass": item_subclass,
             "ilvl": ilvl,
+            "expansion_number": expansion_number,
         }
         self.l_discount_percent = discount_percent
         self.minimum_market_value = minimum_market_value
@@ -183,6 +185,20 @@ class RecommendationsPage(QWidget):
             # "Glyph": 16,
             # "Battle Pet": 17,
             "Profession": 19,
+        }
+        self.expansion_list = {
+            "All": -1,
+            "Classic": 1,
+            "The Burning Crusade": 2,
+            "Wrath of the Lich King": 3,
+            "Cataclysm": 4,
+            "Mists of Pandaria": 5,
+            "Warlords of Draenor": 6,
+            "Legion": 7,
+            "Battle for Azeroth": 8,
+            "Shadowlands": 9,
+            "Dragonflight": 10,
+            "The War Within": 11,
         }
         self.item_sub_category_lists = {
             "All": {"All": -1},
@@ -442,6 +458,14 @@ class RecommendationsPage(QWidget):
         self.item_category.addItems(self.item_category_list)
         self.layout.addWidget(self.item_category_label, 4, 0, 1, 1)
         self.layout.addWidget(self.item_category, 5, 0, 1, 1)
+
+        self.expansion_number = QComboBox(self)
+        self.expansion_number_label = QLabel("Expansion Number", self)
+        self.expansion_number_label.setToolTip("")
+        self.expansion_number_label.setFixedHeight(20)
+        self.expansion_number.addItems(self.expansion_list)
+        self.layout.addWidget(self.expansion_number_label, 4, 2, 1, 1)
+        self.layout.addWidget(self.expansion_number, 5, 2, 1, 1)
 
         self.item_quality = QComboBox(self)
         self.item_quality_label = QLabel("Item Quality", self)
@@ -818,8 +842,8 @@ class App(QMainWindow):
         self.title = f"Azeroth Auction Tartet v{AAT_VERSION}"
         self.left = 100
         self.top = 100
-        self.width = 550
-        self.height = 650
+        self.width = 750
+        self.height = 750
         icon_path = "target.png"
 
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
@@ -987,6 +1011,9 @@ class App(QMainWindow):
         item_quality = self.recommendation_page.item_quality_list[
             self.recommendation_page.item_quality.currentText()
         ]
+        expansion_number = self.recommendation_page.expansion_list[
+            self.recommendation_page.expansion_number.currentText()
+        ]
         self.recommendation_request_thread = RecommendationsRequest(
             realm_id=realm_id,
             region=region,
@@ -1011,6 +1038,7 @@ class App(QMainWindow):
             minimum_market_value=int(
                 self.recommendation_page.minimum_market_value.text()
             ),
+            expansion_number=expansion_number,
         )
         self.recommendation_request_thread.start()
         self.recommendation_request_thread.completed.connect(
