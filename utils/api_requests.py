@@ -79,7 +79,7 @@ def get_petnames(access_token):
 ## SADDLEBAG AND RAIDBOTS STATIC DATA CALLS ##
 
 RAW_GITHUB_BACKUP_PATH = "https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/raw/refs/heads/1.2.5.2/StaticData"
-SADDLEBAG_URL = "http://api.saddxlebagexchange.com"
+SADDLEBAG_URL = "http://api.saddlebagexchange.com"
 
 
 def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
@@ -155,7 +155,7 @@ def get_ilvl_items(ilvl=201, item_ids=[]):
             "item_subclass": [-1],
             "item_ids": item_ids,
         }
-        rfesults = requests.post(
+        results = requests.post(
             f"{SADDLEBAG_URL}/api/wow/itemdata",
             json=json_data,
         ).json()
