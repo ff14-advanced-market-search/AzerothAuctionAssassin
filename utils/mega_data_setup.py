@@ -80,7 +80,15 @@ class MegaData:
         ## should do this here and only get the names of desired items to limit data
         # get name dictionaries
         self.ITEM_NAMES = self.__set_item_names()
-        self.PET_NAMES = self.__set_pet_names()
+        try:
+            self.PET_NAMES = self.__set_pet_names()
+        except Exception as ex:
+            # it's better to avoid using saddlebag apis if possible
+            print(
+                f"Error getting pet names from blizzard api, using backup method: {ex}"
+            )
+            self.PET_NAMES = self.__set_pet_names_backup()
+
         # get static lists of ALL bonus id values from raidbots, note this is the index for all ilvl gear
         (
             self.socket_ids,
@@ -104,7 +112,7 @@ class MegaData:
         # get upload times once from api and then we get it dynamically from each scan
         self.upload_timers = {}
         # # no longer need this it works better without using upload timers from the api
-        # self.upload_timers = self.__set_upload_timers()
+        # self.upload_timers = self.__set_upload_timers_backup()
 
     #### VARIABLE RELATED FUNCTIONS ####
     @staticmethod
@@ -464,7 +472,7 @@ class MegaData:
             error_message += "- desired_ilvl_list.json\n"
             raise Exception(error_message)
 
-    def __set_upload_timers(self):
+    def __set_upload_timers_backup(self):
         update_timers = requests.post(
             "http://api.saddlebagexchange.com/api/wow/uploadtimers",
             json={},
