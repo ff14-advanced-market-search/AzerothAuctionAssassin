@@ -4,6 +4,7 @@ from tenacity import retry, stop_after_attempt
 from utils.helpers import get_wow_russian_realm_ids
 
 
+## DISCORD API CALLS ##
 def send_embed_discord(embed, webhook_url):
     # Send message
     try:
@@ -32,6 +33,7 @@ def send_discord_message(message, webhook_url):
         return False  # Failed to send the message
 
 
+## BLIZZARD API CALLS ##
 @retry(stop=stop_after_attempt(3))
 def get_wow_access_token(client_id, client_secret):
     access_token = requests.post(
@@ -64,6 +66,17 @@ def get_listings_single(connectedRealmId: int, access_token: str, region: str):
     return auction_info["auctions"]
 
 
+def get_petnames(access_token):
+    headers = {"Authorization": f"Bearer {access_token}"}
+    pet_info = requests.get(
+        f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US",
+        headers=headers,
+    ).json()["pets"]
+    pet_info = {int(pet["id"]): pet["name"] for pet in pet_info}
+    return pet_info
+
+
+## SADDLEBAG AND RAIDBOTS STATIC DATA CALLS ##
 def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     update_timers = requests.post(
         "http://api.saddlebagexchange.com/api/wow/uploadtimers",
@@ -91,16 +104,6 @@ def get_itemnames():
         json={"return_all": True},
     ).json()
     return item_names
-
-
-def get_petnames(access_token):
-    headers = {"Authorization": f"Bearer {access_token}"}
-    pet_info = requests.get(
-        f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US",
-        headers=headers,
-    ).json()["pets"]
-    pet_info = {int(pet["id"]): pet["name"] for pet in pet_info}
-    return pet_info
 
 
 def get_pet_names_backup():

@@ -1,0 +1,2289 @@
+{
+  "data": [
+    {
+      "dataSetID": -2,
+      "tableName": "EU_retail_commodityListings",
+      "dataSetName": [
+        "EU Commodities"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": -1,
+      "tableName": "NA_retail_commodityListings",
+      "dataSetName": [
+        "NA Commodities"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:50:47 GMT",
+      "lastUploadMinute": 50,
+      "lastUploadUnix": 1731689447
+    },
+    {
+      "dataSetID": 4,
+      "tableName": "4_singleMinPrices",
+      "dataSetName": [
+        "Kilrogg",
+        "Winterhoof"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:25 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685705
+    },
+    {
+      "dataSetID": 5,
+      "tableName": "5_singleMinPrices",
+      "dataSetName": [
+        "Proudmoore"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:28 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689308
+    },
+    {
+      "dataSetID": 9,
+      "tableName": "9_singleMinPrices",
+      "dataSetName": [
+        "Kil'jaeden"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 11,
+      "tableName": "11_singleMinPrices",
+      "dataSetName": [
+        "Tichondrius"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 12,
+      "tableName": "12_singleMinPrices",
+      "dataSetName": [
+        "Silver Hand",
+        "Thorium Brotherhood",
+        "Farstriders"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 47,
+      "tableName": "47_singleMinPrices",
+      "dataSetName": [
+        "Eitrigg",
+        "Shu'halo"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 52,
+      "tableName": "52_singleMinPrices",
+      "dataSetName": [
+        "Alleria",
+        "Exodar",
+        "Medivh",
+        "Khadgar"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:15 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689355
+    },
+    {
+      "dataSetID": 53,
+      "tableName": "53_singleMinPrices",
+      "dataSetName": [
+        "Hellscream",
+        "Gorefiend",
+        "Spinebreaker",
+        "Zangarmarsh",
+        "Wildhammer",
+        "Eredar"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:14 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689354
+    },
+    {
+      "dataSetID": 54,
+      "tableName": "54_singleMinPrices",
+      "dataSetName": [
+        "Blackhand",
+        "Galakrond"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:12 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689352
+    },
+    {
+      "dataSetID": 55,
+      "tableName": "55_singleMinPrices",
+      "dataSetName": [
+        "Whisperwind",
+        "Dentarg"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:15 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685755
+    },
+    {
+      "dataSetID": 57,
+      "tableName": "57_singleMinPrices",
+      "dataSetName": [
+        "Illidan"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:27 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685767
+    },
+    {
+      "dataSetID": 58,
+      "tableName": "58_singleMinPrices",
+      "dataSetName": [
+        "Stormreaver"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:11 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689351
+    },
+    {
+      "dataSetID": 60,
+      "tableName": "60_singleMinPrices",
+      "dataSetName": [
+        "Stormrage"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:26 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685766
+    },
+    {
+      "dataSetID": 61,
+      "tableName": "61_singleMinPrices",
+      "dataSetName": [
+        "Zul'jin"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:19 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685759
+    },
+    {
+      "dataSetID": 63,
+      "tableName": "63_singleMinPrices",
+      "dataSetName": [
+        "Durotan",
+        "Ysera"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:13 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685753
+    },
+    {
+      "dataSetID": 64,
+      "tableName": "64_singleMinPrices",
+      "dataSetName": [
+        "Bloodhoof",
+        "Duskwood"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:12 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689352
+    },
+    {
+      "dataSetID": 67,
+      "tableName": "67_singleMinPrices",
+      "dataSetName": [
+        "Elune",
+        "Laughing Skull",
+        "Auchindoun",
+        "Cho'gall",
+        "Gilneas"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:14 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689354
+    },
+    {
+      "dataSetID": 69,
+      "tableName": "69_singleMinPrices",
+      "dataSetName": [
+        "Arthas"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:56 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685736
+    },
+    {
+      "dataSetID": 71,
+      "tableName": "71_singleMinPrices",
+      "dataSetName": [
+        "Warsong",
+        "Gorgonnash",
+        "The Forgotten Coast",
+        "Balnazzar",
+        "Alterac Mountains",
+        "Undermine",
+        "Anvilmar"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:00 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685740
+    },
+    {
+      "dataSetID": 73,
+      "tableName": "73_singleMinPrices",
+      "dataSetName": [
+        "Bleeding Hollow"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:01 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689341
+    },
+    {
+      "dataSetID": 75,
+      "tableName": "75_singleMinPrices",
+      "dataSetName": [
+        "Argent Dawn",
+        "The Scryers"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:14 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685754
+    },
+    {
+      "dataSetID": 76,
+      "tableName": "76_singleMinPrices",
+      "dataSetName": [
+        "Sargeras"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:05 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685745
+    },
+    {
+      "dataSetID": 77,
+      "tableName": "77_singleMinPrices",
+      "dataSetName": [
+        "Azgalor",
+        "Thunderlord",
+        "Destromath",
+        "Blood Furnace",
+        "Mannoroth",
+        "Nazjatar",
+        "Azshara"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:23 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685763
+    },
+    {
+      "dataSetID": 78,
+      "tableName": "78_singleMinPrices",
+      "dataSetName": [
+        "Magtheridon",
+        "Anetheron",
+        "Ysondre",
+        "Altar of Storms"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:11 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685751
+    },
+    {
+      "dataSetID": 84,
+      "tableName": "84_singleMinPrices",
+      "dataSetName": [
+        "Dragonmaw",
+        "Uldum",
+        "Akama",
+        "Korialstrasz",
+        "Eldre'Thalas",
+        "Mug'thol",
+        "Antonidas"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 86,
+      "tableName": "86_singleMinPrices",
+      "dataSetName": [
+        "Silvermoon",
+        "Skywall",
+        "Terenas",
+        "Hydraxis",
+        "Drak'thul",
+        "Borean Tundra",
+        "Mok'Nathal",
+        "Shadowsong"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:28 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689308
+    },
+    {
+      "dataSetID": 96,
+      "tableName": "96_singleMinPrices",
+      "dataSetName": [
+        "Eonar",
+        "Skullcrusher",
+        "Gul'dan",
+        "Zuluhed",
+        "Ursin",
+        "Andorhal",
+        "Black Dragonflight",
+        "Velen",
+        "Scilla"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:17 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685757
+    },
+    {
+      "dataSetID": 99,
+      "tableName": "99_singleMinPrices",
+      "dataSetName": [
+        "Llane",
+        "Arygos"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:12 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685752
+    },
+    {
+      "dataSetID": 100,
+      "tableName": "100_singleMinPrices",
+      "dataSetName": [
+        "Earthen Ring"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:13 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689353
+    },
+    {
+      "dataSetID": 104,
+      "tableName": "104_singleMinPrices",
+      "dataSetName": [
+        "Malygos",
+        "Garona",
+        "Lightning's Blade",
+        "Icecrown",
+        "Onyxia",
+        "Burning Blade"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:13 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689353
+    },
+    {
+      "dataSetID": 106,
+      "tableName": "106_singleMinPrices",
+      "dataSetName": [
+        "Aggramar",
+        "Fizzcrank"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:14 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689354
+    },
+    {
+      "dataSetID": 113,
+      "tableName": "113_singleMinPrices",
+      "dataSetName": [
+        "Suramar",
+        "Windrunner",
+        "Darrowmere",
+        "Draka"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 114,
+      "tableName": "114_singleMinPrices",
+      "dataSetName": [
+        "Dragonblight",
+        "Fenris"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:25 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685705
+    },
+    {
+      "dataSetID": 115,
+      "tableName": "115_singleMinPrices",
+      "dataSetName": [
+        "Draenor",
+        "Echo Isles"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 117,
+      "tableName": "117_singleMinPrices",
+      "dataSetName": [
+        "Bronzebeard",
+        "Shandris"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:27 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689307
+    },
+    {
+      "dataSetID": 118,
+      "tableName": "118_singleMinPrices",
+      "dataSetName": [
+        "Feathermoon",
+        "Scarlet Crusade"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:27 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689307
+    },
+    {
+      "dataSetID": 120,
+      "tableName": "120_singleMinPrices",
+      "dataSetName": [
+        "Darkspear"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:27 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689307
+    },
+    {
+      "dataSetID": 121,
+      "tableName": "121_singleMinPrices",
+      "dataSetName": [
+        "Azjol-Nerub",
+        "Muradin",
+        "Nordrassil",
+        "Blackrock",
+        "Khaz Modan"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:27 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689307
+    },
+    {
+      "dataSetID": 125,
+      "tableName": "125_singleMinPrices",
+      "dataSetName": [
+        "Shadow Council",
+        "Sisters of Elune",
+        "Cenarion Circle",
+        "Blackwater Raiders"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:27 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689307
+    },
+    {
+      "dataSetID": 127,
+      "tableName": "127_singleMinPrices",
+      "dataSetName": [
+        "Firetree",
+        "Drak'Tharon",
+        "Rivendare",
+        "Vashj",
+        "Spirestone",
+        "Malorne",
+        "Frostwolf",
+        "Stormscale"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 151,
+      "tableName": "151_singleMinPrices",
+      "dataSetName": [
+        "Runetotem",
+        "Uther"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:25 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685705
+    },
+    {
+      "dataSetID": 154,
+      "tableName": "154_singleMinPrices",
+      "dataSetName": [
+        "Detheroc",
+        "Dethecus",
+        "Lethon",
+        "Blackwing Lair",
+        "Shadowmoon",
+        "Haomarush"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:12 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685752
+    },
+    {
+      "dataSetID": 155,
+      "tableName": "155_singleMinPrices",
+      "dataSetName": [
+        "Kalecgos",
+        "Shattered Halls",
+        "Executus",
+        "Deathwing"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:54 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689334
+    },
+    {
+      "dataSetID": 157,
+      "tableName": "157_singleMinPrices",
+      "dataSetName": [
+        "Dark Iron",
+        "Shattered Hand",
+        "Coilfang",
+        "Demon Soul",
+        "Dalvengyr"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:56 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689336
+    },
+    {
+      "dataSetID": 158,
+      "tableName": "158_singleMinPrices",
+      "dataSetName": [
+        "Greymane",
+        "Tanaris"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:12 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689352
+    },
+    {
+      "dataSetID": 160,
+      "tableName": "160_singleMinPrices",
+      "dataSetName": [
+        "Staghelm",
+        "Dawnbringer",
+        "Madoran",
+        "Azuremyst"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:14 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689354
+    },
+    {
+      "dataSetID": 162,
+      "tableName": "162_singleMinPrices",
+      "dataSetName": [
+        "Emerald Dream"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:19 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685759
+    },
+    {
+      "dataSetID": 163,
+      "tableName": "163_singleMinPrices",
+      "dataSetName": [
+        "Maelstrom",
+        "Twisting Nether",
+        "Lightninghoof",
+        "The Venture Co",
+        "Ravenholdt"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:16 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685756
+    },
+    {
+      "dataSetID": 509,
+      "tableName": "509_singleMinPrices",
+      "dataSetName": [
+        "Garona",
+        "Sargeras",
+        "Ner'zhul"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 510,
+      "tableName": "510_singleMinPrices",
+      "dataSetName": [
+        "Vol'jin",
+        "Chants eternels"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 512,
+      "tableName": "512_singleMinPrices",
+      "dataSetName": [
+        "Arak-arahm",
+        "Rashgarroth",
+        "Kael'thas",
+        "Throk'Feroth"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 531,
+      "tableName": "531_singleMinPrices",
+      "dataSetName": [
+        "Dethecus",
+        "Theradras",
+        "Onyxia",
+        "Mug'thol",
+        "Terrordar"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 570,
+      "tableName": "570_singleMinPrices",
+      "dataSetName": [
+        "Lothar",
+        "Baelgun",
+        "Azshara",
+        "Krag'jin"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 578,
+      "tableName": "578_singleMinPrices",
+      "dataSetName": [
+        "Arthas",
+        "Blutkessel",
+        "Wrathbringer",
+        "Durotan",
+        "Kel'Thuzad",
+        "Vek'lor",
+        "Tirion"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 580,
+      "tableName": "580_singleMinPrices",
+      "dataSetName": [
+        "Blackmoore",
+        "Tichondrius",
+        "Lordaeron"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:36 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688056
+    },
+    {
+      "dataSetID": 581,
+      "tableName": "581_singleMinPrices",
+      "dataSetName": [
+        "Blackrock"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 604,
+      "tableName": "604_singleMinPrices",
+      "dataSetName": [
+        "Thrall",
+        "Kargath",
+        "Ambossar"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 612,
+      "tableName": "612_singleMinPrices",
+      "dataSetName": [
+        "Nefarian",
+        "Gilneas",
+        "Destromath",
+        "Ulduar",
+        "Mannoroth",
+        "Gorgonnash",
+        "Nera'thor"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 633,
+      "tableName": "633_singleMinPrices",
+      "dataSetName": [
+        "Kor'gall",
+        "Executus",
+        "Shattered Hand",
+        "Bloodfeather",
+        "Terokkar",
+        "Saurfang",
+        "Darkspear",
+        "Burning Steppes"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1070,
+      "tableName": "1070_singleMinPrices",
+      "dataSetName": [
+        "Alexstrasza",
+        "Terokkar"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:14 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685754
+    },
+    {
+      "dataSetID": 1071,
+      "tableName": "1071_singleMinPrices",
+      "dataSetName": [
+        "Kirin Tor",
+        "Steamwheedle Cartel",
+        "Sentinels"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:15 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685755
+    },
+    {
+      "dataSetID": 1072,
+      "tableName": "1072_singleMinPrices",
+      "dataSetName": [
+        "Ravencrest",
+        "Uldaman"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:56 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689336
+    },
+    {
+      "dataSetID": 1080,
+      "tableName": "1080_singleMinPrices",
+      "dataSetName": [
+        "Khadgar",
+        "Bloodhoof"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1082,
+      "tableName": "1082_singleMinPrices",
+      "dataSetName": [
+        "Kul Tiras",
+        "Alonsus",
+        "Anachronos"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1084,
+      "tableName": "1084_singleMinPrices",
+      "dataSetName": [
+        "Dentarg",
+        "Tarren Mill"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:37 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688057
+    },
+    {
+      "dataSetID": 1085,
+      "tableName": "1085_singleMinPrices",
+      "dataSetName": [
+        "Moonglade",
+        "Steamwheedle Cartel",
+        "The Sha'tar"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1091,
+      "tableName": "1091_singleMinPrices",
+      "dataSetName": [
+        "Emeriss",
+        "Twilight's Hammer",
+        "Bloodscalp",
+        "Crushridge",
+        "Agamaggan",
+        "Hakkar"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1092,
+      "tableName": "1092_singleMinPrices",
+      "dataSetName": [
+        "Drak'thul",
+        "Burning Blade"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1096,
+      "tableName": "1096_singleMinPrices",
+      "dataSetName": [
+        "Scarshield Legion",
+        "Sporeggar",
+        "Earthen Ring",
+        "Defias Brotherhood",
+        "Ravenholdt",
+        "Darkmoon Faire",
+        "The Venture Co"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 1097,
+      "tableName": "1097_singleMinPrices",
+      "dataSetName": [
+        "Ysera",
+        "Malorne"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1098,
+      "tableName": "1098_singleMinPrices",
+      "dataSetName": [
+        "Malygos",
+        "Malfurion"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1099,
+      "tableName": "1099_singleMinPrices",
+      "dataSetName": [
+        "Rexxar",
+        "Alleria"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1104,
+      "tableName": "1104_singleMinPrices",
+      "dataSetName": [
+        "Anetheron",
+        "Kil'jaeden",
+        "Rajaxx",
+        "Festung der Sturme",
+        "Gul'dan",
+        "Nathrezim"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1105,
+      "tableName": "1105_singleMinPrices",
+      "dataSetName": [
+        "Nazjatar",
+        "Zuluhed",
+        "Dalvengyr",
+        "Aman'Thul",
+        "Frostmourne",
+        "Anub'arak"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1121,
+      "tableName": "1121_singleMinPrices",
+      "dataSetName": [
+        "Die Arguswacht",
+        "Die ewige Wacht",
+        "Die Todeskrallen",
+        "Das Syndikat",
+        "Der abyssische Rat",
+        "Kult der Verdammten",
+        "Das Konsortium",
+        "Die Silberne Hand"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1122,
+      "tableName": "1122_singleMinPrices",
+      "dataSetName": [
+        "Uldaman",
+        "Drek'Thar",
+        "Krasus",
+        "Eitrigg"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1127,
+      "tableName": "1127_singleMinPrices",
+      "dataSetName": [
+        "Confrerie du Thorium",
+        "La Croisade ecarlate",
+        "Culte de la Rive noire",
+        "Les Sentinelles",
+        "Kirin Tor",
+        "Les Clairvoyants",
+        "Conseil des Ombres"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1129,
+      "tableName": "1129_singleMinPrices",
+      "dataSetName": [
+        "Agamaggan",
+        "Kargath",
+        "Burning Legion",
+        "Thunderhorn",
+        "The Underbog",
+        "Blade's Edge",
+        "Archimonde",
+        "Norgannon",
+        "Jaedenar"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:17 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685757
+    },
+    {
+      "dataSetID": 1136,
+      "tableName": "1136_singleMinPrices",
+      "dataSetName": [
+        "Aegwynn",
+        "Gurubashi",
+        "Bonechewer",
+        "Hakkar",
+        "Garrosh",
+        "Daggerspine"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:28 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689308
+    },
+    {
+      "dataSetID": 1138,
+      "tableName": "1138_singleMinPrices",
+      "dataSetName": [
+        "Chromaggus",
+        "Nathrezim",
+        "Smolderthorn",
+        "Anub'arak",
+        "Arathor",
+        "Garithos",
+        "Drenden",
+        "Crushridge"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:25 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685705
+    },
+    {
+      "dataSetID": 1147,
+      "tableName": "1147_singleMinPrices",
+      "dataSetName": [
+        "Kul Tiras",
+        "Bladefist"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 1151,
+      "tableName": "1151_singleMinPrices",
+      "dataSetName": [
+        "Rexxar",
+        "Misha"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:27 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689307
+    },
+    {
+      "dataSetID": 1168,
+      "tableName": "1168_singleMinPrices",
+      "dataSetName": [
+        "Cairne",
+        "Cenarius",
+        "Frostmane",
+        "Tortheldrin",
+        "Ner'zhul",
+        "Korgath",
+        "Perenolde"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:48:27 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731689307
+    },
+    {
+      "dataSetID": 1171,
+      "tableName": "1171_singleMinPrices",
+      "dataSetName": [
+        "Wyrmrest Accord"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 1175,
+      "tableName": "1175_singleMinPrices",
+      "dataSetName": [
+        "Trollbane",
+        "Grizzly Hills",
+        "Malfurion",
+        "Lothar",
+        "Kael'thas",
+        "Gnomeregan",
+        "Moonrunner",
+        "Ghostlands"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:19 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685759
+    },
+    {
+      "dataSetID": 1184,
+      "tableName": "1184_singleMinPrices",
+      "dataSetName": [
+        "Vek'nilash",
+        "Nazgrel",
+        "Nesingwary"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:25 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685705
+    },
+    {
+      "dataSetID": 1185,
+      "tableName": "1185_singleMinPrices",
+      "dataSetName": [
+        "Sen'jin",
+        "Dunemaul",
+        "Maiev",
+        "Bloodscalp",
+        "Quel'dorei",
+        "Boulderfist",
+        "Stonemaul"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 1190,
+      "tableName": "1190_singleMinPrices",
+      "dataSetName": [
+        "Baelgun",
+        "Doomhammer"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:14 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685754
+    },
+    {
+      "dataSetID": 1301,
+      "tableName": "1301_singleMinPrices",
+      "dataSetName": [
+        "Outland"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1302,
+      "tableName": "1302_singleMinPrices",
+      "dataSetName": [
+        "Archimonde"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1303,
+      "tableName": "1303_singleMinPrices",
+      "dataSetName": [
+        "Grim Batol",
+        "Aggra (Portuguus)",
+        "Frostmane"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1305,
+      "tableName": "1305_singleMinPrices",
+      "dataSetName": [
+        "Kazzak"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:37 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688057
+    },
+    {
+      "dataSetID": 1307,
+      "tableName": "1307_singleMinPrices",
+      "dataSetName": [
+        "Chamber of Aspects"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1309,
+      "tableName": "1309_singleMinPrices",
+      "dataSetName": [
+        "Pozzo dell'Eternita"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1313,
+      "tableName": "1313_singleMinPrices",
+      "dataSetName": [
+        "Wildhammer",
+        "Thunderhorn"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1315,
+      "tableName": "1315_singleMinPrices",
+      "dataSetName": [
+        "Elune",
+        "Varimathras"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1316,
+      "tableName": "1316_singleMinPrices",
+      "dataSetName": [
+        "Nemesis"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1325,
+      "tableName": "1325_singleMinPrices",
+      "dataSetName": [
+        "Aggramar",
+        "Hellscream"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1329,
+      "tableName": "1329_singleMinPrices",
+      "dataSetName": [
+        "Ravencrest"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 1331,
+      "tableName": "1331_singleMinPrices",
+      "dataSetName": [
+        "Suramar",
+        "Medivh"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1335,
+      "tableName": "1335_singleMinPrices",
+      "dataSetName": [
+        "Ysondre"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1378,
+      "tableName": "1378_singleMinPrices",
+      "dataSetName": [
+        "Dun Modr",
+        "C'Thun"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1379,
+      "tableName": "1379_singleMinPrices",
+      "dataSetName": [
+        "Zul'jin",
+        "Uldum",
+        "Sanguino",
+        "Shen'dralar"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 1384,
+      "tableName": "1384_singleMinPrices",
+      "dataSetName": [
+        "Tyrande",
+        "Los Errantes",
+        "Colinas Pardas"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1385,
+      "tableName": "1385_singleMinPrices",
+      "dataSetName": [
+        "Exodar",
+        "Minahonda"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1388,
+      "tableName": "1388_singleMinPrices",
+      "dataSetName": [
+        "Lightbringer",
+        "Mazrigos"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1390,
+      "tableName": "1390_singleMinPrices",
+      "dataSetName": [
+        "Hyjal"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 1393,
+      "tableName": "1393_singleMinPrices",
+      "dataSetName": [
+        "Bronze Dragonflight",
+        "Nordrassil"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1396,
+      "tableName": "1396_singleMinPrices",
+      "dataSetName": [
+        "Quel'Thalas",
+        "Azjol-Nerub"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1400,
+      "tableName": "1400_singleMinPrices",
+      "dataSetName": [
+        "Un'Goro",
+        "Sen'jin",
+        "Area 52"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1401,
+      "tableName": "1401_singleMinPrices",
+      "dataSetName": [
+        "Garrosh",
+        "Shattrath",
+        "Nozdormu",
+        "Perenolde",
+        "Teldrassil"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1402,
+      "tableName": "1402_singleMinPrices",
+      "dataSetName": [
+        "Turalyon",
+        "Doomhammer"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 1403,
+      "tableName": "1403_singleMinPrices",
+      "dataSetName": [
+        "Draenor"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:36 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688056
+    },
+    {
+      "dataSetID": 1405,
+      "tableName": "1405_singleMinPrices",
+      "dataSetName": [
+        "Todeswache",
+        "Zirkel des Cenarius",
+        "Der Mithrilorden",
+        "Forscherliga",
+        "Der Rat von Dalaran",
+        "Die Nachtwache"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1406,
+      "tableName": "1406_singleMinPrices",
+      "dataSetName": [
+        "Arygos",
+        "Khaz'goroth"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1408,
+      "tableName": "1408_singleMinPrices",
+      "dataSetName": [
+        "Norgannon",
+        "Dun Morogh"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 1416,
+      "tableName": "1416_singleMinPrices",
+      "dataSetName": [
+        "Blade's Edge",
+        "Eonar",
+        "Vek'nilash",
+        "Aerie Peak",
+        "Bronzebeard"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1417,
+      "tableName": "1417_singleMinPrices",
+      "dataSetName": [
+        "Azuremyst",
+        "Stormrage"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1425,
+      "tableName": "1425_singleMinPrices",
+      "dataSetName": [
+        "Drakkari"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:12 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685752
+    },
+    {
+      "dataSetID": 1426,
+      "tableName": "1426_singleMinPrices",
+      "dataSetName": [
+        "Aerie Peak"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:14 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685754
+    },
+    {
+      "dataSetID": 1427,
+      "tableName": "1427_singleMinPrices",
+      "dataSetName": [
+        "Ragnaros"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:16 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685756
+    },
+    {
+      "dataSetID": 1428,
+      "tableName": "1428_singleMinPrices",
+      "dataSetName": [
+        "Quel'Thalas"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:16 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689356
+    },
+    {
+      "dataSetID": 1587,
+      "tableName": "1587_singleMinPrices",
+      "dataSetName": [
+        "Hellfire",
+        "Runetotem",
+        "Arathor",
+        "Kilrogg",
+        "Nagrand"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1596,
+      "tableName": "1596_singleMinPrices",
+      "dataSetName": [
+        "Karazhan",
+        "Dragonblight",
+        "The Maelstrom",
+        "Ghostlands",
+        "Lightning's Blade",
+        "Deathwing"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1597,
+      "tableName": "1597_singleMinPrices",
+      "dataSetName": [
+        "Auchindoun",
+        "Dunemaul",
+        "Sylvanas",
+        "Jaedenar"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1598,
+      "tableName": "1598_singleMinPrices",
+      "dataSetName": [
+        "Shattered Halls",
+        "Chromaggus",
+        "Sunstrider",
+        "Balnazzar",
+        "Talnivarr",
+        "Ahn'Qiraj",
+        "Daggerspine",
+        "Laughing Skull",
+        "Trollbane",
+        "Boulderfist"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1602,
+      "tableName": "1602_singleMinPrices",
+      "dataSetName": [
+        "Gordunni"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1604,
+      "tableName": "1604_singleMinPrices",
+      "dataSetName": [
+        "Soulflayer"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1605,
+      "tableName": "1605_singleMinPrices",
+      "dataSetName": [
+        "Deathguard"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1614,
+      "tableName": "1614_singleMinPrices",
+      "dataSetName": [
+        "Galakrond",
+        "Deepholm",
+        "Razuvious"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1615,
+      "tableName": "1615_singleMinPrices",
+      "dataSetName": [
+        "Howling Fjord"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1618,
+      "tableName": "1618_singleMinPrices",
+      "dataSetName": [
+        "Die Aldor"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1621,
+      "tableName": "1621_singleMinPrices",
+      "dataSetName": [
+        "Marecage de Zangar",
+        "Cho'gall",
+        "Eldre'Thalas",
+        "Sinstralis",
+        "Dalaran"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 1623,
+      "tableName": "1623_singleMinPrices",
+      "dataSetName": [
+        "Fordragon"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1624,
+      "tableName": "1624_singleMinPrices",
+      "dataSetName": [
+        "Naxxramas",
+        "Arathi",
+        "Illidan",
+        "Temple noir"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1922,
+      "tableName": "1922_singleMinPrices",
+      "dataSetName": [
+        "Azuregos"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1923,
+      "tableName": "1923_singleMinPrices",
+      "dataSetName": [
+        "Ashenvale"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1925,
+      "tableName": "1925_singleMinPrices",
+      "dataSetName": [
+        "Eversong"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 1928,
+      "tableName": "1928_singleMinPrices",
+      "dataSetName": [
+        "Goldrinn",
+        "Lich King",
+        "Greymane"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 1929,
+      "tableName": "1929_singleMinPrices",
+      "dataSetName": [
+        "Blackscar",
+        "Deathweaver",
+        "Borean Tundra",
+        "Thermaplugg",
+        "Grom",
+        "Booty Bay"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:32 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688052
+    },
+    {
+      "dataSetID": 2073,
+      "tableName": "2073_singleMinPrices",
+      "dataSetName": [
+        "Stormscale"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 2074,
+      "tableName": "2074_singleMinPrices",
+      "dataSetName": [
+        "Terenas",
+        "Emerald Dream"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 3207,
+      "tableName": "3207_singleMinPrices",
+      "dataSetName": [
+        "Goldrinn"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:57 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685737
+    },
+    {
+      "dataSetID": 3208,
+      "tableName": "3208_singleMinPrices",
+      "dataSetName": [
+        "Nemesis",
+        "Tol Barad"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:56 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685736
+    },
+    {
+      "dataSetID": 3209,
+      "tableName": "3209_singleMinPrices",
+      "dataSetName": [
+        "Azralon"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:19 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685759
+    },
+    {
+      "dataSetID": 3234,
+      "tableName": "3234_singleMinPrices",
+      "dataSetName": [
+        "Gallywix"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:10 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685750
+    },
+    {
+      "dataSetID": 3391,
+      "tableName": "3391_singleMinPrices",
+      "dataSetName": [
+        "Silvermoon"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:36 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688056
+    },
+    {
+      "dataSetID": 3656,
+      "tableName": "3656_singleMinPrices",
+      "dataSetName": [
+        "Spinebreaker",
+        "Dragonmaw",
+        "Vashj",
+        "Stormreaver",
+        "Haomarush"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 3657,
+      "tableName": "3657_singleMinPrices",
+      "dataSetName": [
+        "Genjuros",
+        "Zenedar",
+        "Bladefist",
+        "Neptulon",
+        "Frostwhisper",
+        "Darksorrow"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 3661,
+      "tableName": "3661_singleMinPrices",
+      "dataSetName": [
+        "Hyjal"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 3666,
+      "tableName": "3666_singleMinPrices",
+      "dataSetName": [
+        "Shadowsong",
+        "Aszune"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 3674,
+      "tableName": "3674_singleMinPrices",
+      "dataSetName": [
+        "Twisting Nether"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:36 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688056
+    },
+    {
+      "dataSetID": 3675,
+      "tableName": "3675_singleMinPrices",
+      "dataSetName": [
+        "Moon Guard"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:27 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685707
+    },
+    {
+      "dataSetID": 3676,
+      "tableName": "3676_singleMinPrices",
+      "dataSetName": [
+        "Area 52"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:10 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689350
+    },
+    {
+      "dataSetID": 3678,
+      "tableName": "3678_singleMinPrices",
+      "dataSetName": [
+        "Thrall"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:01 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685741
+    },
+    {
+      "dataSetID": 3679,
+      "tableName": "3679_singleMinPrices",
+      "dataSetName": [
+        "Aegwynn"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 3681,
+      "tableName": "3681_singleMinPrices",
+      "dataSetName": [
+        "Magtheridon"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 3682,
+      "tableName": "3682_singleMinPrices",
+      "dataSetName": [
+        "Ragnaros"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 3683,
+      "tableName": "3683_singleMinPrices",
+      "dataSetName": [
+        "Dalaran"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:06 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685746
+    },
+    {
+      "dataSetID": 3684,
+      "tableName": "3684_singleMinPrices",
+      "dataSetName": [
+        "Mal'Ganis"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:49:20 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731685760
+    },
+    {
+      "dataSetID": 3685,
+      "tableName": "3685_singleMinPrices",
+      "dataSetName": [
+        "Turalyon"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:03 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689343
+    },
+    {
+      "dataSetID": 3686,
+      "tableName": "3686_singleMinPrices",
+      "dataSetName": [
+        "Antonidas"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 3690,
+      "tableName": "3690_singleMinPrices",
+      "dataSetName": [
+        "Khaz Modan"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 3691,
+      "tableName": "3691_singleMinPrices",
+      "dataSetName": [
+        "Echsenkessel",
+        "Blackhand",
+        "Mal'Ganis",
+        "Taerar"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:36 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688056
+    },
+    {
+      "dataSetID": 3692,
+      "tableName": "3692_singleMinPrices",
+      "dataSetName": [
+        "Eredar"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:35 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688055
+    },
+    {
+      "dataSetID": 3693,
+      "tableName": "3693_singleMinPrices",
+      "dataSetName": [
+        "Kel'Thuzad"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:49:04 GMT",
+      "lastUploadMinute": 49,
+      "lastUploadUnix": 1731689344
+    },
+    {
+      "dataSetID": 3694,
+      "tableName": "3694_singleMinPrices",
+      "dataSetName": [
+        "Lightbringer"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:48:26 GMT",
+      "lastUploadMinute": 48,
+      "lastUploadUnix": 1731685706
+    },
+    {
+      "dataSetID": 3696,
+      "tableName": "3696_singleMinPrices",
+      "dataSetName": [
+        "Nethersturm",
+        "Alexstrasza",
+        "Madmortem",
+        "Proudmoore"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 3702,
+      "tableName": "3702_singleMinPrices",
+      "dataSetName": [
+        "Argent Dawn"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:37 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688057
+    },
+    {
+      "dataSetID": 3703,
+      "tableName": "3703_singleMinPrices",
+      "dataSetName": [
+        "Frostwolf"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:33 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688053
+    },
+    {
+      "dataSetID": 3713,
+      "tableName": "3713_singleMinPrices",
+      "dataSetName": [
+        "Al'Akir",
+        "Skullcrusher",
+        "Xavius",
+        "Burning Legion"
+      ],
+      "region": "EU",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:27:34 GMT",
+      "lastUploadMinute": 27,
+      "lastUploadUnix": 1731688054
+    },
+    {
+      "dataSetID": 3721,
+      "tableName": "3721_singleMinPrices",
+      "dataSetName": [
+        "Caelestrasz",
+        "Nagrand",
+        "Saurfang"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:50:42 GMT",
+      "lastUploadMinute": 50,
+      "lastUploadUnix": 1731685842
+    },
+    {
+      "dataSetID": 3723,
+      "tableName": "3723_singleMinPrices",
+      "dataSetName": [
+        "Barthilas"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:50:45 GMT",
+      "lastUploadMinute": 50,
+      "lastUploadUnix": 1731685845
+    },
+    {
+      "dataSetID": 3725,
+      "tableName": "3725_singleMinPrices",
+      "dataSetName": [
+        "Frostmourne",
+        "Dreadmaul",
+        "Thaurissan",
+        "Jubei'Thos",
+        "Gundrak"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 15:51:00 GMT",
+      "lastUploadMinute": 51,
+      "lastUploadUnix": 1731685860
+    },
+    {
+      "dataSetID": 3726,
+      "tableName": "3726_singleMinPrices",
+      "dataSetName": [
+        "Khaz'goroth",
+        "Aman'Thul",
+        "Dath'Remar"
+      ],
+      "region": "NA",
+      "lastUploadTimeRaw": "Fri, 15 Nov 2024 16:50:47 GMT",
+      "lastUploadMinute": 50,
+      "lastUploadUnix": 1731689447
+    }
+  ]
+}

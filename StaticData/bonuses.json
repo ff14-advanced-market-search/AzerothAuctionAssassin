@@ -14855,8 +14855,8 @@
   },
   "3578": {
     "id": 3578,
-    "ilevel": "1 @plvl 1 - 327 @plvl 327",
-    "curveId": 3039
+    "ilevel": "5 @plvl 1 - 551 @plvl 551",
+    "curveId": 14386
   },
   "3579": {
     "id": 3579,
@@ -15142,8 +15142,8 @@
   },
   "3632": {
     "id": 3632,
-    "ilevel": "1 @plvl 1 - 327 @plvl 327",
-    "curveId": 3039
+    "ilevel": "5 @plvl 1 - 551 @plvl 551",
+    "curveId": 14386
   },
   "3633": {
     "id": 3633,
@@ -32643,28 +32643,28 @@
   },
   "7175": {
     "id": 7175,
-    "ilevel": "29 @plvl 0 - 29 @plvl 29",
-    "curveId": 19958
+    "base_level": 29,
+    "base_level_priority": 1
   },
   "7176": {
     "id": 7176,
-    "ilevel": "65 @plvl 0 - 65 @plvl 65",
-    "curveId": 19968
+    "base_level": 65,
+    "base_level_priority": 1
   },
   "7177": {
     "id": 7177,
-    "ilevel": "94 @plvl 0 - 94 @plvl 94",
-    "curveId": 19978
+    "base_level": 94,
+    "base_level_priority": 1
   },
   "7178": {
     "id": 7178,
-    "ilevel": "127 @plvl 0 - 127 @plvl 127",
-    "curveId": 19988
+    "base_level": 127,
+    "base_level_priority": 1
   },
   "7179": {
     "id": 7179,
-    "ilevel": "163 @plvl 0 - 163 @plvl 163",
-    "curveId": 19993
+    "base_level": 163,
+    "base_level_priority": 1
   },
   "7180": {
     "id": 7180,
@@ -83046,12 +83046,12 @@
   },
   "11071": {
     "id": 11071,
-    "ilevel": "5 @plvl 1 - 584 @plvl 584",
+    "ilevel": "24 @plvl 1 - 584 @plvl 584",
     "curveId": 74088
   },
   "11072": {
     "id": 11072,
-    "ilevel": "21 @plvl 1 - 541 @plvl 541",
+    "ilevel": "19 @plvl 1 - 541 @plvl 541",
     "curveId": 74089,
     "tag": "Timewarped"
   },
@@ -84808,8 +84808,8 @@
   },
   "11332": {
     "id": 11332,
-    "ilevel": "350 @plvl 0 - 350 @plvl 350",
-    "curveId": 78115
+    "base_level": 350,
+    "base_level_priority": 1
   },
   "11334": {
     "id": 11334,
@@ -87426,5 +87426,27 @@
     "ilevel": "363 @plvl 55 - 554 @plvl 554",
     "curveId": 71409,
     "quality": 3
+  },
+  "12070": {
+    "id": 12070,
+    "ilevel": "369 @plvl 55 - 554 @plvl 554",
+    "curveId": 71410,
+    "quality": 4
+  },
+  "12092": {
+    "id": 12092,
+    "tag": "Raid Finder"
+  },
+  "12093": {
+    "id": 12093,
+    "tag": "Timewarped"
+  },
+  "12094": {
+    "id": 12094,
+    "tag": "Heroic"
+  },
+  "12095": {
+    "id": 12095,
+    "tag": "Mythic"
   }
 }
