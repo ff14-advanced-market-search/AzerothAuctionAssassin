@@ -77,9 +77,14 @@ def get_petnames(access_token):
 
 
 ## SADDLEBAG AND RAIDBOTS STATIC DATA CALLS ##
+
+RAW_GITHUB_BACKUP_PATH = "https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/raw/refs/heads/1.2.5.2/StaticData"
+SADDLEBAG_URL = "http://api.saddxlebagexchange.com"
+
+
 def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     update_timers = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/uploadtimers",
+        f"{SADDLEBAG_URL}/api/wow/uploadtimers",
         json={},
     ).json()["data"]
     server_update_times = {
@@ -99,48 +104,64 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
 
 
 def get_itemnames():
-    item_names = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/itemnames",
-        json={"return_all": True},
-    ).json()
+    try:
+        item_names = requests.post(
+            f"{SADDLEBAG_URL}/api/wow/itemnames",
+            json={"return_all": True},
+        ).json()
+    except Exception as e:
+        print(f"Failed to get item names getting backup from github: {e}")
+        item_names = requests.get(f"{RAW_GITHUB_BACKUP_PATH}/item_names.json").json()
     return item_names
 
 
 def get_pet_names_backup():
-    pet_info = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/itemnames",
-        json={"pets": True},
-    ).json()
+    try:
+        pet_info = requests.post(
+            f"{SADDLEBAG_URL}/api/wow/itemnames",
+            json={"pets": True},
+        ).json()
+    except Exception as e:
+        print(f"Failed to get pet names getting backup from github: {e}")
+        pet_info = requests.get(f"{RAW_GITHUB_BACKUP_PATH}/pet_names.json").json()
     pet_info = {int(k): v for k, v in pet_info.items()}
     return pet_info
 
 
 def get_raidbots_bonus_ids():
-    # thanks so much to Seriallos (Raidbots) and BinaryHabitat (GoblinStockAlerts) for organizing this data!
-    bonus_ids = requests.get(
-        "https://www.raidbots.com/static/data/live/bonuses.json"
-    ).json()
+    try:
+        # thanks so much to Seriallos (Raidbots) and BinaryHabitat (GoblinStockAlerts) for organizing this data!
+        bonus_ids = requests.get(
+            "https://www.raidbots.com/static/data/live/bonuses.json"
+        ).json()
+    except Exception as e:
+        print(f"Failed to get raidbots bonus ids getting backup from github: {e}")
+        bonus_ids = requests.get(f"{RAW_GITHUB_BACKUP_PATH}/bonuses.json").json()
     return {int(id): data for id, data in bonus_ids.items()}
 
 
 def get_ilvl_items(ilvl=201, item_ids=[]):
-    # if no item_ids are given, get all items at or above the given ilvl
-    # this gets weird when someone wants a high ilvl item as we have the base ilvl in the DB
-    # but not the max ilvl, so we just set it to 201
-    if len(item_ids) == 0:
-        ilvl = 201
-    json_data = {
-        "ilvl": ilvl,
-        "itemQuality": -1,
-        "required_level": -1,
-        "item_class": [2, 4],
-        "item_subclass": [-1],
-        "item_ids": item_ids,
-    }
-    results = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/itemdata",
-        json=json_data,
-    ).json()
+    try:
+        # if no item_ids are given, get all items at or above the given ilvl
+        # this gets weird when someone wants a high ilvl item as we have the base ilvl in the DB
+        # but not the max ilvl, so we just set it to 201
+        if len(item_ids) == 0:
+            ilvl = 201
+        json_data = {
+            "ilvl": ilvl,
+            "itemQuality": -1,
+            "required_level": -1,
+            "item_class": [2, 4],
+            "item_subclass": [-1],
+            "item_ids": item_ids,
+        }
+        rfesults = requests.post(
+            f"{SADDLEBAG_URL}/api/wow/itemdata",
+            json=json_data,
+        ).json()
+    except Exception as e:
+        print(f"Failed to get ilvl items getting backup from github: {e}")
+        results = requests.get(f"{RAW_GITHUB_BACKUP_PATH}/ilvl_items.json").json()
     # if len(results) == 0:
     #     raise Exception(
     #         f"No items found at or above a base ilvl of {ilvl}, contact us on discord"
