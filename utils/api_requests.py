@@ -148,7 +148,9 @@ def get_ilvl_items(ilvl=201, item_ids=[]):
         # if no item_ids are given, get all items at or above the given ilvl
         # this gets weird when someone wants a high ilvl item as we have the base ilvl in the DB
         # but not the max ilvl, so we just set it to 201
-        if len(item_ids) == 0:
+        if item_ids is None:
+            item_ids = []
+        if not item_ids:
             ilvl = 201
         json_data = {
             "ilvl": ilvl,
@@ -161,6 +163,7 @@ def get_ilvl_items(ilvl=201, item_ids=[]):
         results = requests.post(
             f"{SADDLEBAG_URL}/api/wow/itemdata",
             json=json_data,
+            timeout=10,
         ).json()
     except Exception as e:
         print(f"Failed to get ilvl items getting backup from github: {e}")
