@@ -8,6 +8,9 @@ from utils.api_requests import (
     get_itemnames,
     get_ilvl_items,
     send_embed_discord,
+    get_pet_names_backup,
+    get_petnames,
+    get_update_timers_backup,
 )
 from utils.bonus_ids import get_bonus_id_sets
 from utils.helpers import get_wow_russian_realm_ids
@@ -81,13 +84,13 @@ class MegaData:
         # get name dictionaries
         self.ITEM_NAMES = self.__set_item_names()
         try:
-            self.PET_NAMES = self.__set_pet_names()
+            self.PET_NAMES = get_petnames(self.access_token)
         except Exception as ex:
             # it's better to avoid using saddlebag apis if possible
             print(
                 f"Error getting pet names from blizzard api, using backup method: {ex}"
             )
-            self.PET_NAMES = self.__set_pet_names_backup()
+            self.PET_NAMES = get_pet_names_backup()
 
         # get static lists of ALL bonus id values from raidbots, note this is the index for all ilvl gear
         (
@@ -112,7 +115,7 @@ class MegaData:
         # get upload times once from api and then we get it dynamically from each scan
         self.upload_timers = {}
         # # no longer need this it works better without using upload timers from the api
-        # self.upload_timers = self.__set_upload_timers_backup()
+        # self.upload_timers = get_update_timers_backup(self.REGION, self.NO_RUSSIAN_REALMS)
 
     #### VARIABLE RELATED FUNCTIONS ####
     @staticmethod
@@ -250,23 +253,6 @@ class MegaData:
             self.access_token = access_token_raw["access_token"]
             self.access_token_creation_unix_time = int(datetime.now().timestamp())
             return self.access_token
-
-    def __set_pet_names(self):
-        headers = {"Authorization": f"Bearer {self.access_token}"}
-        pet_info = requests.get(
-            f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US",
-            headers=headers,
-        ).json()["pets"]
-        pet_info = {int(pet["id"]): pet["name"] for pet in pet_info}
-        return pet_info
-
-    def __set_pet_names_backup(self):
-        pet_info = requests.post(
-            "http://api.saddlebagexchange.com/api/wow/itemnames",
-            json={"pets": True},
-        ).json()
-        pet_info = {int(k): v for k, v in pet_info.items()}
-        return pet_info
 
     def __set_item_names(self):
         item_names = get_itemnames()
@@ -471,27 +457,6 @@ class MegaData:
             error_message += "- desired_ilvl.json\n"
             error_message += "- desired_ilvl_list.json\n"
             raise Exception(error_message)
-
-    def __set_upload_timers_backup(self):
-        update_timers = requests.post(
-            "http://api.saddlebagexchange.com/api/wow/uploadtimers",
-            json={},
-        ).json()["data"]
-        server_update_times = {
-            time_data["dataSetID"]: time_data
-            for time_data in update_timers
-            if time_data["dataSetID"] not in [-1, -2]
-            and time_data["region"] == self.REGION
-        }
-        if self.NO_RUSSIAN_REALMS:
-            russian_realm_ids = get_wow_russian_realm_ids()
-            server_update_times = {
-                k: v
-                for k, v in server_update_times.items()
-                if v["dataSetID"] not in russian_realm_ids
-            }
-
-        return server_update_times
 
     def get_upload_time_list(self):
         return list(self.upload_timers.values())

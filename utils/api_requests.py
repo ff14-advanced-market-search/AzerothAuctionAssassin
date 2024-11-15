@@ -1,6 +1,8 @@
 import requests
 from tenacity import retry, stop_after_attempt
 
+from utils.helpers import get_wow_russian_realm_ids
+
 
 def send_embed_discord(embed, webhook_url):
     # Send message
@@ -62,31 +64,23 @@ def get_listings_single(connectedRealmId: int, access_token: str, region: str):
     return auction_info["auctions"]
 
 
-def get_update_timers(region, simple_snipe=False):
-    # get from api every time
+def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     update_timers = requests.post(
         "http://api.saddlebagexchange.com/api/wow/uploadtimers",
         json={},
     ).json()["data"]
-
-    # cover specific realms
-    if simple_snipe:
-        if region == "EU":
-            update_id = -2
-        else:
-            update_id = -1
-        server_update_times = [
-            time_data
-            for time_data in update_timers
-            if time_data["dataSetID"] == update_id
-        ]
-    else:
-        server_update_times = [
-            time_data
-            for time_data in update_timers
-            if time_data["dataSetID"] not in [-1, -2] and time_data["region"] == region
-        ]
-        print(server_update_times)
+    server_update_times = {
+        time_data["dataSetID"]: time_data
+        for time_data in update_timers
+        if time_data["dataSetID"] not in [-1, -2] and time_data["region"] == REGION
+    }
+    if NO_RUSSIAN_REALMS:
+        russian_realm_ids = get_wow_russian_realm_ids()
+        server_update_times = {
+            k: v
+            for k, v in server_update_times.items()
+            if v["dataSetID"] not in russian_realm_ids
+        }
 
     return server_update_times
 
@@ -96,18 +90,25 @@ def get_itemnames():
         "http://api.saddlebagexchange.com/api/wow/itemnames",
         json={"return_all": True},
     ).json()
-
     return item_names
 
 
-def get_petnames(client_id, client_secret):
-    access_token = get_wow_access_token(client_id, client_secret)
+def get_petnames(access_token):
     headers = {"Authorization": f"Bearer {access_token}"}
     pet_info = requests.get(
         f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US",
-        headers=headers,  # Add a comma and pass headers correctly
+        headers=headers,
     ).json()["pets"]
-    pet_info = {pet["id"]: pet["name"] for pet in pet_info}
+    pet_info = {int(pet["id"]): pet["name"] for pet in pet_info}
+    return pet_info
+
+
+def get_pet_names_backup():
+    pet_info = requests.post(
+        "http://api.saddlebagexchange.com/api/wow/itemnames",
+        json={"pets": True},
+    ).json()
+    pet_info = {int(k): v for k, v in pet_info.items()}
     return pet_info
 
 
@@ -160,12 +161,3 @@ def get_ilvl_items(ilvl=201, item_ids=[]):
         for itemID, item_info in results.items()
     }
     return item_names, set(item_names.keys()), base_ilvls, base_required_levels
-
-
-def simple_snipe(json_data):
-    snipe_results = requests.post(
-        "http://api.saddlebagexchange.com/api/wow/regionpricecheck",
-        json=json_data,
-    ).json()
-
-    return snipe_results
