@@ -334,7 +334,7 @@ class MegaData:
         ilvl_groups = defaultdict(list)
         broad_groups = []
         for item in ilvl_info:
-            if len(item["item_ids"]) == 0:
+            if "item_ids" not in item or len(item["item_ids"]) == 0:
                 broad_groups.append(item)
             else:
                 ilvl_groups[item["ilvl"]].append(item["item_ids"])

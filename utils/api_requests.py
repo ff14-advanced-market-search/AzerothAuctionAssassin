@@ -1,6 +1,5 @@
 import requests
 from tenacity import retry, stop_after_attempt
-
 from utils.helpers import get_wow_russian_realm_ids
 
 
