@@ -77,7 +77,11 @@ def get_petnames(access_token):
 
 ## SADDLEBAG AND RAIDBOTS STATIC DATA CALLS ##
 
-RAW_GITHUB_BACKUP_PATH = "https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/raw/refs/heads/1.2.5.2/StaticData"
+# # backup static backups url
+# RAW_GITHUB_BACKUP_PATH = "https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/raw/refs/heads/1.2.5.2/StaticData"
+
+# main static backups url
+RAW_GITHUB_BACKUP_PATH = "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData"
 SADDLEBAG_URL = "http://api.saddlebagexchange.com"
 
 
