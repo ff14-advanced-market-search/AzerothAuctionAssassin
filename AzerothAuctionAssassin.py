@@ -1798,7 +1798,6 @@ class App(QMainWindow):
         if not ok or not text.strip():
             return
 
-        self.item_list_display.clear()
 
         try:
             with open(pathname) as file:
