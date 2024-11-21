@@ -1753,9 +1753,19 @@ class App(QMainWindow):
             self.items_list = {}
 
     def import_item_data(self):
-        pathname = QFileDialog().getOpenFileName(self)[0]
-        if not pathname or pathname == "":
+        # # Import from a json file
+        # pathname = QFileDialog().getOpenFileName(self)[0]
+        # if not pathname or pathname == "":
+        #     return
+
+        # Open a dialog to allow users to paste the AAA-transformer data
+        text, ok = QInputDialog.getMultiLineText(
+            self, "Import AAA-Transformer Data", "Paste your AAA-Transformer Data item data here:"
+        )
+        if not ok or not text.strip():
             return
+
+        self.item_list_display.clear()
 
         self.item_list_display.clear()
 
@@ -1980,8 +1990,16 @@ class App(QMainWindow):
             self.pet_list = {}
 
     def import_pet_data(self):
-        pathname = QFileDialog().getOpenFileName(self)[0]
-        if not pathname or pathname == "":
+        # # Import from a json file
+        # pathname = QFileDialog().getOpenFileName(self)[0]
+        # if not pathname or pathname == "":
+        #     return
+
+        # Open a dialog to allow users to paste the AAA-transformer data
+        text, ok = QInputDialog.getMultiLineText(
+            self, "Import AAA-Transformer Data", "Paste your AAA-Transformer Data pet data here:"
+        )
+        if not ok or not text.strip():
             return
 
         self.pet_list_display.clear()
