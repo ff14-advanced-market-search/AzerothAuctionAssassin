@@ -1753,8 +1753,49 @@ class App(QMainWindow):
             self.items_list = {}
 
     def import_item_data(self):
-        pathname = QFileDialog().getOpenFileName(self)[0]
-        if not pathname or pathname == "":
+        text, ok = QInputDialog.getMultiLineText(
+            self,
+            "Import AAA-Transformer Data",
+            "Paste your Item Data from AAA-Transformer here:",
+        )
+        if not ok or not text.strip():
+            return
+
+        self.item_list_display.clear()
+
+        try:
+            self.items_list.update(json.loads(text))
+            for item_id, price in self.items_list.items():
+                if not (1 <= int(item_id) <= 500000):
+                    raise ValueError(
+                        f"Invalid item ID {item_id}.\nIDs must be integers between 1-500,000."
+                    )
+                if not (0 <= float(price) <= 10000000):
+                    raise ValueError(
+                        f"Invalid price {price} for item ID {item_id}.\nPrices must be integers between 0-10,000,000."
+                    )
+                self.item_list_display.insertItem(
+                    self.item_list_display.count(),
+                    f"Item ID: {item_id}, Price: {price}",
+                )
+
+        except json.JSONDecodeError:
+            QMessageBox.critical(
+                self, "Invalid JSON", "Please provide a valid JSON string!"
+            )
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
+
+    # an option if we want to switch to a file import instead of a text import
+    def import_item_data_from_file(self):
+        text, ok = QInputDialog.getMultiLineText(
+            self,
+            "Import AAA-Transformer Data",
+            "Paste your Item Data from AAA-Transformer here:",
+        )
+        if not ok or not text.strip():
             return
 
         self.item_list_display.clear()
@@ -1981,7 +2022,9 @@ class App(QMainWindow):
 
     def import_pet_data(self):
         text, ok = QInputDialog.getMultiLineText(
-            self, "Import AAA-Transformer Data", "Paste your Pet Data from AAA-Transformer here:"
+            self,
+            "Import AAA-Transformer Data",
+            "Paste your Pet Data from AAA-Transformer here:",
         )
         if not ok or not text.strip():
             return
