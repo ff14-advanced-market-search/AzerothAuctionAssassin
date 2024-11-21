@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.2.5.3"
+AAA_VERSION = "1.2.5.2"
 
 windowsApp_Path = None
 try:
@@ -1753,19 +1753,9 @@ class App(QMainWindow):
             self.items_list = {}
 
     def import_item_data(self):
-        # # Import from a json file
-        # pathname = QFileDialog().getOpenFileName(self)[0]
-        # if not pathname or pathname == "":
-        #     return
-
-        # Open a dialog to allow users to paste the AAA-transformer data
-        text, ok = QInputDialog.getMultiLineText(
-            self, "Import AAA-Transformer Data", "Paste your AAA-Transformer Data item data here:"
-        )
-        if not ok or not text.strip():
+        pathname = QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
             return
-
-        self.item_list_display.clear()
 
         self.item_list_display.clear()
 
@@ -1990,16 +1980,42 @@ class App(QMainWindow):
             self.pet_list = {}
 
     def import_pet_data(self):
-        # # Import from a json file
-        # pathname = QFileDialog().getOpenFileName(self)[0]
-        # if not pathname or pathname == "":
-        #     return
-
-        # Open a dialog to allow users to paste the AAA-transformer data
         text, ok = QInputDialog.getMultiLineText(
-            self, "Import AAA-Transformer Data", "Paste your AAA-Transformer Data pet data here:"
+            self, "Import AAA-Transformer Data", "Paste your Pet Data from AAA-Transformer here:"
         )
         if not ok or not text.strip():
+            return
+
+        self.pet_list_display.clear()
+
+        try:
+            pet_data = json.loads(text)
+            self.pet_list.update(pet_data)
+            for pet_id, price in self.pet_list.items():
+                if not (1 <= int(pet_id) <= 10000):
+                    raise ValueError(
+                        f"Invalid pet ID {pet_id}.\nIDs must be integers between 1-10000."
+                    )
+                if not (1 <= int(price) <= 10000000):
+                    raise ValueError(
+                        f"Invalid price {price} for pet ID {pet_id}.\nPrices must be integers between 1-10,000,000."
+                    )
+                self.pet_list_display.insertItem(
+                    self.pet_list_display.count(), f"Pet ID: {pet_id}, Price: {price}"
+                )
+        except json.JSONDecodeError:
+            QMessageBox.critical(
+                self, "Invalid JSON", "Please provide a valid JSON string!"
+            )
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
+
+    # an option if we want to switch to a file import instead of a text import
+    def import_pet_data_from_file(self):
+        pathname = QFileDialog().getOpenFileName(self)[0]
+        if not pathname or pathname == "":
             return
 
         self.pet_list_display.clear()
@@ -2010,7 +2026,7 @@ class App(QMainWindow):
             for pet_id, price in self.pet_list.items():
                 if not (1 <= int(pet_id) <= 10000):
                     raise ValueError(
-                        f"Invalid pet ID {pet_id}.\nIDs must be integers between 1-500,000."
+                        f"Invalid pet ID {pet_id}.\nIDs must be integers between 1-10,000."
                     )
                 if not (1 <= int(price) <= 10000000):
                     raise ValueError(
