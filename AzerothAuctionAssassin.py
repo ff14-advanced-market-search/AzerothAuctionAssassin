@@ -687,8 +687,9 @@ class App(QMainWindow):
         self.ilvl_page_layout.addWidget(self.ilvl_item_input_label, 0, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_item_input, 1, 0, 1, 1)
 
+        # Item Level inputs group
         self.ilvl_input = QLineEdit(ilvl_page)
-        self.ilvl_input_label = QLabel("Item Level", ilvl_page)
+        self.ilvl_input_label = QLabel("Min Item Level", ilvl_page)
         self.ilvl_input_label.setToolTip(
             "Set the minimum item level (ilvl) you want to snipe. Ex: 400 ilvl."
         )
@@ -697,6 +698,16 @@ class App(QMainWindow):
         self.ilvl_page_layout.addWidget(self.ilvl_input_label, 2, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_input, 3, 0, 1, 1)
 
+        self.ilvl_max_input = QLineEdit(ilvl_page)
+        self.ilvl_max_input_label = QLabel("Max Item Level", ilvl_page)
+        self.ilvl_max_input_label.setToolTip(
+            "Set the maximum item level (ilvl) you want to snipe. Ex: 500 ilvl."
+        )
+        self.ilvl_max_input_label.setFixedSize(120, 15)
+        self.ilvl_max_input.setFixedSize(120, 25)
+        self.ilvl_page_layout.addWidget(self.ilvl_max_input_label, 4, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_max_input, 5, 0, 1, 1)
+
         self.ilvl_price_input = QLineEdit(ilvl_page)
         self.ilvl_price_input_label = QLabel("Buyout", ilvl_page)
         self.ilvl_price_input_label.setToolTip(
@@ -704,24 +715,24 @@ class App(QMainWindow):
         )
         self.ilvl_price_input_label.setFixedSize(120, 15)
         self.ilvl_price_input.setFixedSize(120, 25)
-        self.ilvl_page_layout.addWidget(self.ilvl_price_input_label, 4, 0, 1, 1)
-        self.ilvl_page_layout.addWidget(self.ilvl_price_input, 5, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_price_input_label, 6, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_price_input, 7, 0, 1, 1)
 
         self.ilvl_sockets = QCheckBox("Sockets", ilvl_page)
         self.ilvl_sockets.setToolTip("Do you want the item to have Sockets?")
-        self.ilvl_page_layout.addWidget(self.ilvl_sockets, 6, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_sockets, 8, 0, 1, 1)
 
         self.ilvl_speed = QCheckBox("Speed", ilvl_page)
         self.ilvl_speed.setToolTip("Do you want the item to have Speed?")
-        self.ilvl_page_layout.addWidget(self.ilvl_speed, 7, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_speed, 9, 0, 1, 1)
 
         self.ilvl_leech = QCheckBox("Leech", ilvl_page)
         self.ilvl_leech.setToolTip("Do you want the item to have Leech?")
-        self.ilvl_page_layout.addWidget(self.ilvl_leech, 8, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_leech, 10, 0, 1, 1)
 
         self.ilvl_avoidance = QCheckBox("Avoidance", ilvl_page)
         self.ilvl_avoidance.setToolTip("Do you want the item to have Avoidance?")
-        self.ilvl_page_layout.addWidget(self.ilvl_avoidance, 9, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_avoidance, 11, 0, 1, 1)
 
         self.ilvl_min_required_lvl_input = QLineEdit(ilvl_page)
         self.ilvl_min_required_lvl_input_label = QLabel("Min Player Level", ilvl_page)
@@ -732,9 +743,9 @@ class App(QMainWindow):
         self.ilvl_min_required_lvl_input_label.setFixedSize(120, 15)
         self.ilvl_min_required_lvl_input.setFixedSize(120, 25)
         self.ilvl_page_layout.addWidget(
-            self.ilvl_min_required_lvl_input_label, 10, 0, 1, 1
+            self.ilvl_min_required_lvl_input_label, 12, 0, 1, 1
         )
-        self.ilvl_page_layout.addWidget(self.ilvl_min_required_lvl_input, 11, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_min_required_lvl_input, 13, 0, 1, 1)
 
         self.ilvl_max_required_lvl_input = QLineEdit(ilvl_page)
         self.ilvl_max_required_lvl_input_label = QLabel("Max Player Level", ilvl_page)
@@ -745,9 +756,9 @@ class App(QMainWindow):
         self.ilvl_max_required_lvl_input_label.setFixedSize(120, 15)
         self.ilvl_max_required_lvl_input.setFixedSize(120, 25)
         self.ilvl_page_layout.addWidget(
-            self.ilvl_max_required_lvl_input_label, 12, 0, 1, 1
+            self.ilvl_max_required_lvl_input_label, 14, 0, 1, 1
         )
-        self.ilvl_page_layout.addWidget(self.ilvl_max_required_lvl_input, 13, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_max_required_lvl_input, 15, 0, 1, 1)
 
         self.add_ilvl_button = QPushButton("Add/Update Item", ilvl_page)
         self.add_ilvl_button.setToolTip("Add/Update item to your snipe list.")
