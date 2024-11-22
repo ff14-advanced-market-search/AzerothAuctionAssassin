@@ -1752,38 +1752,82 @@ class App(QMainWindow):
             self.item_list_display.clear()
             self.items_list = {}
 
-    def import_item_data(self):
-        pathname = QFileDialog().getOpenFileName(self)[0]
-        if not pathname or pathname == "":
-            return
-
-        self.item_list_display.clear()
-
+    def process_import_data(self, data_source, is_file=False, data_type="item"):
         try:
-            with open(pathname) as file:
-                self.items_list.update(json.load(file))
-            for item_id, price in self.items_list.items():
-                if not (1 <= int(item_id) <= 500000):
+            # Load the JSON data from the appropriate source
+            if is_file:
+                with open(data_source, "r") as file:
+                    data = json.load(file)
+            else:
+                data = json.loads(data_source)
+
+            # Determine the target list and display based on data type
+            if data_type == "item":
+                target_list = self.items_list
+                display_widget = self.item_list_display
+                id_range = (1, 500000)
+                price_range = (0, 10000000)
+            elif data_type == "pet":
+                target_list = self.pet_list
+                display_widget = self.pet_list_display
+                id_range = (1, 10000)
+                price_range = (1, 10000000)
+            else:
+                raise ValueError("Invalid data type specified.")
+
+            # Clear the display and update the target list
+            display_widget.clear()
+            target_list.update(data)
+
+            # Validate and display each entry
+            for entry_id, price in target_list.items():
+                if not (id_range[0] <= int(entry_id) <= id_range[1]):
                     raise ValueError(
-                        f"Invalid item ID {item_id}.\nIDs must be integers between 1-500,000."
+                        f"Invalid {data_type} ID {entry_id}.\nIDs must be integers between {id_range[0]}-{id_range[1]}."
                     )
-                if not (0 <= float(price) <= 10000000):
+                if not (price_range[0] <= float(price) <= price_range[1]):
                     raise ValueError(
-                        f"Invalid price {price} for item ID {item_id}.\nPrices must be integers between 0-10,000,000."
+                        f"Invalid price {price} for {data_type} ID {entry_id}.\nPrices must be integers between {price_range[0]}-{price_range[1]}."
                     )
-                self.item_list_display.insertItem(
-                    self.item_list_display.count(),
-                    f"Item ID: {item_id}, Price: {price}",
+                display_widget.insertItem(
+                    display_widget.count(),
+                    f"{data_type.capitalize()} ID: {entry_id}, Price: {price}",
                 )
 
         except json.JSONDecodeError:
             QMessageBox.critical(
-                self, "Invalid JSON", "Please provide a valid JSON file!"
+                self,
+                "Invalid JSON",
+                f"Please provide a valid JSON string or file for {data_type} data!",
             )
         except ValueError as ve:
             QMessageBox.critical(self, "Invalid Value", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
+
+    def import_item_data(self):
+        text, ok = QInputDialog.getMultiLineText(
+            self,
+            "Import AAA-Transformer Data",
+            "Paste your Item Data from AAA-Transformer here:",
+        )
+        if not ok or not text.strip():
+            return
+
+        self.process_import_data(text, data_type="item")
+
+    # an option if we want to switch to a file import instead of a text import
+    def import_item_data_from_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Import AAA-Transformer Data from File",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if not file_path:
+            return
+
+        self.process_import_data(file_path, is_file=True, data_type="item")
 
     def import_pbs_data(self):
         # Open a dialog to allow users to paste the PBS data
@@ -1980,35 +2024,26 @@ class App(QMainWindow):
             self.pet_list = {}
 
     def import_pet_data(self):
-        pathname = QFileDialog().getOpenFileName(self)[0]
-        if not pathname or pathname == "":
+        text, ok = QInputDialog.getMultiLineText(
+            self,
+            "Import AAA-Transformer Data",
+            "Paste your Pet Data from AAA-Transformer here:",
+        )
+        if not ok or not text.strip():
             return
+        self.process_import_data(text, data_type="pet")
 
-        self.pet_list_display.clear()
-
-        try:
-            with open(pathname) as file:
-                self.pet_list.update(json.load(file))
-            for pet_id, price in self.pet_list.items():
-                if not (1 <= int(pet_id) <= 10000):
-                    raise ValueError(
-                        f"Invalid pet ID {pet_id}.\nIDs must be integers between 1-500,000."
-                    )
-                if not (1 <= int(price) <= 10000000):
-                    raise ValueError(
-                        f"Invalid price {price} for pet ID {pet_id}.\nPrices must be integers between 1-10,000,000."
-                    )
-                self.pet_list_display.insertItem(
-                    self.pet_list_display.count(), f"Pet ID: {pet_id}, Price: {price}"
-                )
-        except json.JSONDecodeError:
-            QMessageBox.critical(
-                self, "Invalid JSON", "Please provide a valid JSON file!"
-            )
-        except ValueError as ve:
-            QMessageBox.critical(self, "Invalid Value", str(ve))
-        except Exception as e:
-            QMessageBox.critical(self, "Unknown Error", str(e))
+    # an option if we want to switch to a file import instead of a text import
+    def import_pet_data_from_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Import AAA-Transformer Pet Data from File",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if not file_path:
+            return
+        self.process_import_data(file_path, is_file=True, data_type="pet")
 
     def import_configs(self):
         pathname = QFileDialog().getOpenFileName(self)[0]
