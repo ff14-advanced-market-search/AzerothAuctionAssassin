@@ -376,9 +376,11 @@ class MegaData:
         ilvl_info["item_ids"] = ilvl_info.get("item_ids", [])
         ilvl_info["required_min_lvl"] = ilvl_info.get("required_min_lvl", 1)
         ilvl_info["required_max_lvl"] = ilvl_info.get("required_max_lvl", 1000)
+        ilvl_info["max_ilvl"] = ilvl_info.get("max_ilvl", 10000)
 
         example = {
             "ilvl": 360,
+            "max_ilvl": 10000,
             "buyout": 50000,
             "sockets": False,
             "speed": True,
