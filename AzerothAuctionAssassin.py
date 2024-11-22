@@ -1367,7 +1367,7 @@ class App(QMainWindow):
 
     def add_ilvl_to_list(self):
         ilvl = self.ilvl_input.text()
-        ilvl_max = self.ilvl_max_input.text()
+        ilvl_max = self.ilvl_max_input.text() or "10000"  # Default to 10000 if empty
         price = self.ilvl_price_input.text()
 
         if ilvl == "" or price == "":
@@ -1472,11 +1472,11 @@ class App(QMainWindow):
                         "Max level must be between 1 and 999.",
                     )
                     return False
-                elif required_max_lvl <= required_min_lvl:
+                elif required_max_lvl < required_min_lvl:
                     QMessageBox.critical(
                         self,
                         "Invalid Level Range",
-                        "Max level must be greater than Min level.",
+                        "Max level must be greater than or equal to Min level.",
                     )
                     return False
             except ValueError:
@@ -1673,7 +1673,7 @@ class App(QMainWindow):
                     )
                 if required_max_lvl <= required_min_lvl:
                     raise ValueError(
-                        f"Max level {required_max_lvl} must be greater than Min level {required_min_lvl}."
+                        f"Max level {required_max_lvl} must be greater than or equal to Min level {required_min_lvl}."
                     )
 
                 # Check that sockets, speed, leech and avoidance are booleans
