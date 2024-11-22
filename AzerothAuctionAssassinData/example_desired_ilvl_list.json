@@ -27,5 +27,6 @@
 {"ilvl": 483, "buyout": 700001, "sockets": false, "speed": false, "leech": false, "avoidance": true,"item_ids": [208426, 208427]},
 {"ilvl": 483, "buyout": 1200001, "sockets": false, "speed": false, "leech": true, "avoidance": false,"item_ids": [208426, 208427]},
 {"ilvl": 483, "buyout": 10001, "sockets": false, "speed": false, "leech": true, "avoidance": false},
-{"ilvl": 400, "buyout": 100, "sockets": false, "speed": false, "leech": false, "avoidance": false, "item_ids": [224592], "required_min_lvl": 71, "required_max_lvl": 79}
+{"ilvl": 400, "buyout": 100, "sockets": false, "speed": false, "leech": false, "avoidance": false, "item_ids": [224592], "required_min_lvl": 71, "required_max_lvl": 79},
+{"ilvl": 500, "max_ilvl": 560, "buyout": 1000, "sockets": false, "speed": false, "leech": false, "avoidance": false, "item_ids": [224632, 224631, 224639, 224625], "required_min_lvl": 1, "required_max_lvl": 999}
 ]
