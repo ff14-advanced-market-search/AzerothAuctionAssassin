@@ -700,6 +700,7 @@ class App(QMainWindow):
 
         self.ilvl_max_input = QLineEdit(ilvl_page)
         self.ilvl_max_input_label = QLabel("Max Item Level", ilvl_page)
+        self.ilvl_max_input.setPlaceholderText("10000")
         self.ilvl_max_input_label.setToolTip(
             "Set the maximum item level (ilvl) you want to snipe. Ex: 500 ilvl."
         )
@@ -736,6 +737,7 @@ class App(QMainWindow):
 
         self.ilvl_min_required_lvl_input = QLineEdit(ilvl_page)
         self.ilvl_min_required_lvl_input_label = QLabel("Min Player Level", ilvl_page)
+        self.ilvl_min_required_lvl_input.setPlaceholderText("1")
         self.ilvl_min_required_lvl_input_label.setToolTip(
             "Set the minimum required character level to use gear.\n"
             + "Ex: required level 80 for TWW items, 70 for DF items, etc."
@@ -749,6 +751,7 @@ class App(QMainWindow):
 
         self.ilvl_max_required_lvl_input = QLineEdit(ilvl_page)
         self.ilvl_max_required_lvl_input_label = QLabel("Max Player Level", ilvl_page)
+        self.ilvl_max_required_lvl_input.setPlaceholderText("1000")
         self.ilvl_max_required_lvl_input_label.setToolTip(
             "Set the maximum required character level to use gear.\n"
             + "Ex: required level 70 for TWW twink items, etc."
