@@ -398,7 +398,13 @@ class MegaData:
 
         snipe_info = {}
         bool_vars = ["sockets", "speed", "leech", "avoidance"]
-        int_vars = ["ilvl", "max_ilvl", "buyout", "required_min_lvl", "required_max_lvl"]
+        int_vars = [
+            "ilvl",
+            "max_ilvl",
+            "buyout",
+            "required_min_lvl",
+            "required_max_lvl",
+        ]
         for key, value in ilvl_info.items():
             if key in bool_vars:
                 if isinstance(ilvl_info[key], bool):
