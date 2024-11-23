@@ -338,6 +338,10 @@ class Alerts(QThread):
             if ilvl < min_ilvl:
                 return False
 
+            # skip if ilvl is too high
+            if ilvl > DESIRED_ILVL_ITEMS["max_ilvl"]:
+                return False
+
             # skip if required_lvl is too low
             if required_lvl < DESIRED_ILVL_ITEMS["required_min_lvl"]:
                 return False
