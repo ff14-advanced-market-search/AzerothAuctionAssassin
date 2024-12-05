@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.2.6"
+AAA_VERSION = "1.2.6.1"
 
 windowsApp_Path = None
 try:
@@ -2161,6 +2161,16 @@ class App(QMainWindow):
             "WOW_CLIENT_ID": self.wow_client_id_input.text().strip(),
             "WOW_CLIENT_SECRET": self.wow_client_secret_input.text().strip(),
         }
+
+        # confirm the client id and secret are not the same value
+        if required_fields["WOW_CLIENT_ID"] == required_fields["WOW_CLIENT_SECRET"]:
+            QMessageBox.critical(
+                self,
+                "Invalid Client ID and Secret",
+                "Client ID and Secret cannot be the same value. Read the wiki:\n\n"
+                + "https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Installation-Guide#4-go-to-httpsdevelopbattlenetaccessclients-and-create-a-client-get-the-blizzard-oauth-client-and-secret-ids--you-will-use-these-values-for-the-wow_client_id-and-wow_client_secret-later-on",
+            )
+            return False
 
         for field, value in required_fields.items():
             if not value:
