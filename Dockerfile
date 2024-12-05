@@ -6,9 +6,15 @@
 FROM python:slim-bookworm
 
 # install packages
-RUN pip3 install tenacity requests PyQt5 \
-    && apt-get update \
-    && apt-get install -y libglib2.0-0 \
+RUN apt-get update \
+    && apt-get install -y \
+        gcc \
+        g++ \
+        libglib2.0-0 \
+        python3-dev \
+    && pip3 install tenacity requests PyQt5 \
+    && apt-get remove -y gcc g++ python3-dev \
+    && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
 # copy over files
