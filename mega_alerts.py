@@ -363,9 +363,11 @@ class Alerts(QThread):
             if required_lvl > DESIRED_ILVL_ITEMS["required_max_lvl"]:
                 return False
 
+            # if no buyout, use bid
+            if "buyout" not in auction and "bid" in auction:
+                auction["buyout"] = auction["bid"]
+
             # if we get through everything and still haven't skipped, add to matching
-            if "buyout" not in auction:
-                return False
             buyout = round(auction["buyout"] / 10000, 2)
             if buyout > DESIRED_ILVL_ITEMS["buyout"]:
                 return False
