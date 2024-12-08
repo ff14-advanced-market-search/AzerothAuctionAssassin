@@ -65,11 +65,11 @@ class Alerts(QThread):
         log_path = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "logs")
         os.makedirs(log_path, exist_ok=True)
         log_file = os.path.join(
-            log_path, f"aaa_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            log_path, f"mega_alerts_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         )
         # Create stream handler that captures both stdout and stderr
         self.stream_handler = StreamToFile(log_file)
-        print(f"Starting Azeroth Auction Assassin at {datetime.now()}")
+        print(f"Starting Mega Alerts at {datetime.now()}")
         print(f"Log file created at: {log_file}")
 
     def run(self):
