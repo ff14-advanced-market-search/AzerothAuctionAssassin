@@ -188,12 +188,16 @@ class App(QMainWindow):
         realms_page = QWidget()
         self.realms_page_layout = QGridLayout(realms_page)
 
+        pet_ilvl_page = QWidget()
+        self.pet_ilvl_page_layout = QGridLayout(pet_ilvl_page)
+
         self.stacked_widget.addWidget(home_page)
         self.stacked_widget.addWidget(pet_page)
         self.stacked_widget.addWidget(item_page)
         self.stacked_widget.addWidget(ilvl_page)
         self.stacked_widget.addWidget(settings_page)
         self.stacked_widget.addWidget(realms_page)
+        self.stacked_widget.addWidget(pet_ilvl_page)
 
         self.layout_area.addWidget(self.stacked_widget, 0, 1, 17, 2)
 
@@ -204,6 +208,8 @@ class App(QMainWindow):
         self.make_item_page(item_page=item_page)
 
         self.make_ilvl_page(ilvl_page=ilvl_page)
+
+        self.make_pet_ilvl_page(pet_ilvl_page=pet_ilvl_page)
 
         self.make_settings_page(settings_page=settings_page)
 
@@ -310,19 +316,24 @@ class App(QMainWindow):
         self.go_to_settings_button = QPushButton("Application Settings")
         self.go_to_settings_button.setFixedSize(150, 25)
         self.go_to_settings_button.clicked.connect(self.go_to_settings_page)
-        self.layout_area.addWidget(self.go_to_settings_button, 4, 0)
+        self.layout_area.addWidget(self.go_to_settings_button, 5, 0)
 
         self.go_to_realm_button = QPushButton("Realm Lists")
         self.go_to_realm_button.setFixedSize(150, 25)
         self.go_to_realm_button.clicked.connect(self.go_to_realms_page)
-        self.layout_area.addWidget(self.go_to_realm_button, 5, 0)
+        self.layout_area.addWidget(self.go_to_realm_button, 6, 0)
+
+        self.go_to_pet_ilvl_button = QPushButton("Pet Levels")
+        self.go_to_pet_ilvl_button.setFixedSize(150, 25)
+        self.go_to_pet_ilvl_button.clicked.connect(self.go_to_pet_ilvl_page)
+        self.layout_area.addWidget(self.go_to_pet_ilvl_button, 4, 0)
 
         # add a line to separate the buttons from the rest of the UI
         self.line = QLabel(self)
         self.line.setStyleSheet("background-color: white")
         self.line.setFixedSize(150, 25)
 
-        self.layout_area.addWidget(self.line, 6, 0)
+        self.layout_area.addWidget(self.line, 7, 0)
 
         # self.import_pbs_data_button = UIButtons(
         #     self, "Import PBS Data", 25, 400, 200, 50
@@ -336,13 +347,13 @@ class App(QMainWindow):
         self.save_data_button.setFixedSize(150, 25)
         self.save_data_button.clicked.connect(self.save_data_to_json)
         self.save_data_button.setToolTip("Save data without starting a scan.")
-        self.layout_area.addWidget(self.save_data_button, 7, 0)
+        self.layout_area.addWidget(self.save_data_button, 8, 0)
 
         self.reset_data_button = QPushButton("Reset Data")
         self.reset_data_button.setFixedSize(150, 25)
         self.reset_data_button.clicked.connect(self.reset_app_data)
         self.reset_data_button.setToolTip("Erase all data and reset the app.")
-        self.layout_area.addWidget(self.reset_data_button, 8, 0)
+        self.layout_area.addWidget(self.reset_data_button, 9, 0)
 
         self.start_button = QPushButton("Start Alerts")
         self.start_button.setFixedSize(150, 25)
@@ -350,7 +361,7 @@ class App(QMainWindow):
         self.start_button.setToolTip(
             "Start the scan! Runs once on start and then waits for new data to send more alerts."
         )
-        self.layout_area.addWidget(self.start_button, 9, 0)
+        self.layout_area.addWidget(self.start_button, 10, 0)
 
         self.stop_button = QPushButton("Stop Alerts")
         self.stop_button.setFixedSize(150, 25)
@@ -359,12 +370,12 @@ class App(QMainWindow):
         self.stop_button.setToolTip(
             "Gracefully stop the alerts.\nThis will not stop alerts in progress.\nYou may need to kill the process for a force stop."
         )
-        self.layout_area.addWidget(self.stop_button, 10, 0)
+        self.layout_area.addWidget(self.stop_button, 11, 0)
 
         self.mega_alerts_progress = QLabel("Waiting for user to Start!")
         # this is important, if the messages from mega alerts status are too long, it will break the UI
         self.mega_alerts_progress.setFixedSize(150, 100)
-        self.layout_area.addWidget(self.mega_alerts_progress, 11, 0)
+        self.layout_area.addWidget(self.mega_alerts_progress, 12, 0)
 
     def make_home_page(self, home_page):
 
@@ -810,6 +821,9 @@ class App(QMainWindow):
 
     def go_to_realms_page(self):
         self.stacked_widget.setCurrentIndex(5)
+
+    def go_to_pet_ilvl_page(self):
+        self.stacked_widget.setCurrentIndex(6)
 
     def api_data_received(self, pet_statistics, item_statistics):
         self.pet_statistics = pet_statistics
@@ -2360,6 +2374,28 @@ class App(QMainWindow):
         self.save_json_file(path_to_backup_pets, self.pet_list)
         self.save_json_file(path_to_backup_ilvl_list, self.ilvl_list)
 
+        # Get pet level rules
+        pet_ilvl_rules = []
+        for i in range(self.pet_ilvl_list_display.count()):
+            item = self.pet_ilvl_list_display.item(i)
+            parts = item.text().split(";")
+            pet_id = int(parts[0].split(":")[1].strip())
+            price = int(parts[1].split(":")[1].strip())
+            min_level = int(parts[2].split(":")[1].strip())
+            min_quality = int(parts[3].split(":")[1].strip())
+            excluded_breeds = eval(parts[4].split(":")[1].strip())
+
+            pet_ilvl_rules.append({
+                "petID": pet_id,
+                "price": price,
+                "minLevel": min_level,
+                "minQuality": min_quality,
+                "excludeBreeds": excluded_breeds
+            })
+
+        # Save pet level rules
+        self.save_json_file(os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "desired_pet_ilvl_list.json"), pet_ilvl_rules)
+
         return True
 
     def save_json_file(self, path, data):
@@ -2442,6 +2478,215 @@ class App(QMainWindow):
 
     def alerts_progress_changed(self, progress_str):
         self.mega_alerts_progress.setText(progress_str)
+
+    # Add after the make_ilvl_page method
+
+    def make_pet_ilvl_page(self, pet_ilvl_page):
+        # Pet ID input
+        self.pet_ilvl_id_input = QLineEdit(pet_ilvl_page)
+        self.pet_ilvl_id_input_label = QLabel("Pet ID", pet_ilvl_page)
+        self.pet_ilvl_id_input_label.setToolTip("Enter the Pet ID you want to snipe")
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_id_input_label, 0, 0, 1, 1)
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_id_input, 1, 0, 1, 1)
+
+        # Price input
+        self.pet_ilvl_price_input = QLineEdit(pet_ilvl_page)
+        self.pet_ilvl_price_input_label = QLabel("Max Price", pet_ilvl_page)
+        self.pet_ilvl_price_input_label.setToolTip("Maximum price you're willing to pay")
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_price_input_label, 0, 1, 1, 1)
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_price_input, 1, 1, 1, 1)
+
+        # Pet name dropdown (populated from pet_statistics)
+        self.pet_ilvl_name_input = QComboBox(pet_ilvl_page)
+        self.pet_ilvl_name_input.setEnabled(False)
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_name_input, 2, 0, 1, 2)
+
+        # Min Level input
+        self.pet_ilvl_min_level_input = QLineEdit(pet_ilvl_page)
+        self.pet_ilvl_min_level_input_label = QLabel("Minimum Level", pet_ilvl_page)
+        self.pet_ilvl_min_level_input_label.setToolTip("Minimum pet level (1-25)")
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_min_level_input_label, 3, 0, 1, 1)
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_min_level_input, 4, 0, 1, 1)
+
+        # Min Quality input
+        self.pet_ilvl_min_quality_input = QLineEdit(pet_ilvl_page)
+        self.pet_ilvl_min_quality_input.setText("-1")
+        self.pet_ilvl_min_quality_input_label = QLabel("Minimum Quality (-1 to 3)", pet_ilvl_page)
+        self.pet_ilvl_min_quality_input_label.setToolTip("Minimum pet quality (-1 for any, 0-3 for Poor to Rare)")
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_min_quality_input_label, 3, 1, 1, 1)
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_min_quality_input, 4, 1, 1, 1)
+
+        # Excluded Breeds input
+        self.pet_ilvl_breeds_input = QLineEdit(pet_ilvl_page)
+        self.pet_ilvl_breeds_input_label = QLabel("Excluded Breeds", pet_ilvl_page)
+        self.pet_ilvl_breeds_input_label.setToolTip("Comma-separated list of breed IDs to exclude")
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_breeds_input_label, 5, 0, 1, 2)
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_breeds_input, 6, 0, 1, 2)
+
+        # Add/Update and Remove buttons
+        self.add_pet_ilvl_button = QPushButton("Add/Update Pet Level Rule")
+        self.add_pet_ilvl_button.clicked.connect(self.add_pet_ilvl_to_list)
+        self.pet_ilvl_page_layout.addWidget(self.add_pet_ilvl_button, 7, 0, 1, 1)
+
+        self.remove_pet_ilvl_button = QPushButton("Remove Pet Level Rule")
+        self.remove_pet_ilvl_button.clicked.connect(self.remove_pet_ilvl_from_list)
+        self.pet_ilvl_page_layout.addWidget(self.remove_pet_ilvl_button, 7, 1, 1, 1)
+
+        # List display
+        self.pet_ilvl_list_display = QListWidget(pet_ilvl_page)
+        self.pet_ilvl_list_display.setSortingEnabled(True)
+        self.pet_ilvl_list_display.itemClicked.connect(self.pet_ilvl_list_clicked)
+        self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_list_display, 8, 0, 8, 2)
+
+        # Import/Export buttons
+        self.import_pet_ilvl_button = QPushButton("Import Pet Level Rules")
+        self.import_pet_ilvl_button.clicked.connect(self.import_pet_ilvl_data)
+        self.pet_ilvl_page_layout.addWidget(self.import_pet_ilvl_button, 16, 0, 1, 1)
+
+        self.erase_pet_ilvl_button = QPushButton("Erase Pet Level Rules")
+        self.erase_pet_ilvl_button.clicked.connect(self.erase_pet_ilvl_data)
+        self.pet_ilvl_page_layout.addWidget(self.erase_pet_ilvl_button, 16, 1, 1, 1)
+
+    def add_pet_ilvl_to_list(self):
+        """Add or update a pet level rule in the list"""
+        try:
+            # Get and validate inputs
+            pet_id = int(self.pet_ilvl_id_input.text())
+            price = int(self.pet_ilvl_price_input.text())
+            min_level = int(self.pet_ilvl_min_level_input.text())
+            min_quality = int(self.pet_ilvl_min_quality_input.text())
+            
+            # Validate excluded breeds
+            excluded_breeds = []
+            if self.pet_ilvl_breeds_input.text().strip():
+                excluded_breeds = [int(x.strip()) for x in self.pet_ilvl_breeds_input.text().split(",")]
+
+            # Validation checks
+            if not (1 <= pet_id <= 10000):
+                raise ValueError("Pet ID must be between 1 and 10000")
+            if price <= 0:
+                raise ValueError("Price must be greater than 0")
+            if not (1 <= min_level <= 25):
+                raise ValueError("Minimum level must be between 1 and 25")
+            if not (-1 <= min_quality <= 3):
+                raise ValueError("Minimum quality must be between -1 and 3")
+
+            # Create pet level rule dictionary
+            pet_rule = {
+                "petID": pet_id,
+                "price": price,
+                "minLevel": min_level,
+                "minQuality": min_quality,
+                "excludeBreeds": excluded_breeds
+            }
+
+            # Format display string
+            display_string = (
+                f"Pet ID: {pet_id}; "
+                f"Price: {price}; "
+                f"Min Level: {min_level}; "
+                f"Min Quality: {min_quality}; "
+                f"Excluded Breeds: {excluded_breeds}"
+            )
+
+            # Update list display
+            for i in range(self.pet_ilvl_list_display.count()):
+                item = self.pet_ilvl_list_display.item(i)
+                if str(pet_id) in item.text():
+                    self.pet_ilvl_list_display.takeItem(i)
+                    break
+
+            self.pet_ilvl_list_display.addItem(display_string)
+
+        except ValueError as e:
+            QMessageBox.critical(self, "Invalid Input", str(e))
+            return False
+
+        return True
+
+    def remove_pet_ilvl_from_list(self):
+        """Remove a pet level rule from the list"""
+        current_item = self.pet_ilvl_list_display.currentItem()
+        if not current_item:
+            QMessageBox.critical(
+                self,
+                "Selection Error",
+                "Please select a pet level rule to remove"
+            )
+            return
+        
+        self.pet_ilvl_list_display.takeItem(self.pet_ilvl_list_display.row(current_item))
+
+    def pet_ilvl_list_clicked(self, item):
+        """Handle clicking on a pet level rule in the list"""
+        # Parse the display string
+        parts = item.text().split(";")
+        pet_id = parts[0].split(":")[1].strip()
+        price = parts[1].split(":")[1].strip()
+        min_level = parts[2].split(":")[1].strip()
+        min_quality = parts[3].split(":")[1].strip()
+        excluded_breeds = parts[4].split(":")[1].strip()
+
+        # Update input fields
+        self.pet_ilvl_id_input.setText(pet_id)
+        self.pet_ilvl_price_input.setText(price)
+        self.pet_ilvl_min_level_input.setText(min_level)
+        self.pet_ilvl_min_quality_input.setText(min_quality)
+        self.pet_ilvl_breeds_input.setText(excluded_breeds.strip("[]"))
+
+        # Update pet name dropdown if possible
+        try:
+            pet_name = self.pet_statistics[
+                self.pet_statistics["itemID"] == int(pet_id)
+            ].iloc[0]["itemName"]
+            index = self.pet_ilvl_name_input.findText(pet_name)
+            self.pet_ilvl_name_input.setCurrentIndex(index)
+        except:
+            self.pet_ilvl_name_input.setCurrentText("Pet ID not found")
+
+    def import_pet_ilvl_data(self):
+        """Import pet level rules from a file"""
+        pathname = QFileDialog().getOpenFileName(self)[0]
+        if not pathname:
+            return
+
+        try:
+            with open(pathname) as file:
+                data = json.load(file)
+
+            self.pet_ilvl_list_display.clear()
+            for rule in data:
+                # Validate rule format
+                required_keys = {"petID", "price", "minLevel", "minQuality", "excludeBreeds"}
+                if not all(key in rule for key in required_keys):
+                    raise ValueError(f"Invalid rule format: {rule}")
+
+                # Format display string
+                display_string = (
+                    f"Pet ID: {rule['petID']}; "
+                    f"Price: {rule['price']}; "
+                    f"Min Level: {rule['minLevel']}; "
+                    f"Min Quality: {rule['minQuality']}; "
+                    f"Excluded Breeds: {rule['excludeBreeds']}"
+                )
+                self.pet_ilvl_list_display.addItem(display_string)
+
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, "Invalid JSON", "Please provide a valid JSON file")
+        except Exception as e:
+            QMessageBox.critical(self, "Import Error", str(e))
+
+    def erase_pet_ilvl_data(self):
+        """Clear all pet level rules"""
+        reply = QMessageBox.question(
+            self,
+            "Confirm Reset",
+            "Are you sure you want to reset all pet level rules? This action cannot be undone.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            self.pet_ilvl_list_display.clear()
 
 
 if __name__ == "__main__":
