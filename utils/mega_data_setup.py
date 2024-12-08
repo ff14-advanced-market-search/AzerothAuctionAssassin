@@ -25,6 +25,7 @@ class MegaData:
         path_to_desired_pets=None,
         path_to_desired_ilvl_items=None,
         path_to_desired_ilvl_list=None,
+        path_to_desired_pet_ilvl_list=None,
     ):
         # the raw file users can write their input into
         if path_to_data_files == None:
@@ -78,6 +79,9 @@ class MegaData:
             path_to_desired_ilvl_items
         )
         self.DESIRED_ILVL_LIST = self.__set_desired_ilvl_list(path_to_desired_ilvl_list)
+        self.DESIRED_PET_ILVL_LIST = self.__set_desired_pet_ilvl_list(
+            path_to_desired_pet_ilvl_list
+        )
         self.__validate_snipe_lists()
 
         ## should do this here and only get the names of desired items to limit data
@@ -437,6 +441,51 @@ class MegaData:
             }
 
         return snipe_info, ilvl_info["ilvl"]
+    
+    def __set_desired_pet_ilvl_list(self, path_to_data=None):
+        item_list_name = "desired_pet_ilvl_list"
+        file_name = f"{item_list_name}.json"
+        env_var_name = item_list_name.upper()
+        if path_to_data == None:
+            pet_ilvl_info = json.load(open(f"AzerothAuctionAssassinData/{file_name}"))
+        else:
+            pet_ilvl_info = json.load(open(path_to_data))
+        
+        # if file is not set use env var
+        if len(pet_ilvl_info) == 0:
+            print(
+                f"no desired items found in AzerothAuctionAssassinData/{file_name} pulling from env vars"
+            )
+            if os.getenv(env_var_name):
+                pet_ilvl_info = json.loads(os.getenv(env_var_name))
+            else:
+                print(f"skipping {item_list_name} its not set in file or env var")
+                return []
+
+        # Validate and process each pet entry
+        processed_pet_list = []
+        for pet in pet_ilvl_info:
+            if not all(key in pet for key in ["petID", "price", "minLevel"]):
+                raise Exception(
+                    f"Error: Each pet entry must contain 'petID', 'price', and 'minLevel'. Found: {pet}"
+                )
+            
+            # Validate types and convert as needed
+            processed_pet = {
+                "petID": int(pet["petID"]),
+                "price": int(pet["price"]),
+                "minLevel": int(pet["minLevel"])  # Handle both string and int inputs
+            }
+            
+            # Validate value ranges
+            if not (1 <= processed_pet["minLevel"] <= 25):
+                raise Exception(f"Error: minLevel must be between 1 and 25. Found: {processed_pet['minLevel']}")
+            if processed_pet["price"] <= 0:
+                raise Exception(f"Error: price must be greater than 0. Found: {processed_pet['price']}")
+                
+            processed_pet_list.append(processed_pet)
+
+        return processed_pet_list
 
     def __set_realm_names(self):
         realm_names = json.load(

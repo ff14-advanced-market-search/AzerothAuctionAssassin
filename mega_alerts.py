@@ -203,6 +203,7 @@ class Alerts(QThread):
 
                 # all caged battle pets have item id 82800
                 elif item_id == 82800:
+                    # desired pets
                     if item["item"]["pet_species_id"] in mega_data.DESIRED_PETS:
                         pet_id = item["item"]["pet_species_id"]
                         price = 10000000 * 10000
@@ -216,6 +217,11 @@ class Alerts(QThread):
                             add_price_to_dict(
                                 price, pet_id, pet_ah_buyouts, is_pet=True
                             )
+                    if item_id in [pet["petID"] for pet in mega_data.DESIRED_PET_ILVL_LIST]:
+                        pet_ilvl_item_info = check_pet_ilvl_stats(
+                            item,
+                            mega_data.DESIRED_PET_ILVL_LIST,
+                        )
 
                 # ilvl snipe items
                 if (
