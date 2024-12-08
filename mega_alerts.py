@@ -218,7 +218,7 @@ class Alerts(QThread):
                             add_price_to_dict(
                                 price, pet_id, pet_ah_buyouts, is_pet=True
                             )
-                    if item_id in [
+                    if item["item"]["pet_species_id"] in [
                         pet["petID"] for pet in mega_data.DESIRED_PET_ILVL_LIST
                     ]:
                         pet_ilvl_item_info = check_pet_ilvl_stats(
