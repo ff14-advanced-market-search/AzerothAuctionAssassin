@@ -441,7 +441,7 @@ class MegaData:
             }
 
         return snipe_info, ilvl_info["ilvl"]
-    
+
     def __set_desired_pet_ilvl_list(self, path_to_data=None):
         item_list_name = "desired_pet_ilvl_list"
         file_name = f"{item_list_name}.json"
@@ -450,7 +450,7 @@ class MegaData:
             pet_ilvl_info = json.load(open(f"AzerothAuctionAssassinData/{file_name}"))
         else:
             pet_ilvl_info = json.load(open(path_to_data))
-        
+
         # if file is not set use env var
         if len(pet_ilvl_info) == 0:
             print(
@@ -469,20 +469,24 @@ class MegaData:
                 raise Exception(
                     f"Error: Each pet entry must contain 'petID', 'price', and 'minLevel'. Found: {pet}"
                 )
-            
+
             # Validate types and convert as needed
             processed_pet = {
-                "petID": int(pet["petID"]),
+                "petID": int(pet["petID"]),  # Match the API's
                 "price": int(pet["price"]),
-                "minLevel": int(pet["minLevel"])  # Handle both string and int inputs
+                "minLevel": int(pet["minLevel"]),  # Handle both string and int inputs
             }
-            
+
             # Validate value ranges
             if not (1 <= processed_pet["minLevel"] <= 25):
-                raise Exception(f"Error: minLevel must be between 1 and 25. Found: {processed_pet['minLevel']}")
+                raise Exception(
+                    f"Error: minLevel must be between 1 and 25. Found: {processed_pet['minLevel']}"
+                )
             if processed_pet["price"] <= 0:
-                raise Exception(f"Error: price must be greater than 0. Found: {processed_pet['price']}")
-                
+                raise Exception(
+                    f"Error: price must be greater than 0. Found: {processed_pet['price']}"
+                )
+
             processed_pet_list.append(processed_pet)
 
         return processed_pet_list
@@ -506,14 +510,16 @@ class MegaData:
             and len(self.DESIRED_PETS) == 0
             and len(self.DESIRED_ILVL_ITEMS) == 0
             and len(self.DESIRED_ILVL_LIST) == 0
+            and len(self.DESIRED_PET_ILVL_LIST) == 0
         ):
             error_message = "Error no snipe data found!\n"
-            error_message += "You need to set env vars for DESIRED_ITEMS or DESIRED_PETS, DESIRED_ILVL or DESIRED_ILVL_LIST\n"
+            error_message += "You need to set env vars for DESIRED_ITEMS or DESIRED_PETS, DESIRED_ILVL, DESIRED_ILVL_LIST or DESIRED_PET_ILVL_LIST\n"
             error_message += "Or you need to set up your AzerothAuctionAssassinData/ json files with one of the following files:\n"
             error_message += "- desired_items.json\n"
             error_message += "- desired_pets.json\n"
             error_message += "- desired_ilvl.json\n"
             error_message += "- desired_ilvl_list.json\n"
+            error_message += "- desired_pet_ilvl_list.json\n"
             raise Exception(error_message)
 
     def get_upload_time_list(self):
