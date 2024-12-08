@@ -18,20 +18,26 @@ import utils.mega_data_setup
 class StreamToFile:
     def __init__(self, filepath):
         self.filepath = filepath
-        self.terminal = sys.stdout
+        self.terminal_out = sys.stdout
+        self.terminal_err = sys.stderr
         # Ensure log directory exists
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         # Clear previous log file
         with open(self.filepath, "w", encoding="utf-8") as f:
             f.write(f"=== Log started at {datetime.now()} ===\n")
 
+        # Redirect both stdout and stderr
+        sys.stdout = self
+        sys.stderr = self
+
     def write(self, text):
-        self.terminal.write(text)
+        self.terminal_out.write(text)
         with open(self.filepath, "a", encoding="utf-8") as f:
             f.write(text)
 
     def flush(self):
-        self.terminal.flush()
+        self.terminal_out.flush()
+        self.terminal_err.flush()
 
 
 class Alerts(QThread):
@@ -61,7 +67,8 @@ class Alerts(QThread):
         log_file = os.path.join(
             log_path, f"aaa_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         )
-        sys.stdout = StreamToFile(log_file)
+        # Create stream handler that captures both stdout and stderr
+        self.stream_handler = StreamToFile(log_file)
         print(f"Starting Azeroth Auction Assassin at {datetime.now()}")
         print(f"Log file created at: {log_file}")
 
