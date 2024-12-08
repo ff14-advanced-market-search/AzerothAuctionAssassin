@@ -833,13 +833,17 @@ class App(QMainWindow):
         self.pet_statistics = pet_statistics
         self.item_statistics = item_statistics
 
-        self.pet_name_input.addItems(
-            self.pet_statistics.sort_values(by="itemName")["itemName"].tolist()
-        )
+        # Populate both pet name dropdowns
+        pet_names = self.pet_statistics.sort_values(by="itemName")["itemName"].tolist()
+
+        self.pet_name_input.addItems(pet_names)
         self.pet_name_input.setEditable(True)
         self.pet_name_input.setInsertPolicy(QComboBox.NoInsert)
         self.pet_name_input.completer()
         self.pet_name_input.currentIndexChanged.connect(self.on_combo_box_pet_changed)
+
+        self.pet_ilvl_name_input.addItems(pet_names)
+        self.pet_ilvl_name_input.setEnabled(True)
 
         self.item_name_input.addItems(
             self.item_statistics.sort_values(by="itemName")["itemName"].tolist()
@@ -2511,6 +2515,17 @@ class App(QMainWindow):
         # Pet name dropdown (populated from pet_statistics)
         self.pet_ilvl_name_input = QComboBox(pet_ilvl_page)
         self.pet_ilvl_name_input.setEnabled(False)
+        self.pet_ilvl_name_input.setEditable(True)
+        self.pet_ilvl_name_input.setInsertPolicy(QComboBox.NoInsert)
+        self.pet_ilvl_name_input.completer()
+        self.pet_ilvl_name_input.currentIndexChanged.connect(
+            self.on_combo_box_pet_ilvl_changed
+        )
+        self.pet_ilvl_name_input.setStyleSheet(
+            "QComboBox { background-color: #1D2023; color: white; }"
+            "QComboBox::editable { background: #1D2023; color: white; }"
+            "QComboBox::drop-down { border: 0px; }"
+        )
         self.pet_ilvl_page_layout.addWidget(self.pet_ilvl_name_input, 2, 0, 1, 2)
 
         # Min Level input
@@ -2750,6 +2765,29 @@ class App(QMainWindow):
         if reply == QMessageBox.Yes:
             self.pet_ilvl_list_display.clear()
             self.pet_ilvl_rules = []
+
+    def on_combo_box_pet_ilvl_changed(self, index):
+        # This function will be called whenever the user selects a different pet
+        selected_pet = self.pet_ilvl_name_input.currentText()
+        selected_pet_stats = self.pet_statistics[
+            self.pet_statistics["itemName"] == selected_pet
+        ]
+        selected_pet_id = selected_pet_stats["itemID"].iloc[0]
+
+        # Set the pet ID input
+        self.pet_ilvl_id_input.setText(str(selected_pet_id))
+
+        # Set a default price if none exists
+        if not self.pet_ilvl_price_input.text():
+            try:
+                selected_pet_price = selected_pet_stats["desiredPrice"].iloc[0]
+                discount_percent = int(self.discount_percent.text()) / 100
+                recommended_price = str(
+                    int(float(selected_pet_price) * discount_percent)
+                )
+                self.pet_ilvl_price_input.setText(recommended_price)
+            except:
+                self.pet_ilvl_price_input.setText("10")
 
 
 if __name__ == "__main__":
