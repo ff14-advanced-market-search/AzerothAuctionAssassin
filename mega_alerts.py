@@ -586,11 +586,13 @@ class Alerts(QThread):
                 return None
 
             # Check if pet meets level requirement
-            if item["item"]["pet_level"] < desired_pet["minLevel"]:
+            pet_level = item["item"].get("pet_level")
+            if pet_level is None or pet_level < desired_pet["minLevel"]:
                 return None
 
             # Check if price meets requirement (buyout price should be less than desired price)
-            if item["buyout"] / 10000 > desired_pet["price"]:
+            buyout = item.get("buyout")
+            if buyout is None or buyout / 10000 > desired_pet["price"]:
                 return None
 
             # If we get here, the pet matches all criteria
