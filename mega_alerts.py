@@ -99,6 +99,13 @@ class Alerts(QThread):
                         pet_name = "Unknown Pet"
                         # old method
                         # id_msg += f"`Name:` {pet_name}\n"
+                    if "pet_level" in auction:
+                        id_msg += f"`pet_level:` {auction['pet_level']}\n"
+                    if "quality" in auction:
+                        id_msg += f"`quality:` {auction['quality']}\n"
+                    if "breed" in auction:
+                        id_msg += f"`breed:` {auction['breed']}\n"
+
                     embed_name = pet_name
 
                 message = ""
