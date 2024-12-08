@@ -2276,16 +2276,17 @@ class App(QMainWindow):
         return config_json
 
     def validate_item_lists(self):
-        # Check if items_list and pet_list are not empty
+        # Check if items_list, pet_list, ilvl_list, or pet_ilvl_rules are not empty
         if (
             len(self.items_list) == 0
             and len(self.pet_list) == 0
             and len(self.ilvl_list) == 0
+            and len(self.pet_ilvl_rules) == 0  # Add check for pet level rules
         ):
             QMessageBox.critical(
                 self,
                 "Empty Lists",
-                "Please add items, pets or ilvl data to the lists. All appear to be empty.",
+                "Please add items, pets, ilvl data, or pet level rules to the lists. All appear to be empty.",
             )
             return False
 
@@ -2324,6 +2325,30 @@ class App(QMainWindow):
                     self,
                     "Invalid Item ID",
                     "All item IDs should be integers between 1 and 500,000.",
+                )
+                return False
+
+        # Add validation for pet level rules
+        for rule in self.pet_ilvl_rules:
+            if not (1 <= rule["petID"] <= 10000):
+                QMessageBox.critical(
+                    self,
+                    "Invalid Pet ID",
+                    "All pet IDs in level rules should be between 1 and 10000.",
+                )
+                return False
+            if not (1 <= rule["minLevel"] <= 25):
+                QMessageBox.critical(
+                    self,
+                    "Invalid Pet Level",
+                    "All pet minimum levels should be between 1 and 25.",
+                )
+                return False
+            if not (-1 <= rule["minQuality"] <= 3):
+                QMessageBox.critical(
+                    self,
+                    "Invalid Pet Quality",
+                    "All pet minimum qualities should be between -1 and 3.",
                 )
                 return False
 
