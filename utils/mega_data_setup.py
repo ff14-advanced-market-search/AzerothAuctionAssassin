@@ -465,9 +465,14 @@ class MegaData:
         # Validate and process each pet entry
         processed_pet_list = []
         for pet in pet_ilvl_info:
-            if not all(key in pet for key in ["petID", "price", "minLevel"]):
+            pet["minQuality"] = int(pet.get("minQuality", -1))
+            pet["excludeBreeds"] = list(pet.get("excludeBreeds", []))
+            if not all(
+                key in pet
+                for key in ["petID", "price", "minLevel", "minQuality", "excludeBreeds"]
+            ):
                 raise Exception(
-                    f"Error: Each pet entry must contain 'petID', 'price', and 'minLevel'. Found: {pet}"
+                    f"Error: Each pet entry must contain 'petID', 'price', 'minLevel', 'minQuality', 'excludeBreeds'. Found: {pet}"
                 )
 
             # Validate types and convert as needed
@@ -475,6 +480,8 @@ class MegaData:
                 "petID": int(pet["petID"]),  # Match the API's
                 "price": int(pet["price"]),
                 "minLevel": int(pet["minLevel"]),  # Handle both string and int inputs
+                "minQuality": pet["minQuality"],
+                "excludeBreeds": [int(breed) for breed in pet["excludeBreeds"]],
             }
 
             # Validate value ranges

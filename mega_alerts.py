@@ -590,6 +590,18 @@ class Alerts(QThread):
             if pet_level is None or pet_level < desired_pet["minLevel"]:
                 return None
 
+                # Check if quality meets requirement
+            if item["item"]["pet_quality_id"] < desired_pet["minQuality"]:
+                return None
+
+            # Check if breed is excluded
+            # https://www.warcraftpets.com/wow-pet-battles/breeds/
+            # 4        14 are the best power
+            # 5 15 are the best speed
+            # 6 16 are the best health
+            if item["item"]["pet_breed_id"] in desired_pet["excludeBreeds"]:
+                return None
+
             # Check if price meets requirement (buyout price should be less than desired price)
             buyout = item.get("buyout")
             if buyout is None or buyout / 10000 > desired_pet["price"]:
