@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from __future__ import print_function
-import time, json, random, os
+import time, json, random, os, sys
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from utils.helpers import (
@@ -12,6 +12,26 @@ from utils.helpers import (
 )
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
+
+
+# Add at the beginning of the file, after imports
+class StreamToFile:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.terminal = sys.stdout
+        # Ensure log directory exists
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        # Clear previous log file
+        with open(self.filepath, "w", encoding="utf-8") as f:
+            f.write(f"=== Log started at {datetime.now()} ===\n")
+
+    def write(self, text):
+        self.terminal.write(text)
+        with open(self.filepath, "a", encoding="utf-8") as f:
+            f.write(text)
+
+    def flush(self):
+        self.terminal.flush()
 
 
 class Alerts(QThread):
@@ -34,6 +54,16 @@ class Alerts(QThread):
         self.path_to_desired_ilvl_items = path_to_desired_ilvl_items
         self.path_to_desired_ilvl_list = path_to_desired_ilvl_list
         self.alert_record = []
+
+        # Setup logging
+        log_path = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "logs")
+        os.makedirs(log_path, exist_ok=True)
+        log_file = os.path.join(
+            log_path, f"aaa_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        )
+        sys.stdout = StreamToFile(log_file)
+        print(f"Starting Azeroth Auction Assassin at {datetime.now()}")
+        print(f"Log file created at: {log_file}")
 
     def run(self):
         #### FUNCTIONS ####

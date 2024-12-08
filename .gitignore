@@ -5,6 +5,7 @@ AzerothAuctionAssassinData/desired_items.json
 AzerothAuctionAssassinData/desired_pets.json
 AzerothAuctionAssassinData/mega_data.json
 AzerothAuctionAssassinData/backup/*
+AzerothAuctionAssassinData/logs/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
