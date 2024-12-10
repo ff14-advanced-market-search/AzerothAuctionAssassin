@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.3.0"
+AAA_VERSION = "1.3.1"
 
 windowsApp_Path = None
 try:
@@ -54,6 +54,32 @@ if sys.platform == "win32":
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 
+# Add at the beginning of the file after imports
+class StreamToFile:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.terminal_out = sys.stdout
+        self.terminal_err = sys.stderr
+        # Ensure log directory exists
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        # Clear previous log file
+        with open(self.filepath, "w", encoding="utf-8") as f:
+            f.write(f"=== Log started at {datetime.now()} ===\n")
+
+        # Redirect both stdout and stderr
+        sys.stdout = self
+        sys.stderr = self
+
+    def write(self, text):
+        self.terminal_out.write(text)
+        with open(self.filepath, "a", encoding="utf-8") as f:
+            f.write(text)
+
+    def flush(self):
+        self.terminal_out.flush()
+        self.terminal_err.flush()
+
+
 class Item_And_Pet_Statistics(QThread):
     completed = pyqtSignal(pd.DataFrame, pd.DataFrame)
 
@@ -82,92 +108,140 @@ class Item_And_Pet_Statistics(QThread):
 
 class App(QMainWindow):
     def __init__(self):
-        super(App, self).__init__()
-        self.title = f"Azeroth Auction Assassin v{AAA_VERSION}"
-        self.left = 100
-        self.top = 100
-        self.width = 650
-        self.height = 750
-        icon_path = "icon.png"
+        try:
+            super(App, self).__init__()
+            # Setup logging before anything else
+            log_path = os.path.join(os.getcwd(), "AzerothAuctionAssassinData", "logs")
+            os.makedirs(log_path, exist_ok=True)
+            log_file = os.path.join(
+                log_path, f"aaa_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            )
+            # Create stream handler that captures both stdout and stderr
+            self.stream_handler = StreamToFile(log_file)
+            print(f"Starting Azeroth Auction Assassin at {datetime.now()}")
+            print(f"Log file created at: {log_file}")
 
-        # checking if the app is invoked from the windows binary and if yes then change the icon file path.
-        if windowsApp_Path is not None:
-            icon_path = f"{windowsApp_Path}\\{icon_path}"
+            # Install exception hook to catch Qt exceptions
+            sys.excepthook = self.handle_exception
 
-        icon = QIcon(icon_path)
-        self.setWindowIcon(icon)
+            self.title = f"Azeroth Auction Assassin v{AAA_VERSION}"
+            self.left = 100
+            self.top = 100
+            self.width = 650
+            self.height = 750
+            icon_path = "icon.png"
 
-        self.token_auth_url = "http://api.saddlebagexchange.com/api/wow/checkmegatoken"
+            # checking if the app is invoked from the windows binary and if yes then change the icon file path.
+            if windowsApp_Path is not None:
+                icon_path = f"{windowsApp_Path}\\{icon_path}"
 
-        self.eu_connected_realms = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "eu-wow-connected-realm-ids.json"
-        )
-        self.na_connected_realms = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "na-wow-connected-realm-ids.json"
-        )
-        self.EUCLASSIC_connected_realms = os.path.join(
-            os.getcwd(),
-            "AzerothAuctionAssassinData",
-            "euclassic-wow-connected-realm-ids.json",
-        )
-        self.NACLASSIC_connected_realms = os.path.join(
-            os.getcwd(),
-            "AzerothAuctionAssassinData",
-            "naclassic-wow-connected-realm-ids.json",
-        )
-        self.NASODCLASSIC_connected_realms = os.path.join(
-            os.getcwd(),
-            "AzerothAuctionAssassinData",
-            "nasodclassic-wow-connected-realm-ids.json",
-        )
-        self.EUSODCLASSIC_connected_realms = os.path.join(
-            os.getcwd(),
-            "AzerothAuctionAssassinData",
-            "eusodclassic-wow-connected-realm-ids.json",
-        )
+            icon = QIcon(icon_path)
+            self.setWindowIcon(icon)
 
-        # default to 10% discount, just use EU for now for less data
-        self.api_data_thread = Item_And_Pet_Statistics()
-        self.api_data_thread.start()
-        self.api_data_thread.completed.connect(self.api_data_received)
+            self.token_auth_url = (
+                "http://api.saddlebagexchange.com/api/wow/checkmegatoken"
+            )
 
-        self.pet_statistics = None
-        self.item_statistics = None
+            self.eu_connected_realms = os.path.join(
+                os.getcwd(),
+                "AzerothAuctionAssassinData",
+                "eu-wow-connected-realm-ids.json",
+            )
+            self.na_connected_realms = os.path.join(
+                os.getcwd(),
+                "AzerothAuctionAssassinData",
+                "na-wow-connected-realm-ids.json",
+            )
+            self.EUCLASSIC_connected_realms = os.path.join(
+                os.getcwd(),
+                "AzerothAuctionAssassinData",
+                "euclassic-wow-connected-realm-ids.json",
+            )
+            self.NACLASSIC_connected_realms = os.path.join(
+                os.getcwd(),
+                "AzerothAuctionAssassinData",
+                "naclassic-wow-connected-realm-ids.json",
+            )
+            self.NASODCLASSIC_connected_realms = os.path.join(
+                os.getcwd(),
+                "AzerothAuctionAssassinData",
+                "nasodclassic-wow-connected-realm-ids.json",
+            )
+            self.EUSODCLASSIC_connected_realms = os.path.join(
+                os.getcwd(),
+                "AzerothAuctionAssassinData",
+                "eusodclassic-wow-connected-realm-ids.json",
+            )
 
-        self.path_to_data = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "mega_data.json"
-        )
-        self.path_to_desired_items = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "desired_items.json"
-        )
-        self.path_to_desired_pets = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "desired_pets.json"
-        )
-        self.path_to_desired_ilvl_items = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "desired_ilvl.json"
-        )
-        self.path_to_desired_ilvl_list = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "desired_ilvl_list.json"
-        )
-        self.path_to_desired_pet_ilvl_list = os.path.join(
-            os.getcwd(), "AzerothAuctionAssassinData", "desired_pet_ilvl_list.json"
-        )
+            # default to 10% discount, just use EU for now for less data
+            self.api_data_thread = Item_And_Pet_Statistics()
+            self.api_data_thread.start()
+            self.api_data_thread.completed.connect(self.api_data_received)
 
-        self.pet_list = {}
-        self.items_list = {}
-        self.ilvl_list = []
-        self.ilvl_items = {}
-        self.pet_ilvl_rules = []
+            self.pet_statistics = None
+            self.item_statistics = None
 
-        # Load existing pet level rules if file exists
-        if os.path.exists(self.path_to_desired_pet_ilvl_list):
-            try:
-                with open(self.path_to_desired_pet_ilvl_list, "r") as f:
-                    self.pet_ilvl_rules = json.load(f)
-            except Exception as e:
-                print(f"Error loading pet level rules: {e}")
+            self.path_to_data = os.path.join(
+                os.getcwd(), "AzerothAuctionAssassinData", "mega_data.json"
+            )
+            self.path_to_desired_items = os.path.join(
+                os.getcwd(), "AzerothAuctionAssassinData", "desired_items.json"
+            )
+            self.path_to_desired_pets = os.path.join(
+                os.getcwd(), "AzerothAuctionAssassinData", "desired_pets.json"
+            )
+            self.path_to_desired_ilvl_items = os.path.join(
+                os.getcwd(), "AzerothAuctionAssassinData", "desired_ilvl.json"
+            )
+            self.path_to_desired_ilvl_list = os.path.join(
+                os.getcwd(), "AzerothAuctionAssassinData", "desired_ilvl_list.json"
+            )
+            self.path_to_desired_pet_ilvl_list = os.path.join(
+                os.getcwd(), "AzerothAuctionAssassinData", "desired_pet_ilvl_list.json"
+            )
 
-        self.initUI()
+            self.pet_list = {}
+            self.items_list = {}
+            self.ilvl_list = []
+            self.ilvl_items = {}
+            self.pet_ilvl_rules = []
+
+            # Load existing pet level rules if file exists
+            if os.path.exists(self.path_to_desired_pet_ilvl_list):
+                try:
+                    with open(self.path_to_desired_pet_ilvl_list, "r") as f:
+                        self.pet_ilvl_rules = json.load(f)
+                except Exception as e:
+                    print(f"Error loading pet level rules: {e}")
+
+            self.initUI()
+        except Exception as e:
+            print("=== CRASH REPORT ===")
+            print(f"Crash occurred at: {datetime.now()}")
+            print(f"Error: {str(e)}")
+            import traceback
+
+            print("Full traceback:")
+            print(traceback.format_exc())
+            print("=== END CRASH REPORT ===")
+            raise
+
+    def handle_exception(self, exc_type, exc_value, exc_traceback):
+        """Handle uncaught exceptions"""
+        if issubclass(exc_type, KeyboardInterrupt):
+            # Handle keyboard interrupt differently
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+
+        print("=== CRASH REPORT ===")
+        print(f"Crash occurred at: {datetime.now()}")
+        print(f"Error Type: {exc_type.__name__}")
+        print(f"Error: {exc_value}")
+        print("Full traceback:")
+        import traceback
+
+        print("".join(traceback.format_tb(exc_traceback)))
+        print("=== END CRASH REPORT ===")
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -2816,10 +2890,22 @@ class App(QMainWindow):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    file = QFile(":/dark/stylesheet.qss")
-    file.open(QFile.ReadOnly | QFile.Text)
-    stream = QTextStream(file)
-    app.setStyleSheet(stream.readAll())
-    ex = App()
-    exit(app.exec_())
+    try:
+        app = QApplication(sys.argv)
+        file = QFile(":/dark/stylesheet.qss")
+        file.open(QFile.ReadOnly | QFile.Text)
+        stream = QTextStream(file)
+        app.setStyleSheet(stream.readAll())
+        ex = App()
+        exit(app.exec_())
+    except Exception as e:
+        print("=== CRASH REPORT ===")
+        print(f"Crash occurred at: {datetime.now()}")
+        print(f"Error: {str(e)}")
+        import traceback
+
+        print("Full traceback:")
+        print(traceback.format_exc())
+        print("=== END CRASH REPORT ===")
+        # Re-raise the exception after logging
+        raise
