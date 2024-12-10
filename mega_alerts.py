@@ -99,6 +99,13 @@ class Alerts(QThread):
                         pet_name = "Unknown Pet"
                         # old method
                         # id_msg += f"`Name:` {pet_name}\n"
+                    if "pet_level" in auction:
+                        id_msg += f"`pet_level:` {auction['pet_level']}\n"
+                    if "quality" in auction:
+                        id_msg += f"`quality:` {auction['quality']}\n"
+                    if "breed" in auction:
+                        id_msg += f"`breed:` {auction['breed']}\n"
+
                     embed_name = pet_name
 
                 message = ""
@@ -164,6 +171,7 @@ class Alerts(QThread):
             pet_ah_buyouts = {}
             pet_ah_bids = {}
             ilvl_ah_buyouts = []
+            pet_ilvl_ah_buyouts = []
 
             if len(auctions) == 0:
                 print(f"no listings found on {connected_id} of {mega_data.REGION}")
@@ -203,6 +211,7 @@ class Alerts(QThread):
 
                 # all caged battle pets have item id 82800
                 elif item_id == 82800:
+                    # desired pets
                     if item["item"]["pet_species_id"] in mega_data.DESIRED_PETS:
                         pet_id = item["item"]["pet_species_id"]
                         price = 10000000 * 10000
@@ -216,6 +225,17 @@ class Alerts(QThread):
                             add_price_to_dict(
                                 price, pet_id, pet_ah_buyouts, is_pet=True
                             )
+
+                    # desired pet ilvl items
+                    if item["item"]["pet_species_id"] in [
+                        pet["petID"] for pet in mega_data.DESIRED_PET_ILVL_LIST
+                    ]:
+                        pet_ilvl_item_info = check_pet_ilvl_stats(
+                            item,
+                            mega_data.DESIRED_PET_ILVL_LIST,
+                        )
+                        if pet_ilvl_item_info:
+                            pet_ilvl_ah_buyouts.append(pet_ilvl_item_info)
 
                 # ilvl snipe items
                 if (
@@ -256,6 +276,7 @@ class Alerts(QThread):
                 or pet_ah_buyouts
                 or pet_ah_bids
                 or ilvl_ah_buyouts
+                or pet_ilvl_ah_buyouts
             ):
                 print(
                     f"no listings found matching desires on {connected_id} of {mega_data.REGION}"
@@ -270,6 +291,7 @@ class Alerts(QThread):
                     pet_ah_buyouts,
                     pet_ah_bids,
                     list(ilvl_ah_buyouts),
+                    pet_ilvl_ah_buyouts,
                 )
 
         def check_tertiary_stats_generic(
@@ -350,6 +372,10 @@ class Alerts(QThread):
             if required_lvl > DESIRED_ILVL_ITEMS["required_max_lvl"]:
                 return False
 
+            # if no buyout, use bid
+            if "buyout" not in auction and "bid" in auction:
+                auction["buyout"] = auction["bid"]
+
             # if we get through everything and still haven't skipped, add to matching
             buyout = round(auction["buyout"] / 10000, 2)
             if buyout > DESIRED_ILVL_ITEMS["buyout"]:
@@ -371,6 +397,7 @@ class Alerts(QThread):
             pet_ah_buyouts,
             pet_ah_bids,
             ilvl_ah_buyouts,
+            pet_ilvl_ah_buyouts,
         ):
             results = []
             realm_names = mega_data.get_realm_names(connected_id)
@@ -461,6 +488,25 @@ class Alerts(QThread):
                         )
                     )
 
+            # Add new section for pet level snipes
+            for auction in pet_ilvl_ah_buyouts:
+                petID = auction["pet_species_id"]
+                # use instead of item name
+                itemlink = create_oribos_exchange_pet_link(
+                    realm_names[0], petID, mega_data.REGION
+                )
+                results.append(
+                    pet_ilvl_results_dict(
+                        auction,
+                        itemlink,
+                        connected_id,
+                        realm_names,
+                        petID,
+                        "petID",
+                        "buyout",
+                    )
+                )
+
             # end of the line alerts go out from here
             return results
 
@@ -497,6 +543,77 @@ class Alerts(QThread):
                 "bonus_ids": auction["bonus_ids"],
                 "ilvl": auction["ilvl"],
                 "required_lvl": auction["required_lvl"],
+            }
+
+        def pet_ilvl_results_dict(
+            auction, itemlink, connected_id, realm_names, id, idType, priceType
+        ):
+            """Format pet level snipe results for alerts"""
+            return {
+                "region": mega_data.REGION,
+                "realmID": connected_id,
+                "realmNames": realm_names,
+                f"{idType}": id,
+                "itemlink": itemlink,
+                "minPrice": auction["buyout"],
+                f"{priceType}_prices": auction["buyout"],
+                "pet_level": auction["current_level"],
+                "quality": auction["quality"],
+                "breed": auction["breed"],
+            }
+
+        def check_pet_ilvl_stats(item, desired_pet_list):
+            """
+            Check if a pet auction meets the desired level and price criteria
+
+            Args:
+                item (dict): Auction house item data from Blizzard API
+                desired_pet_list (list): List of dictionaries containing desired pet criteria
+
+            Returns:
+                dict: Pet info if it matches criteria, None if it doesn't match
+            """
+            # Get the pet species ID from the item data
+            pet_species_id = item["item"]["pet_species_id"]
+
+            # Find matching desired pet entry
+            desired_pet = next(
+                (pet for pet in desired_pet_list if pet["petID"] == pet_species_id),
+                None,
+            )
+
+            if not desired_pet:
+                return None
+
+            # Check if pet meets level requirement
+            pet_level = item["item"].get("pet_level")
+            if pet_level is None or pet_level < desired_pet["minLevel"]:
+                return None
+
+                # Check if quality meets requirement
+            if item["item"]["pet_quality_id"] < desired_pet["minQuality"]:
+                return None
+
+            # Check if breed is excluded
+            # https://www.warcraftpets.com/wow-pet-battles/breeds/
+            # 4        14 are the best power
+            # 5 15 are the best speed
+            # 6 16 are the best health
+            if item["item"]["pet_breed_id"] in desired_pet["excludeBreeds"]:
+                return None
+
+            # Check if price meets requirement (buyout price should be less than desired price)
+            buyout = item.get("buyout")
+            if buyout is None or buyout / 10000 > desired_pet["price"]:
+                return None
+
+            # If we get here, the pet matches all criteria
+            return {
+                "pet_species_id": pet_species_id,
+                "current_level": item["item"]["pet_level"],
+                "buyout": item["buyout"] / 10000,
+                "quality": item["item"]["pet_quality_id"],
+                "breed": item["item"]["pet_breed_id"],
             }
 
         #### MAIN ####
@@ -593,6 +710,7 @@ class Alerts(QThread):
             + f"checking for items {mega_data.DESIRED_ITEMS}\n"
             + f"or pets {mega_data.DESIRED_PETS}\n"
             + f"or ilvl items from list {mega_data.DESIRED_ILVL_LIST}\n"
+            + f"or pet ilvl items from list {mega_data.DESIRED_PET_ILVL_LIST}\n"
         )
 
         # start app here
