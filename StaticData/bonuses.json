@@ -73013,8 +73013,8 @@
       "id": 181649,
       "index": 0,
       "spell": {
-        "id": 431147,
-        "name": "Slash",
+        "id": 471633,
+        "name": "Combo Attack",
         "icon": "inv_sword_1h_kultirasquest_b_01"
       }
     }
@@ -87416,6 +87416,34 @@
       }
     }
   },
+  "12012": {
+    "id": 12012,
+    "quality": 4
+  },
+  "12013": {
+    "id": 12013,
+    "quality": 4
+  },
+  "12014": {
+    "id": 12014,
+    "quality": 4
+  },
+  "12025": {
+    "id": 12025,
+    "quality": 4
+  },
+  "12026": {
+    "id": 12026,
+    "quality": 4
+  },
+  "12027": {
+    "id": 12027,
+    "quality": 4
+  },
+  "12028": {
+    "id": 12028,
+    "quality": 4
+  },
   "12057": {
     "id": 12057,
     "ilevel": "356 @plvl 55 - 551 @plvl 551",
@@ -87427,11 +87455,128 @@
     "curveId": 71409,
     "quality": 3
   },
+  "12062": {
+    "id": 12062,
+    "quality": 1,
+    "effect": {
+      "id": 193026,
+      "index": 0,
+      "spell": {
+        "id": 471717,
+        "name": "Celestial Barrage",
+        "icon": "inv_ability_eluneschosendruid_boundlessmoonlight"
+      }
+    }
+  },
+  "12063": {
+    "id": 12063,
+    "quality": 2,
+    "effect": {
+      "id": 193027,
+      "index": 0,
+      "spell": {
+        "id": 472390,
+        "name": "Celestial Barrage",
+        "icon": "inv_ability_eluneschosendruid_boundlessmoonlight"
+      }
+    }
+  },
+  "12064": {
+    "id": 12064,
+    "quality": 3,
+    "effect": {
+      "id": 193028,
+      "index": 0,
+      "spell": {
+        "id": 472403,
+        "name": "Celestial Barrage",
+        "icon": "inv_ability_eluneschosendruid_boundlessmoonlight"
+      }
+    }
+  },
+  "12065": {
+    "id": 12065,
+    "quality": 4,
+    "effect": {
+      "id": 193029,
+      "index": 0,
+      "spell": {
+        "id": 472406,
+        "name": "Celestial Barrage",
+        "icon": "inv_ability_eluneschosendruid_boundlessmoonlight"
+      }
+    }
+  },
   "12070": {
     "id": 12070,
     "ilevel": "369 @plvl 55 - 554 @plvl 554",
     "curveId": 71410,
     "quality": 4
+  },
+  "12085": {
+    "id": 12085,
+    "quality": 1,
+    "effect": {
+      "id": 193234,
+      "index": 0,
+      "spell": {
+        "id": 472696,
+        "name": "Void Tear",
+        "icon": "ability_hunter_readiness"
+      }
+    }
+  },
+  "12086": {
+    "id": 12086,
+    "quality": 2,
+    "effect": {
+      "id": 193244,
+      "index": 0,
+      "spell": {
+        "id": 472852,
+        "name": "Void Tear",
+        "icon": "ability_hunter_readiness"
+      }
+    }
+  },
+  "12087": {
+    "id": 12087,
+    "quality": 3,
+    "effect": {
+      "id": 193245,
+      "index": 0,
+      "spell": {
+        "id": 472859,
+        "name": "Void Tear",
+        "icon": "ability_hunter_readiness"
+      }
+    }
+  },
+  "12088": {
+    "id": 12088,
+    "quality": 4,
+    "effect": {
+      "id": 193246,
+      "index": 0,
+      "spell": {
+        "id": 472866,
+        "name": "Void Tear",
+        "icon": "ability_hunter_readiness"
+      }
+    }
+  },
+  "12089": {
+    "id": 12089,
+    "quality": 1,
+    "effect": {
+      "id": 193264,
+      "index": 0,
+      "spell": {
+        "id": 472908,
+        "name": "G.R.A.V. Glove",
+        "icon": "inv_mechanicalhandpet"
+      }
+    }
   },
   "12092": {
     "id": 12092,
@@ -87448,5 +87593,109 @@
   "12095": {
     "id": 12095,
     "tag": "Mythic"
+  },
+  "12097": {
+    "id": 12097,
+    "quality": 1,
+    "effect": {
+      "id": 193342,
+      "index": 0,
+      "spell": {
+        "id": 473810,
+        "name": "Aura of Zealotry",
+        "icon": "ability_paladin_artofwar"
+      }
+    }
+  },
+  "12098": {
+    "id": 12098,
+    "quality": 2,
+    "effect": {
+      "id": 193344,
+      "index": 0,
+      "spell": {
+        "id": 473819,
+        "name": "Aura of Zealotry",
+        "icon": "ability_paladin_artofwar"
+      }
+    }
+  },
+  "12099": {
+    "id": 12099,
+    "quality": 3,
+    "effect": {
+      "id": 193345,
+      "index": 0,
+      "spell": {
+        "id": 473823,
+        "name": "Aura of Zealotry",
+        "icon": "ability_paladin_artofwar"
+      }
+    }
+  },
+  "12100": {
+    "id": 12100,
+    "quality": 4,
+    "effect": {
+      "id": 193346,
+      "index": 0,
+      "spell": {
+        "id": 473828,
+        "name": "Aura of Zealotry",
+        "icon": "ability_paladin_artofwar"
+      }
+    }
+  },
+  "12101": {
+    "id": 12101,
+    "quality": 1,
+    "effect": {
+      "id": 203151,
+      "index": 0,
+      "spell": {
+        "id": 474121,
+        "name": "Call Galefeather",
+        "icon": "inv_eagle2windmount_sepia"
+      }
+    }
+  },
+  "12106": {
+    "id": 12106,
+    "quality": 2,
+    "effect": {
+      "id": 203613,
+      "index": 0,
+      "spell": {
+        "id": 474650,
+        "name": "Call Galefeather",
+        "icon": "inv_eagle2windmount_sepia"
+      }
+    }
+  },
+  "12107": {
+    "id": 12107,
+    "quality": 3,
+    "effect": {
+      "id": 203614,
+      "index": 0,
+      "spell": {
+        "id": 474651,
+        "name": "Call Galefeather",
+        "icon": "inv_eagle2windmount_sepia"
+      }
+    }
+  },
+  "12108": {
+    "id": 12108,
+    "quality": 4,
+    "effect": {
+      "id": 203615,
+      "index": 0,
+      "spell": {
+        "id": 474652,
+        "name": "Call Galefeather",
+        "icon": "inv_eagle2windmount_sepia"
+      }
+    }
   }
 }
