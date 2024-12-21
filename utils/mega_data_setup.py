@@ -549,6 +549,8 @@ class MegaData:
             print("==========================================")
             print(f"gather data from {self.REGION} commodities")
             auction_info = self.make_commodity_ah_api_request()
+            if auction_info is None:
+                return []
             return auction_info["auctions"]
         else:
             print("==========================================")
@@ -711,7 +713,7 @@ class MegaData:
                 # Check if data is older than 2 hours (7200 seconds)
                 if current_time - last_upload_time > 7200:
                     print(f"Commodity data is too old (>2 hours), skipping")
-                    return None
+                    return {"auctions": []}
                     
             except Exception as ex:
                 print(f"The exception was:", ex)
