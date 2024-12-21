@@ -549,8 +549,6 @@ class MegaData:
             print("==========================================")
             print(f"gather data from {self.REGION} commodities")
             auction_info = self.make_commodity_ah_api_request()
-            if auction_info is None:
-                return []
             return auction_info["auctions"]
         else:
             print("==========================================")
