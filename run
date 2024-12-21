@@ -1,2 +1,3 @@
 #!/bin/sh
-python3 mega_alerts.py
+/usr/local/bin/python3.11 AzerothAuctionAssassin.py
+# /usr/local/bin/python3.11 mega_alerts.py
