@@ -2629,6 +2629,7 @@ class App(QMainWindow):
 
         # Min Level input
         self.pet_ilvl_min_level_input = QLineEdit(pet_ilvl_page)
+        self.pet_ilvl_min_level_input.setText("1")
         self.pet_ilvl_min_level_input_label = QLabel("Minimum Level", pet_ilvl_page)
         self.pet_ilvl_min_level_input_label.setToolTip("Minimum pet level (1-25)")
         self.pet_ilvl_page_layout.addWidget(
