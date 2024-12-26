@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.3.1"
+AAA_VERSION = "1.3.1.1"
 
 windowsApp_Path = None
 try:
@@ -2629,6 +2629,7 @@ class App(QMainWindow):
 
         # Min Level input
         self.pet_ilvl_min_level_input = QLineEdit(pet_ilvl_page)
+        self.pet_ilvl_min_level_input.setText("1")
         self.pet_ilvl_min_level_input_label = QLabel("Minimum Level", pet_ilvl_page)
         self.pet_ilvl_min_level_input_label.setToolTip("Minimum pet level (1-25)")
         self.pet_ilvl_page_layout.addWidget(
@@ -2702,6 +2703,9 @@ class App(QMainWindow):
         """Add or update a pet level rule in the list"""
         try:
             # Get and validate inputs
+            if not self.pet_ilvl_min_level_input.text().strip():
+                raise ValueError("Please set a pet level (1-25)")
+
             pet_id = int(self.pet_ilvl_id_input.text())
             price = int(self.pet_ilvl_price_input.text())
             min_level = int(self.pet_ilvl_min_level_input.text())
