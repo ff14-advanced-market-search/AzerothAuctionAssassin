@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.3.1.1"
+AAA_VERSION = "1.3.1.2"
 
 windowsApp_Path = None
 try:
@@ -2430,6 +2430,33 @@ class App(QMainWindow):
 
     def save_data_to_json(self):
         # Validate application settings
+        """
+        Save application data and configuration to JSON files with backup mechanism.
+        
+        This method performs the following key actions:
+        - Validates application settings and item lists
+        - Saves configuration and user-defined lists to primary JSON files
+        - Creates timestamped backup files for data preservation
+        
+        Parameters:
+            None
+        
+        Returns:
+            bool: True if data saving is successful, False if validation fails
+        
+        Raises:
+            No explicit exceptions, but may raise file I/O related errors during JSON saving
+        
+        Side Effects:
+            - Writes JSON files to predefined paths
+            - Creates backup files with timestamp in filename
+            - Modifies filesystem by creating new JSON files
+        
+        Notes:
+            - Saves configuration, desired pets, items, item levels, and pet item levels
+            - Backup files are created in 'AzerothAuctionAssassinData/backup' directory
+            - Backup filename includes timestamp for unique identification
+        """
         config_json = self.validate_application_settings()
         if not config_json:
             return False
@@ -2444,6 +2471,7 @@ class App(QMainWindow):
         self.save_json_file(self.path_to_desired_items, self.items_list)
         self.save_json_file(self.path_to_desired_ilvl_list, self.ilvl_list)
         self.save_json_file(self.path_to_desired_ilvl_items, self.ilvl_items)
+        self.save_json_file(self.path_to_desired_pet_ilvl_list, self.pet_ilvl_rules)
 
         # Save Backups
         time_int = (
@@ -2476,43 +2504,32 @@ class App(QMainWindow):
             "backup",
             f"{time_int}_desired_ilvl_list.json",
         )
+        path_to_backup_pet_ilvl_list = os.path.join(
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "backup",
+            f"{time_int}_desired_pet_ilvl_list.json",
+        )
         self.save_json_file(path_to_backup_mega_data, config_json)
         self.save_json_file(path_to_backup_items, self.items_list)
         self.save_json_file(path_to_backup_pets, self.pet_list)
         self.save_json_file(path_to_backup_ilvl_list, self.ilvl_list)
-
-        # Get pet level rules
-        pet_ilvl_rules = []
-        for i in range(self.pet_ilvl_list_display.count()):
-            item = self.pet_ilvl_list_display.item(i)
-            parts = item.text().split(";")
-            pet_id = int(parts[0].split(":")[1].strip())
-            price = int(parts[1].split(":")[1].strip())
-            min_level = int(parts[2].split(":")[1].strip())
-            min_quality = int(parts[3].split(":")[1].strip())
-            excluded_breeds = eval(parts[4].split(":")[1].strip())
-
-            pet_ilvl_rules.append(
-                {
-                    "petID": pet_id,
-                    "price": price,
-                    "minLevel": min_level,
-                    "minQuality": min_quality,
-                    "excludeBreeds": excluded_breeds,
-                }
-            )
-
-        # Save pet level rules
-        self.save_json_file(
-            os.path.join(
-                os.getcwd(), "AzerothAuctionAssassinData", "desired_pet_ilvl_list.json"
-            ),
-            pet_ilvl_rules,
-        )
+        self.save_json_file(path_to_backup_pet_ilvl_list, self.pet_ilvl_rules)
 
         return True
 
     def save_json_file(self, path, data):
+        """
+        Save data to a JSON file with UTF-8 encoding and formatted indentation.
+        
+        Parameters:
+            path (str): The file path where the JSON file will be saved
+            data (dict or list): The data to be serialized and saved to the JSON file
+        
+        Raises:
+            IOError: If the file cannot be written due to permission or path issues
+            TypeError: If the data cannot be JSON serialized
+        """
         with open(path, "w", encoding="utf-8") as json_file:
             json.dump(data, json_file, ensure_ascii=False, indent=4)
 
