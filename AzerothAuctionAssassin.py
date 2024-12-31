@@ -2430,6 +2430,33 @@ class App(QMainWindow):
 
     def save_data_to_json(self):
         # Validate application settings
+        """
+        Save application data and configuration to JSON files with backup mechanism.
+        
+        This method performs the following key actions:
+        - Validates application settings and item lists
+        - Saves configuration and user-defined lists to primary JSON files
+        - Creates timestamped backup files for data preservation
+        
+        Parameters:
+            None
+        
+        Returns:
+            bool: True if data saving is successful, False if validation fails
+        
+        Raises:
+            No explicit exceptions, but may raise file I/O related errors during JSON saving
+        
+        Side Effects:
+            - Writes JSON files to predefined paths
+            - Creates backup files with timestamp in filename
+            - Modifies filesystem by creating new JSON files
+        
+        Notes:
+            - Saves configuration, desired pets, items, item levels, and pet item levels
+            - Backup files are created in 'AzerothAuctionAssassinData/backup' directory
+            - Backup filename includes timestamp for unique identification
+        """
         config_json = self.validate_application_settings()
         if not config_json:
             return False
@@ -2492,6 +2519,17 @@ class App(QMainWindow):
         return True
 
     def save_json_file(self, path, data):
+        """
+        Save data to a JSON file with UTF-8 encoding and formatted indentation.
+        
+        Parameters:
+            path (str): The file path where the JSON file will be saved
+            data (dict or list): The data to be serialized and saved to the JSON file
+        
+        Raises:
+            IOError: If the file cannot be written due to permission or path issues
+            TypeError: If the data cannot be JSON serialized
+        """
         with open(path, "w", encoding="utf-8") as json_file:
             json.dump(data, json_file, ensure_ascii=False, indent=4)
 
