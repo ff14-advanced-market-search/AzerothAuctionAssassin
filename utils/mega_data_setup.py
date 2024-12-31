@@ -75,9 +75,11 @@ class MegaData:
         self.DESIRED_PETS = self.__set_desired_items(
             "desired_pets", path_to_desired_pets
         )
-        self.DESIRED_ILVL_ITEMS, self.min_ilvl = self.__set_desired_ilvl_single(
-            path_to_desired_ilvl_items
-        )
+
+        # this should be depreciated now
+        self.DESIRED_ILVL_ITEMS, self.min_ilvl = {}, 100000
+        # this should be depreciated now
+
         self.DESIRED_ILVL_LIST = self.__set_desired_ilvl_list(path_to_desired_ilvl_list)
         self.DESIRED_PET_ILVL_LIST = self.__set_desired_pet_ilvl_list(
             path_to_desired_pet_ilvl_list
