@@ -2444,6 +2444,7 @@ class App(QMainWindow):
         self.save_json_file(self.path_to_desired_items, self.items_list)
         self.save_json_file(self.path_to_desired_ilvl_list, self.ilvl_list)
         self.save_json_file(self.path_to_desired_ilvl_items, self.ilvl_items)
+        self.save_json_file(self.path_to_desired_pet_ilvl_list, self.pet_ilvl_rules)
 
         # Save Backups
         time_int = (
@@ -2476,39 +2477,17 @@ class App(QMainWindow):
             "backup",
             f"{time_int}_desired_ilvl_list.json",
         )
+        path_to_backup_pet_ilvl_list = os.path.join(
+            os.getcwd(),
+            "AzerothAuctionAssassinData",
+            "backup",
+            f"{time_int}_desired_pet_ilvl_list.json",
+        )
         self.save_json_file(path_to_backup_mega_data, config_json)
         self.save_json_file(path_to_backup_items, self.items_list)
         self.save_json_file(path_to_backup_pets, self.pet_list)
         self.save_json_file(path_to_backup_ilvl_list, self.ilvl_list)
-
-        # Get pet level rules
-        pet_ilvl_rules = []
-        for i in range(self.pet_ilvl_list_display.count()):
-            item = self.pet_ilvl_list_display.item(i)
-            parts = item.text().split(";")
-            pet_id = int(parts[0].split(":")[1].strip())
-            price = int(parts[1].split(":")[1].strip())
-            min_level = int(parts[2].split(":")[1].strip())
-            min_quality = int(parts[3].split(":")[1].strip())
-            excluded_breeds = eval(parts[4].split(":")[1].strip())
-
-            pet_ilvl_rules.append(
-                {
-                    "petID": pet_id,
-                    "price": price,
-                    "minLevel": min_level,
-                    "minQuality": min_quality,
-                    "excludeBreeds": excluded_breeds,
-                }
-            )
-
-        # Save pet level rules
-        self.save_json_file(
-            os.path.join(
-                os.getcwd(), "AzerothAuctionAssassinData", "desired_pet_ilvl_list.json"
-            ),
-            pet_ilvl_rules,
-        )
+        self.save_json_file(path_to_backup_pet_ilvl_list, self.pet_ilvl_rules)
 
         return True
 
