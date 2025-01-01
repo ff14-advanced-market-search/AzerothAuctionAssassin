@@ -38,7 +38,6 @@ class MegaData:
         self.SCAN_TIME_MIN = self.__set_mega_vars("SCAN_TIME_MIN", raw_mega_data)
         self.SCAN_TIME_MAX = self.__set_mega_vars("SCAN_TIME_MAX", raw_mega_data)
         self.REFRESH_ALERTS = self.__set_mega_vars("REFRESH_ALERTS", raw_mega_data)
-        self.IMPORTANT_EMOJI = self.__set_mega_vars("IMPORTANT_EMOJI", raw_mega_data)
         self.SHOW_BIDPRICES = self.__set_mega_vars("SHOW_BID_PRICES", raw_mega_data)
         self.EXTRA_ALERTS = self.__set_mega_vars("EXTRA_ALERTS", raw_mega_data)
         self.NO_RUSSIAN_REALMS = self.__set_mega_vars(
@@ -194,31 +193,6 @@ class MegaData:
                     var_value = 1
             else:
                 var_value = 1
-
-        if var_name == "IMPORTANT_EMOJI":
-            if len(str(var_value)) != 1:
-                var_value = "🔥"
-            else:
-                var_value = str(var_value)
-
-        ## save old method just incase, can probably delete it later
-        # if var_name == "DEBUG":
-        #     if str(var_value).lower() == "true" or var_value == True:
-        #         var_value = True
-        #     else:
-        #         var_value = False
-
-        # if var_name == "NO_RUSSIAN_REALMS":
-        #     if var_value == "false" or var_value == False:
-        #         var_value = False
-        #     else:
-        #         var_value = True
-
-        # if var_name == "REFRESH_ALERTS":
-        #     if str(var_value).lower() == "false" or var_value == False:
-        #         var_value = False
-        #     else:
-        #         var_value = True
 
         # handle cases where we need a default value to be true or false
         def process_var(var_value, default_behaviour):
@@ -553,14 +527,12 @@ class MegaData:
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
     def get_listings_single(self, connectedRealmId: int):
         if connectedRealmId in [-1, -2]:
-            print("==========================================")
             print(f"gather data from {self.REGION} commodities")
             auction_info = self.make_commodity_ah_api_request()
             if auction_info is None:
                 return []
             return auction_info["auctions"]
         else:
-            print("==========================================")
             print(
                 f"gather data from connectedRealmId {connectedRealmId} of region {self.REGION}"
             )

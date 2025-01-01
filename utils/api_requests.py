@@ -45,7 +45,6 @@ def get_wow_access_token(client_id, client_secret):
 
 @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
 def get_listings_single(connectedRealmId: int, access_token: str, region: str):
-    print("==========================================")
     print(f"gather data from connectedRealmId {connectedRealmId} of region {region}")
     if region == "NA":
         url = f"https://us.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions?namespace=dynamic-us&locale=en_US"
