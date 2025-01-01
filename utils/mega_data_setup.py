@@ -293,37 +293,23 @@ class MegaData:
             desired_items[int(k)] = float(v)
         return desired_items
 
-    def __set_desired_ilvl_single(self, path_to_data=None):
-        item_list_name = "desired_ilvl"
-        file_name = f"{item_list_name}.json"
-        env_var_name = item_list_name.upper()
-
-        if path_to_data == None:
-            ilvl_info = json.load(open(f"AzerothAuctionAssassinData/{file_name}"))
-        else:
-            ilvl_info = json.load(open(path_to_data))
-
-        # if file is not set use env var
-        if len(ilvl_info) == 0:
-            print(
-                f"no desired items found in AzerothAuctionAssassinData/{file_name} pulling from env vars"
-            )
-            if os.getenv(env_var_name):
-                ilvl_info = json.loads(os.getenv(env_var_name))
-            else:
-                print(f"skipping {item_list_name} its not set in file or env var")
-                return {}, 201
-        DESIRED_ILVL_ITEMS, min_ilvl = self.__set_desired_ilvl(ilvl_info)
-        return DESIRED_ILVL_ITEMS, min_ilvl
-
     def __set_desired_ilvl_list(self, path_to_data=None):
         item_list_name = "desired_ilvl_list"
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
-        if path_to_data == None:
-            ilvl_info = json.load(open(f"AzerothAuctionAssassinData/{file_name}"))
+        ilvl_info = {}
+
+        if path_to_data:
+            if os.path.exists(path_to_data):
+                ilvl_info = json.load(open(path_to_data))
+            else:
+                print(f"File not found: {path_to_data}")
         else:
-            ilvl_info = json.load(open(path_to_data))
+            file_path = f"AzerothAuctionAssassinData/{file_name}"
+            if os.path.exists(file_path):
+                ilvl_info = json.load(open(file_path))
+            else:
+                print(f"File not found: {file_path}")
 
         # if file is not set use env var
         if len(ilvl_info) == 0:
@@ -448,10 +434,19 @@ class MegaData:
         item_list_name = "desired_pet_ilvl_list"
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
-        if path_to_data == None:
-            pet_ilvl_info = json.load(open(f"AzerothAuctionAssassinData/{file_name}"))
+        pet_ilvl_info = {}
+
+        if path_to_data:
+            if os.path.exists(path_to_data):
+                pet_ilvl_info = json.load(open(path_to_data))
+            else:
+                print(f"File not found: {path_to_data}")
         else:
-            pet_ilvl_info = json.load(open(path_to_data))
+            file_path = f"AzerothAuctionAssassinData/{file_name}"
+            if os.path.exists(file_path):
+                pet_ilvl_info = json.load(open(file_path))
+            else:
+                print(f"File not found: {file_path}")
 
         # if file is not set use env var
         if len(pet_ilvl_info) == 0:
