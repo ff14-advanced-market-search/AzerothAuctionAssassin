@@ -272,12 +272,20 @@ class MegaData:
     def __set_desired_items(self, item_list_name, path_to_data=None):
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
-        if path_to_data == None:
-            desired_items_raw = json.load(
-                open(f"AzerothAuctionAssassinData/{file_name}")
-            )
+        desired_items_raw = {}
+
+        if path_to_data:
+            if os.path.exists(path_to_data):
+                desired_items_raw = json.load(open(path_to_data))
+            else:
+                print(f"File not found: {path_to_data}")
         else:
-            desired_items_raw = json.load(open(path_to_data))
+            file_path = f"AzerothAuctionAssassinData/{file_name}"
+            if os.path.exists(file_path):
+                desired_items_raw = json.load(open(file_path))
+            else:
+                print(f"File not found: {file_path}")
+
         # if file is not set use env var
         if len(desired_items_raw) == 0:
             print(
@@ -288,6 +296,8 @@ class MegaData:
             else:
                 print(f"skipping {item_list_name} its not set in file or env var")
                 desired_items_raw = {}
+
+        # convert to int keys and float values
         desired_items = {}
         for k, v in desired_items_raw.items():
             desired_items[int(k)] = float(v)
