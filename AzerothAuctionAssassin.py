@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.3.2"
+AAA_VERSION = "1.3.2.1"
 
 windowsApp_Path = None
 try:
@@ -1994,6 +1994,30 @@ class App(QMainWindow):
 
     def import_pbs_data(self):
         # Open a dialog to allow users to paste the PBS data
+        """
+        Import PBS (Price Breakdown Sheet) data into the application's item tracking system.
+        
+        This method allows users to paste PBS data, which contains item names and their corresponding prices. It processes the pasted data, matches item names with the application's item statistics, and updates the item list with prices.
+        
+        Parameters:
+            None (uses self context)
+        
+        Behavior:
+            - Opens a multi-line input dialog for users to paste PBS data
+            - Parses the pasted data, extracting item names and prices
+            - Matches item names with existing item statistics
+            - Updates item list with PBS prices or calculates discounted prices
+            - Populates the item list display with matched items and their prices
+        
+        Raises:
+            ValueError: If invalid numeric values are encountered during price parsing
+            Exception: For any unexpected errors during data processing
+        
+        Notes:
+            - Handles items with or without quotes in their names
+            - Supports fallback to discounted default prices if PBS price is not available
+            - Converts item names to lowercase for case-insensitive matching
+        """
         text, ok = QInputDialog.getMultiLineText(
             self, "Import PBS Data", "Paste your PBS data here:"
         )
@@ -2018,7 +2042,9 @@ class App(QMainWindow):
                 if len(parts) > 1:
                     price_parts = parts[1].split(";")
                     item_price = (
-                        float(price_parts[-1]) if price_parts[-1].isdigit() else None
+                        float(price_parts[-1])
+                        if self.isfloat(price_parts[-1])
+                        else None
                     )
                     pbs_prices[item_name] = item_price
                 else:
@@ -2629,6 +2655,30 @@ class App(QMainWindow):
     # Add after the make_ilvl_page method
     def make_pet_ilvl_page(self, pet_ilvl_page):
         # Pet ID input
+        """
+        Configures the pet item level (ilvl) page in the Azeroth Auction Assassin application.
+        
+        This method sets up a comprehensive UI for managing pet sniping rules, including:
+        - Input fields for pet ID, max price, name, minimum level, and minimum quality
+        - Dropdown for pet name selection
+        - Input for excluded breed IDs
+        - Buttons for adding, removing, importing, and exporting pet level rules
+        - A list widget to display current pet level rules
+        
+        The page allows users to:
+        - Define specific criteria for pet auction sniping
+        - Add and manage multiple pet level rules
+        - Import rules from different sources (including Point Blank Sniper)
+        - Convert rules between different formats
+        
+        Parameters:
+            pet_ilvl_page (QWidget): The parent widget for the pet item level page
+        
+        Side Effects:
+            - Creates and configures multiple QLineEdit, QLabel, QComboBox, QPushButton, and QListWidget
+            - Populates the pet level rules list display
+            - Connects various UI elements to corresponding event handlers
+        """
         self.pet_ilvl_id_input = QLineEdit(pet_ilvl_page)
         self.pet_ilvl_id_input_label = QLabel("Pet ID", pet_ilvl_page)
         self.pet_ilvl_id_input_label.setToolTip("Enter the Pet ID you want to snipe")
@@ -2732,16 +2782,15 @@ class App(QMainWindow):
             )
             self.pet_ilvl_list_display.addItem(display_string)
 
-        #### this is broken
-        # # Add after the existing import/export buttons in make_pet_ilvl_page method
-        # self.import_pbs_pet_ilvl_button = QPushButton("Import PBS Pet Data")
-        # self.import_pbs_pet_ilvl_button.setToolTip(
-        #     "Import your Point Blank Sniper pet text files"
-        # )
-        # self.import_pbs_pet_ilvl_button.clicked.connect(self.import_pbs_pet_ilvl_data)
-        # self.pet_ilvl_page_layout.addWidget(
-        #     self.import_pbs_pet_ilvl_button, 16, 1, 1, 1
-        # )
+        # Add after the existing import/export buttons in make_pet_ilvl_page method
+        self.import_pbs_pet_ilvl_button = QPushButton("Import PBS Pet Data")
+        self.import_pbs_pet_ilvl_button.setToolTip(
+            "Import your Point Blank Sniper pet text files"
+        )
+        self.import_pbs_pet_ilvl_button.clicked.connect(self.import_pbs_pet_ilvl_data)
+        self.pet_ilvl_page_layout.addWidget(
+            self.import_pbs_pet_ilvl_button, 16, 1, 1, 1
+        )
 
         self.convert_pet_ilvl_to_pbs_button = QPushButton("Convert AAA to PBS")
         self.convert_pet_ilvl_to_pbs_button.setToolTip(
@@ -2927,6 +2976,22 @@ class App(QMainWindow):
 
     def on_combo_box_pet_ilvl_changed(self, index):
         # This function will be called whenever the user selects a different pet
+        """
+        Update the pet item level input fields when a new pet is selected from the dropdown.
+        
+        This method is triggered when the user changes the selected pet in the pet item level (ilvl) combo box. It performs the following actions:
+        - Retrieves the selected pet's details from the pet statistics DataFrame
+        - Populates the pet ID input field with the corresponding item ID
+        - Sets a recommended price based on the pet's desired price and a user-defined discount percentage
+        - Provides a default price of 10 if no price can be calculated
+        
+        Parameters:
+            index (int): The index of the selected item in the combo box (unused)
+        
+        Side Effects:
+            - Updates pet_ilvl_id_input with the selected pet's item ID
+            - Updates pet_ilvl_price_input with a recommended or default price
+        """
         selected_pet = self.pet_ilvl_name_input.currentText()
         selected_pet_stats = self.pet_statistics[
             self.pet_statistics["itemName"] == selected_pet
@@ -2948,9 +3013,38 @@ class App(QMainWindow):
             except:
                 self.pet_ilvl_price_input.setText("10")
 
-    #### this is broken fix later
     def import_pbs_pet_ilvl_data(self):
-        """Import PBS pet data and convert to pet level rules"""
+        """
+        Import PBS pet data and convert to pet level rules.
+        
+        This method allows users to paste PBS (Presumably Pet Battle System) pet data and
+        automatically generates pet trading rules based on the imported information.
+        
+        Parameters:
+            None (uses self context)
+        
+        Functionality:
+            - Opens a multi-line input dialog for users to paste PBS pet data
+            - Parses the pasted data to extract pet names and prices
+            - Creates pet trading rules with extracted information
+            - Handles various data parsing scenarios and edge cases
+            - Provides fallback pricing using default discount mechanism
+            - Updates the pet level rules list and displays the rules
+        
+        Raises:
+            QMessageBox warnings/errors for:
+            - Invalid data format
+            - No valid pets imported
+            - Parsing errors
+        
+        Returns:
+            None (updates internal state and UI components)
+        
+        Notes:
+            - Supports flexible data parsing with multiple semicolon-separated fields
+            - Handles pet names with/without quotes
+            - Provides default pricing if no valid price is found
+        """
         text, ok = QInputDialog.getMultiLineText(
             self, "Import PBS Pet Data", "Paste your PBS pet data here:"
         )
@@ -2962,46 +3056,63 @@ class App(QMainWindow):
 
         try:
             # Process the pasted PBS data
+            # (Note: We remove any newlines but DO NOT over-filter the entries)
             pbs_data = text.replace("\n", "").replace("\r", "").split("^")
-            
-            # Remove any header entries (like "Battle Pet / Companions")
-            pbs_data = [entry for entry in pbs_data if entry.startswith('^"') or entry.startswith('"')]
 
             # Create a dictionary to map pet names to prices from the PBS data
             pbs_prices = {}
             for pet in pbs_data:
+                # Each 'pet' string might look like:  "Battle Pet Name;;0;0;0;0;0;50000" (etc.)
                 parts = pet.split(";;")
                 if not parts:
                     continue
 
-                # Handle pet name with or without "Snipe^" prefix
-                pet_name = parts[0].replace('Snipe^', '').strip()
-                if pet_name[0] == '"' and pet_name[-1] == '"':
+                # 1) Extract the pet name
+                # Strip whitespace, remove leading/trailing quotes if they exist
+                pet_name = parts[0].strip()
+                if pet_name.startswith('"') and pet_name.endswith('"'):
                     pet_name = pet_name[1:-1]
-                
-                # Try to get price from the data
-                price = None
-                if len(parts) > 1:
-                    try:
-                        # Look for the first valid number in the price parts
-                        price_parts = [p for p in parts[1].split(";") if p and p.replace(".", "").isdigit()]
-                        if price_parts:
-                            price = float(price_parts[0])
-                    except (ValueError, IndexError):
-                        continue
 
-                if price is not None:
-                    pbs_prices[pet_name.lower()] = price
+                pet_name_lower = pet_name.lower()
+
+                # 2) Extract the pet price if present
+                pet_price = None
+                if len(parts) > 1:
+                    # Split the second portion on semicolons
+                    price_parts = parts[1].split(";")
+                    # Try to parse the last or any valid digit
+                    # (same approach as your working function)
+                    if price_parts and self.isfloat(price_parts[-1]):
+                        pet_price = float(price_parts[-1])
+                    else:
+                        # If the last part isn't numeric, you could search backwards
+                        # for the first digit-like part:
+                        for p in reversed(price_parts):
+                            if self.isfloat(p):
+                                pet_price = float(p)
+                                break
+
+                # Store the parsed price (even if None) in the dictionary
+                pbs_prices[pet_name_lower] = pet_price
 
             # Create pet level rules
             temp_pet_rules = []
             for _index, pet in self.pet_statistics.iterrows():
                 pet_name_lower = pet["itemName"].lower()
                 if pet_name_lower in pbs_prices:
-                    # Create pet level rule with default values
+                    parsed_price = pbs_prices[pet_name_lower]
+
+                    # If the parsed price is None, fallback to the default price logic,
+                    # or any discount logic you prefer
+                    if parsed_price is None or parsed_price <= 0:
+                        default_price = pet["desiredPrice"]
+                        discount_percent = int(self.discount_percent.text()) / 100.0
+                        parsed_price = round(float(default_price) * discount_percent, 4)
+
+                    # Create a pet-level rule
                     pet_rule = {
                         "petID": int(pet["itemID"]),
-                        "price": float(pbs_prices[pet_name_lower]),
+                        "price": float(parsed_price),
                         "minLevel": 1,  # Default minimum level
                         "minQuality": -1,  # Default to any quality
                         "excludeBreeds": [],  # Default to no excluded breeds
@@ -3024,7 +3135,7 @@ class App(QMainWindow):
                 QMessageBox.warning(
                     self,
                     "Import Warning",
-                    "No valid pets were imported. Check the PBS data format."
+                    "No valid pets were imported. Check the PBS data format.",
                 )
 
         except ValueError as ve:
@@ -3063,6 +3174,31 @@ class App(QMainWindow):
 
     def import_pbs_pet_data(self):
         # Open a dialog to allow users to paste the PBS data
+        """
+        Import pet data from PBS (Probably Battle Stones) format into the application.
+        
+        This method allows users to paste a formatted text containing pet data, which is then processed
+        to extract pet names and their corresponding prices. The method supports various input formats
+        and handles price extraction with fallback mechanisms.
+        
+        Parameters:
+            None (uses self context)
+        
+        Raises:
+            ValueError: If invalid data is encountered during parsing
+            Exception: For any unexpected errors during data processing
+        
+        Behavior:
+            - Opens a multi-line input dialog for users to paste PBS pet data
+            - Parses the input, extracting pet names and prices
+            - Matches pet names against existing pet statistics
+            - Populates the pet list with extracted prices or calculated discounted prices
+            - Updates the pet list display with imported pet IDs and prices
+            - Handles cases where prices might be missing by applying a default discount
+        
+        Example:
+            Input format: "Pet Name;;0;0;0;0;0;50000^Another Pet;;0;0;0;0;0;25000"
+        """
         text, ok = QInputDialog.getMultiLineText(
             self, "Import PBS Pet Data", "Paste your PBS pet data here:"
         )
@@ -3087,7 +3223,9 @@ class App(QMainWindow):
                 if len(parts) > 1:
                     price_parts = parts[1].split(";")
                     pet_price = (
-                        float(price_parts[-1]) if price_parts[-1].isdigit() else None
+                        float(price_parts[-1])
+                        if self.isfloat(price_parts[-1])
+                        else None
                     )
                     pbs_prices[pet_name] = pet_price
                 else:
@@ -3139,6 +3277,24 @@ class App(QMainWindow):
 
     def convert_aaa_pets_to_pbs(self, pet_data):
         # Prepare the PBS list
+        """
+        Convert AAA pet data format to PBS (Panda Bot Sniper) format.
+        
+        This method transforms a dictionary of pet IDs and prices into a PBS-compatible string
+        for use in automated pet sniping tools.
+        
+        Parameters:
+            pet_data (dict): A dictionary with pet item IDs as keys and their corresponding prices as values.
+        
+        Returns:
+            str: A concatenated string of PBS-formatted pet snipe entries, where each entry follows
+                 the format: 'Snipe^"Pet Name";;0;0;0;0;0;price;;#;;'
+        
+        Notes:
+            - Skips pets that cannot be found in the pet_statistics DataFrame
+            - Converts prices to integers
+            - Requires self.pet_statistics DataFrame with 'itemID' and 'itemName' columns
+        """
         pbs_list = []
 
         for pet_id, price in pet_data.items():
@@ -3163,6 +3319,21 @@ class App(QMainWindow):
         pbs_string = "".join(pbs_list)
 
         return pbs_string
+
+    def isfloat(self, value):
+        """Check if a value can be converted to float.
+
+        Args:
+            value: The value to check
+
+        Returns:
+            bool: True if value can be converted to float, False otherwise
+        """
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
 
 
 if __name__ == "__main__":
