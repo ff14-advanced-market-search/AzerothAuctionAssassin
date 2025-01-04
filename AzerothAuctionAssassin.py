@@ -2732,15 +2732,16 @@ class App(QMainWindow):
             )
             self.pet_ilvl_list_display.addItem(display_string)
 
-        # Add after the existing import/export buttons in make_pet_ilvl_page method
-        self.import_pbs_pet_ilvl_button = QPushButton("Import PBS Pet Data")
-        self.import_pbs_pet_ilvl_button.setToolTip(
-            "Import your Point Blank Sniper pet text files"
-        )
-        self.import_pbs_pet_ilvl_button.clicked.connect(self.import_pbs_pet_ilvl_data)
-        self.pet_ilvl_page_layout.addWidget(
-            self.import_pbs_pet_ilvl_button, 16, 1, 1, 1
-        )
+        #### this is broken
+        # # Add after the existing import/export buttons in make_pet_ilvl_page method
+        # self.import_pbs_pet_ilvl_button = QPushButton("Import PBS Pet Data")
+        # self.import_pbs_pet_ilvl_button.setToolTip(
+        #     "Import your Point Blank Sniper pet text files"
+        # )
+        # self.import_pbs_pet_ilvl_button.clicked.connect(self.import_pbs_pet_ilvl_data)
+        # self.pet_ilvl_page_layout.addWidget(
+        #     self.import_pbs_pet_ilvl_button, 16, 1, 1, 1
+        # )
 
         self.convert_pet_ilvl_to_pbs_button = QPushButton("Convert AAA to PBS")
         self.convert_pet_ilvl_to_pbs_button.setToolTip(
@@ -2947,6 +2948,7 @@ class App(QMainWindow):
             except:
                 self.pet_ilvl_price_input.setText("10")
 
+    #### this is broken fix later
     def import_pbs_pet_ilvl_data(self):
         """Import PBS pet data and convert to pet level rules"""
         text, ok = QInputDialog.getMultiLineText(
