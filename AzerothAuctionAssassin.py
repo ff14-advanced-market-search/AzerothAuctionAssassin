@@ -2734,7 +2734,6 @@ class App(QMainWindow):
             )
             self.pet_ilvl_list_display.addItem(display_string)
 
-        #### this is broken
         # Add after the existing import/export buttons in make_pet_ilvl_page method
         self.import_pbs_pet_ilvl_button = QPushButton("Import PBS Pet Data")
         self.import_pbs_pet_ilvl_button.setToolTip(
