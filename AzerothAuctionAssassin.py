@@ -2732,6 +2732,30 @@ class App(QMainWindow):
             )
             self.pet_ilvl_list_display.addItem(display_string)
 
+        # Add after the existing import/export buttons in make_pet_ilvl_page method
+        self.import_pbs_pet_ilvl_button = QPushButton("Import PBS Pet Data")
+        self.import_pbs_pet_ilvl_button.setToolTip(
+            "Import your Point Blank Sniper pet text files"
+        )
+        self.import_pbs_pet_ilvl_button.clicked.connect(self.import_pbs_pet_ilvl_data)
+        self.pet_ilvl_page_layout.addWidget(
+            self.import_pbs_pet_ilvl_button, 17, 0, 1, 1
+        )
+
+        self.convert_pet_ilvl_to_pbs_button = QPushButton("Convert AAA to PBS")
+        self.convert_pet_ilvl_to_pbs_button.setToolTip(
+            "Convert your AAA pet level rules to PBS format"
+        )
+        self.convert_pet_ilvl_to_pbs_button.clicked.connect(
+            self.convert_pet_ilvl_to_pbs
+        )
+        self.pet_ilvl_page_layout.addWidget(
+            self.convert_pet_ilvl_to_pbs_button, 17, 1, 1, 1
+        )
+
+        # Move the erase button down one row
+        self.pet_ilvl_page_layout.addWidget(self.erase_pet_ilvl_button, 18, 0, 1, 2)
+
     def add_pet_ilvl_to_list(self):
         """Add or update a pet level rule in the list"""
         try:
@@ -2924,6 +2948,103 @@ class App(QMainWindow):
                 self.pet_ilvl_price_input.setText(recommended_price)
             except:
                 self.pet_ilvl_price_input.setText("10")
+
+    def import_pbs_pet_ilvl_data(self):
+        """Import PBS pet data and convert to pet level rules"""
+        text, ok = QInputDialog.getMultiLineText(
+            self, "Import PBS Pet Data", "Paste your PBS pet data here:"
+        )
+        if not ok or not text.strip():
+            return
+
+        self.pet_ilvl_list_display.clear()
+        self.pet_ilvl_rules = []
+
+        try:
+            # Process the pasted PBS data
+            pbs_data = text.replace("\n", "").replace("\r", "").split("^")
+
+            # Create a dictionary to map pet names to prices from the PBS data
+            for pet in pbs_data:
+                parts = pet.split(";;")
+                if len(parts) < 2:
+                    continue
+
+                pet_name = parts[0].strip().lower()
+                # strip off " if the name begins and ends with "
+                if pet_name[0] == '"' and pet_name[-1] == '"':
+                    pet_name = pet_name[1:-1]
+
+                price_parts = parts[1].split(";")
+                if not price_parts[-1].isdigit():
+                    continue
+
+                pet_price = float(price_parts[-1])
+
+                # Find pet ID from pet name
+                pet_match = self.pet_statistics[
+                    self.pet_statistics["itemName"].str.lower() == pet_name
+                ]
+                if pet_match.empty:
+                    continue
+
+                pet_id = pet_match.iloc[0]["itemID"]
+
+                # Create pet level rule with default values
+                pet_rule = {
+                    "petID": int(pet_id),
+                    "price": int(pet_price),
+                    "minLevel": 1,  # Default minimum level
+                    "minQuality": -1,  # Default to any quality
+                    "excludeBreeds": [],  # Default to no excluded breeds
+                }
+
+                # Add to rules list
+                self.pet_ilvl_rules.append(pet_rule)
+
+                # Add to display
+                display_string = (
+                    f"Pet ID: {pet_rule['petID']}; "
+                    f"Price: {pet_rule['price']}; "
+                    f"Min Level: {pet_rule['minLevel']}; "
+                    f"Min Quality: {pet_rule['minQuality']}; "
+                    f"Excluded Breeds: {pet_rule['excludeBreeds']}"
+                )
+                self.pet_ilvl_list_display.addItem(display_string)
+
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
+
+    def convert_pet_ilvl_to_pbs(self):
+        """Convert pet level rules to PBS format"""
+        try:
+            pbs_list = []
+            for rule in self.pet_ilvl_rules:
+                # Find the pet name from the ID
+                pet_name = self.pet_statistics.loc[
+                    self.pet_statistics["itemID"] == rule["petID"], "itemName"
+                ]
+                if pet_name.empty:
+                    continue
+
+                pet_name = pet_name.iloc[0]
+
+                # Construct PBS entry (using only ID and price, other fields don't map to PBS)
+                pbs_entry = f'Snipe^"{pet_name}";;0;0;0;0;0;{rule["price"]};;#;;'
+                pbs_list.append(pbs_entry)
+
+            # Join all entries and copy to clipboard
+            pbs_string = "".join(pbs_list)
+            clipboard = QApplication.clipboard()
+            clipboard.setText(pbs_string)
+
+            QMessageBox.information(
+                self, "Success", "Converted PBS pet string copied to clipboard."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Conversion Error", str(e))
 
     def import_pbs_pet_data(self):
         # Open a dialog to allow users to paste the PBS data
