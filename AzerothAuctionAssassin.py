@@ -690,7 +690,15 @@ class App(QMainWindow):
         self.import_pet_data_button = QPushButton("Import Pet Data")
         self.import_pet_data_button.setToolTip("Import your desired_pets.json config")
         self.import_pet_data_button.clicked.connect(self.import_pet_data)
-        self.pet_page_layout.addWidget(self.import_pet_data_button, 17, 0, 1, 2)
+        self.pet_page_layout.addWidget(self.import_pet_data_button, 17, 0, 1, 1)
+
+        # Add new PBS import button for pets
+        self.import_pbs_pet_data_button = QPushButton("Import PBS Pet Data")
+        self.import_pbs_pet_data_button.setToolTip(
+            "Import your Point Blank Sniper pet text files"
+        )
+        self.import_pbs_pet_data_button.clicked.connect(self.import_pbs_pet_data)
+        self.pet_page_layout.addWidget(self.import_pbs_pet_data_button, 17, 1, 1, 1)
 
         self.erase_pet_data_button = QPushButton("Erase Pet Data")
         self.erase_pet_data_button.setToolTip("Erase your pet list")
@@ -2908,6 +2916,67 @@ class App(QMainWindow):
                 self.pet_ilvl_price_input.setText(recommended_price)
             except:
                 self.pet_ilvl_price_input.setText("10")
+
+    def import_pbs_pet_data(self):
+        # Open a dialog to allow users to paste the PBS data
+        text, ok = QInputDialog.getMultiLineText(
+            self, "Import PBS Pet Data", "Paste your PBS pet data here:"
+        )
+        if not ok or not text.strip():
+            return
+
+        self.pet_list_display.clear()
+
+        try:
+            # Process the pasted PBS data
+            pbs_data = text.replace("\n", "").replace("\r", "").split("^")
+
+            # Create a dictionary to map pet names to prices from the PBS data
+            pbs_prices = {}
+            for pet in pbs_data:
+                # parts will be like ['Battle Pet Name', '0;0;0;0;0;50000', '#', '']
+                parts = pet.split(";;")
+                pet_name = parts[0].strip().lower()
+                # strip off " if the name begins and ends with "
+                if pet_name[0] == '"' and pet_name[-1] == '"':
+                    pet_name = pet_name[1:-1]
+                if len(parts) > 1:
+                    price_parts = parts[1].split(";")
+                    pet_price = (
+                        float(price_parts[-1]) if price_parts[-1].isdigit() else None
+                    )
+                    pbs_prices[pet_name] = pet_price
+                else:
+                    pbs_prices[pet_name] = None
+
+            temp_pet_list = {}
+            pbs_pet_names = list(pbs_prices.keys())
+            for _index, pet in self.pet_statistics.iterrows():
+                pet_name_lower = pet["itemName"].lower()
+                if pet_name_lower in pbs_pet_names:
+                    price = pbs_prices[pet_name_lower]
+                    if price is not None:
+                        temp_pet_list[str(pet["itemID"])] = pbs_prices[pet_name_lower]
+                    else:
+                        # Use default behavior if price is not set in PBS
+                        default_price = pet["desiredPrice"]
+                        discount_percent = int(self.discount_percent.text()) / 100
+                        discount_price = round(
+                            float(default_price) * discount_percent, 4
+                        )
+                        temp_pet_list[str(pet["itemID"])] = discount_price
+
+            for key, value in temp_pet_list.items():
+                self.pet_list_display.insertItem(
+                    self.pet_list_display.count(),
+                    f"Pet ID: {key}, Price: {value}",
+                )
+                self.pet_list[str(key)] = value
+
+        except ValueError as ve:
+            QMessageBox.critical(self, "Invalid Value", str(ve))
+        except Exception as e:
+            QMessageBox.critical(self, "Unknown Error", str(e))
 
 
 if __name__ == "__main__":
