@@ -703,7 +703,15 @@ class App(QMainWindow):
         self.erase_pet_data_button = QPushButton("Erase Pet Data")
         self.erase_pet_data_button.setToolTip("Erase your pet list")
         self.erase_pet_data_button.clicked.connect(self.erase_pet_data)
-        self.pet_page_layout.addWidget(self.erase_pet_data_button, 18, 0, 1, 2)
+        self.pet_page_layout.addWidget(self.erase_pet_data_button, 18, 0, 1, 1)
+
+        # Add convert to PBS button for pets
+        self.convert_pets_to_pbs_button = QPushButton("Convert AAA to PBS")
+        self.convert_pets_to_pbs_button.setToolTip(
+            "Convert your AAA pet list to PBS format."
+        )
+        self.convert_pets_to_pbs_button.clicked.connect(self.convert_pets_to_pbs)
+        self.pet_page_layout.addWidget(self.convert_pets_to_pbs_button, 18, 1, 1, 1)
 
     def make_item_page(self, item_page):
 
@@ -2977,6 +2985,48 @@ class App(QMainWindow):
             QMessageBox.critical(self, "Invalid Value", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
+
+    def convert_pets_to_pbs(self):
+        try:
+            # Convert the AAA pet list to PBS format
+            pbs_string = self.convert_aaa_pets_to_pbs(self.pet_list)
+
+            # Copy to clipboard
+            clipboard = QApplication.clipboard()
+            clipboard.setText(pbs_string)
+
+            QMessageBox.information(
+                self, "Success", "Converted PBS pet string copied to clipboard."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Conversion Error", str(e))
+
+    def convert_aaa_pets_to_pbs(self, pet_data):
+        # Prepare the PBS list
+        pbs_list = []
+
+        for pet_id, price in pet_data.items():
+            # Find the pet name by matching the itemID in pet_statistics
+            pet_name = self.pet_statistics.loc[
+                self.pet_statistics["itemID"] == int(pet_id), "itemName"
+            ]
+
+            # Skip if we don't find a name
+            if pet_name.empty:
+                continue
+            pet_name = pet_name.iloc[0]
+
+            # Construct the PBS entry
+            # Format: Snipe^"Pet Name";;0;0;0;0;0;price;;#;;
+            pbs_entry = f'Snipe^"{pet_name}";;0;0;0;0;0;{int(float(price))};;#;;'
+
+            # Append the PBS entry to the list
+            pbs_list.append(pbs_entry)
+
+        # Join the PBS entries into a single string
+        pbs_string = "".join(pbs_list)
+
+        return pbs_string
 
 
 if __name__ == "__main__":
