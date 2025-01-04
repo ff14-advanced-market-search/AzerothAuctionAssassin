@@ -2761,7 +2761,8 @@ class App(QMainWindow):
                 raise ValueError("Please set a pet level (1-25)")
 
             pet_id = int(self.pet_ilvl_id_input.text())
-            price = int(self.pet_ilvl_price_input.text())
+            # Convert price to float instead of int
+            price = float(self.pet_ilvl_price_input.text())
             min_level = int(self.pet_ilvl_min_level_input.text())
             min_quality = int(self.pet_ilvl_min_quality_input.text())
 
@@ -2785,7 +2786,7 @@ class App(QMainWindow):
             # Create pet level rule dictionary
             pet_rule = {
                 "petID": pet_id,
-                "price": price,
+                "price": price,  # Store as float
                 "minLevel": min_level,
                 "minQuality": min_quality,
                 "excludeBreeds": excluded_breeds,
@@ -2960,54 +2961,69 @@ class App(QMainWindow):
         try:
             # Process the pasted PBS data
             pbs_data = text.replace("\n", "").replace("\r", "").split("^")
+            
+            # Remove any header entries (like "Battle Pet / Companions")
+            pbs_data = [entry for entry in pbs_data if entry.startswith('^"') or entry.startswith('"')]
 
             # Create a dictionary to map pet names to prices from the PBS data
+            pbs_prices = {}
             for pet in pbs_data:
                 parts = pet.split(";;")
-                if len(parts) < 2:
+                if not parts:
                     continue
 
-                pet_name = parts[0].strip().lower()
-                # strip off " if the name begins and ends with "
+                # Handle pet name with or without "Snipe^" prefix
+                pet_name = parts[0].replace('Snipe^', '').strip()
                 if pet_name[0] == '"' and pet_name[-1] == '"':
                     pet_name = pet_name[1:-1]
+                
+                # Try to get price from the data
+                price = None
+                if len(parts) > 1:
+                    try:
+                        # Look for the first valid number in the price parts
+                        price_parts = [p for p in parts[1].split(";") if p and p.replace(".", "").isdigit()]
+                        if price_parts:
+                            price = float(price_parts[0])
+                    except (ValueError, IndexError):
+                        continue
 
-                price_parts = parts[1].split(";")
-                if not price_parts[-1].isdigit():
-                    continue
+                if price is not None:
+                    pbs_prices[pet_name.lower()] = price
 
-                pet_price = float(price_parts[-1])
+            # Create pet level rules
+            temp_pet_rules = []
+            for _index, pet in self.pet_statistics.iterrows():
+                pet_name_lower = pet["itemName"].lower()
+                if pet_name_lower in pbs_prices:
+                    # Create pet level rule with default values
+                    pet_rule = {
+                        "petID": int(pet["itemID"]),
+                        "price": float(pbs_prices[pet_name_lower]),
+                        "minLevel": 1,  # Default minimum level
+                        "minQuality": -1,  # Default to any quality
+                        "excludeBreeds": [],  # Default to no excluded breeds
+                    }
+                    temp_pet_rules.append(pet_rule)
 
-                # Find pet ID from pet name
-                pet_match = self.pet_statistics[
-                    self.pet_statistics["itemName"].str.lower() == pet_name
-                ]
-                if pet_match.empty:
-                    continue
-
-                pet_id = pet_match.iloc[0]["itemID"]
-
-                # Create pet level rule with default values
-                pet_rule = {
-                    "petID": int(pet_id),
-                    "price": int(pet_price),
-                    "minLevel": 1,  # Default minimum level
-                    "minQuality": -1,  # Default to any quality
-                    "excludeBreeds": [],  # Default to no excluded breeds
-                }
-
-                # Add to rules list
-                self.pet_ilvl_rules.append(pet_rule)
-
-                # Add to display
+            # Update rules list and display
+            self.pet_ilvl_rules = temp_pet_rules
+            for rule in self.pet_ilvl_rules:
                 display_string = (
-                    f"Pet ID: {pet_rule['petID']}; "
-                    f"Price: {pet_rule['price']}; "
-                    f"Min Level: {pet_rule['minLevel']}; "
-                    f"Min Quality: {pet_rule['minQuality']}; "
-                    f"Excluded Breeds: {pet_rule['excludeBreeds']}"
+                    f"Pet ID: {rule['petID']}; "
+                    f"Price: {rule['price']}; "
+                    f"Min Level: {rule['minLevel']}; "
+                    f"Min Quality: {rule['minQuality']}; "
+                    f"Excluded Breeds: {rule['excludeBreeds']}"
                 )
                 self.pet_ilvl_list_display.addItem(display_string)
+
+            if not self.pet_ilvl_rules:
+                QMessageBox.warning(
+                    self,
+                    "Import Warning",
+                    "No valid pets were imported. Check the PBS data format."
+                )
 
         except ValueError as ve:
             QMessageBox.critical(self, "Invalid Value", str(ve))
