@@ -2018,7 +2018,9 @@ class App(QMainWindow):
                 if len(parts) > 1:
                     price_parts = parts[1].split(";")
                     item_price = (
-                        float(price_parts[-1]) if price_parts[-1].isdigit() else None
+                        float(price_parts[-1])
+                        if self.isfloat(price_parts[-1])
+                        else None
                     )
                     pbs_prices[item_name] = item_price
                 else:
@@ -2733,15 +2735,15 @@ class App(QMainWindow):
             self.pet_ilvl_list_display.addItem(display_string)
 
         #### this is broken
-        # # Add after the existing import/export buttons in make_pet_ilvl_page method
-        # self.import_pbs_pet_ilvl_button = QPushButton("Import PBS Pet Data")
-        # self.import_pbs_pet_ilvl_button.setToolTip(
-        #     "Import your Point Blank Sniper pet text files"
-        # )
-        # self.import_pbs_pet_ilvl_button.clicked.connect(self.import_pbs_pet_ilvl_data)
-        # self.pet_ilvl_page_layout.addWidget(
-        #     self.import_pbs_pet_ilvl_button, 16, 1, 1, 1
-        # )
+        # Add after the existing import/export buttons in make_pet_ilvl_page method
+        self.import_pbs_pet_ilvl_button = QPushButton("Import PBS Pet Data")
+        self.import_pbs_pet_ilvl_button.setToolTip(
+            "Import your Point Blank Sniper pet text files"
+        )
+        self.import_pbs_pet_ilvl_button.clicked.connect(self.import_pbs_pet_ilvl_data)
+        self.pet_ilvl_page_layout.addWidget(
+            self.import_pbs_pet_ilvl_button, 16, 1, 1, 1
+        )
 
         self.convert_pet_ilvl_to_pbs_button = QPushButton("Convert AAA to PBS")
         self.convert_pet_ilvl_to_pbs_button.setToolTip(
@@ -2962,46 +2964,63 @@ class App(QMainWindow):
 
         try:
             # Process the pasted PBS data
+            # (Note: We remove any newlines but DO NOT over-filter the entries)
             pbs_data = text.replace("\n", "").replace("\r", "").split("^")
-            
-            # Remove any header entries (like "Battle Pet / Companions")
-            pbs_data = [entry for entry in pbs_data if entry.startswith('^"') or entry.startswith('"')]
 
             # Create a dictionary to map pet names to prices from the PBS data
             pbs_prices = {}
             for pet in pbs_data:
+                # Each 'pet' string might look like:  "Battle Pet Name;;0;0;0;0;0;50000" (etc.)
                 parts = pet.split(";;")
                 if not parts:
                     continue
 
-                # Handle pet name with or without "Snipe^" prefix
-                pet_name = parts[0].replace('Snipe^', '').strip()
-                if pet_name[0] == '"' and pet_name[-1] == '"':
+                # 1) Extract the pet name
+                # Strip whitespace, remove leading/trailing quotes if they exist
+                pet_name = parts[0].strip()
+                if pet_name.startswith('"') and pet_name.endswith('"'):
                     pet_name = pet_name[1:-1]
-                
-                # Try to get price from the data
-                price = None
-                if len(parts) > 1:
-                    try:
-                        # Look for the first valid number in the price parts
-                        price_parts = [p for p in parts[1].split(";") if p and p.replace(".", "").isdigit()]
-                        if price_parts:
-                            price = float(price_parts[0])
-                    except (ValueError, IndexError):
-                        continue
 
-                if price is not None:
-                    pbs_prices[pet_name.lower()] = price
+                pet_name_lower = pet_name.lower()
+
+                # 2) Extract the pet price if present
+                pet_price = None
+                if len(parts) > 1:
+                    # Split the second portion on semicolons
+                    price_parts = parts[1].split(";")
+                    # Try to parse the last or any valid digit
+                    # (same approach as your working function)
+                    if price_parts and self.isfloat(price_parts[-1]):
+                        pet_price = float(price_parts[-1])
+                    else:
+                        # If the last part isn't numeric, you could search backwards
+                        # for the first digit-like part:
+                        for p in reversed(price_parts):
+                            if p.isdigit():
+                                pet_price = float(p)
+                                break
+
+                # Store the parsed price (even if None) in the dictionary
+                pbs_prices[pet_name_lower] = pet_price
 
             # Create pet level rules
             temp_pet_rules = []
             for _index, pet in self.pet_statistics.iterrows():
                 pet_name_lower = pet["itemName"].lower()
                 if pet_name_lower in pbs_prices:
-                    # Create pet level rule with default values
+                    parsed_price = pbs_prices[pet_name_lower]
+
+                    # If the parsed price is None, fallback to the default price logic,
+                    # or any discount logic you prefer
+                    if parsed_price is None or parsed_price <= 0:
+                        default_price = pet["desiredPrice"]
+                        discount_percent = int(self.discount_percent.text()) / 100.0
+                        parsed_price = round(float(default_price) * discount_percent, 4)
+
+                    # Create a pet-level rule
                     pet_rule = {
                         "petID": int(pet["itemID"]),
-                        "price": float(pbs_prices[pet_name_lower]),
+                        "price": float(parsed_price),
                         "minLevel": 1,  # Default minimum level
                         "minQuality": -1,  # Default to any quality
                         "excludeBreeds": [],  # Default to no excluded breeds
@@ -3024,7 +3043,7 @@ class App(QMainWindow):
                 QMessageBox.warning(
                     self,
                     "Import Warning",
-                    "No valid pets were imported. Check the PBS data format."
+                    "No valid pets were imported. Check the PBS data format.",
                 )
 
         except ValueError as ve:
@@ -3087,7 +3106,9 @@ class App(QMainWindow):
                 if len(parts) > 1:
                     price_parts = parts[1].split(";")
                     pet_price = (
-                        float(price_parts[-1]) if price_parts[-1].isdigit() else None
+                        float(price_parts[-1])
+                        if self.isfloat(price_parts[-1])
+                        else None
                     )
                     pbs_prices[pet_name] = pet_price
                 else:
@@ -3163,6 +3184,21 @@ class App(QMainWindow):
         pbs_string = "".join(pbs_list)
 
         return pbs_string
+
+    def isfloat(self, value):
+        """Check if a value can be converted to float.
+
+        Args:
+            value: The value to check
+
+        Returns:
+            bool: True if value can be converted to float, False otherwise
+        """
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
 
 
 if __name__ == "__main__":
