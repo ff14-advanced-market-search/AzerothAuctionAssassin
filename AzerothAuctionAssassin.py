@@ -2719,7 +2719,7 @@ class App(QMainWindow):
 
         self.erase_pet_ilvl_button = QPushButton("Erase Pet Level Rules")
         self.erase_pet_ilvl_button.clicked.connect(self.erase_pet_ilvl_data)
-        self.pet_ilvl_page_layout.addWidget(self.erase_pet_ilvl_button, 16, 1, 1, 1)
+        self.pet_ilvl_page_layout.addWidget(self.erase_pet_ilvl_button, 17, 0, 1, 1)
 
         # Load existing rules into display
         for rule in self.pet_ilvl_rules:
@@ -2739,7 +2739,7 @@ class App(QMainWindow):
         )
         self.import_pbs_pet_ilvl_button.clicked.connect(self.import_pbs_pet_ilvl_data)
         self.pet_ilvl_page_layout.addWidget(
-            self.import_pbs_pet_ilvl_button, 17, 0, 1, 1
+            self.import_pbs_pet_ilvl_button, 16, 1, 1, 1
         )
 
         self.convert_pet_ilvl_to_pbs_button = QPushButton("Convert AAA to PBS")
@@ -2752,9 +2752,6 @@ class App(QMainWindow):
         self.pet_ilvl_page_layout.addWidget(
             self.convert_pet_ilvl_to_pbs_button, 17, 1, 1, 1
         )
-
-        # Move the erase button down one row
-        self.pet_ilvl_page_layout.addWidget(self.erase_pet_ilvl_button, 18, 0, 1, 2)
 
     def add_pet_ilvl_to_list(self):
         """Add or update a pet level rule in the list"""
