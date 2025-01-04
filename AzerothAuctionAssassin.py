@@ -2949,7 +2949,6 @@ class App(QMainWindow):
             except:
                 self.pet_ilvl_price_input.setText("10")
 
-    #### this is broken fix later
     def import_pbs_pet_ilvl_data(self):
         """Import PBS pet data and convert to pet level rules"""
         text, ok = QInputDialog.getMultiLineText(
@@ -2995,7 +2994,7 @@ class App(QMainWindow):
                         # If the last part isn't numeric, you could search backwards
                         # for the first digit-like part:
                         for p in reversed(price_parts):
-                            if p.isdigit():
+                            if self.isfloat(p):
                                 pet_price = float(p)
                                 break
 
