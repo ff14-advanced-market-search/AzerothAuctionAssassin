@@ -85,14 +85,14 @@ class Item_And_Pet_Statistics(QThread):
 
     def __init__(self, parent=None):
         super(Item_And_Pet_Statistics, self).__init__(parent)
-        # Get the parent window to access wow_region, default to EU if not available
         self.parent = parent
         self.region = "EU"  # Default to EU
-        if parent and hasattr(parent, "wow_region"):
-            selected_region = parent.wow_region.currentText()
-            # Only use NA or EU for item stats
-            if selected_region in ["NA", "EU"]:
-                self.region = selected_region
+
+    def set_region(self, region):
+        """Update region and refresh statistics"""
+        if region in ["NA", "EU"]:
+            self.region = region
+            self.start()  # Refresh the statistics with new region
 
     def run(self):
         item_statistics = pd.DataFrame(
@@ -183,7 +183,6 @@ class App(QMainWindow):
 
             # default to 10% discount, just use EU for now for less data
             self.api_data_thread = Item_And_Pet_Statistics(self)
-            self.api_data_thread.start()
             self.api_data_thread.completed.connect(self.api_data_received)
 
             self.pet_statistics = None
@@ -561,6 +560,8 @@ class App(QMainWindow):
         self.wow_region.addItems(
             ["EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
         )
+        # Add handler for region changes
+        self.wow_region.currentTextChanged.connect(self.on_region_changed)
         self.wow_region_label = QLabel("Auction Assassin Token", settings_page)
         self.wow_region_label.setToolTip(
             "Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic."
@@ -655,6 +656,11 @@ class App(QMainWindow):
         self.import_config_button.setToolTip("Import your mega_data.json config.")
 
         self.settings_page_layout.addWidget(self.import_config_button, 18, 0, 1, 1)
+
+    def on_region_changed(self, new_region):
+        """Handle region changes and refresh statistics if needed"""
+        if new_region in ["NA", "EU"]:
+            self.api_data_thread.set_region(new_region)
 
     def make_pet_page(self, pet_page):
 
@@ -1402,6 +1408,12 @@ class App(QMainWindow):
 
         if os.path.exists(self.path_to_data):
             self.check_config_file(self.path_to_data)
+            # After loading config, update region and start the thread
+            if hasattr(self, "wow_region"):
+                selected_region = self.wow_region.currentText()
+                if selected_region in ["NA", "EU"]:
+                    self.api_data_thread.set_region(selected_region)
+            self.api_data_thread.start()
 
         if os.path.exists(self.path_to_desired_pets):
             self.pet_list = json.load(open(self.path_to_desired_pets))
