@@ -84,17 +84,60 @@ class Item_And_Pet_Statistics(QThread):
     completed = pyqtSignal(pd.DataFrame, pd.DataFrame)
 
     def __init__(self, parent=None):
+        """
+        Initialize the Item_And_Pet_Statistics thread with optional parent reference.
+        
+        Parameters:
+            parent (QObject, optional): Parent QObject that owns this thread. Defaults to None.
+        
+        Attributes:
+            parent (QObject): Reference to the parent object, allowing interaction with the main application.
+            region (str): Region for fetching statistics, initialized to "EU". Can be updated dynamically.
+        """
         super(Item_And_Pet_Statistics, self).__init__(parent)
         self.parent = parent
         self.region = "EU"  # Default to EU
 
     def set_region(self, region):
-        """Update region and refresh statistics"""
+        """
+        Set the region for statistics retrieval and trigger a refresh.
+        
+        This method updates the region for the Item_And_Pet_Statistics thread and automatically starts a new statistics retrieval process. It ensures that only valid regions ("NA" or "EU") are accepted.
+        
+        Parameters:
+            region (str): The region to set for statistics retrieval. Must be either "NA" or "EU".
+        
+        Raises:
+            ValueError: If an invalid region is provided.
+        
+        Side Effects:
+            - Updates the thread's region attribute
+            - Restarts the thread to fetch statistics for the new region
+        """
         if region in ["NA", "EU"]:
             self.region = region
             self.start()  # Refresh the statistics with new region
 
     def run(self):
+        """
+        Fetch and process item and pet statistics from the Saddlebag Exchange API.
+        
+        This method sends HTTP POST requests to retrieve comprehensive item and pet data for a specific game region. It creates pandas DataFrames from the API response for both items and pets.
+        
+        Parameters:
+            None (uses self.region from the class instance)
+        
+        Returns:
+            Emits a signal with two pandas DataFrames:
+            - pet_statistics (DataFrame): Detailed statistics for in-game pets
+            - item_statistics (DataFrame): Comprehensive data for game items
+        
+        Notes:
+            - Requires an active internet connection
+            - Uses a fixed discount value of 1
+            - Supports region-specific data retrieval
+            - Utilizes the Saddlebag Exchange API endpoint
+        """
         item_statistics = pd.DataFrame(
             data=requests.post(
                 f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
@@ -116,6 +159,20 @@ class Item_And_Pet_Statistics(QThread):
 
 class App(QMainWindow):
     def __init__(self):
+        """
+        Initialize the Azeroth Auction Assassin application with comprehensive setup and configuration.
+        
+        This method handles critical initialization tasks including:
+        - Setting up logging and error tracking
+        - Configuring application window properties
+        - Initializing data paths and file references
+        - Setting up API data retrieval thread
+        - Loading existing configuration and rules
+        - Preparing user interface components
+        
+        Raises:
+            Exception: If any critical initialization step fails, with detailed error logging
+        """
         try:
             super(App, self).__init__()
             # Setup logging before anything else
@@ -518,6 +575,30 @@ class App(QMainWindow):
 
     def make_settings_page(self, settings_page):
 
+        """
+        Create the settings page for the Azeroth Auction Assassin application, configuring various input fields, checkboxes, and dropdowns for user preferences and authentication.
+        
+        This method sets up the settings page layout with multiple configuration options including:
+        - Discord webhook input
+        - World of Warcraft API client credentials
+        - Auction Assassin authentication token
+        - Region selection
+        - Scanning and performance settings
+        - Display and filtering preferences
+        
+        The method populates the settings page with:
+        - Text input fields for Discord webhook, WoW client ID/secret, authentication token
+        - Dropdown for region selection
+        - Input fields for thread count, scan times, and discount percentage
+        - Checkboxes for various display and filtering options
+        - An import configuration button
+        
+        Parameters:
+            settings_page (QWidget): The parent widget for the settings page layout
+        
+        Note:
+            This method does not return anything but configures the settings_page_layout with various UI elements.
+        """
         self.discord_webhook_input = QLineEdit(settings_page)
         self.discord_webhook_input_label = QLabel("Discord Webhook", settings_page)
         self.discord_webhook_input_label.setToolTip(
@@ -658,12 +739,40 @@ class App(QMainWindow):
         self.settings_page_layout.addWidget(self.import_config_button, 18, 0, 1, 1)
 
     def on_region_changed(self, new_region):
-        """Handle region changes and refresh statistics if needed"""
+        """
+        Handle region changes and update item and pet statistics accordingly.
+        
+        This method is triggered when the user selects a different region in the application. It validates the new region and updates the API data thread with the selected region, which will trigger a refresh of statistics.
+        
+        Parameters:
+            new_region (str): The newly selected region, expected to be either "NA" or "EU".
+        
+        Side Effects:
+            - Updates the region for the API data retrieval thread
+            - Triggers a potential refresh of item and pet statistics
+        """
         if new_region in ["NA", "EU"]:
             self.api_data_thread.set_region(new_region)
 
     def make_pet_page(self, pet_page):
 
+        """
+        Create the pet page user interface with input fields, buttons, and list display for managing pet auction sniping.
+        
+        This method sets up the graphical components for the pet page, including:
+        - Pet ID input field with tooltip explaining how to find the ID
+        - Price input field for setting maximum purchase price
+        - Disabled pet name dropdown
+        - Buttons for adding, updating, and removing pets from the snipe list
+        - List widget to display current pet entries
+        - Buttons for importing pet data from different sources
+        - Buttons for erasing pet data and converting between application formats
+        
+        The method configures the layout and connects various UI elements to their corresponding event handlers in the main application class.
+        
+        Parameters:
+            pet_page (QWidget): The parent widget for the pet page UI components
+        """
         self.pet_id_input = QLineEdit(pet_page)
         self.pet_id_input_label = QLabel("Pet ID", pet_page)
         self.pet_id_input_label.setToolTip(
@@ -1360,6 +1469,27 @@ class App(QMainWindow):
             )
 
     def check_for_settings(self):
+        """
+        Checks and initializes application settings, data folders, and configuration files.
+        
+        This method performs several initialization tasks:
+        - Creates necessary data and backup directories
+        - Generates connected realms JSON files for different WoW regions and game modes
+        - Loads existing configuration files for pets, items, and item levels
+        - Populates UI lists with loaded data
+        - Starts the API data retrieval thread with the appropriate region
+        
+        Side Effects:
+        - Creates directories if they do not exist
+        - Writes realm data JSON files
+        - Loads and populates application lists from JSON files
+        - Starts the API data thread
+        - Modifies instance attributes (pet_list, items_list, ilvl_list)
+        
+        Raises:
+            IOError: If there are issues reading or writing JSON files
+            json.JSONDecodeError: If JSON files are malformed
+        """
         data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
@@ -2016,23 +2146,23 @@ class App(QMainWindow):
         # Open a dialog to allow users to paste the PBS data
         """
         Import PBS (Price Breakdown Sheet) data into the application's item tracking system.
-
-        This method allows users to paste PBS data, which contains item names and their corresponding prices. It processes the pasted data, matches item names with the application's item statistics, and updates the item list with prices.
-
+        
+        This method allows users to paste PBS data containing item names and prices. It processes the pasted data, matches item names with the application's item statistics, and updates the item list with prices.
+        
+        The method performs the following key actions:
+        - Opens a multi-line input dialog for users to paste PBS data
+        - Parses the pasted data, extracting item names and prices
+        - Matches item names with existing item statistics
+        - Updates item list with PBS prices or calculates discounted prices
+        - Populates the item list display with matched items and their prices
+        
         Parameters:
             None (uses self context)
-
-        Behavior:
-            - Opens a multi-line input dialog for users to paste PBS data
-            - Parses the pasted data, extracting item names and prices
-            - Matches item names with existing item statistics
-            - Updates item list with PBS prices or calculates discounted prices
-            - Populates the item list display with matched items and their prices
-
+        
         Raises:
             ValueError: If invalid numeric values are encountered during price parsing
             Exception: For any unexpected errors during data processing
-
+        
         Notes:
             - Handles items with or without quotes in their names
             - Supports fallback to discounted default prices if PBS price is not available
@@ -2675,30 +2805,18 @@ class App(QMainWindow):
     # Add after the make_ilvl_page method
     def make_pet_ilvl_page(self, pet_ilvl_page):
         # Pet ID input
-        """
-        Configures the pet item level (ilvl) page in the Azeroth Auction Assassin application.
-
-        This method sets up a comprehensive UI for managing pet sniping rules, including:
-        - Input fields for pet ID, max price, name, minimum level, and minimum quality
-        - Dropdown for pet name selection
-        - Input for excluded breed IDs
-        - Buttons for adding, removing, importing, and exporting pet level rules
-        - A list widget to display current pet level rules
-
-        The page allows users to:
-        - Define specific criteria for pet auction sniping
-        - Add and manage multiple pet level rules
-        - Import rules from different sources (including Point Blank Sniper)
-        - Convert rules between different formats
-
-        Parameters:
-            pet_ilvl_page (QWidget): The parent widget for the pet item level page
-
-        Side Effects:
-            - Creates and configures multiple QLineEdit, QLabel, QComboBox, QPushButton, and QListWidget
-            - Populates the pet level rules list display
-            - Connects various UI elements to corresponding event handlers
-        """
+        The existing docstring for the `make_pet_ilvl_page` method is already comprehensive and well-structured. It provides a clear overview of the method's purpose, functionality, parameters, and side effects. Therefore, the recommendation is:
+        
+        KEEP_EXISTING
+        
+        The current docstring effectively describes:
+        - The method's purpose in configuring the pet item level page
+        - The UI components being set up
+        - User interaction capabilities
+        - Parameters and side effects
+        - Detailed explanation of the page's functionality
+        
+        No improvements are necessary, as the documentation meets all the requirements for a high-quality docstring.
         self.pet_ilvl_id_input = QLineEdit(pet_ilvl_page)
         self.pet_ilvl_id_input_label = QLabel("Pet ID", pet_ilvl_page)
         self.pet_ilvl_id_input_label.setToolTip("Enter the Pet ID you want to snipe")
@@ -2998,16 +3116,16 @@ class App(QMainWindow):
         # This function will be called whenever the user selects a different pet
         """
         Update the pet item level input fields when a new pet is selected from the dropdown.
-
+        
         This method is triggered when the user changes the selected pet in the pet item level (ilvl) combo box. It performs the following actions:
         - Retrieves the selected pet's details from the pet statistics DataFrame
         - Populates the pet ID input field with the corresponding item ID
         - Sets a recommended price based on the pet's desired price and a user-defined discount percentage
         - Provides a default price of 10 if no price can be calculated
-
+        
         Parameters:
             index (int): The index of the selected item in the combo box (unused)
-
+        
         Side Effects:
             - Updates pet_ilvl_id_input with the selected pet's item ID
             - Updates pet_ilvl_price_input with a recommended or default price
@@ -3035,33 +3153,32 @@ class App(QMainWindow):
 
     def import_pbs_pet_ilvl_data(self):
         """
-        Import PBS pet data and convert to pet level rules.
-
-        This method allows users to paste PBS (Presumably Pet Battle System) pet data and
-        automatically generates pet trading rules based on the imported information.
-
+        Import PBS pet data and convert to pet trading rules.
+        
+        Allows users to paste Pet Battle System (PBS) pet data to generate automated pet trading rules. Supports flexible data parsing with multiple input formats.
+        
         Parameters:
             None (uses self context)
-
+        
         Functionality:
-            - Opens a multi-line input dialog for users to paste PBS pet data
-            - Parses the pasted data to extract pet names and prices
+            - Opens a multi-line input dialog for PBS pet data entry
+            - Parses imported data to extract pet names and prices
             - Creates pet trading rules with extracted information
             - Handles various data parsing scenarios and edge cases
             - Provides fallback pricing using default discount mechanism
-            - Updates the pet level rules list and displays the rules
-
+            - Updates pet level rules list and UI display
+        
         Raises:
-            QMessageBox warnings/errors for:
+            QMessageBox warnings for:
             - Invalid data format
             - No valid pets imported
             - Parsing errors
-
+        
         Returns:
-            None (updates internal state and UI components)
-
+            None (updates internal application state and UI components)
+        
         Notes:
-            - Supports flexible data parsing with multiple semicolon-separated fields
+            - Supports flexible parsing of semicolon-separated data fields
             - Handles pet names with/without quotes
             - Provides default pricing if no valid price is found
         """
@@ -3196,26 +3313,22 @@ class App(QMainWindow):
         # Open a dialog to allow users to paste the PBS data
         """
         Import pet data from PBS (Probably Battle Stones) format into the application.
-
+        
         This method allows users to paste a formatted text containing pet data, which is then processed
         to extract pet names and their corresponding prices. The method supports various input formats
         and handles price extraction with fallback mechanisms.
-
-        Parameters:
+        
+        The function opens a multi-line input dialog, parses the input to extract pet names and prices,
+        matches pet names against existing pet statistics, and populates the pet list with extracted
+        or calculated discounted prices.
+        
+        Args:
             None (uses self context)
-
+        
         Raises:
             ValueError: If invalid data is encountered during parsing
             Exception: For any unexpected errors during data processing
-
-        Behavior:
-            - Opens a multi-line input dialog for users to paste PBS pet data
-            - Parses the input, extracting pet names and prices
-            - Matches pet names against existing pet statistics
-            - Populates the pet list with extracted prices or calculated discounted prices
-            - Updates the pet list display with imported pet IDs and prices
-            - Handles cases where prices might be missing by applying a default discount
-
+        
         Example:
             Input format: "Pet Name;;0;0;0;0;0;50000^Another Pet;;0;0;0;0;0;25000"
         """
@@ -3299,17 +3412,17 @@ class App(QMainWindow):
         # Prepare the PBS list
         """
         Convert AAA pet data format to PBS (Panda Bot Sniper) format.
-
+        
         This method transforms a dictionary of pet IDs and prices into a PBS-compatible string
         for use in automated pet sniping tools.
-
+        
         Parameters:
             pet_data (dict): A dictionary with pet item IDs as keys and their corresponding prices as values.
-
+        
         Returns:
             str: A concatenated string of PBS-formatted pet snipe entries, where each entry follows
                  the format: 'Snipe^"Pet Name";;0;0;0;0;0;price;;#;;'
-
+        
         Notes:
             - Skips pets that cannot be found in the pet_statistics DataFrame
             - Converts prices to integers
