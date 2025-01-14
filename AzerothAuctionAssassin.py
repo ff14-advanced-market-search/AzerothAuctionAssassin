@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.3.2.1"
+AAA_VERSION = "1.3.3"
 
 windowsApp_Path = None
 try:
@@ -83,15 +83,23 @@ class StreamToFile:
 class Item_And_Pet_Statistics(QThread):
     completed = pyqtSignal(pd.DataFrame, pd.DataFrame)
 
-    def __init__(self):
-        super(Item_And_Pet_Statistics, self).__init__()
+    def __init__(self, parent=None):
+        super(Item_And_Pet_Statistics, self).__init__(parent)
+        self.parent = parent
+        self.region = "EU"  # Default to EU
+
+    def set_region(self, region):
+        """Update region and refresh statistics"""
+        if region in ["NA", "EU"]:
+            self.region = region
+            self.start()  # Refresh the statistics with new region
 
     def run(self):
         item_statistics = pd.DataFrame(
             data=requests.post(
                 f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
                 headers={"Accept": "application/json"},
-                json={"region": "EU", "discount": 1},
+                json={"region": self.region, "discount": 1},
             ).json()
         )
 
@@ -99,7 +107,7 @@ class Item_And_Pet_Statistics(QThread):
             data=requests.post(
                 f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
                 headers={"Accept": "application/json"},
-                json={"region": "EU", "discount": 1, "pets": True},
+                json={"region": self.region, "discount": 1, "pets": True},
             ).json()
         )
 
@@ -174,8 +182,7 @@ class App(QMainWindow):
             )
 
             # default to 10% discount, just use EU for now for less data
-            self.api_data_thread = Item_And_Pet_Statistics()
-            self.api_data_thread.start()
+            self.api_data_thread = Item_And_Pet_Statistics(self)
             self.api_data_thread.completed.connect(self.api_data_received)
 
             self.pet_statistics = None
@@ -553,6 +560,8 @@ class App(QMainWindow):
         self.wow_region.addItems(
             ["EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
         )
+        # Add handler for region changes
+        self.wow_region.currentTextChanged.connect(self.on_region_changed)
         self.wow_region_label = QLabel("Auction Assassin Token", settings_page)
         self.wow_region_label.setToolTip(
             "Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic."
@@ -647,6 +656,11 @@ class App(QMainWindow):
         self.import_config_button.setToolTip("Import your mega_data.json config.")
 
         self.settings_page_layout.addWidget(self.import_config_button, 18, 0, 1, 1)
+
+    def on_region_changed(self, new_region):
+        """Handle region changes and refresh statistics if needed"""
+        if new_region in ["NA", "EU"]:
+            self.api_data_thread.set_region(new_region)
 
     def make_pet_page(self, pet_page):
 
@@ -1394,6 +1408,12 @@ class App(QMainWindow):
 
         if os.path.exists(self.path_to_data):
             self.check_config_file(self.path_to_data)
+            # After loading config, update region and start the thread
+            if hasattr(self, "wow_region"):
+                selected_region = self.wow_region.currentText()
+                if selected_region in ["NA", "EU"]:
+                    self.api_data_thread.set_region(selected_region)
+            self.api_data_thread.start()
 
         if os.path.exists(self.path_to_desired_pets):
             self.pet_list = json.load(open(self.path_to_desired_pets))
@@ -1996,23 +2016,23 @@ class App(QMainWindow):
         # Open a dialog to allow users to paste the PBS data
         """
         Import PBS (Price Breakdown Sheet) data into the application's item tracking system.
-        
+
         This method allows users to paste PBS data, which contains item names and their corresponding prices. It processes the pasted data, matches item names with the application's item statistics, and updates the item list with prices.
-        
+
         Parameters:
             None (uses self context)
-        
+
         Behavior:
             - Opens a multi-line input dialog for users to paste PBS data
             - Parses the pasted data, extracting item names and prices
             - Matches item names with existing item statistics
             - Updates item list with PBS prices or calculates discounted prices
             - Populates the item list display with matched items and their prices
-        
+
         Raises:
             ValueError: If invalid numeric values are encountered during price parsing
             Exception: For any unexpected errors during data processing
-        
+
         Notes:
             - Handles items with or without quotes in their names
             - Supports fallback to discounted default prices if PBS price is not available
@@ -2657,23 +2677,23 @@ class App(QMainWindow):
         # Pet ID input
         """
         Configures the pet item level (ilvl) page in the Azeroth Auction Assassin application.
-        
+
         This method sets up a comprehensive UI for managing pet sniping rules, including:
         - Input fields for pet ID, max price, name, minimum level, and minimum quality
         - Dropdown for pet name selection
         - Input for excluded breed IDs
         - Buttons for adding, removing, importing, and exporting pet level rules
         - A list widget to display current pet level rules
-        
+
         The page allows users to:
         - Define specific criteria for pet auction sniping
         - Add and manage multiple pet level rules
         - Import rules from different sources (including Point Blank Sniper)
         - Convert rules between different formats
-        
+
         Parameters:
             pet_ilvl_page (QWidget): The parent widget for the pet item level page
-        
+
         Side Effects:
             - Creates and configures multiple QLineEdit, QLabel, QComboBox, QPushButton, and QListWidget
             - Populates the pet level rules list display
@@ -2978,16 +2998,16 @@ class App(QMainWindow):
         # This function will be called whenever the user selects a different pet
         """
         Update the pet item level input fields when a new pet is selected from the dropdown.
-        
+
         This method is triggered when the user changes the selected pet in the pet item level (ilvl) combo box. It performs the following actions:
         - Retrieves the selected pet's details from the pet statistics DataFrame
         - Populates the pet ID input field with the corresponding item ID
         - Sets a recommended price based on the pet's desired price and a user-defined discount percentage
         - Provides a default price of 10 if no price can be calculated
-        
+
         Parameters:
             index (int): The index of the selected item in the combo box (unused)
-        
+
         Side Effects:
             - Updates pet_ilvl_id_input with the selected pet's item ID
             - Updates pet_ilvl_price_input with a recommended or default price
@@ -3016,13 +3036,13 @@ class App(QMainWindow):
     def import_pbs_pet_ilvl_data(self):
         """
         Import PBS pet data and convert to pet level rules.
-        
+
         This method allows users to paste PBS (Presumably Pet Battle System) pet data and
         automatically generates pet trading rules based on the imported information.
-        
+
         Parameters:
             None (uses self context)
-        
+
         Functionality:
             - Opens a multi-line input dialog for users to paste PBS pet data
             - Parses the pasted data to extract pet names and prices
@@ -3030,16 +3050,16 @@ class App(QMainWindow):
             - Handles various data parsing scenarios and edge cases
             - Provides fallback pricing using default discount mechanism
             - Updates the pet level rules list and displays the rules
-        
+
         Raises:
             QMessageBox warnings/errors for:
             - Invalid data format
             - No valid pets imported
             - Parsing errors
-        
+
         Returns:
             None (updates internal state and UI components)
-        
+
         Notes:
             - Supports flexible data parsing with multiple semicolon-separated fields
             - Handles pet names with/without quotes
@@ -3176,18 +3196,18 @@ class App(QMainWindow):
         # Open a dialog to allow users to paste the PBS data
         """
         Import pet data from PBS (Probably Battle Stones) format into the application.
-        
+
         This method allows users to paste a formatted text containing pet data, which is then processed
         to extract pet names and their corresponding prices. The method supports various input formats
         and handles price extraction with fallback mechanisms.
-        
+
         Parameters:
             None (uses self context)
-        
+
         Raises:
             ValueError: If invalid data is encountered during parsing
             Exception: For any unexpected errors during data processing
-        
+
         Behavior:
             - Opens a multi-line input dialog for users to paste PBS pet data
             - Parses the input, extracting pet names and prices
@@ -3195,7 +3215,7 @@ class App(QMainWindow):
             - Populates the pet list with extracted prices or calculated discounted prices
             - Updates the pet list display with imported pet IDs and prices
             - Handles cases where prices might be missing by applying a default discount
-        
+
         Example:
             Input format: "Pet Name;;0;0;0;0;0;50000^Another Pet;;0;0;0;0;0;25000"
         """
@@ -3279,17 +3299,17 @@ class App(QMainWindow):
         # Prepare the PBS list
         """
         Convert AAA pet data format to PBS (Panda Bot Sniper) format.
-        
+
         This method transforms a dictionary of pet IDs and prices into a PBS-compatible string
         for use in automated pet sniping tools.
-        
+
         Parameters:
             pet_data (dict): A dictionary with pet item IDs as keys and their corresponding prices as values.
-        
+
         Returns:
             str: A concatenated string of PBS-formatted pet snipe entries, where each entry follows
                  the format: 'Snipe^"Pet Name";;0;0;0;0;0;price;;#;;'
-        
+
         Notes:
             - Skips pets that cannot be found in the pet_statistics DataFrame
             - Converts prices to integers
