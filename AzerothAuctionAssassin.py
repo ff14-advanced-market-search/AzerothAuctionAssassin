@@ -912,6 +912,19 @@ class App(QMainWindow):
         self.ilvl_list_display.itemClicked.connect(self.ilvl_list_double_clicked)
         self.ilvl_page_layout.addWidget(self.ilvl_list_display, 0, 1, 11, 2)
 
+        # Add new bonus lists input after the existing ilvl inputs
+        self.ilvl_bonus_lists_input = QLineEdit(ilvl_page)
+        self.ilvl_bonus_lists_input_label = QLabel("Bonus Lists", ilvl_page)
+        self.ilvl_bonus_lists_input_label.setToolTip(
+            "Comma-separated list of bonus IDs to match.\n"
+            + "Example: 6652,10844\n"
+            + "Leave empty to match any bonus lists."
+        )
+        self.ilvl_bonus_lists_input_label.setFixedSize(120, 15)
+        self.ilvl_bonus_lists_input.setFixedSize(120, 25)
+        self.ilvl_page_layout.addWidget(self.ilvl_bonus_lists_input_label, 16, 0, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_bonus_lists_input, 17, 0, 1, 1)
+
     def go_to_home_page(self):
         self.stacked_widget.setCurrentIndex(0)
 
@@ -1457,7 +1470,8 @@ class App(QMainWindow):
                     f"Avoidance: {ilvl_dict_data['avoidance']}; "
                     f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
                     f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
-                    f"Max ILvl: {ilvl_dict_data['max_ilvl']}"
+                    f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
+                    f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
                 )
                 # Insert the string into the display list
                 self.ilvl_list_display.insertItem(
@@ -1477,6 +1491,10 @@ class App(QMainWindow):
         required_min_lvl = item_split[8].split(";")[0]
         required_max_lvl = item_split[9].split(";")[0]
         ilvl_max = item_split[10].split(";")[0]
+        bonus_lists = item_split[11].split(";")[
+            0
+        ]  # Get bonus lists from display string
+        self.ilvl_bonus_lists_input.setText(bonus_lists.strip("[]").replace(" ", ""))
 
         self.ilvl_item_input.setText(item_id)
         self.ilvl_price_input.setText(buyout)
@@ -1620,6 +1638,25 @@ class App(QMainWindow):
                 )
                 return False
 
+        # Parse bonus lists
+        bonus_lists = []
+        if self.ilvl_bonus_lists_input.text().strip():
+            try:
+                bonus_lists = [
+                    int(x.strip())
+                    for x in self.ilvl_bonus_lists_input.text().split(",")
+                ]
+                # Validate bonus IDs are positive integers
+                if not all(x > 0 for x in bonus_lists):
+                    raise ValueError("Bonus list IDs must be positive integers")
+            except ValueError:
+                QMessageBox.critical(
+                    self,
+                    "Invalid Input",
+                    "Bonus lists must be comma-separated integers",
+                )
+                return False
+
         # Create a dictionary with the data, including ilvl_max
         ilvl_dict_data = {
             "ilvl": ilvl_int,
@@ -1632,6 +1669,7 @@ class App(QMainWindow):
             "required_min_lvl": int(required_min_lvl),
             "required_max_lvl": int(required_max_lvl),
             "max_ilvl": ilvl_max_int,
+            "bonus_lists": bonus_lists,  # Add the bonus lists field
         }
 
         # Only append and display if the dictionary is not already in the list
@@ -1650,7 +1688,8 @@ class App(QMainWindow):
                 f"Avoidance: {ilvl_dict_data['avoidance']}; "
                 f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
                 f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
-                f"Max ILvl: {ilvl_dict_data['max_ilvl']}"
+                f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
+                f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
             )
 
             # Insert the formatted string into the display list

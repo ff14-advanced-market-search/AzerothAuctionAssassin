@@ -410,7 +410,7 @@ class Alerts(QThread):
                 return False
 
             # skip if all DESIRED_ILVL_ITEMS["bonus_ids"] are not in item_bonus_ids
-            if not all(
+            if DESIRED_ILVL_ITEMS["bonus_lists"] != [] and not all(
                 bonus_id in item_bonus_ids
                 for bonus_id in DESIRED_ILVL_ITEMS["bonus_lists"]
             ):
