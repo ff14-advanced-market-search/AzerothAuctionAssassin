@@ -353,6 +353,7 @@ class MegaData:
         ilvl_info["required_min_lvl"] = ilvl_info.get("required_min_lvl", 1)
         ilvl_info["required_max_lvl"] = ilvl_info.get("required_max_lvl", 1000)
         ilvl_info["max_ilvl"] = ilvl_info.get("max_ilvl", 10000)
+        ilvl_info["bonus_lists"] = ilvl_info.get("bonus_lists", [])
 
         example = {
             "ilvl": 360,
@@ -365,6 +366,7 @@ class MegaData:
             "item_ids": [12345, 67890],
             "required_min_lvl": 1,
             "required_max_lvl": 1000,
+            "bonus_lists": [12345, 67890],
         }
 
         if ilvl_info.keys() != example.keys():
@@ -411,6 +413,7 @@ class MegaData:
                 item_id: base_required_levels.get(item_id, 1)
                 for item_id in ilvl_info["item_ids"]
             }
+            snipe_info["bonus_lists"] = ilvl_info["bonus_lists"]
 
         return snipe_info, ilvl_info["ilvl"]
 

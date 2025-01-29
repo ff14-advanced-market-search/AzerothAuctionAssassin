@@ -409,6 +409,13 @@ class Alerts(QThread):
             if required_lvl > DESIRED_ILVL_ITEMS["required_max_lvl"]:
                 return False
 
+            # skip if all DESIRED_ILVL_ITEMS["bonus_ids"] are not in item_bonus_ids
+            if not all(
+                bonus_id in item_bonus_ids
+                for bonus_id in DESIRED_ILVL_ITEMS["bonus_lists"]
+            ):
+                return False
+
             # if no buyout, use bid
             if "buyout" not in auction and "bid" in auction:
                 auction["buyout"] = auction["bid"]
