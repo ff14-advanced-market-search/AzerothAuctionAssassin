@@ -1729,6 +1729,13 @@ class App(QMainWindow):
         else:
             ilvl_max = int(self.ilvl_max_input.text())
 
+        # Parse bonus lists
+        bonus_lists = []
+        if self.ilvl_bonus_lists_input.text().strip():
+            bonus_lists = [
+                int(x.strip()) for x in self.ilvl_bonus_lists_input.text().split(",")
+            ]
+
         # Create a dictionary with the data
         ilvl_dict_data = {
             "ilvl": int(self.ilvl_input.text()),
@@ -1741,6 +1748,7 @@ class App(QMainWindow):
             "required_min_lvl": required_min_lvl,
             "required_max_lvl": required_max_lvl,
             "max_ilvl": ilvl_max,
+            "bonus_lists": bonus_lists,
         }
 
         # Check if the item data is already in the list
@@ -1757,7 +1765,8 @@ class App(QMainWindow):
                 f"Avoidance: {ilvl_dict_data['avoidance']}; "
                 f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
                 f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
-                f"Max ILvl: {ilvl_dict_data['max_ilvl']}"
+                f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
+                f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
             )
 
             # Print the formatted string
