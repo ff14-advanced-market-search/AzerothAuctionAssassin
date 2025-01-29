@@ -395,6 +395,14 @@ class MegaData:
                 else:
                     raise Exception(f"error in ilvl info '{key}' must be an int")
 
+        # Validate bonus lists are integers
+        if ilvl_info["bonus_lists"] != [] and not all(
+            isinstance(x, int) for x in ilvl_info["bonus_lists"]
+        ):
+            raise Exception(
+                "error in ilvl info 'bonus_lists' must contain only integers"
+            )
+
         if ilvl_info["item_ids"] == []:
             snipe_info["item_names"] = item_names
             snipe_info["item_ids"] = set(item_names.keys())
