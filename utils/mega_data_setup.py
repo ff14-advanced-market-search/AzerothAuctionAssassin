@@ -353,6 +353,7 @@ class MegaData:
         ilvl_info["required_min_lvl"] = ilvl_info.get("required_min_lvl", 1)
         ilvl_info["required_max_lvl"] = ilvl_info.get("required_max_lvl", 1000)
         ilvl_info["max_ilvl"] = ilvl_info.get("max_ilvl", 10000)
+        ilvl_info["bonus_lists"] = ilvl_info.get("bonus_lists", [])
 
         example = {
             "ilvl": 360,
@@ -365,6 +366,7 @@ class MegaData:
             "item_ids": [12345, 67890],
             "required_min_lvl": 1,
             "required_max_lvl": 1000,
+            "bonus_lists": [12345, 67890],
         }
 
         if ilvl_info.keys() != example.keys():
@@ -393,11 +395,20 @@ class MegaData:
                 else:
                     raise Exception(f"error in ilvl info '{key}' must be an int")
 
+        # Validate bonus lists are integers
+        if ilvl_info["bonus_lists"] != [] and not all(
+            isinstance(x, int) for x in ilvl_info["bonus_lists"]
+        ):
+            raise Exception(
+                "error in ilvl info 'bonus_lists' must contain only integers"
+            )
+
         if ilvl_info["item_ids"] == []:
             snipe_info["item_names"] = item_names
             snipe_info["item_ids"] = set(item_names.keys())
             snipe_info["base_ilvls"] = base_ilvls
             snipe_info["base_required_levels"] = base_required_levels
+            snipe_info["bonus_lists"] = ilvl_info["bonus_lists"]
         else:
             snipe_info["item_names"] = {
                 item_id: item_names.get(item_id, "foobar")
@@ -411,6 +422,7 @@ class MegaData:
                 item_id: base_required_levels.get(item_id, 1)
                 for item_id in ilvl_info["item_ids"]
             }
+            snipe_info["bonus_lists"] = ilvl_info["bonus_lists"]
 
         return snipe_info, ilvl_info["ilvl"]
 

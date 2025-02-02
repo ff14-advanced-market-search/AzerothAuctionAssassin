@@ -109,8 +109,6 @@ class Alerts(QThread):
                         id_msg += f"`ilvl:` {auction['ilvl']}\n"
                         if auction["tertiary_stats"]:
                             id_msg += f"`tertiary_stats:` {auction['tertiary_stats']}\n"
-                        # # disable bonus_ids for now, too much text
-                        # id_msg += f"`bonus_ids:` {list(auction['bonus_ids'])}\n"
                     elif auction["itemID"] in mega_data.ITEM_NAMES:
                         item_name = mega_data.ITEM_NAMES[auction["itemID"]]
                         # old method
@@ -125,6 +123,8 @@ class Alerts(QThread):
                         and auction["required_lvl"] is not None
                     ):
                         id_msg += f"`required_lvl:` {auction['required_lvl']}\n"
+                    if "tertiary_stats" in auction:
+                        id_msg += f"`bonus_ids:` {list(auction['bonus_ids'])}\n"
                 else:
                     id_msg = f"`petID:` {auction['petID']}\n"
                     saddlebag_link_id = auction["petID"]
@@ -407,6 +407,13 @@ class Alerts(QThread):
 
             # skip if required_lvl is too high
             if required_lvl > DESIRED_ILVL_ITEMS["required_max_lvl"]:
+                return False
+
+            # skip if all DESIRED_ILVL_ITEMS["bonus_ids"] are not in item_bonus_ids
+            if DESIRED_ILVL_ITEMS["bonus_lists"] != [] and not all(
+                bonus_id in item_bonus_ids
+                for bonus_id in DESIRED_ILVL_ITEMS["bonus_lists"]
+            ):
                 return False
 
             # if no buyout, use bid
