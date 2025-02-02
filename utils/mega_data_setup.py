@@ -408,6 +408,7 @@ class MegaData:
             snipe_info["item_ids"] = set(item_names.keys())
             snipe_info["base_ilvls"] = base_ilvls
             snipe_info["base_required_levels"] = base_required_levels
+            snipe_info["bonus_lists"] = ilvl_info["bonus_lists"]
         else:
             snipe_info["item_names"] = {
                 item_id: item_names.get(item_id, "foobar")
