@@ -361,11 +361,19 @@ class MegaData:
         ilvl_info["avoidance"] = ilvl_info.get("avoidance", False)
 
         required_keys = {
-            "ilvl", "max_ilvl", "buyout", "sockets", "speed", "leech", 
-            "avoidance", "item_ids", "required_min_lvl", "required_max_lvl", 
-            "bonus_lists"
+            "ilvl",
+            "max_ilvl",
+            "buyout",
+            "sockets",
+            "speed",
+            "leech",
+            "avoidance",
+            "item_ids",
+            "required_min_lvl",
+            "required_max_lvl",
+            "bonus_lists",
         }
-        
+
         # Check if all required keys are present
         missing_keys = required_keys - set(ilvl_info.keys())
         if missing_keys:
@@ -377,7 +385,7 @@ class MegaData:
         bool_vars = ["sockets", "speed", "leech", "avoidance"]
         int_vars = [
             "ilvl",
-            "max_ilvl", 
+            "max_ilvl",
             "buyout",
             "required_min_lvl",
             "required_max_lvl",
