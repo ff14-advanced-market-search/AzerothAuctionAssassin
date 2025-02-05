@@ -225,11 +225,24 @@ class MegaData:
             return self.access_token
         # if over 20 hours make a new token and reset the creation time
         else:
-            access_token_raw = requests.post(
+            response = requests.post(
                 "https://oauth.battle.net/token",
                 data={"grant_type": "client_credentials"},
                 auth=(self.WOW_CLIENT_ID, self.WOW_CLIENT_SECRET),
-            ).json()
+            )
+
+            if response.status_code != 200:
+                raise Exception(
+                    f"Failed to get blizzard oauth access token. Try again at: https://develop.battle.net/access/clients . Status code: {response.status_code}, Response: {response.text}"
+                )
+
+            access_token_raw = response.json()
+
+            if "access_token" not in access_token_raw:
+                raise Exception(
+                    f"No access token in response. Response: {access_token_raw}"
+                )
+
             self.access_token = access_token_raw["access_token"]
             self.access_token_creation_unix_time = int(datetime.now().timestamp())
             return self.access_token
