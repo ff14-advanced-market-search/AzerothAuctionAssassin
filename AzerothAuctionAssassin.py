@@ -1458,6 +1458,9 @@ class App(QMainWindow):
                     ilvl_dict_data["required_max_lvl"] = 999
                 if "max_ilvl" not in ilvl_dict_data:
                     ilvl_dict_data["max_ilvl"] = 10000
+                if "bonus_lists" not in ilvl_dict_data:
+                    ilvl_dict_data["bonus_lists"] = []
+
                 # Create a formatted string with the item data
                 item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
                 display_string = (
