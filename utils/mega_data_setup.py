@@ -225,11 +225,24 @@ class MegaData:
             return self.access_token
         # if over 20 hours make a new token and reset the creation time
         else:
-            access_token_raw = requests.post(
+            response = requests.post(
                 "https://oauth.battle.net/token",
                 data={"grant_type": "client_credentials"},
                 auth=(self.WOW_CLIENT_ID, self.WOW_CLIENT_SECRET),
-            ).json()
+            )
+
+            if response.status_code != 200:
+                raise Exception(
+                    f"Failed to get blizzard oauth access token. Try again at: https://develop.battle.net/access/clients . Status code: {response.status_code}, Response: {response.text}"
+                )
+
+            access_token_raw = response.json()
+
+            if "access_token" not in access_token_raw:
+                raise Exception(
+                    f"No access token in response. Response: {access_token_raw}"
+                )
+
             self.access_token = access_token_raw["access_token"]
             self.access_token_creation_unix_time = int(datetime.now().timestamp())
             return self.access_token
@@ -349,29 +362,36 @@ class MegaData:
     def __set_desired_ilvl(
         self, ilvl_info, item_names, base_ilvls, base_required_levels
     ):
+        # Set default values if not present
         ilvl_info["item_ids"] = ilvl_info.get("item_ids", [])
         ilvl_info["required_min_lvl"] = ilvl_info.get("required_min_lvl", 1)
         ilvl_info["required_max_lvl"] = ilvl_info.get("required_max_lvl", 1000)
         ilvl_info["max_ilvl"] = ilvl_info.get("max_ilvl", 10000)
         ilvl_info["bonus_lists"] = ilvl_info.get("bonus_lists", [])
+        ilvl_info["sockets"] = ilvl_info.get("sockets", False)
+        ilvl_info["speed"] = ilvl_info.get("speed", False)
+        ilvl_info["leech"] = ilvl_info.get("leech", False)
+        ilvl_info["avoidance"] = ilvl_info.get("avoidance", False)
 
-        example = {
-            "ilvl": 360,
-            "max_ilvl": 10000,
-            "buyout": 50000,
-            "sockets": False,
-            "speed": True,
-            "leech": False,
-            "avoidance": False,
-            "item_ids": [12345, 67890],
-            "required_min_lvl": 1,
-            "required_max_lvl": 1000,
-            "bonus_lists": [12345, 67890],
+        required_keys = {
+            "ilvl",
+            "max_ilvl",
+            "buyout",
+            "sockets",
+            "speed",
+            "leech",
+            "avoidance",
+            "item_ids",
+            "required_min_lvl",
+            "required_max_lvl",
+            "bonus_lists",
         }
 
-        if ilvl_info.keys() != example.keys():
+        # Check if all required keys are present
+        missing_keys = required_keys - set(ilvl_info.keys())
+        if missing_keys:
             raise Exception(
-                f"error missing required keys {set(example.keys())} from info:\n{ilvl_info}"
+                f"Error: Missing required keys {missing_keys} in ilvl_info:\n{ilvl_info}"
             )
 
         snipe_info = {}
