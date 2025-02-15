@@ -1628,7 +1628,7 @@ class App(QMainWindow):
                         "Max level must be between 1 and 999.",
                     )
                     return False
-                elif required_max_lvl <= required_min_lvl:
+                elif required_max_lvl < required_min_lvl:
                     QMessageBox.critical(
                         self,
                         "Invalid Level Range",
@@ -1857,7 +1857,7 @@ class App(QMainWindow):
                     raise ValueError(
                         f"Invalid Max Level {required_max_lvl}.\nMax level must be between 1-999."
                     )
-                if required_max_lvl <= required_min_lvl:
+                if required_max_lvl < required_min_lvl:
                     raise ValueError(
                         f"Max level {required_max_lvl} must be greater than or equal to Min level {required_min_lvl}."
                     )
