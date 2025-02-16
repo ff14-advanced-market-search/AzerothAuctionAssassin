@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.3.4.2"
+AAA_VERSION = "1.4.0"
 
 windowsApp_Path = None
 try:
@@ -1857,7 +1857,7 @@ class App(QMainWindow):
                     raise ValueError(
                         f"Invalid Max Level {required_max_lvl}.\nMax level must be between 1-999."
                     )
-                if required_max_lvl <= required_min_lvl:
+                if required_max_lvl < required_min_lvl:
                     raise ValueError(
                         f"Max level {required_max_lvl} must be greater than or equal to Min level {required_min_lvl}."
                     )
