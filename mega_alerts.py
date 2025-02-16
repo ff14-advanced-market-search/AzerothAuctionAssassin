@@ -417,7 +417,9 @@ class Alerts(QThread):
             #     return False
 
             # skip no exact match
-            if DESIRED_ILVL_ITEMS["bonus_lists"] != [] and set(DESIRED_ILVL_ITEMS["bonus_lists"]) != set(item_bonus_ids):
+            if DESIRED_ILVL_ITEMS["bonus_lists"] != [] and set(
+                DESIRED_ILVL_ITEMS["bonus_lists"]
+            ) != set(item_bonus_ids):
                 return False
 
             # if no buyout, use bid
