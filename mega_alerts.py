@@ -417,8 +417,25 @@ class Alerts(QThread):
             #     return False
 
             # skip no exact match
-            if DESIRED_ILVL_ITEMS["bonus_lists"] != [] and set(DESIRED_ILVL_ITEMS["bonus_lists"]) != set(item_bonus_ids):
+            if (
+                DESIRED_ILVL_ITEMS["bonus_lists"] != []
+                and DESIRED_ILVL_ITEMS["bonus_lists"] != [-1]
+                and set(DESIRED_ILVL_ITEMS["bonus_lists"]) != set(item_bonus_ids)
+            ):
                 return False
+
+            # if the bonus_lists is -1, then we need to check if the item has more than 3 bonus IDs
+            # this is when someone wants an item at base stats with no level modifiers
+            if DESIRED_ILVL_ITEMS["bonus_lists"] == [-1]:
+                temp_bonus_ids = set(item_bonus_ids)
+                # Remove all tertiary stat bonus IDs
+                temp_bonus_ids -= socket_ids
+                temp_bonus_ids -= leech_ids
+                temp_bonus_ids -= avoidance_ids
+                temp_bonus_ids -= speed_ids
+                # If more than 3 bonus IDs remain, skip this item
+                if len(temp_bonus_ids) > 3:
+                    return False
 
             # if no buyout, use bid
             if "buyout" not in auction and "bid" in auction:
