@@ -1675,27 +1675,47 @@ class App(QMainWindow):
             "bonus_lists": bonus_lists,  # Add the bonus lists field
         }
 
-        # Only append and display if the dictionary is not already in the list
-        if ilvl_dict_data not in self.ilvl_list:
+        # Check if an entry with the same criteria (except buyout) exists
+        existing_entry = None
+        for i, entry in enumerate(self.ilvl_list):
+            entry_copy = entry.copy()
+            entry_copy.pop("buyout")  # Remove buyout for comparison
+            new_entry_copy = ilvl_dict_data.copy()
+            new_entry_copy.pop("buyout")  # Remove buyout for comparison
+
+            if entry_copy == new_entry_copy:
+                existing_entry = i
+                break
+
+        # If found, update the existing entry
+        if existing_entry is not None:
+            self.ilvl_list[existing_entry] = ilvl_dict_data
+            # Update the display
+            self.ilvl_list_display.takeItem(existing_entry)
+        else:
+            # If not found, append as new entry
             self.ilvl_list.append(ilvl_dict_data)
 
-            # Format the display string
-            item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
-            display_string = (
-                f"Item ID: {item_ids}; "
-                f"Price: {ilvl_dict_data['buyout']}; "
-                f"ILvl: {ilvl_dict_data['ilvl']}; "
-                f"Sockets: {ilvl_dict_data['sockets']}; "
-                f"Speed: {ilvl_dict_data['speed']}; "
-                f"Leech: {ilvl_dict_data['leech']}; "
-                f"Avoidance: {ilvl_dict_data['avoidance']}; "
-                f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
-                f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
-                f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
-                f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
-            )
+        # Format and display the entry
+        item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
+        display_string = (
+            f"Item ID: {item_ids}; "
+            f"Price: {ilvl_dict_data['buyout']}; "
+            f"ILvl: {ilvl_dict_data['ilvl']}; "
+            f"Sockets: {ilvl_dict_data['sockets']}; "
+            f"Speed: {ilvl_dict_data['speed']}; "
+            f"Leech: {ilvl_dict_data['leech']}; "
+            f"Avoidance: {ilvl_dict_data['avoidance']}; "
+            f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
+            f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
+            f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
+            f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
+        )
 
-            # Insert the formatted string into the display list
+        # Insert the formatted string into the display list
+        if existing_entry is not None:
+            self.ilvl_list_display.insertItem(existing_entry, display_string)
+        else:
             self.ilvl_list_display.insertItem(
                 self.ilvl_list_display.count(), display_string
             )
