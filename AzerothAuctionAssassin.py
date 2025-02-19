@@ -1650,8 +1650,8 @@ class App(QMainWindow):
                     for x in self.ilvl_bonus_lists_input.text().split(",")
                 ]
                 # Validate bonus IDs are positive integers
-                if not all(x > 0 for x in bonus_lists):
-                    raise ValueError("Bonus list IDs must be positive integers")
+                if not all(isinstance(x, int) for x in bonus_lists):
+                    raise ValueError("Bonus list IDs must be integers")
             except ValueError:
                 QMessageBox.critical(
                     self,
