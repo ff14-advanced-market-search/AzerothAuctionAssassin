@@ -437,6 +437,11 @@ class Alerts(QThread):
                 if len(temp_bonus_ids) > 3:
                     return False
 
+                # some rare ids dont work like this, so we skip them
+                bad_ids = [224637]
+                if auction["item"]["id"] in bad_ids:
+                    return False
+
             # if no buyout, use bid
             if "buyout" not in auction and "bid" in auction:
                 auction["buyout"] = auction["bid"]
