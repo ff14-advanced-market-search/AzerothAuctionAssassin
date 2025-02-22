@@ -8600,5 +8600,104 @@
     "purchase_price": 2827026,
     "sell_price": 565405,
     "ilvl": 584
+  },
+  "232655": {
+    "itemID": 232655,
+    "itemName": "Vatwork Janitor's Wasteband",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 1,
+    "purchase_price": 423757,
+    "sell_price": 423757,
+    "ilvl": 623
+  },
+  "232656": {
+    "itemID": 232656,
+    "itemName": "Psychopath's Ravemantle",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 1,
+    "purchase_price": 423757,
+    "sell_price": 423757,
+    "ilvl": 623
+  },
+  "232657": {
+    "itemID": 232657,
+    "itemName": "Mechgineer's Blowtorch Cover",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 2,
+    "purchase_price": 423757,
+    "sell_price": 423757,
+    "ilvl": 623
+  },
+  "232658": {
+    "itemID": 232658,
+    "itemName": "Firebug's Anklegear",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 2,
+    "purchase_price": 423757,
+    "sell_price": 423757,
+    "ilvl": 623
+  },
+  "232659": {
+    "itemID": 232659,
+    "itemName": "Loyalist's Holdout Hood",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 3,
+    "purchase_price": 423757,
+    "sell_price": 423757,
+    "ilvl": 623
+  },
+  "232660": {
+    "itemID": 232660,
+    "itemName": "Midnight Lounge Cummerbund",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 3,
+    "purchase_price": 423757,
+    "sell_price": 423757,
+    "ilvl": 623
+  },
+  "232661": {
+    "itemID": 232661,
+    "itemName": "Bootleg Wrynn Shoulderplates",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 4,
+    "purchase_price": 423757,
+    "sell_price": 423757,
+    "ilvl": 623
+  },
+  "232662": {
+    "itemID": 232662,
+    "itemName": "Globlin-Fused Greatbelt",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 4,
+    "purchase_price": 423757,
+    "sell_price": 423757,
+    "ilvl": 623
+  },
+  "232663": {
+    "itemID": 232663,
+    "itemName": "Undermine Merc's Dog Tags",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 423757,
+    "sell_price": 423757,
+    "ilvl": 623
   }
 }
