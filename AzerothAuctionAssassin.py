@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.4.1.1"
+AAA_VERSION = "1.4.2"
 
 windowsApp_Path = None
 try:
@@ -430,7 +430,7 @@ class App(QMainWindow):
 
         self.save_data_button = QPushButton("Save Data")
         self.save_data_button.setFixedSize(150, 25)
-        self.save_data_button.clicked.connect(self.save_data_to_json)
+        self.save_data_button.clicked.connect(self.paid_save_data_to_json)
         self.save_data_button.setToolTip("Save data without starting a scan.")
         self.layout_area.addWidget(self.save_data_button, 8, 0)
 
@@ -2364,79 +2364,15 @@ class App(QMainWindow):
             self.items_list = {}
             self.ilvl_list = []
 
-            self.save_data_to_json()
+            self.save_data_to_json(reset=True)
 
-    def validate_application_settings(self):
+    def validate_application_settings(self, reset=False):
         wow_region = self.wow_region.currentText()
-
-        # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC'
-        if wow_region not in [
-            "NA",
-            "EU",
-            "NACLASSIC",
-            "EUCLASSIC",
-            "NASODCLASSIC",
-            "EUSODCLASSIC",
-        ]:
-            QMessageBox.critical(
-                self,
-                "Invalid Region",
-                "WOW region must be either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'EUSODCLASSIC or 'NASODCLASSIC'.",
-            )
-            return False
-
-        required_fields = {
-            "MEGA_WEBHOOK_URL": self.discord_webhook_input.text().strip(),
-            "WOW_CLIENT_ID": self.wow_client_id_input.text().strip(),
-            "WOW_CLIENT_SECRET": self.wow_client_secret_input.text().strip(),
-        }
-
-        # confirm the client id and secret are not the same value
-        if required_fields["WOW_CLIENT_ID"] == required_fields["WOW_CLIENT_SECRET"]:
-            QMessageBox.critical(
-                self,
-                "Invalid Client ID and Secret",
-                "Client ID and Secret cannot be the same value. Read the wiki:\n\n"
-                + "https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Installation-Guide#4-go-to-httpsdevelopbattlenetaccessclients-and-create-a-client-get-the-blizzard-oauth-client-and-secret-ids--you-will-use-these-values-for-the-wow_client_id-and-wow_client_secret-later-on",
-            )
-            return False
-
-        for field, value in required_fields.items():
-            if not value:
-                QMessageBox.critical(self, "Empty Field", f"{field} cannot be empty.")
-                return False
-            if len(value) < 20:
-                QMessageBox.critical(
-                    self,
-                    "Required Field Error",
-                    f"{field} value {value} is invalid. "
-                    + "Contact the devs on discord.",
-                )
-                return False
-
         mega_threads = self.number_of_mega_threads.text()
         scan_time_max = self.scan_time_max.text()
         scan_time_min = self.scan_time_min.text()
         discount_percent = self.discount_percent.text()
         faction = self.faction.currentText()
-
-        # Check if MEGA_THREADS, SCAN_TIME_MAX, and SCAN_TIME_MIN are integers
-        integer_fields = {
-            "MEGA_THREADS": mega_threads,
-            "SCAN_TIME_MAX": scan_time_max,
-            "SCAN_TIME_MIN": scan_time_min,
-            "DISCOUNT_PERCENT": discount_percent,
-        }
-
-        for field, value in integer_fields.items():
-            try:
-                int(value)
-            except ValueError:
-                QMessageBox.critical(
-                    self, "Invalid Value", f"{field} should be an integer."
-                )
-                return False
-
         show_bids = self.show_bid_prices.isChecked()
         wowhead = self.wow_head_link.isChecked()
         no_links = self.no_links.isChecked()
@@ -2444,35 +2380,100 @@ class App(QMainWindow):
         refresh_alerts = self.refresh_alerts.isChecked()
         debug = self.debug_mode.isChecked()
 
-        boolean_fields = {
-            "SHOW_BID_PRICES": show_bids,
-            "WOWHEAD_LINK": wowhead,
-            "NO_LINKS": no_links,
-            "NO_RUSSIAN_REALMS": no_russians,
-            "REFRESH_ALERTS": refresh_alerts,
-            "DEBUG": debug,
-        }
-
-        # Ensure all boolean fields have a boolean value.
-        for field, value in boolean_fields.items():
-            if type(value) != bool:
+        if not reset:
+            # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC'
+            if wow_region not in [
+                "NA",
+                "EU",
+                "NACLASSIC",
+                "EUCLASSIC",
+                "NASODCLASSIC",
+                "EUSODCLASSIC",
+            ]:
                 QMessageBox.critical(
-                    self, "Invalid Value", f"{field} should be a boolean."
+                    self,
+                    "Invalid Region",
+                    "WOW region must be either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'EUSODCLASSIC or 'NASODCLASSIC'.",
                 )
                 return False
 
-        # If all tests pass, save data to JSON.
+            required_fields = {
+                "MEGA_WEBHOOK_URL": self.discord_webhook_input.text().strip(),
+                "WOW_CLIENT_ID": self.wow_client_id_input.text().strip(),
+                "WOW_CLIENT_SECRET": self.wow_client_secret_input.text().strip(),
+            }
+
+            # confirm the client id and secret are not the same value
+            if required_fields["WOW_CLIENT_ID"] == required_fields["WOW_CLIENT_SECRET"]:
+                QMessageBox.critical(
+                    self,
+                    "Invalid Client ID and Secret",
+                    "Client ID and Secret cannot be the same value. Read the wiki:\n\n"
+                    + "https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Installation-Guide#4-go-to-httpsdevelopbattlenetaccessclients-and-create-a-client-get-the-blizzard-oauth-client-and-secret-ids--you-will-use-these-values-for-the-wow_client_id-and-wow_client_secret-later-on",
+                )
+                return False
+
+            for field, value in required_fields.items():
+                if not value:
+                    QMessageBox.critical(
+                        self, "Empty Field", f"{field} cannot be empty."
+                    )
+                    return False
+                if len(value) < 20:
+                    QMessageBox.critical(
+                        self,
+                        "Required Field Error",
+                        f"{field} value {value} is invalid. "
+                        + "Contact the devs on discord.",
+                    )
+                    return False
+
+            # Check if MEGA_THREADS, SCAN_TIME_MAX, and SCAN_TIME_MIN are integers
+            integer_fields = {
+                "MEGA_THREADS": mega_threads,
+                "SCAN_TIME_MAX": scan_time_max,
+                "SCAN_TIME_MIN": scan_time_min,
+                "DISCOUNT_PERCENT": discount_percent,
+            }
+
+            for field, value in integer_fields.items():
+                try:
+                    int(value)
+                except ValueError:
+                    QMessageBox.critical(
+                        self, "Invalid Value", f"{field} should be an integer."
+                    )
+                    return False
+
+            # Ensure all boolean fields have a boolean value.
+            boolean_fields = {
+                "SHOW_BID_PRICES": show_bids,
+                "WOWHEAD_LINK": wowhead,
+                "NO_LINKS": no_links,
+                "NO_RUSSIAN_REALMS": no_russians,
+                "REFRESH_ALERTS": refresh_alerts,
+                "DEBUG": debug,
+            }
+
+            for field, value in boolean_fields.items():
+                if type(value) != bool:
+                    QMessageBox.critical(
+                        self, "Invalid Value", f"{field} should be a boolean."
+                    )
+                    return False
+
+        # If all tests pass or we're resetting, return the config JSON
         config_json = {
-            "MEGA_WEBHOOK_URL": required_fields["MEGA_WEBHOOK_URL"],
-            "WOW_CLIENT_ID": required_fields["WOW_CLIENT_ID"],
-            "WOW_CLIENT_SECRET": required_fields["WOW_CLIENT_SECRET"],
+            "MEGA_WEBHOOK_URL": self.discord_webhook_input.text().strip(),
+            "WOW_CLIENT_ID": self.wow_client_id_input.text().strip(),
+            "WOW_CLIENT_SECRET": self.wow_client_secret_input.text().strip(),
             "AUTHENTICATION_TOKEN": self.authentication_token.text().strip(),
             "WOW_REGION": wow_region,
             "SHOW_BID_PRICES": show_bids,
             "MEGA_THREADS": int(mega_threads),
             "WOWHEAD_LINK": wowhead,
             "NO_LINKS": no_links,
-            "DISCOUNT_PERCENT": int(self.discount_percent.text()),
+            "DISCOUNT_PERCENT": int(discount_percent),
             "NO_RUSSIAN_REALMS": no_russians,
             "REFRESH_ALERTS": refresh_alerts,
             "SCAN_TIME_MAX": int(scan_time_max),
@@ -2482,7 +2483,11 @@ class App(QMainWindow):
         }
         return config_json
 
-    def validate_item_lists(self):
+    def validate_item_lists(self, reset=False):
+        # When resetting, we don't need to validate since lists will be empty
+        if reset:
+            return True
+
         # Check if items_list, pet_list, ilvl_list, or pet_ilvl_rules are not empty
         if (
             len(self.items_list) == 0
@@ -2561,7 +2566,62 @@ class App(QMainWindow):
 
         return True
 
-    def save_data_to_json(self):
+    def paid_save_data_to_json(self):
+        response = requests.post(
+            self.token_auth_url,
+            json={"token": f"{self.authentication_token.text()}"},
+        )
+
+        response_dict = response.json()
+
+        if response.status_code != 200:
+            QMessageBox.critical(
+                self,
+                "Request Error",
+                f"Could not reach server, status code : {response.status_code}",
+            )
+            return
+
+        if len(response_dict) == 0:
+            QMessageBox.critical(
+                self,
+                "Auction Assassin Token",
+                "Please provide a valid Auction Assassin token to save data!",
+            )
+            return
+
+        if "succeeded" not in response_dict:
+            QMessageBox.critical(
+                self,
+                "Auction Assassin Token",
+                "Please provide a valid Auction Assassin token to save data!",
+            )
+            return
+
+        if not response_dict["succeeded"]:
+            QMessageBox.critical(
+                self,
+                "Auction Assassin Token",
+                "Your Auction Assassin token is incorrect or expired!\n\n"
+                + "You must run the bot command once every 14 days to get a new token.",
+            )
+            return
+
+        if not self.save_data_to_json():
+            QMessageBox.critical(
+                self,
+                "Save Error",
+                "Could not save data to JSON.\nAbort scan.\nYour inputs may be invalid",
+            )
+            return
+
+        QMessageBox.information(
+            self,
+            "Save Sucessful!",
+            "Save Sucessful!\nHappy scanning!",
+        )
+
+    def save_data_to_json(self, reset=False):
         # Validate application settings
         """
         Save application data and configuration to JSON files with backup mechanism.
@@ -2590,12 +2650,12 @@ class App(QMainWindow):
             - Backup files are created in 'AzerothAuctionAssassinData/backup' directory
             - Backup filename includes timestamp for unique identification
         """
-        config_json = self.validate_application_settings()
+        config_json = self.validate_application_settings(reset=reset)
         if not config_json:
             return False
 
         # validate pet or item and ilvl data
-        if not self.validate_item_lists():
+        if not self.validate_item_lists(reset=reset):
             return False
 
         # Save JSON files
@@ -2667,44 +2727,15 @@ class App(QMainWindow):
             json.dump(data, json_file, ensure_ascii=False, indent=4)
 
     def start_alerts(self):
-        response = requests.post(
-            self.token_auth_url,
-            json={"token": f"{self.authentication_token.text()}"},
+        reply = QMessageBox.question(
+            self,
+            "Save Reminder",
+            "Did you hit save before run?\n\nIf you did not save then your\nitems may not be up to date!",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
         )
 
-        response_dict = response.json()
-
-        if response.status_code != 200:
-            QMessageBox.critical(
-                self,
-                "Request Error",
-                f"Could not reach server, status code : {response.status_code}",
-            )
-            return
-
-        if len(response_dict) == 0:
-            QMessageBox.critical(
-                self,
-                "Auction Assassin Token",
-                "Please provide a valid Auction Assassin token!",
-            )
-            return
-
-        if "succeeded" not in response_dict:
-            QMessageBox.critical(
-                self,
-                "Auction Assassin Token",
-                "Please provide a valid Auction Assassin token!",
-            )
-            return
-
-        if not response_dict["succeeded"]:
-            QMessageBox.critical(
-                self,
-                "Auction Assassin Token",
-                "Your Auction Assassin token is incorrect or expired!\n\n"
-                + "You must run the bot command once every 14 days to get a new token.",
-            )
+        if reply == QMessageBox.No:
             return
 
         if not self.save_data_to_json():
