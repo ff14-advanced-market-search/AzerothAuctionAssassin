@@ -430,7 +430,7 @@ class App(QMainWindow):
 
         self.save_data_button = QPushButton("Save Data")
         self.save_data_button.setFixedSize(150, 25)
-        self.save_data_button.clicked.connect(self.save_data_to_json)
+        self.save_data_button.clicked.connect(self.paid_save_data_to_json)
         self.save_data_button.setToolTip("Save data without starting a scan.")
         self.layout_area.addWidget(self.save_data_button, 8, 0)
 
@@ -2561,6 +2561,47 @@ class App(QMainWindow):
 
         return True
 
+    def paid_save_data_to_json(self):
+        response = requests.post(
+            self.token_auth_url,
+            json={"token": f"{self.authentication_token.text()}"},
+        )
+
+        response_dict = response.json()
+
+        if response.status_code != 200:
+            QMessageBox.critical(
+                self,
+                "Request Error",
+                f"Could not reach server, status code : {response.status_code}",
+            )
+            return
+
+        if len(response_dict) == 0:
+            QMessageBox.critical(
+                self,
+                "Auction Assassin Token",
+                "Please provide a valid Auction Assassin token to save data!",
+            )
+            return
+
+        if "succeeded" not in response_dict:
+            QMessageBox.critical(
+                self,
+                "Auction Assassin Token",
+                "Please provide a valid Auction Assassin token to save data!",
+            )
+            return
+
+        if not response_dict["succeeded"]:
+            QMessageBox.critical(
+                self,
+                "Auction Assassin Token",
+                "Your Auction Assassin token is incorrect or expired!\n\n"
+                + "You must run the bot command once every 14 days to get a new token.",
+            )
+            return
+
     def save_data_to_json(self):
         # Validate application settings
         """
@@ -2667,44 +2708,15 @@ class App(QMainWindow):
             json.dump(data, json_file, ensure_ascii=False, indent=4)
 
     def start_alerts(self):
-        response = requests.post(
-            self.token_auth_url,
-            json={"token": f"{self.authentication_token.text()}"},
+        reply = QMessageBox.question(
+            self,
+            "Save Reminder",
+            "Did you hit save before run?\nIf you did not, hit save now or\nthe scan may not be up to date!",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
         )
 
-        response_dict = response.json()
-
-        if response.status_code != 200:
-            QMessageBox.critical(
-                self,
-                "Request Error",
-                f"Could not reach server, status code : {response.status_code}",
-            )
-            return
-
-        if len(response_dict) == 0:
-            QMessageBox.critical(
-                self,
-                "Auction Assassin Token",
-                "Please provide a valid Auction Assassin token!",
-            )
-            return
-
-        if "succeeded" not in response_dict:
-            QMessageBox.critical(
-                self,
-                "Auction Assassin Token",
-                "Please provide a valid Auction Assassin token!",
-            )
-            return
-
-        if not response_dict["succeeded"]:
-            QMessageBox.critical(
-                self,
-                "Auction Assassin Token",
-                "Your Auction Assassin token is incorrect or expired!\n\n"
-                + "You must run the bot command once every 14 days to get a new token.",
-            )
+        if reply == QMessageBox.No:
             return
 
         if not self.save_data_to_json():
