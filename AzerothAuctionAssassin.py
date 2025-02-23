@@ -2607,6 +2607,20 @@ class App(QMainWindow):
             )
             return
 
+        if not self.save_data_to_json():
+            QMessageBox.critical(
+                self,
+                "Save Error",
+                "Could not save data to JSON.\nAbort scan.\nYour inputs may be invalid",
+            )
+            return
+
+        QMessageBox.information(
+            self,
+            "Save Sucessful!",
+            "Save Sucessful!\nHappy scanning!",
+        )
+
     def save_data_to_json(self, reset=False):
         # Validate application settings
         """
