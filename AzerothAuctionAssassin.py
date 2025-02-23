@@ -2384,7 +2384,7 @@ class App(QMainWindow):
             # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC'
             if wow_region not in [
                 "NA",
-                "EU", 
+                "EU",
                 "NACLASSIC",
                 "EUCLASSIC",
                 "NASODCLASSIC",
@@ -2415,7 +2415,9 @@ class App(QMainWindow):
 
             for field, value in required_fields.items():
                 if not value:
-                    QMessageBox.critical(self, "Empty Field", f"{field} cannot be empty.")
+                    QMessageBox.critical(
+                        self, "Empty Field", f"{field} cannot be empty."
+                    )
                     return False
                 if len(value) < 20:
                     QMessageBox.critical(
@@ -2481,7 +2483,11 @@ class App(QMainWindow):
         }
         return config_json
 
-    def validate_item_lists(self):
+    def validate_item_lists(self, reset=False):
+        # When resetting, we don't need to validate since lists will be empty
+        if reset:
+            return True
+
         # Check if items_list, pet_list, ilvl_list, or pet_ilvl_rules are not empty
         if (
             len(self.items_list) == 0
@@ -2635,7 +2641,7 @@ class App(QMainWindow):
             return False
 
         # validate pet or item and ilvl data
-        if not self.validate_item_lists():
+        if not self.validate_item_lists(reset=reset):
             return False
 
         # Save JSON files
