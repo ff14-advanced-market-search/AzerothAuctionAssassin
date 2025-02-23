@@ -2730,7 +2730,7 @@ class App(QMainWindow):
         reply = QMessageBox.question(
             self,
             "Save Reminder",
-            "Did you hit save before run?\nIf you did not, hit save now or\nthe scan may not be up to date!",
+            "Did you hit save before run?\n\nIf you did not save then your\nitems may not be up to date!",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
         )
