@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.4.3"
+AAA_VERSION = "1.4.3.1"
 
 windowsApp_Path = None
 try:
@@ -2124,7 +2124,7 @@ class App(QMainWindow):
             # Create a dictionary to map item names to prices from the PBS data
             pbs_prices = {}
             for item in pbs_data:
-                # parts will be like ['Skullflame shield', '0;0;0;0;0;50000', '#', '']
+                # parts will be like ['Skullflame shield', '0;0;0;0;0;0;0;50000', '#', '']
                 parts = item.split(";;")
                 item_name = parts[0].strip().lower()
                 # strip off " if the name begins and ends with "
@@ -3184,7 +3184,7 @@ class App(QMainWindow):
             # Create a dictionary to map pet names to prices from the PBS data
             pbs_prices = {}
             for pet in pbs_data:
-                # Each 'pet' string might look like:  "Battle Pet Name;;0;0;0;0;0;50000" (etc.)
+                # Each 'pet' string might look like:  "Battle Pet Name;;0;0;0;0;0;0;0;50000" (etc.)
                 parts = pet.split(";;")
                 if not parts:
                     continue
@@ -3280,7 +3280,7 @@ class App(QMainWindow):
                 pet_name = pet_name.iloc[0]
 
                 # Construct PBS entry (using only ID and price, other fields don't map to PBS)
-                pbs_entry = f'Snipe^"{pet_name}";;0;0;0;0;0;{rule["price"]};;#;;'
+                pbs_entry = f'Snipe^"{pet_name}";;0;0;0;0;0;0;0;{rule["price"]};;#;;'
                 pbs_list.append(pbs_entry)
 
             # Join all entries and copy to clipboard
@@ -3319,7 +3319,7 @@ class App(QMainWindow):
             - Handles cases where prices might be missing by applying a default discount
 
         Example:
-            Input format: "Pet Name;;0;0;0;0;0;50000^Another Pet;;0;0;0;0;0;25000"
+            Input format: "Pet Name;;0;0;0;0;0;0;0;50000^Another Pet;;0;0;0;0;0;0;0;25000"
         """
         text, ok = QInputDialog.getMultiLineText(
             self, "Import PBS Pet Data", "Paste your PBS pet data here:"
@@ -3336,7 +3336,7 @@ class App(QMainWindow):
             # Create a dictionary to map pet names to prices from the PBS data
             pbs_prices = {}
             for pet in pbs_data:
-                # parts will be like ['Battle Pet Name', '0;0;0;0;0;50000', '#', '']
+                # parts will be like ['Battle Pet Name', '0;0;0;0;0;0;0;50000', '#', '']
                 parts = pet.split(";;")
                 pet_name = parts[0].strip().lower()
                 # strip off " if the name begins and ends with "
@@ -3410,7 +3410,7 @@ class App(QMainWindow):
 
         Returns:
             str: A concatenated string of PBS-formatted pet snipe entries, where each entry follows
-                 the format: 'Snipe^"Pet Name";;0;0;0;0;0;price;;#;;'
+                 the format: 'Snipe^"Pet Name";;0;0;0;0;0;0;0;price;;#;;'
 
         Notes:
             - Skips pets that cannot be found in the pet_statistics DataFrame
@@ -3431,8 +3431,8 @@ class App(QMainWindow):
             pet_name = pet_name.iloc[0]
 
             # Construct the PBS entry
-            # Format: Snipe^"Pet Name";;0;0;0;0;0;price;;#;;
-            pbs_entry = f'Snipe^"{pet_name}";;0;0;0;0;0;{int(float(price))};;#;;'
+            # Format: Snipe^"Pet Name";;0;0;0;0;0;0;0;price;;#;;
+            pbs_entry = f'Snipe^"{pet_name}";;0;0;0;0;0;0;0;{int(float(price))};;#;;'
 
             # Append the PBS entry to the list
             pbs_list.append(pbs_entry)
