@@ -310,6 +310,9 @@ class App(QMainWindow):
 
         self.check_for_settings()
 
+        # Start fetching data immediately after initialization
+        self.api_data_thread.start()
+
         # Create a QScrollArea and set its widget to be the container
         scrollArea = QScrollArea()
         scrollArea.setWidgetResizable(
@@ -1421,12 +1424,14 @@ class App(QMainWindow):
 
         if os.path.exists(self.path_to_data):
             self.check_config_file(self.path_to_data)
-            # After loading config, update region and start the thread
+            # After loading config, update region if needed
             if hasattr(self, "wow_region"):
                 selected_region = self.wow_region.currentText()
                 if selected_region in ["NA", "EU"]:
                     self.api_data_thread.set_region(selected_region)
-            self.api_data_thread.start()
+        else:
+            # If no config exists, start with default EU region
+            self.api_data_thread.set_region("EU")
 
         if os.path.exists(self.path_to_desired_pets):
             self.pet_list = json.load(open(self.path_to_desired_pets))
