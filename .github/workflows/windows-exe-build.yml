@@ -1,7 +1,7 @@
 name: Build Windows Executable
 
 env:
-  AAA_VERSION: "1.4.3.1"
+  AAA_VERSION: "1.4.3.2"
 
 on:
   workflow_dispatch:
