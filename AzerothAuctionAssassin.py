@@ -1737,28 +1737,13 @@ class App(QMainWindow):
             )
             return
 
-        # Create a dictionary with the current form data
+        # Create the comparison dictionary (excluding price)
         if self.ilvl_item_input.text() == "":
             item_ids_list = []
         else:
             item_ids_list = list(
                 map(int, self.ilvl_item_input.text().replace(" ", "").split(","))
             )
-
-        if self.ilvl_min_required_lvl_input.text() == "":
-            required_min_lvl = 1
-        else:
-            required_min_lvl = int(self.ilvl_min_required_lvl_input.text())
-
-        if self.ilvl_max_required_lvl_input.text() == "":
-            required_max_lvl = 999
-        else:
-            required_max_lvl = int(self.ilvl_max_required_lvl_input.text())
-
-        if self.ilvl_max_input.text() == "":
-            ilvl_max = 10000
-        else:
-            ilvl_max = int(self.ilvl_max_input.text())
 
         # Parse bonus lists
         bonus_lists = []
@@ -1767,7 +1752,6 @@ class App(QMainWindow):
                 int(x.strip()) for x in self.ilvl_bonus_lists_input.text().split(",")
             ]
 
-        # Create the comparison dictionary (excluding price)
         compare_dict = {
             "ilvl": int(self.ilvl_input.text()),
             "sockets": self.ilvl_sockets.isChecked(),
@@ -1775,26 +1759,31 @@ class App(QMainWindow):
             "leech": self.ilvl_leech.isChecked(),
             "avoidance": self.ilvl_avoidance.isChecked(),
             "item_ids": item_ids_list,
-            "required_min_lvl": required_min_lvl,
-            "required_max_lvl": required_max_lvl,
-            "max_ilvl": ilvl_max,
+            "required_min_lvl": int(self.ilvl_min_required_lvl_input.text() or 1),
+            "required_max_lvl": int(self.ilvl_max_required_lvl_input.text() or 999),
+            "max_ilvl": int(self.ilvl_max_input.text() or 10000),
             "bonus_lists": bonus_lists,
         }
 
-        # Find all matching entries
-        indices_to_remove = []
-        for i, entry in enumerate(self.ilvl_list):
-            entry_copy = entry.copy()
-            entry_copy.pop("buyout")
-            if entry_copy == compare_dict:
-                indices_to_remove.append(i)
+        # Keep removing matches until none are found
+        found_match = False
+        while True:
+            # Find next matching entry
+            match_found = False
+            for i, entry in enumerate(self.ilvl_list):
+                entry_copy = entry.copy()
+                entry_copy.pop("buyout")
+                if entry_copy == compare_dict:
+                    self.ilvl_list.pop(i)
+                    self.ilvl_list_display.takeItem(i)
+                    match_found = True
+                    found_match = True
+                    break
 
-        # Remove matching entries from both list and display
-        for index in sorted(indices_to_remove, reverse=True):
-            self.ilvl_list.pop(index)
-            self.ilvl_list_display.takeItem(index)
+            if not match_found:
+                break
 
-        if not indices_to_remove:
+        if not found_match:
             QMessageBox.information(
                 self,
                 "No Match Found",
