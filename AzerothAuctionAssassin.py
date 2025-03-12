@@ -1487,35 +1487,41 @@ class App(QMainWindow):
                 )
 
     def ilvl_list_double_clicked(self, item):
-        item_split = item.text().replace(" ", "").split(":")
+        # Parse the display string more carefully
+        parts = item.text().split(";")
 
-        item_id = item_split[1].split(";")[0]
-        buyout = item_split[2].split(";")[0]
-        ilvl = item_split[3].split(";")[0]
-        sockets = item_split[4].split(";")[0]
-        speed = item_split[5].split(";")[0]
-        leech = item_split[6].split(";")[0]
-        avoidance = item_split[7].split(";")[0]
-        required_min_lvl = item_split[8].split(";")[0]
-        required_max_lvl = item_split[9].split(";")[0]
-        ilvl_max = item_split[10].split(";")[0]
-        bonus_lists = item_split[11].split(";")[
-            0
-        ]  # Get bonus lists from display string
-        self.ilvl_bonus_lists_input.setText(bonus_lists.strip("[]").replace(" ", ""))
+        # Extract item IDs (handle empty case)
+        item_id_part = parts[0].split(":")[1].strip()
+        self.ilvl_item_input.setText(item_id_part if item_id_part else "")
 
-        self.ilvl_item_input.setText(item_id)
-        self.ilvl_price_input.setText(buyout)
+        # Extract price
+        price = parts[1].split(":")[1].strip()
+        self.ilvl_price_input.setText(price)
 
-        self.ilvl_sockets.setChecked(sockets == "True")
-        self.ilvl_speed.setChecked(speed == "True")
-        self.ilvl_leech.setChecked(leech == "True")
-        self.ilvl_avoidance.setChecked(avoidance == "True")
-
+        # Extract ilvl
+        ilvl = parts[2].split(":")[1].strip()
         self.ilvl_input.setText(ilvl)
-        self.ilvl_min_required_lvl_input.setText(required_min_lvl)
-        self.ilvl_max_required_lvl_input.setText(required_max_lvl)
-        self.ilvl_max_input.setText(ilvl_max)
+
+        # Set checkboxes
+        self.ilvl_sockets.setChecked(parts[3].split(":")[1].strip() == "True")
+        self.ilvl_speed.setChecked(parts[4].split(":")[1].strip() == "True")
+        self.ilvl_leech.setChecked(parts[5].split(":")[1].strip() == "True")
+        self.ilvl_avoidance.setChecked(parts[6].split(":")[1].strip() == "True")
+
+        # Extract level requirements
+        min_level = parts[7].split(":")[1].strip()
+        self.ilvl_min_required_lvl_input.setText(min_level)
+
+        max_level = parts[8].split(":")[1].strip()
+        self.ilvl_max_required_lvl_input.setText(max_level)
+
+        # Extract max ilvl
+        max_ilvl = parts[9].split(":")[1].strip()
+        self.ilvl_max_input.setText(max_ilvl)
+
+        # Extract bonus lists
+        bonus_lists = parts[10].split(":")[1].strip()
+        self.ilvl_bonus_lists_input.setText(bonus_lists.strip("[]").replace(" ", ""))
 
     def realm_list_clicked(self, item):
         realm_split = item.text().split(":")
