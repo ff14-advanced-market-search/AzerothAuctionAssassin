@@ -1687,7 +1687,7 @@ class App(QMainWindow):
         }
 
         # Check if an entry with the same criteria (except buyout) exists
-        existing_entry = None
+        existing_entries = []
         for i, entry in enumerate(self.ilvl_list):
             entry_copy = entry.copy()
             entry_copy.pop("buyout")  # Remove buyout for comparison
@@ -1695,17 +1695,15 @@ class App(QMainWindow):
             new_entry_copy.pop("buyout")  # Remove buyout for comparison
 
             if entry_copy == new_entry_copy:
-                existing_entry = i
-                break
+                existing_entries.append(i)
 
-        # If found, update the existing entry
-        if existing_entry is not None:
-            self.ilvl_list[existing_entry] = ilvl_dict_data
-            # Update the display
-            self.ilvl_list_display.takeItem(existing_entry)
-        else:
-            # If not found, append as new entry
-            self.ilvl_list.append(ilvl_dict_data)
+        # Remove all matching entries (could be multiple due to previous bugs)
+        for index in sorted(existing_entries, reverse=True):
+            self.ilvl_list.pop(index)
+            self.ilvl_list_display.takeItem(index)
+
+        # Add the new entry
+        self.ilvl_list.append(ilvl_dict_data)
 
         # Format and display the entry
         item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
@@ -1723,13 +1721,10 @@ class App(QMainWindow):
             f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
         )
 
-        # Insert the formatted string into the display list
-        if existing_entry is not None:
-            self.ilvl_list_display.insertItem(existing_entry, display_string)
-        else:
-            self.ilvl_list_display.insertItem(
-                self.ilvl_list_display.count(), display_string
-            )
+        # Add the new display item
+        self.ilvl_list_display.insertItem(
+            self.ilvl_list_display.count(), display_string
+        )
 
         return True
 
@@ -1741,6 +1736,8 @@ class App(QMainWindow):
                 "Please double click an ilvl json to remove it!",
             )
             return
+
+        # Create a dictionary with the current form data
         if self.ilvl_item_input.text() == "":
             item_ids_list = []
         else:
@@ -1770,10 +1767,9 @@ class App(QMainWindow):
                 int(x.strip()) for x in self.ilvl_bonus_lists_input.text().split(",")
             ]
 
-        # Create a dictionary with the data
-        ilvl_dict_data = {
+        # Create the comparison dictionary (excluding price)
+        compare_dict = {
             "ilvl": int(self.ilvl_input.text()),
-            "buyout": int(self.ilvl_price_input.text()),
             "sockets": self.ilvl_sockets.isChecked(),
             "speed": self.ilvl_speed.isChecked(),
             "leech": self.ilvl_leech.isChecked(),
@@ -1785,33 +1781,25 @@ class App(QMainWindow):
             "bonus_lists": bonus_lists,
         }
 
-        # Check if the item data is already in the list
-        if ilvl_dict_data in self.ilvl_list:
-            # Create the display string
-            item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
-            string_with_data = (
-                f"Item ID: {item_ids}; "
-                f"Price: {ilvl_dict_data['buyout']}; "
-                f"ILvl: {ilvl_dict_data['ilvl']}; "
-                f"Sockets: {ilvl_dict_data['sockets']}; "
-                f"Speed: {ilvl_dict_data['speed']}; "
-                f"Leech: {ilvl_dict_data['leech']}; "
-                f"Avoidance: {ilvl_dict_data['avoidance']}; "
-                f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
-                f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
-                f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
-                f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
+        # Find all matching entries
+        indices_to_remove = []
+        for i, entry in enumerate(self.ilvl_list):
+            entry_copy = entry.copy()
+            entry_copy.pop("buyout")
+            if entry_copy == compare_dict:
+                indices_to_remove.append(i)
+
+        # Remove matching entries from both list and display
+        for index in sorted(indices_to_remove, reverse=True):
+            self.ilvl_list.pop(index)
+            self.ilvl_list_display.takeItem(index)
+
+        if not indices_to_remove:
+            QMessageBox.information(
+                self,
+                "No Match Found",
+                "No exact match found for the selected criteria.",
             )
-
-            # Print the formatted string
-            print(f"Removing | {string_with_data}")
-
-            # Remove the item from the list and display if it exists
-            for x in range(self.ilvl_list_display.count()):
-                if self.ilvl_list_display.item(x).text() == string_with_data:
-                    self.ilvl_list_display.takeItem(x)
-                    self.ilvl_list.remove(ilvl_dict_data)
-                    return
 
     def erase_ilvl_data(self):
         reply = QMessageBox.question(
