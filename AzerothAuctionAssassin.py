@@ -1850,6 +1850,7 @@ class App(QMainWindow):
                 required_min_lvl = ilvl_dict_data.get("required_min_lvl", 1)
                 required_max_lvl = ilvl_dict_data.get("required_max_lvl", 999)
                 ilvl_max = ilvl_dict_data.get("max_ilvl", 10000)
+                bonus_lists = ilvl_dict_data.get("bonus_lists", [])
 
                 # Check that all item IDs are valid integers, but allow list to be empty
                 if not all(
@@ -1911,7 +1912,8 @@ class App(QMainWindow):
                     f"Avoidance: {avoidance}; "
                     f"MinLevel: {required_min_lvl}; "
                     f"MaxLevel: {required_max_lvl}; "
-                    f"Max ILvl: {ilvl_max}"
+                    f"Max ILvl: {ilvl_max}; "
+                    f"Bonus Lists: {bonus_lists}"
                 )
                 self.ilvl_list_display.insertItem(
                     self.ilvl_list_display.count(), string_with_data
