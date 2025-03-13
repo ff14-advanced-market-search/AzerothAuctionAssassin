@@ -1532,6 +1532,14 @@ class App(QMainWindow):
 
         self.realm_id_input.setText(realm_id)
 
+    def log_list_widget_contents(self, list_widget, message=""):
+        """Log all items in a QListWidget"""
+        print(f"\n=== List Widget Contents {message} ===")
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
+            print(f"Item {i}: {item.text()}")
+        print("=== End List Contents ===\n")
+
     def add_ilvl_to_list(self):
         ilvl = self.ilvl_input.text()
         ilvl_max = self.ilvl_max_input.text() or "10000"  # Default to 10000 if empty
@@ -1697,10 +1705,14 @@ class App(QMainWindow):
             if entry_copy == new_entry_copy:
                 existing_entries.append(i)
 
+        # Log contents before changes
+        self.log_list_widget_contents(self.ilvl_list_display, "BEFORE add/update")
+
         # Remove all matching entries (could be multiple due to previous bugs)
         for index in sorted(existing_entries, reverse=True):
+            removed_item = self.ilvl_list_display.takeItem(index)
+            print(f"Removing item at index {index}: {removed_item.text()}")
             self.ilvl_list.pop(index)
-            self.ilvl_list_display.takeItem(index)
 
         # Add the new entry
         self.ilvl_list.append(ilvl_dict_data)
@@ -1720,11 +1732,15 @@ class App(QMainWindow):
             f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
             f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
         )
+        a = str(self.ilvl_list_display)
 
         # Add the new display item
         self.ilvl_list_display.insertItem(
             self.ilvl_list_display.count(), display_string
         )
+
+        # Log contents after changes
+        self.log_list_widget_contents(self.ilvl_list_display, "AFTER add/update")
 
         return True
 
@@ -1765,23 +1781,29 @@ class App(QMainWindow):
             "bonus_lists": bonus_lists,
         }
 
+        # Log contents before removal
+        self.log_list_widget_contents(self.ilvl_list_display, "BEFORE remove")
+
         # Keep removing matches until none are found
         found_match = False
         while True:
-            # Find next matching entry
             match_found = False
             for i, entry in enumerate(self.ilvl_list):
                 entry_copy = entry.copy()
                 entry_copy.pop("buyout")
                 if entry_copy == compare_dict:
+                    removed_item = self.ilvl_list_display.takeItem(i)
+                    print(f"Removing item at index {i}: {removed_item.text()}")
                     self.ilvl_list.pop(i)
-                    self.ilvl_list_display.takeItem(i)
                     match_found = True
                     found_match = True
                     break
 
             if not match_found:
                 break
+
+        # Log contents after removal
+        self.log_list_widget_contents(self.ilvl_list_display, "AFTER remove")
 
         if not found_match:
             QMessageBox.information(
