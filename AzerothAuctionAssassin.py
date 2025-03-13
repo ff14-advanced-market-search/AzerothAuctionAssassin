@@ -1714,10 +1714,7 @@ class App(QMainWindow):
             print(f"Removing item at index {index}: {removed_item.text()}")
             self.ilvl_list.pop(index)
 
-        # Add the new entry
-        self.ilvl_list.append(ilvl_dict_data)
-
-        # Format and display the entry
+        # Format the display string
         item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
         display_string = (
             f"Item ID: {item_ids}; "
@@ -1732,12 +1729,19 @@ class App(QMainWindow):
             f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
             f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
         )
-        a = str(self.ilvl_list_display)
 
-        # Add the new display item
-        self.ilvl_list_display.insertItem(
-            self.ilvl_list_display.count(), display_string
-        )
+        # If we found and removed matches, insert at the first removed position
+        # Otherwise add to the end
+        if existing_entries:
+            insert_position = existing_entries[0]  # Use first match position
+            self.ilvl_list.insert(insert_position, ilvl_dict_data)
+            self.ilvl_list_display.insertItem(insert_position, display_string)
+        else:
+            # No matches found, append as new entry
+            self.ilvl_list.append(ilvl_dict_data)
+            self.ilvl_list_display.insertItem(
+                self.ilvl_list_display.count(), display_string
+            )
 
         # Log contents after changes
         self.log_list_widget_contents(self.ilvl_list_display, "AFTER add/update")
