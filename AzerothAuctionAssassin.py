@@ -1378,10 +1378,10 @@ class App(QMainWindow):
     def check_for_settings(self):
         """
         Initializes required directories, configuration, and user data files.
-        
+
         This method ensures that essential folders and backup directories exist, creating them
         if necessary. It checks for default realm data files for various regions and writes them
-        using preset data if they are missing. When a configuration file is present, it is 
+        using preset data if they are missing. When a configuration file is present, it is
         validated and used to update the API's region, otherwise the region defaults to EU.
         Additionally, pet, item, and item level lists are loaded from JSON files and their entries
         are added to the corresponding display widgets, with missing fields in item level entries
@@ -1501,7 +1501,7 @@ class App(QMainWindow):
         # Parse the display string more carefully
         """
         Handles a double-click event on an ilvl list item.
-        
+
         Parses the semicolon-separated text of the clicked item to extract attributes such as item ID, price, item level, socket and other boolean flags, level requirements, maximum item level, and bonus list. It then populates the corresponding UI fields and checkboxes with these values, clearing any field if the extracted value is empty.
         """
         parts = item.text().split(";")
@@ -1542,7 +1542,7 @@ class App(QMainWindow):
     def realm_list_clicked(self, item):
         """
         Handles a realm list item selection by updating the realm input fields.
-        
+
         Extracts the realm name and ID from the clicked list item's text—expected to be formatted as colon-separated segments—and sets them in the corresponding input fields.
         Args:
             item: The list widget item clicked that contains the realm details.
@@ -1557,7 +1557,7 @@ class App(QMainWindow):
 
     def log_list_widget_contents(self, list_widget, message=""):
         """Log all items in the provided QListWidget.
-        
+
         Prints a header with an optional custom message and iterates over each item in the list widget,
         logging both the index and text of every item. Useful for debugging to inspect the widget's content.
         """
@@ -1570,7 +1570,7 @@ class App(QMainWindow):
     def add_ilvl_to_list(self):
         """
         Add or update an item level filter entry from the UI inputs.
-        
+
         This method retrieves and validates data entered for item level, maximum item level (defaulting to
         10000 if not provided), price, optional item IDs, required level range, and bonus lists. It checks
         that numerical values fall within predefined limits and ensures that the required level range is
@@ -1578,7 +1578,7 @@ class App(QMainWindow):
         returning False. When all inputs are valid, the method constructs an entry dictionary (ignoring
         the price for duplicate comparison), removes any preexisting matching entries, updates the internal
         list and its associated display widget, logs the changes, and returns True.
-        
+
         Returns:
             bool: True if the entry was successfully added or updated, False otherwise.
         """
@@ -1787,7 +1787,7 @@ class App(QMainWindow):
     def remove_ilvl_to_list(self):
         """
         Removes an item level rule matching the specified criteria from the list.
-        
+
         This method constructs a comparison dictionary from various UI input fields—including item level,
         checkbox states (sockets, speed, leech, avoidance), item IDs, bonus lists, and level limits—and
         filters the internal list of item level rules to remove entries that match exactly. The display is
@@ -1873,18 +1873,18 @@ class App(QMainWindow):
     def entries_match(self, entry, compare_dict):
         """
         Compare two entry dictionaries while ignoring the 'buyout' field.
-        
+
         This helper function creates a shallow copy of the provided entry dictionary,
         removes the 'buyout' key, and then compares the resulting dictionary with the
         given comparison dictionary.
-        
+
         Args:
             entry (dict): The entry data including a 'buyout' key.
             compare_dict (dict): The dictionary to compare against, excluding the 'buyout' attribute.
-        
+
         Returns:
             bool: True if the entries match after excluding the 'buyout' field; otherwise, False.
-        
+
         Raises:
             KeyError: If the 'buyout' key is not present in the entry dictionary.
         """
@@ -1895,7 +1895,7 @@ class App(QMainWindow):
     def erase_ilvl_data(self):
         """
         Resets all item level data after user confirmation.
-        
+
         Displays a confirmation dialog to ensure the user wants to reset all item level data.
         If confirmed, clears both the visual list widget and the corresponding internal data list.
         """
@@ -1913,7 +1913,7 @@ class App(QMainWindow):
     def import_ilvl_data(self):
         """
         Imports and validates item level data from a JSON file.
-        
+
         Prompts the user to select a JSON file and loads a list of item level configurations. Each configuration
         should be a dictionary that includes required fields such as 'buyout', 'ilvl', and boolean flags for
         'sockets', 'speed', 'leech', and 'avoidance', with optional keys like 'item_ids', 'required_min_lvl',
