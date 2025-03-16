@@ -2,6 +2,15 @@ from utils.api_requests import get_raidbots_bonus_ids
 
 
 def get_bonus_ids():
+    """Get categorized bonus IDs based on specific attributes from raidbot data.
+    Returns:
+        - dict: A dictionary with keys representing bonus categories and values containing bonus IDs matching category criteria.
+    Processing Logic:
+        - Identify socket bonuses directly from the bonus_id_dict.
+        - Level bonuses are those with specific key sets indicating an item level addition.
+        - Use "rawStats" to determine other bonus categories such as Leech, Avoidance, Speed, and others.
+        - Aggregate categorized bonus IDs into a consolidated dictionary for easy access.
+    """
     bonus_id_dict = get_raidbots_bonus_ids()
     # sockets are simple
     sockets = {k: v for k, v in bonus_id_dict.items() if "socket" in v.keys()}
@@ -52,6 +61,13 @@ def get_bonus_ids():
 
 def get_bonus_id_sets():
     # get raw data
+    """Get sets of bonus IDs categorized by type.
+    Returns:
+        - tuple: A tuple containing sets of IDs for sockets, leech, avoidance, speed, and a list of item level additions.
+    Processing Logic:
+        - Extracts bonus IDs from a predefined data structure.
+        - Organizes the IDs into sets based on the bonus type.
+        - Retrieves additional item level bonuses separately."""
     bonus_ids = get_bonus_ids()
     # get ids for each bonus type
     socket_ids = set(bonus_ids["sockets"].keys())
@@ -69,6 +85,13 @@ def get_bonus_id_sets():
 
 def get_secondary_stats():
     # get raw data
+    """Extract secondary stat bonus IDs.
+    Returns:
+        - tuple: A tuple containing four sets representing the bonus IDs for 'haste', 'crit', 'mastery', and 'versatility'.
+    Processing Logic:
+        - Retrieves raw data for bonus IDs using the `get_bonus_ids()` function.
+        - Extracts bonus type IDs from the raw data and organizes them into sets for easy manipulation and access.
+    """
     bonus_ids = get_bonus_ids()
     # get ids for each bonus type
     haste_ids = set(bonus_ids["haste"].keys())
