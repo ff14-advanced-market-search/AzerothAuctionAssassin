@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.4.3.2"
+AAA_VERSION = "1.4.3.3"
 
 windowsApp_Path = None
 try:
@@ -1376,6 +1376,17 @@ class App(QMainWindow):
             )
 
     def check_for_settings(self):
+        """
+        Initializes required directories, configuration, and user data files.
+
+        This method ensures that essential folders and backup directories exist, creating them
+        if necessary. It checks for default realm data files for various regions and writes them
+        using preset data if they are missing. When a configuration file is present, it is
+        validated and used to update the API's region, otherwise the region defaults to EU.
+        Additionally, pet, item, and item level lists are loaded from JSON files and their entries
+        are added to the corresponding display widgets, with missing fields in item level entries
+        being populated with default values.
+        """
         data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
@@ -1487,37 +1498,55 @@ class App(QMainWindow):
                 )
 
     def ilvl_list_double_clicked(self, item):
-        item_split = item.text().replace(" ", "").split(":")
+        # Parse the display string more carefully
+        """
+        Handles a double-click event on an ilvl list item.
 
-        item_id = item_split[1].split(";")[0]
-        buyout = item_split[2].split(";")[0]
-        ilvl = item_split[3].split(";")[0]
-        sockets = item_split[4].split(";")[0]
-        speed = item_split[5].split(";")[0]
-        leech = item_split[6].split(";")[0]
-        avoidance = item_split[7].split(";")[0]
-        required_min_lvl = item_split[8].split(";")[0]
-        required_max_lvl = item_split[9].split(";")[0]
-        ilvl_max = item_split[10].split(";")[0]
-        bonus_lists = item_split[11].split(";")[
-            0
-        ]  # Get bonus lists from display string
+        Parses the semicolon-separated text of the clicked item to extract attributes such as item ID, price, item level, socket and other boolean flags, level requirements, maximum item level, and bonus list. It then populates the corresponding UI fields and checkboxes with these values, clearing any field if the extracted value is empty.
+        """
+        parts = item.text().split(";")
+
+        # Extract item IDs (handle empty case)
+        item_id_part = parts[0].split(":")[1].strip()
+        self.ilvl_item_input.setText(item_id_part if item_id_part else "")
+
+        # Extract price
+        price = parts[1].split(":")[1].strip()
+        self.ilvl_price_input.setText(price)
+
+        # Extract ilvl
+        ilvl = parts[2].split(":")[1].strip()
+        self.ilvl_input.setText(ilvl)
+
+        # Set checkboxes
+        self.ilvl_sockets.setChecked(parts[3].split(":")[1].strip() == "True")
+        self.ilvl_speed.setChecked(parts[4].split(":")[1].strip() == "True")
+        self.ilvl_leech.setChecked(parts[5].split(":")[1].strip() == "True")
+        self.ilvl_avoidance.setChecked(parts[6].split(":")[1].strip() == "True")
+
+        # Extract level requirements
+        min_level = parts[7].split(":")[1].strip()
+        self.ilvl_min_required_lvl_input.setText(min_level)
+
+        max_level = parts[8].split(":")[1].strip()
+        self.ilvl_max_required_lvl_input.setText(max_level)
+
+        # Extract max ilvl
+        max_ilvl = parts[9].split(":")[1].strip()
+        self.ilvl_max_input.setText(max_ilvl)
+
+        # Extract bonus lists
+        bonus_lists = parts[10].split(":")[1].strip()
         self.ilvl_bonus_lists_input.setText(bonus_lists.strip("[]").replace(" ", ""))
 
-        self.ilvl_item_input.setText(item_id)
-        self.ilvl_price_input.setText(buyout)
-
-        self.ilvl_sockets.setChecked(sockets == "True")
-        self.ilvl_speed.setChecked(speed == "True")
-        self.ilvl_leech.setChecked(leech == "True")
-        self.ilvl_avoidance.setChecked(avoidance == "True")
-
-        self.ilvl_input.setText(ilvl)
-        self.ilvl_min_required_lvl_input.setText(required_min_lvl)
-        self.ilvl_max_required_lvl_input.setText(required_max_lvl)
-        self.ilvl_max_input.setText(ilvl_max)
-
     def realm_list_clicked(self, item):
+        """
+        Handles a realm list item selection by updating the realm input fields.
+
+        Extracts the realm name and ID from the clicked list item's text—expected to be formatted as colon-separated segments—and sets them in the corresponding input fields.
+        Args:
+            item: The list widget item clicked that contains the realm details.
+        """
         realm_split = item.text().split(":")
         realm_name = realm_split[1].split(";")[0][1::]
         realm_id = realm_split[2].split(";")[0][1::]
@@ -1526,7 +1555,33 @@ class App(QMainWindow):
 
         self.realm_id_input.setText(realm_id)
 
+    def log_list_widget_contents(self, list_widget, message=""):
+        """Log all items in the provided QListWidget.
+
+        Prints a header with an optional custom message and iterates over each item in the list widget,
+        logging both the index and text of every item. Useful for debugging to inspect the widget's content.
+        """
+        print(f"\n=== List Widget Contents {message} ===")
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
+            print(f"Item {i}: {item.text()}")
+        print("=== End List Contents ===\n")
+
     def add_ilvl_to_list(self):
+        """
+        Add or update an item level filter entry from the UI inputs.
+
+        This method retrieves and validates data entered for item level, maximum item level (defaulting to
+        10000 if not provided), price, optional item IDs, required level range, and bonus lists. It checks
+        that numerical values fall within predefined limits and ensures that the required level range is
+        logical. On validation failure, a critical error message is displayed and the process aborts by
+        returning False. When all inputs are valid, the method constructs an entry dictionary (ignoring
+        the price for duplicate comparison), removes any preexisting matching entries, updates the internal
+        list and its associated display widget, logs the changes, and returns True.
+
+        Returns:
+            bool: True if the entry was successfully added or updated, False otherwise.
+        """
         ilvl = self.ilvl_input.text()
         ilvl_max = self.ilvl_max_input.text() or "10000"  # Default to 10000 if empty
         price = self.ilvl_price_input.text()
@@ -1681,7 +1736,7 @@ class App(QMainWindow):
         }
 
         # Check if an entry with the same criteria (except buyout) exists
-        existing_entry = None
+        existing_entries = []
         for i, entry in enumerate(self.ilvl_list):
             entry_copy = entry.copy()
             entry_copy.pop("buyout")  # Remove buyout for comparison
@@ -1689,45 +1744,56 @@ class App(QMainWindow):
             new_entry_copy.pop("buyout")  # Remove buyout for comparison
 
             if entry_copy == new_entry_copy:
-                existing_entry = i
-                break
+                existing_entries.append(i)
 
-        # If found, update the existing entry
-        if existing_entry is not None:
-            self.ilvl_list[existing_entry] = ilvl_dict_data
-            # Update the display
-            self.ilvl_list_display.takeItem(existing_entry)
-        else:
-            # If not found, append as new entry
-            self.ilvl_list.append(ilvl_dict_data)
+        # Log contents before changes
+        self.log_list_widget_contents(self.ilvl_list_display, "BEFORE add/update")
 
-        # Format and display the entry
-        item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
-        display_string = (
-            f"Item ID: {item_ids}; "
-            f"Price: {ilvl_dict_data['buyout']}; "
-            f"ILvl: {ilvl_dict_data['ilvl']}; "
-            f"Sockets: {ilvl_dict_data['sockets']}; "
-            f"Speed: {ilvl_dict_data['speed']}; "
-            f"Leech: {ilvl_dict_data['leech']}; "
-            f"Avoidance: {ilvl_dict_data['avoidance']}; "
-            f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
-            f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
-            f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
-            f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
-        )
+        # If we found matches, rebuild the list without them
+        if existing_entries:
+            self.ilvl_list = [
+                entry
+                for i, entry in enumerate(self.ilvl_list)
+                if i not in existing_entries
+            ]
 
-        # Insert the formatted string into the display list
-        if existing_entry is not None:
-            self.ilvl_list_display.insertItem(existing_entry, display_string)
-        else:
-            self.ilvl_list_display.insertItem(
-                self.ilvl_list_display.count(), display_string
+        # Add the new entry
+        self.ilvl_list.append(ilvl_dict_data)
+
+        # Clear and rebuild display
+        self.ilvl_list_display.clear()
+        for entry in self.ilvl_list:
+            item_ids = ",".join(map(str, entry["item_ids"]))
+            display_string = (
+                f"Item ID: {item_ids}; "
+                f"Price: {entry['buyout']}; "
+                f"ILvl: {entry['ilvl']}; "
+                f"Sockets: {entry['sockets']}; "
+                f"Speed: {entry['speed']}; "
+                f"Leech: {entry['leech']}; "
+                f"Avoidance: {entry['avoidance']}; "
+                f"MinLevel: {entry['required_min_lvl']}; "
+                f"MaxLevel: {entry['required_max_lvl']}; "
+                f"Max ILvl: {entry['max_ilvl']}; "
+                f"Bonus Lists: {entry['bonus_lists']}"
             )
+            self.ilvl_list_display.addItem(display_string)
+
+        # Log contents after changes
+        self.log_list_widget_contents(self.ilvl_list_display, "AFTER add/update")
 
         return True
 
     def remove_ilvl_to_list(self):
+        """
+        Removes an item level rule matching the specified criteria from the list.
+
+        This method constructs a comparison dictionary from various UI input fields—including item level,
+        checkbox states (sockets, speed, leech, avoidance), item IDs, bonus lists, and level limits—and
+        filters the internal list of item level rules to remove entries that match exactly. The display is
+        then refreshed to show the updated list. If the required item level input is empty or no matching
+        entry is found, an appropriate message is displayed.
+        """
         if len(self.ilvl_input.text()) == 0:
             QMessageBox.critical(
                 self,
@@ -1735,27 +1801,14 @@ class App(QMainWindow):
                 "Please double click an ilvl json to remove it!",
             )
             return
+
+        # Create the comparison dictionary (excluding price)
         if self.ilvl_item_input.text() == "":
             item_ids_list = []
         else:
             item_ids_list = list(
                 map(int, self.ilvl_item_input.text().replace(" ", "").split(","))
             )
-
-        if self.ilvl_min_required_lvl_input.text() == "":
-            required_min_lvl = 1
-        else:
-            required_min_lvl = int(self.ilvl_min_required_lvl_input.text())
-
-        if self.ilvl_max_required_lvl_input.text() == "":
-            required_max_lvl = 999
-        else:
-            required_max_lvl = int(self.ilvl_max_required_lvl_input.text())
-
-        if self.ilvl_max_input.text() == "":
-            ilvl_max = 10000
-        else:
-            ilvl_max = int(self.ilvl_max_input.text())
 
         # Parse bonus lists
         bonus_lists = []
@@ -1764,50 +1817,88 @@ class App(QMainWindow):
                 int(x.strip()) for x in self.ilvl_bonus_lists_input.text().split(",")
             ]
 
-        # Create a dictionary with the data
-        ilvl_dict_data = {
+        compare_dict = {
             "ilvl": int(self.ilvl_input.text()),
-            "buyout": int(self.ilvl_price_input.text()),
             "sockets": self.ilvl_sockets.isChecked(),
             "speed": self.ilvl_speed.isChecked(),
             "leech": self.ilvl_leech.isChecked(),
             "avoidance": self.ilvl_avoidance.isChecked(),
             "item_ids": item_ids_list,
-            "required_min_lvl": required_min_lvl,
-            "required_max_lvl": required_max_lvl,
-            "max_ilvl": ilvl_max,
+            "required_min_lvl": int(self.ilvl_min_required_lvl_input.text() or 1),
+            "required_max_lvl": int(self.ilvl_max_required_lvl_input.text() or 999),
+            "max_ilvl": int(self.ilvl_max_input.text() or 10000),
             "bonus_lists": bonus_lists,
         }
 
-        # Check if the item data is already in the list
-        if ilvl_dict_data in self.ilvl_list:
-            # Create the display string
-            item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
-            string_with_data = (
+        # Log contents before removal
+        self.log_list_widget_contents(self.ilvl_list_display, "BEFORE remove")
+
+        # Filter out matching entries
+        original_length = len(self.ilvl_list)
+        self.ilvl_list = [
+            entry
+            for entry in self.ilvl_list
+            if not self.entries_match(entry, compare_dict)
+        ]
+
+        # Clear and rebuild display
+        self.ilvl_list_display.clear()
+        for entry in self.ilvl_list:
+            item_ids = ",".join(map(str, entry["item_ids"]))
+            display_string = (
                 f"Item ID: {item_ids}; "
-                f"Price: {ilvl_dict_data['buyout']}; "
-                f"ILvl: {ilvl_dict_data['ilvl']}; "
-                f"Sockets: {ilvl_dict_data['sockets']}; "
-                f"Speed: {ilvl_dict_data['speed']}; "
-                f"Leech: {ilvl_dict_data['leech']}; "
-                f"Avoidance: {ilvl_dict_data['avoidance']}; "
-                f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
-                f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
-                f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
-                f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
+                f"Price: {entry['buyout']}; "
+                f"ILvl: {entry['ilvl']}; "
+                f"Sockets: {entry['sockets']}; "
+                f"Speed: {entry['speed']}; "
+                f"Leech: {entry['leech']}; "
+                f"Avoidance: {entry['avoidance']}; "
+                f"MinLevel: {entry['required_min_lvl']}; "
+                f"MaxLevel: {entry['required_max_lvl']}; "
+                f"Max ILvl: {entry['max_ilvl']}; "
+                f"Bonus Lists: {entry['bonus_lists']}"
+            )
+            self.ilvl_list_display.addItem(display_string)
+
+        # Log contents after removal
+        self.log_list_widget_contents(self.ilvl_list_display, "AFTER remove")
+
+        if len(self.ilvl_list) == original_length:
+            QMessageBox.information(
+                self,
+                "No Match Found",
+                "No exact match found for the selected criteria.",
             )
 
-            # Print the formatted string
-            print(f"Removing | {string_with_data}")
+    def entries_match(self, entry, compare_dict):
+        """
+        Compare two entry dictionaries while ignoring the 'buyout' field.
 
-            # Remove the item from the list and display if it exists
-            for x in range(self.ilvl_list_display.count()):
-                if self.ilvl_list_display.item(x).text() == string_with_data:
-                    self.ilvl_list_display.takeItem(x)
-                    self.ilvl_list.remove(ilvl_dict_data)
-                    return
+        This helper function creates a shallow copy of the provided entry dictionary,
+        removes the 'buyout' key, and then compares the resulting dictionary with the
+        given comparison dictionary.
+
+        Args:
+            entry (dict): The entry data including a 'buyout' key.
+            compare_dict (dict): The dictionary to compare against, excluding the 'buyout' attribute.
+
+        Returns:
+            bool: True if the entries match after excluding the 'buyout' field; otherwise, False.
+
+        Raises:
+            KeyError: If the 'buyout' key is not present in the entry dictionary.
+        """
+        entry_copy = entry.copy()
+        entry_copy.pop("buyout")
+        return entry_copy == compare_dict
 
     def erase_ilvl_data(self):
+        """
+        Resets all item level data after user confirmation.
+
+        Displays a confirmation dialog to ensure the user wants to reset all item level data.
+        If confirmed, clears both the visual list widget and the corresponding internal data list.
+        """
         reply = QMessageBox.question(
             self,
             "Confirm Reset",
@@ -1820,6 +1911,16 @@ class App(QMainWindow):
             self.ilvl_list = []
 
     def import_ilvl_data(self):
+        """
+        Imports and validates item level data from a JSON file.
+
+        Prompts the user to select a JSON file and loads a list of item level configurations. Each configuration
+        should be a dictionary that includes required fields such as 'buyout', 'ilvl', and boolean flags for
+        'sockets', 'speed', 'leech', and 'avoidance', with optional keys like 'item_ids', 'required_min_lvl',
+        'required_max_lvl', 'max_ilvl', and 'bonus_lists'. The function validates each entry to ensure numerical
+        values fall within the expected ranges and that all boolean flags are valid before updating the display list.
+        If parsing or validation fails, an appropriate error message is shown using a message box.
+        """
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
             return
@@ -1844,6 +1945,7 @@ class App(QMainWindow):
                 required_min_lvl = ilvl_dict_data.get("required_min_lvl", 1)
                 required_max_lvl = ilvl_dict_data.get("required_max_lvl", 999)
                 ilvl_max = ilvl_dict_data.get("max_ilvl", 10000)
+                bonus_lists = ilvl_dict_data.get("bonus_lists", [])
 
                 # Check that all item IDs are valid integers, but allow list to be empty
                 if not all(
@@ -1905,7 +2007,8 @@ class App(QMainWindow):
                     f"Avoidance: {avoidance}; "
                     f"MinLevel: {required_min_lvl}; "
                     f"MaxLevel: {required_max_lvl}; "
-                    f"Max ILvl: {ilvl_max}"
+                    f"Max ILvl: {ilvl_max}; "
+                    f"Bonus Lists: {bonus_lists}"
                 )
                 self.ilvl_list_display.insertItem(
                     self.ilvl_list_display.count(), string_with_data
