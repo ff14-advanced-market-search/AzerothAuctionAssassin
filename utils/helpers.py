@@ -31,6 +31,16 @@ def get_wow_russian_realm_ids():
 
 
 def create_embed(title, description, fields):
+    """Create a Discord embed with specified title, description, and fields.
+    Parameters:
+        - title (str): The title of the embed message.
+        - description (str): The description content of the embed message.
+        - fields (list): A list of dictionaries, each representing a field with name and value.
+    Returns:
+        - dict: A dictionary representing the Discord embed object.
+    Processing Logic:
+        - Uses a default blurple color code for the embed.
+        - Adds the current local time as a footer in the embed."""
     embed = {
         "title": title,
         "description": description,
