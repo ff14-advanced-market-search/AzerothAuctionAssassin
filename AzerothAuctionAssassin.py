@@ -1708,40 +1708,35 @@ class App(QMainWindow):
         # Log contents before changes
         self.log_list_widget_contents(self.ilvl_list_display, "BEFORE add/update")
 
-        # Remove all matching entries (could be multiple due to previous bugs)
-        for index in sorted(existing_entries, reverse=True):
-            removed_item = self.ilvl_list_display.takeItem(index)
-            print(f"Removing item at index {index}: {removed_item.text()}")
-            self.ilvl_list.pop(index)
-
-        # Format the display string
-        item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
-        display_string = (
-            f"Item ID: {item_ids}; "
-            f"Price: {ilvl_dict_data['buyout']}; "
-            f"ILvl: {ilvl_dict_data['ilvl']}; "
-            f"Sockets: {ilvl_dict_data['sockets']}; "
-            f"Speed: {ilvl_dict_data['speed']}; "
-            f"Leech: {ilvl_dict_data['leech']}; "
-            f"Avoidance: {ilvl_dict_data['avoidance']}; "
-            f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
-            f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
-            f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
-            f"Bonus Lists: {ilvl_dict_data['bonus_lists']}"
-        )
-
-        # If we found and removed matches, insert at the first removed position
-        # Otherwise add to the end
+        # If we found matches, rebuild the list without them
         if existing_entries:
-            insert_position = existing_entries[0]  # Use first match position
-            self.ilvl_list.insert(insert_position, ilvl_dict_data)
-            self.ilvl_list_display.insertItem(insert_position, display_string)
-        else:
-            # No matches found, append as new entry
-            self.ilvl_list.append(ilvl_dict_data)
-            self.ilvl_list_display.insertItem(
-                self.ilvl_list_display.count(), display_string
+            self.ilvl_list = [
+                entry
+                for i, entry in enumerate(self.ilvl_list)
+                if i not in existing_entries
+            ]
+
+        # Add the new entry
+        self.ilvl_list.append(ilvl_dict_data)
+
+        # Clear and rebuild display
+        self.ilvl_list_display.clear()
+        for entry in self.ilvl_list:
+            item_ids = ",".join(map(str, entry["item_ids"]))
+            display_string = (
+                f"Item ID: {item_ids}; "
+                f"Price: {entry['buyout']}; "
+                f"ILvl: {entry['ilvl']}; "
+                f"Sockets: {entry['sockets']}; "
+                f"Speed: {entry['speed']}; "
+                f"Leech: {entry['leech']}; "
+                f"Avoidance: {entry['avoidance']}; "
+                f"MinLevel: {entry['required_min_lvl']}; "
+                f"MaxLevel: {entry['required_max_lvl']}; "
+                f"Max ILvl: {entry['max_ilvl']}; "
+                f"Bonus Lists: {entry['bonus_lists']}"
             )
+            self.ilvl_list_display.addItem(display_string)
 
         # Log contents after changes
         self.log_list_widget_contents(self.ilvl_list_display, "AFTER add/update")
