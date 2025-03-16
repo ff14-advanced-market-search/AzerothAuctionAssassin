@@ -6,16 +6,13 @@ from utils.helpers import get_wow_russian_realm_ids
 ## DISCORD API CALLS ##
 def send_embed_discord(embed, webhook_url):
     # Send message
-    """Send an embed message to a specified Discord webhook URL.
-    Parameters:
-        - embed (dict): A dictionary representing the embed content to be sent.
-        - webhook_url (str): The Discord webhook URL to which the embed will be sent.
-    Returns:
-        - bool: True if the embed is sent successfully; False otherwise.
-    Processing Logic:
-        - Checks the HTTP response status to determine success.
-        - Raises an exception for non-2xx status codes.
-        - Catches exceptions related to request errors."""
+    """
+    Send an embed message to Discord using a webhook URL.
+    
+    Sends an HTTP POST request with the given embed data to the provided Discord 
+    webhook. Returns True if the request is successful (HTTP status 200 or 204), 
+    and False if an error occurs.
+    """
     try:
         print(f"sending embed to discord...")
         req = requests.post(webhook_url, json={"embeds": [embed]})
@@ -32,16 +29,18 @@ def send_embed_discord(embed, webhook_url):
 
 @retry(stop=stop_after_attempt(3))
 def send_discord_message(message, webhook_url):
-    """Send a message to a Discord channel using a webhook.
-    Parameters:
-        - message (str): The message content to send to Discord.
-        - webhook_url (str): The URL of the Discord webhook to use for sending the message.
+    """
+    Send a plain text message to a Discord channel via a webhook.
+    
+    Attempts an HTTP POST request to the provided Discord webhook URL with the given message.
+    Returns True if the request is successful; otherwise, prints an error message and returns False.
+    
+    Args:
+        message (str): The message to send.
+        webhook_url (str): The Discord webhook URL.
+        
     Returns:
-        - bool: True if the message was sent successfully, False otherwise.
-    Processing Logic:
-        - The function uses `requests.post` to send a message via a Discord webhook.
-        - It raises an exception for non-2xx HTTP status codes to ensure the request was successful.
-        - If an exception occurs during the request, it logs the error and returns False.
+        bool: True if the message was sent successfully, False otherwise.
     """
     try:
         json_data = {"content": message}
@@ -66,17 +65,21 @@ def get_wow_access_token(client_id, client_secret):
 
 @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
 def get_listings_single(connectedRealmId: int, access_token: str, region: str):
-    """Fetches auction listings for a specific connected realm and region in the World of Warcraft game using the Blizzard API.
+    """
+    Fetch auction listings for a given connected realm and region.
+    
+    Constructs the appropriate Blizzard API URL based on the specified region ('NA' or 'EU') 
+    and retrieves auction listings using the provided access token. If an unsupported region 
+    is specified, an error message is printed and the program terminates.
+    
     Parameters:
-        - connectedRealmId (int): Identifier for the connected realm to fetch auction data from.
-        - access_token (str): Authorization token for accessing Blizzard API.
-        - region (str): Region code for which the data is to be fetched ('NA' for North America, 'EU' for Europe).
+        connectedRealmId (int): The ID of the connected realm.
+        access_token (str): Blizzard API access token for authorization.
+        region (str): Region code determining the API endpoint ('NA' for North America, 'EU' for Europe).
+    
     Returns:
-        - list: A list of auction data dictionaries fetched from the specified realm and region.
-    Processing Logic:
-        - Constructs the API URL based on the region code.
-        - Returns a message and exits if the region is unsupported.
-        - Sends a GET request with authorization headers to fetch auction data."""
+        list: A list of auction data dictionaries.
+    """
     print(f"gather data from connectedRealmId {connectedRealmId} of region {region}")
     if region == "NA":
         url = f"https://us.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions?namespace=dynamic-us&locale=en_US"
@@ -97,15 +100,17 @@ def get_listings_single(connectedRealmId: int, access_token: str, region: str):
 
 
 def get_petnames(access_token):
-    """Get a dictionary of pet IDs and names from the World of Warcraft API.
-    Parameters:
-        - access_token (str): An OAuth access token used for authentication in the API request.
+    """Retrieve a mapping of pet IDs to names from the World of Warcraft API.
+    
+    Uses the provided OAuth access token to fetch pet data from Blizzard's API and
+    returns a dictionary mapping each pet's numeric ID to its corresponding name.
+    
+    Args:
+        access_token (str): OAuth token used to authenticate the API request.
+    
     Returns:
-        - dict: A dictionary where keys are pet IDs (int) and values are pet names (str).
-    Processing Logic:
-        - Sends a GET request to the World of Warcraft API using the provided access token for authorization.
-        - Parses the JSON response to extract a list of pets.
-        - Constructs and returns a dictionary mapping each pet's ID to its name."""
+        dict: A dictionary with pet IDs (int) as keys and pet names (str) as values.
+    """
     headers = {"Authorization": f"Bearer {access_token}"}
     pet_info = requests.get(
         f"https://us.api.blizzard.com/data/wow/pet/index?namespace=static-us&locale=en_US",
@@ -126,16 +131,18 @@ SADDLEBAG_URL = "http://api.saddlebagexchange.com"
 
 
 def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
-    """Get backup of update timers for a specific region, optionally excluding Russian realms.
-    Parameters:
-        - REGION (str): The region identifier for which update timers are retrieved.
-        - NO_RUSSIAN_REALMS (bool, optional): Flag indicating whether to exclude Russian realms in the result. Defaults to True.
+    """
+    Fetch backup update timers for a specified region.
+    
+    Retrieves update timer data from an external service and filters out entries with
+    invalid dataset IDs. If NO_RUSSIAN_REALMS is True, data for Russian realms is omitted.
+    
+    Args:
+        REGION (str): The region identifier for which update timers are fetched.
+        NO_RUSSIAN_REALMS (bool, optional): Flag to exclude Russian realm data. Defaults to True.
+    
     Returns:
-        - dict: A dictionary mapping dataSetID to update timer data for the specified region.
-    Processing Logic:
-        - Fetches update timers data via a POST request.
-        - Filters out data with invalid dataSetID values (-1, -2) and matches the specified region.
-        - Optionally filters out Russian realms from the result if NO_RUSSIAN_REALMS is True.
+        dict: A dictionary mapping valid dataSetID values to corresponding update timer data.
     """
     update_timers = requests.post(
         f"{SADDLEBAG_URL}/api/wow/uploadtimers",
@@ -158,13 +165,14 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
 
 
 def get_itemnames():
-    """Get item names from a specified API or fallback to a GitHub backup.
+    """
+    Retrieves item names from an API endpoint with a GitHub backup fallback.
+    
+    Attempts a POST request to obtain item names. If the request fails, prints an error message and retrieves the names via a GET request from a GitHub backup.
+    
     Returns:
-        - list: A list of item names retrieved from the API or GitHub backup.
-    Processing Logic:
-        - Sends a POST request to a specified API endpoint to fetch item names.
-        - If the request fails, it prints an error message and retrieves item names from a GitHub backup.
-        - Returns the item names as a JSON object."""
+        list: The list of item names.
+    """
     try:
         item_names = requests.post(
             f"{SADDLEBAG_URL}/api/wow/itemnames",
@@ -177,13 +185,16 @@ def get_itemnames():
 
 
 def get_pet_names_backup():
-    """Fetches pet names from a specified API endpoint or a backup source if the request fails.
+    """
+    Retrieves pet names from the primary API with a backup fallback.
+    
+    This function sends a POST request to obtain a dictionary mapping pet IDs to names.
+    If the request fails, it retrieves the data from a GitHub backup via a GET request.
+    The keys of the returned dictionary are converted to integers.
+    
     Returns:
-        - dict: A dictionary mapping pet IDs to their names.
-    Processing Logic:
-        - Attempts to retrieve pet names from the primary API endpoint.
-        - If the API request fails, fetches pet names from a GitHub backup source.
-        - Converts the keys of the resulting dictionary to integers."""
+        dict: A mapping from pet IDs (as integers) to their names.
+    """
     try:
         pet_info = requests.post(
             f"{SADDLEBAG_URL}/api/wow/itemnames",
@@ -197,13 +208,16 @@ def get_pet_names_backup():
 
 
 def get_raidbots_bonus_ids():
-    """Fetch bonus IDs from an external source and return them in a dictionary format.
+    """
+    Retrieve bonus IDs from the Raidbots API with a GitHub backup fallback.
+    
+    This function attempts to fetch bonus IDs by sending a GET request to the Raidbots API and converts the keys 
+    of the JSON response to integers. If the API request fails, it prints an error message and retrieves the data 
+    from a GitHub backup instead.
+    
     Returns:
-        - dict: A dictionary of bonus IDs keyed by the ID converted to an integer, with corresponding data as values.
-    Processing Logic:
-        - Initial data is fetched from Raidbots API; if it fails, data is fetched from a GitHub backup.
-        - Exceptions are caught and logged to indicate the fallback to the backup source.
-        - The function ensures that keys in the returned dictionary are integers."""
+        dict: A dictionary mapping bonus IDs (as integers) to their associated data.
+    """
     try:
         # thanks so much to Seriallos (Raidbots) and BinaryHabitat (GoblinStockAlerts) for organizing this data!
         bonus_ids = requests.get(
@@ -216,20 +230,24 @@ def get_raidbots_bonus_ids():
 
 
 def get_ilvl_items(ilvl=201, item_ids=[]):
-    """Get item details based on the item level and item IDs provided.
-    Parameters:
-        - ilvl (int): The item level threshold for filtering items, default is 201.
-        - item_ids (list): List of item IDs to filter; if empty or None, items are fetched based on ilvl only.
+    """
+    Retrieve detailed information for items based on a base item level and an optional list of item IDs.
+    
+    When no item IDs are provided (or the list is empty), the function resets the item level filter to 201
+    and retrieves all items meeting this default threshold. Data is fetched from the primary Saddlebag API,
+    falling back to a GitHub backup on failure.
+    
+    Args:
+        ilvl (int): The item level threshold for filtering items. This value is ignored if a list of item IDs is provided.
+        item_ids (list): Optional list of item IDs to filter; if empty or None, items are retrieved based on the default item level.
+    
     Returns:
-        - tuple: A tuple containing four elements:
-            - dict: Item names keyed by item ID.
-            - set: A set of item IDs.
-            - dict: Base item levels keyed by item ID.
-            - dict: Base required levels keyed by item ID.
-    Processing Logic:
-        - If item_ids is not provided or is empty, resets ilvl to 201.
-        - Fetches item data from the Saddlebag URL, using a backup source if the request fails.
-        - Filters results specifically for item IDs if given."""
+        tuple: A four-element tuple containing:
+            - dict: Mapping of item IDs (int) to item names (str).
+            - set: Set of item IDs (int).
+            - dict: Mapping of item IDs (int) to base item levels.
+            - dict: Mapping of item IDs (int) to base required levels.
+    """
     try:
         # if no item_ids are given, get all items at or above the given ilvl
         # this gets weird when someone wants a high ilvl item as we have the base ilvl in the DB

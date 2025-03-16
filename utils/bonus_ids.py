@@ -2,14 +2,19 @@ from utils.api_requests import get_raidbots_bonus_ids
 
 
 def get_bonus_ids():
-    """Get categorized bonus IDs based on specific attributes from raidbot data.
+    """
+    Get categorized bonus IDs from raidbot data.
+    
+    Retrieves and categorizes bonus IDs by analyzing attributes in raidbot data.
+    Socket bonuses are identified from entries containing the 'socket' key, while
+    item level additions are detected in entries whose only keys are 'id' and 'level'.
+    Additional stats such as Leech, Avoidance, Speed, Haste, Crit, Mastery, and Versatility
+    are extracted from the 'rawStats' field.
+    
     Returns:
-        - dict: A dictionary with keys representing bonus categories and values containing bonus IDs matching category criteria.
-    Processing Logic:
-        - Identify socket bonuses directly from the bonus_id_dict.
-        - Level bonuses are those with specific key sets indicating an item level addition.
-        - Use "rawStats" to determine other bonus categories such as Leech, Avoidance, Speed, and others.
-        - Aggregate categorized bonus IDs into a consolidated dictionary for easy access.
+        dict: A dictionary with keys 'sockets', 'leech', 'avoidance', 'speed',
+        'ilvl_addition', 'haste', 'crit', 'mastery', and 'versatility' mapping to their
+        corresponding bonus IDs.
     """
     bonus_id_dict = get_raidbots_bonus_ids()
     # sockets are simple
@@ -61,13 +66,12 @@ def get_bonus_ids():
 
 def get_bonus_id_sets():
     # get raw data
-    """Get sets of bonus IDs categorized by type.
+    """Return bonus ID sets categorized by type.
+    
     Returns:
-        - tuple: A tuple containing sets of IDs for sockets, leech, avoidance, speed, and a list of item level additions.
-    Processing Logic:
-        - Extracts bonus IDs from a predefined data structure.
-        - Organizes the IDs into sets based on the bonus type.
-        - Retrieves additional item level bonuses separately."""
+        tuple: A tuple containing a set of socket bonus IDs, a set of leech bonus IDs,
+        a set of avoidance bonus IDs, a set of speed bonus IDs, and a list of item level bonus additions.
+    """
     bonus_ids = get_bonus_ids()
     # get ids for each bonus type
     socket_ids = set(bonus_ids["sockets"].keys())
@@ -85,12 +89,13 @@ def get_bonus_id_sets():
 
 def get_secondary_stats():
     # get raw data
-    """Extract secondary stat bonus IDs.
+    """Extract secondary stat bonus IDs from categorized raidbot data.
+    
+    Retrieves bonus IDs using internal logic and collects keys for the secondary stats:
+    'haste', 'crit', 'mastery', and 'versatility' into individual sets. Returns a tuple of these sets.
+    
     Returns:
-        - tuple: A tuple containing four sets representing the bonus IDs for 'haste', 'crit', 'mastery', and 'versatility'.
-    Processing Logic:
-        - Retrieves raw data for bonus IDs using the `get_bonus_ids()` function.
-        - Extracts bonus type IDs from the raw data and organizes them into sets for easy manipulation and access.
+        tuple: A tuple of four sets corresponding to the bonus IDs for haste, crit, mastery, and versatility.
     """
     bonus_ids = get_bonus_ids()
     # get ids for each bonus type

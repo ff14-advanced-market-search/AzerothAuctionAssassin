@@ -8,7 +8,13 @@ namespace AzerothAuctionAssassin
     {
         /// <summary>
         ///  The main entry point for the application.
+        /// <summary>
+        /// Entry point of the application that sets up the environment and launches the main Python script.
         /// </summary>
+        /// <remarks>
+        /// Initializes application-specific paths for the current version, embedded Python installation, and dependency files.
+        /// It installs necessary components and unzips required packages before executing the primary Python-based application.
+        /// </remarks>
         [STAThread]
 
         static void Main()
@@ -45,7 +51,16 @@ namespace AzerothAuctionAssassin
         /// installApp(@"C:\Apps\AzerothAuctionAssassin\", "1.0.0");
         /// // This will install the application at the specified directory, creating directories if they do not exist,
         /// // and set it to the specified version, handling any version-specific setup.
-        /// </example>
+        /// <summary>
+        /// Installs the application for the specified version into the given installation path.
+        /// </summary>
+        /// <remarks>
+        /// Ensures the installation directory exists, then checks whether the version-specific subdirectory is present.
+        /// If absent, writes the application package from embedded resources to a temporary ZIP file, extracts its contents
+        /// to the version folder, and removes any previous versions.
+        /// </remarks>
+        /// <param name="installPath">The directory where the application should be installed.</param>
+        /// <param name="appVersion">The version identifier used to create the version-specific folder.</param>
         static void installApp(string installPath,string appVersion)
         {
 
@@ -79,7 +94,16 @@ namespace AzerothAuctionAssassin
         /// <example>
         /// deleteOldVersions("/path/to/app", "v1.2.3");
         /// // This will delete all directories in the specified path except for "v1.2.3".
-        /// </example>
+        /// <summary>
+        /// Deletes all subdirectories in the specified application path that do not match the current version.
+        /// </summary>
+        /// <param name="appPath">The base directory containing version-specific subdirectories.</param>
+        /// <param name="currentVersion">The version identifier of the directory to retain.</param>
+        /// <remarks>
+        /// If the application path does not exist, the method exits without performing any actions.
+        /// The method attempts to delete all subdirectories except the one matching the current version,
+        /// logging any errors encountered during deletion to the console.
+        /// </remarks>
         public static void deleteOldVersions(string appPath, string currentVersion)
         {
             if (!Directory.Exists(appPath)) return;
@@ -114,6 +138,16 @@ namespace AzerothAuctionAssassin
         /// <exception cref="FileNotFoundException">Thrown when the specified zip file does not exist.</exception>
         /// <example>
         /// UnzipToFolder("example.zip", "outputDirectory");
+        /// <summary>
+        /// Extracts the contents of a zip archive to the specified directory, overwriting any existing files.
+        /// </summary>
+        /// <param name="zipFilePath">The full path to the zip file to extract.</param>
+        /// <param name="folderPath">The destination folder where the archive contents will be extracted.</param>
+        /// <exception cref="FileNotFoundException">Thrown if the specified zip file does not exist.</exception>
+        /// <example>
+        /// <code>
+        /// UnzipToFolder("C:\\temp\\archive.zip", "C:\\temp\\output");
+        /// </code>
         /// </example>
         public static void UnzipToFolder(string zipFilePath,string folderPath)
         {
@@ -139,7 +173,10 @@ namespace AzerothAuctionAssassin
         /// <param name="pythonInstallPath">The directory path where Python should be installed.</param>
         /// <example>
         /// InstallPython("C:\\Path\\To\\Install\\Python");
-        /// </example>
+        /// <summary>
+        /// Installs the embedded Python distribution to the specified directory if it is not already present.
+        /// </summary>
+        /// <param name="pythonInstallPath">The directory where Python should be installed. Installation is skipped if the directory already exists.</param>
         static void InstallPython(string pythonInstallPath)
         {
 
@@ -186,7 +223,22 @@ namespace AzerothAuctionAssassin
         /// <example>
         /// InstallPipeRequirements("C:\\MyApp", "C:\\Python39", "C:\\MyApp\\requirements.txt");
         /// // This will ensure the required Python packages are installed or attempt to extract them from a library zip.
-        /// </example>
+        /// <summary>
+        /// Installs the required Python libraries by extracting a bundled library resource into the Python installation directory.
+        /// </summary>
+        /// <remarks>
+        /// If the 'Lib\site-packages' directory exists in the specified Python path, it is assumed that the libraries are already installed.
+        /// Otherwise, an embedded library zip is extracted to complete the installation.
+        /// </remarks>
+        /// <param name="appPath">
+        /// The root application directory. This parameter is retained for potential use in alternative installation strategies but is not active in the current implementation.
+        /// </param>
+        /// <param name="pythonPath">
+        /// The directory where Python is installed. The method checks for the presence of the 'Lib\site-packages' folder within this directory.
+        /// </param>
+        /// <param name="requirementsPath">
+        /// The path to the pip requirements file, which is not utilized in the current installation logic.
+        /// </param>
         static void InstallPipeRequirements(string appPath,string pythonPath,string requirementsPath) 
         {
             /*
@@ -212,6 +264,12 @@ namespace AzerothAuctionAssassin
         }
 
 
+        /// <summary>
+        /// Executes the specified Python script using the Python executable, passing the application directory and its corresponding site-packages folder as arguments.
+        /// </summary>
+        /// <param name="appPath">The application's installation directory.</param>
+        /// <param name="pythonPath">The directory where Python is installed.</param>
+        /// <param name="pythonFilePath">The full path to the Python script to be executed.</param>
         static void RunPythonFile(string appPath,string pythonPath,string pythonFilePath)
         {
             string command = $"{pythonFilePath} run-from-windows-bin \"{appPath}\" \"{pythonPath}\\Lib\\site-packages\"";
@@ -233,6 +291,21 @@ namespace AzerothAuctionAssassin
         /// <example>
         /// bool result = ExecuteShellCommand("cmd.exe", "/c dir", @"C:\", true, true);
         /// Console.WriteLine(result); // Expected output: true or false depending on the execution outcome
+        /// <summary>
+        /// Executes a shell command by starting a process with the specified executable and arguments.
+        /// </summary>
+        /// <param name="fileName">The path or name of the executable to run.</param>
+        /// <param name="command">The command-line arguments to pass to the executable.</param>
+        /// <param name="appPath">An optional working directory for the process (currently not applied).</param>
+        /// <param name="hidden">If true, sets the process window style to hidden.</param>
+        /// <param name="no_window">If true, creates the process without a visible window.</param>
+        /// <returns>
+        /// True if the process completes with an exit code of 0; otherwise, false.
+        /// </returns>
+        /// <example>
+        /// <code>
+        /// bool success = ExecuteShellCommand("python.exe", "script.py", @"C:\MyApp", hidden: true, no_window: true);
+        /// </code>
         /// </example>
         static bool ExecuteShellCommand(string fileName, string command, string appPath = "", bool hidden = true, bool no_window = true)
         {
@@ -279,6 +352,20 @@ namespace AzerothAuctionAssassin
         /// <example>
         /// bool result = ExecutePowerShellCommand("Get-Process", false, false);
         /// Console.WriteLine(result); // Expected output: True if the command is valid and executes without errors
+        /// <summary>
+        /// Executes a PowerShell command using a new process and returns whether it executed successfully.
+        /// </summary>
+        /// <remarks>
+        /// This method launches a PowerShell process to run the specified command. The process's window visibility can be controlled via the 'hidden' and 'no_window' parameters. The method captures the command's output, waits for the process to complete, and returns true if the process exits with code 0.
+        /// </remarks>
+        /// <param name="command">The PowerShell command to execute.</param>
+        /// <param name="hidden">If set to true, the process window is hidden.</param>
+        /// <param name="no_window">If set to true, no window is created for the process.</param>
+        /// <returns>True if the command executed successfully; otherwise, false.</returns>
+        /// <example>
+        /// <code>
+        /// bool success = ExecutePowerShellCommand("Get-Process", hidden: true, no_window: true);
+        /// </code>
         /// </example>
         static bool ExecutePowerShellCommand(string command, bool hidden = true,bool no_window=true)
         {
