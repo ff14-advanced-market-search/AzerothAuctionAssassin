@@ -1783,33 +1783,48 @@ class App(QMainWindow):
         # Log contents before removal
         self.log_list_widget_contents(self.ilvl_list_display, "BEFORE remove")
 
-        # Keep removing matches until none are found
-        found_match = False
-        while True:
-            match_found = False
-            for i, entry in enumerate(self.ilvl_list):
-                entry_copy = entry.copy()
-                entry_copy.pop("buyout")
-                if entry_copy == compare_dict:
-                    removed_item = self.ilvl_list_display.takeItem(i)
-                    print(f"Removing item at index {i}: {removed_item.text()}")
-                    self.ilvl_list.pop(i)
-                    match_found = True
-                    found_match = True
-                    break
+        # Filter out matching entries
+        original_length = len(self.ilvl_list)
+        self.ilvl_list = [
+            entry
+            for entry in self.ilvl_list
+            if not self.entries_match(entry, compare_dict)
+        ]
 
-            if not match_found:
-                break
+        # Clear and rebuild display
+        self.ilvl_list_display.clear()
+        for entry in self.ilvl_list:
+            item_ids = ",".join(map(str, entry["item_ids"]))
+            display_string = (
+                f"Item ID: {item_ids}; "
+                f"Price: {entry['buyout']}; "
+                f"ILvl: {entry['ilvl']}; "
+                f"Sockets: {entry['sockets']}; "
+                f"Speed: {entry['speed']}; "
+                f"Leech: {entry['leech']}; "
+                f"Avoidance: {entry['avoidance']}; "
+                f"MinLevel: {entry['required_min_lvl']}; "
+                f"MaxLevel: {entry['required_max_lvl']}; "
+                f"Max ILvl: {entry['max_ilvl']}; "
+                f"Bonus Lists: {entry['bonus_lists']}"
+            )
+            self.ilvl_list_display.addItem(display_string)
 
         # Log contents after removal
         self.log_list_widget_contents(self.ilvl_list_display, "AFTER remove")
 
-        if not found_match:
+        if len(self.ilvl_list) == original_length:
             QMessageBox.information(
                 self,
                 "No Match Found",
                 "No exact match found for the selected criteria.",
             )
+
+    def entries_match(self, entry, compare_dict):
+        """Helper function to compare entries without buyout price"""
+        entry_copy = entry.copy()
+        entry_copy.pop("buyout")
+        return entry_copy == compare_dict
 
     def erase_ilvl_data(self):
         reply = QMessageBox.question(
