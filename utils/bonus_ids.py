@@ -9,7 +9,8 @@ def get_bonus_ids():
         - Identify socket bonuses directly from the bonus_id_dict.
         - Level bonuses are those with specific key sets indicating an item level addition.
         - Use "rawStats" to determine other bonus categories such as Leech, Avoidance, Speed, and others.
-        - Aggregate categorized bonus IDs into a consolidated dictionary for easy access."""
+        - Aggregate categorized bonus IDs into a consolidated dictionary for easy access.
+    """
     bonus_id_dict = get_raidbots_bonus_ids()
     # sockets are simple
     sockets = {k: v for k, v in bonus_id_dict.items() if "socket" in v.keys()}
@@ -89,7 +90,8 @@ def get_secondary_stats():
         - tuple: A tuple containing four sets representing the bonus IDs for 'haste', 'crit', 'mastery', and 'versatility'.
     Processing Logic:
         - Retrieves raw data for bonus IDs using the `get_bonus_ids()` function.
-        - Extracts bonus type IDs from the raw data and organizes them into sets for easy manipulation and access."""
+        - Extracts bonus type IDs from the raw data and organizes them into sets for easy manipulation and access.
+    """
     bonus_ids = get_bonus_ids()
     # get ids for each bonus type
     haste_ids = set(bonus_ids["haste"].keys())

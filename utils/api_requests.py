@@ -41,7 +41,8 @@ def send_discord_message(message, webhook_url):
     Processing Logic:
         - The function uses `requests.post` to send a message via a Discord webhook.
         - It raises an exception for non-2xx HTTP status codes to ensure the request was successful.
-        - If an exception occurs during the request, it logs the error and returns False."""
+        - If an exception occurs during the request, it logs the error and returns False.
+    """
     try:
         json_data = {"content": message}
         response = requests.post(webhook_url, json=json_data)
@@ -134,7 +135,8 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     Processing Logic:
         - Fetches update timers data via a POST request.
         - Filters out data with invalid dataSetID values (-1, -2) and matches the specified region.
-        - Optionally filters out Russian realms from the result if NO_RUSSIAN_REALMS is True."""
+        - Optionally filters out Russian realms from the result if NO_RUSSIAN_REALMS is True.
+    """
     update_timers = requests.post(
         f"{SADDLEBAG_URL}/api/wow/uploadtimers",
         json={},

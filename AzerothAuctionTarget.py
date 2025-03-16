@@ -88,6 +88,7 @@ class RecommendationsRequest(QThread):
         - Sends a POST request to retrieve item statistics using provided request data.
         - Filters items based on historic market value and calculates recommended prices with a discount.
     """
+
     completed = pyqtSignal(dict)
 
     def __init__(
@@ -153,7 +154,8 @@ class RecommendationsRequest(QThread):
         Processing Logic:
             - Validates the 'homeRealmId' from the request data to ensure it is greater than 0.
             - Sends a POST request to retrieve item statistics from an external API using the provided request data.
-            - Filters items based on their historic market value and calculates recommended prices with a discount."""
+            - Filters items based on their historic market value and calculates recommended prices with a discount.
+        """
         if self.request_data["homeRealmId"] <= 0:
             # return error that commodities are not a realm, tick the box and pick your home server
             self.completed.emit({})
@@ -187,6 +189,7 @@ class Item_Statistics(QThread):
         - Transforms the JSON response from the API into a pandas DataFrame.
         - Emits the DataFrame via a PyQt signal to indicate completion.
     """
+
     completed = pyqtSignal(pd.DataFrame)
 
     def __init__(self):
@@ -497,7 +500,8 @@ class RecommendationsPage(QWidget):
         Processing Logic:
             - Connects dropdowns and input fields with appropriate signals for user interaction.
             - Sets default values for various input fields and dropdown selections.
-            - Adds descriptive labels for each input widget to inform users about their purpose."""
+            - Adds descriptive labels for each input widget to inform users about their purpose.
+        """
         self.minimum_average_price_input = QLineEdit(self)
         self.minimum_average_price_input.setText("2000")
         self.minimum_average_price_input_label = QLabel(
@@ -654,7 +658,9 @@ class HomePage(QWidget):
         - Adjusts the icon file path conditionally if the app is run from a specific Windows binary path.
         - Configures a grid layout to arrange various UI elements such as an icon and text labels.
         - Each label in the layout is assigned a hyperlink for external websites, styled with specific fonts.
-        - Ensures open external links feature is enabled for the labels containing hyperlinks."""
+        - Ensures open external links feature is enabled for the labels containing hyperlinks.
+    """
+
     def __init__(self):
         super(HomePage, self).__init__()
         self.layout = QGridLayout(self)
@@ -731,7 +737,9 @@ class ItemPage(QWidget):
     Processing Logic:
         - Uses QGridLayout to organize UI elements such as input fields, labels, and buttons.
         - Employs signal connections to handle button actions and list interactions.
-        - Implements methods for item addition, removal, and importing item data from files."""
+        - Implements methods for item addition, removal, and importing item data from files.
+    """
+
     def __init__(self):
         super(ItemPage, self).__init__()
         self.layout = QGridLayout(self)
@@ -806,7 +814,8 @@ class ItemPage(QWidget):
             - Displays error messages in case of invalid or incomplete input.
             - Ensures the item ID is within the range 1 to 500000.
             - Ensures the item price is within the range 0 to 10 million.
-            - Removes the item from the display list if it already exists, before updating it."""
+            - Removes the item from the display list if it already exists, before updating it.
+        """
         item_id = self.item_id_input.text()
         item_price = self.item_price_input.text()
 
@@ -868,7 +877,8 @@ class ItemPage(QWidget):
             - Parses the item's text to extract its ID and price.
             - Sets the extracted ID and price to the corresponding input fields.
             - Searches for the itemName in the item_statistics DataFrame using the item ID.
-            - Updates the item name input field with the found itemName or sets a default message if not found."""
+            - Updates the item name input field with the found itemName or sets a default message if not found.
+        """
         item_split = item.text().replace(" ", "").split(":")
         item_id = item_split[1].split(",")[0]
         self.item_id_input.setText(item_id)
@@ -893,7 +903,8 @@ class ItemPage(QWidget):
         Processing Logic:
             - Checks if the entered item ID exists in the current item list.
             - Iterates over displayed items to find and remove the matching item.
-            - Deletes the item from the internal items list once removed from the display."""
+            - Deletes the item from the internal items list once removed from the display.
+        """
         if self.item_id_input.text() in self.items_list:
             for x in range(self.item_list_display.count()):
                 if (
@@ -915,7 +926,8 @@ class ItemPage(QWidget):
             - Clears the current item display and initializes an item list dictionary.
             - Validates item IDs to ensure they are between 1 and 500,000 and prices between 0 and 10,000,000.
             - Displays items in a list view if they pass validation checks.
-            - Handles JSON decoding errors, invalid value errors, and other exceptions with message dialogs."""
+            - Handles JSON decoding errors, invalid value errors, and other exceptions with message dialogs.
+        """
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
             return
@@ -961,7 +973,8 @@ class ItemPage(QWidget):
             - Extracts and processes PBS item names from the file.
             - Matches these names with existing data to find the desired price.
             - Applies a discount based on user input and updates both the display and internal list.
-            - Handles errors with appropriate message dialogs for value and unknown exceptions."""
+            - Handles errors with appropriate message dialogs for value and unknown exceptions.
+        """
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
             return
@@ -1007,7 +1020,8 @@ class ItemPage(QWidget):
             - Retrieves the selected item's name and looks up its statistics.
             - Determines the selected item's ID and price from available data.
             - Updates the input fields for item price and ID based on user inputs or default settings.
-            - Applies a discount to the item price if a discount percentage is provided, with a default rate applied on failure to parse the discount."""
+            - Applies a discount to the item price if a discount percentage is provided, with a default rate applied on failure to parse the discount.
+        """
 
         selected_item = self.item_name_input.currentText()
         selected_item_stats = self.item_statistics[
@@ -1049,7 +1063,9 @@ class App(QMainWindow):
         - Sets the application title with the specified version.
         - Determines the correct path for the icon file based on the environment.
         - Configures paths for various data files used by the application.
-        - Initiates and connects the API data retrieval thread for handling item statistics."""
+        - Initiates and connects the API data retrieval thread for handling item statistics.
+    """
+
     def __init__(self):
         """Initializes the App class and its graphical user interface components.
         Parameters:
@@ -1060,7 +1076,8 @@ class App(QMainWindow):
             - Sets the application title with the specified version.
             - Determines the correct path for the icon file based on the environment.
             - Configures paths for various data files used by the application.
-            - Initiates and connects the API data retrieval thread for handling item statistics."""
+            - Initiates and connects the API data retrieval thread for handling item statistics.
+        """
         super(App, self).__init__()
         self.title = f"Azeroth Auction Tartet v{AAT_VERSION}"
         self.left = 100
@@ -1237,7 +1254,8 @@ class App(QMainWindow):
             - Determines realm ID and region based on user selection of recommendations region.
             - Computes item category and sub-category from user selections; assigns -1 for sub-category if category is invalid.
             - Converts desired average price to copper units for thread processing.
-            - Initiates a recommendations request thread with the extracted criteria and connects the completion signal to data received handler."""
+            - Initiates a recommendations request thread with the extracted criteria and connects the completion signal to data received handler.
+        """
         if self.recommendation_page.recommendations_region.currentText() == "Europe":
             realm_id = self.recommendation_page.eu_realms[
                 self.recommendation_page.recommendations_realm_combobox.currentText()
@@ -1335,7 +1353,8 @@ class App(QMainWindow):
         Processing Logic:
             - Sorts the item statistics by item name for display in the input field.
             - Updates the input widget to allow editing and autocompletion of item names.
-            - Connects the input widget change event to a handler for further item change management."""
+            - Connects the input widget change event to a handler for further item change management.
+        """
         self.item_page.item_statistics = item_statistics
 
         self.item_page.item_name_input.addItems(
@@ -1365,7 +1384,8 @@ class App(QMainWindow):
             - None: The function performs initialization and setup tasks but does not return a value.
         Processing Logic:
             - Checks and creates a data directory if it does not exist.
-            - Loads desired items from a specified JSON file if it exists and populates a display list with the items and their prices."""
+            - Loads desired items from a specified JSON file if it exists and populates a display list with the items and their prices.
+        """
         data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
@@ -1392,7 +1412,8 @@ class App(QMainWindow):
             - bool: Returns False if validation fails, True otherwise.
         Processing Logic:
             - Checks if `items_list`, `pet_list`, and `ilvl_list` are all empty and prompts an error if they are.
-            - Validates each item ID in `items_list` to ensure it is an integer between 1 and 500000, showing an error message if any ID is invalid."""
+            - Validates each item ID in `items_list` to ensure it is an integer between 1 and 500000, showing an error message if any ID is invalid.
+        """
         if (
             len(self.item_page.items_list) == 0
             and len(self.pet_page.pet_list) == 0
