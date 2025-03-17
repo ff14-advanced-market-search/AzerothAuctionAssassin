@@ -7216,24 +7216,22 @@ else:
     qt_resource_struct = qt_resource_struct_v2
 
 
-# add docstring here if needed
 def qInitResources():
     """
-        Initializes Qt resource data.
-    
-        Registers embedded resource data with Qt's resource system, enabling the
-        application to access compiled-in resources.
-        """
+    Initializes Qt resource data.
+
+    Registers embedded resource data with Qt's resource system, enabling the
+    application to access compiled-in resources.
+    """
     QtCore.qRegisterResourceData(
         rcc_version, qt_resource_struct, qt_resource_name, qt_resource_data
     )
 
 
-# add docstring here if needed
 def qCleanupResources():
     """
     Unregisters the Qt resource data.
-    
+
     This function cleans up resources previously registered via Qt's resource system
     by calling QtCore.qUnregisterResourceData with the associated global resource
     identifiers. It should be called when the resource data is no longer needed.
@@ -14461,12 +14459,11 @@ else:
     qt_resource_struct = qt_resource_struct_v2
 
 
-# add docstring here if needed
 def qInitResources():
     """
     Registers Qt resource data for the application.
-    
-    This function initializes Qt's resource system by registering precompiled resource 
+
+    This function initializes Qt's resource system by registering precompiled resource
     data using predefined constants.
     """
     QtCore.qRegisterResourceData(
@@ -14474,11 +14471,10 @@ def qInitResources():
     )
 
 
-# add docstring here if needed
 def qCleanupResources():
     """
     Unregisters the Qt resource data.
-    
+
     This function cleans up previously registered Qt resource data by calling
     QtCore.qUnregisterResourceData with the module-specific resource information.
     """

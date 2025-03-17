@@ -4,19 +4,18 @@ from utils.helpers import get_wow_russian_realm_ids
 
 
 ## DISCORD API CALLS ##
-# add docstring here if needed
 def send_embed_discord(embed, webhook_url):
     # Send message
     """Sends an embed message to a Discord webhook URL.
-    
+
     Sends the given embed content as a JSON payload via a POST request to the specified
     Discord webhook URL. Returns True if the embed is sent successfully (HTTP status 200 or 204),
     or False if a request error occurs.
-    
+
     Args:
         embed (dict): The embed content to include in the message.
         webhook_url (str): The Discord webhook URL to send the embed to.
-    
+
     Returns:
         bool: True if the embed is sent successfully, False otherwise.
     """
@@ -35,15 +34,14 @@ def send_embed_discord(embed, webhook_url):
 
 
 @retry(stop=stop_after_attempt(3))
-# add docstring here if needed
 def send_discord_message(message, webhook_url):
     """
     Sends a message to a Discord channel via a webhook.
-    
+
     Args:
         message (str): The content of the message.
         webhook_url (str): The Discord webhook URL.
-    
+
     Returns:
         bool: True if the message was sent successfully, False otherwise.
     """
@@ -59,19 +57,18 @@ def send_discord_message(message, webhook_url):
 
 ## BLIZZARD API CALLS ##
 @retry(stop=stop_after_attempt(3))
-# add docstring here if needed
 def get_wow_access_token(client_id, client_secret):
     """
     Fetches an OAuth access token from the Blizzard API.
-    
+
     This function sends a POST request to Blizzard's Battle.net OAuth token endpoint using the
     provided client credentials. It returns the access token as a string for use in authenticating
     subsequent API requests.
-    
+
     Args:
         client_id: The Blizzard API client identifier.
         client_secret: The Blizzard API client secret.
-    
+
     Returns:
         The access token as a string.
     """
@@ -84,21 +81,20 @@ def get_wow_access_token(client_id, client_secret):
 
 
 @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
-# add docstring here if needed
 def get_listings_single(connectedRealmId: int, access_token: str, region: str):
     """
     Fetches auction listings for a connected realm in a specified region.
-    
+
     Retrieves auction data from Blizzard's World of Warcraft API for the given
     connected realm and region. Supported region codes are "NA" and "EU". If the
     region is unsupported, the function prints a notification and terminates the
     program.
-    
+
     Parameters:
         connectedRealmId (int): Identifier for the connected realm.
         access_token (str): Blizzard API OAuth access token.
         region (str): Region code ("NA" for North America or "EU" for Europe).
-    
+
     Returns:
         list: A list of auction data dictionaries.
     """
@@ -121,13 +117,12 @@ def get_listings_single(connectedRealmId: int, access_token: str, region: str):
     return auction_info["auctions"]
 
 
-# add docstring here if needed
 def get_petnames(access_token):
     """Fetch a mapping of World of Warcraft pet IDs to their names.
-    
+
     Retrieves pet data from the Blizzard World of Warcraft API using the provided OAuth access token.
     Returns a dictionary where each key is a pet ID (int) and each value is the corresponding pet name (str).
-    
+
     Args:
         access_token: An OAuth access token used for authenticating the API request.
     """
@@ -150,19 +145,18 @@ RAW_GITHUB_BACKUP_PATH = "https://raw.githubusercontent.com/ff14-advanced-market
 SADDLEBAG_URL = "http://api.saddlebagexchange.com"
 
 
-# add docstring here if needed
 def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     """
     Retrieves backup update timers for a specified region.
-    
+
     This function fetches update timer data from an external API and filters the results to include only those
     timers that match the provided region and have valid dataSetID values. If enabled, it further excludes
     timers for Russian realms.
-    
+
     Args:
         REGION (str): The region identifier for which timers are retrieved.
         NO_RUSSIAN_REALMS (bool, optional): If True, excludes timers associated with Russian realms. Defaults to True.
-    
+
     Returns:
         dict: A mapping of valid dataSetID values to their corresponding update timer data.
     """
@@ -186,13 +180,12 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     return server_update_times
 
 
-# add docstring here if needed
 def get_itemnames():
     """
     Retrieves a list of item names from the primary API, falling back to a backup source if necessary.
-    
+
     This function attempts to fetch item names by sending a POST request to the primary API endpoint. If an exception occurs during the request, it prints an error message and retrieves the item names from a GitHub backup.
-    
+
     Returns:
         list: A list of item names.
     """
@@ -207,15 +200,14 @@ def get_itemnames():
     return item_names
 
 
-# add docstring here if needed
 def get_pet_names_backup():
     """
     Retrieve pet names from the primary API or a GitHub backup.
-    
+
     This function sends a POST request with a JSON payload to obtain pet names. If the request fails,
     it falls back to retrieving the data from a GitHub backup. The resulting dictionary is processed to
     convert its keys to integers.
-    
+
     Returns:
         dict: A mapping of pet IDs (integers) to their corresponding names.
     """
@@ -231,14 +223,13 @@ def get_pet_names_backup():
     return pet_info
 
 
-# add docstring here if needed
 def get_raidbots_bonus_ids():
     """
     Fetch bonus IDs from the Raidbots API and return them as a dictionary.
-    
+
     Returns:
         dict: A dictionary mapping bonus IDs (as integers) to their corresponding data.
-    
+
     If the primary API request fails, a backup source is used to retrieve the data.
     """
     try:
@@ -252,20 +243,19 @@ def get_raidbots_bonus_ids():
     return {int(id): data for id, data in bonus_ids.items()}
 
 
-# add docstring here if needed
 def get_ilvl_items(ilvl=201, item_ids=[]):
     """
     Retrieves item details based on item level and optional item IDs.
-    
-    This function fetches World of Warcraft item data from a primary API endpoint using the specified item level 
-    and an optional list of item IDs for filtering. If no item IDs are provided, the item level is reset to 201, ensuring 
+
+    This function fetches World of Warcraft item data from a primary API endpoint using the specified item level
+    and an optional list of item IDs for filtering. If no item IDs are provided, the item level is reset to 201, ensuring
     a default query is executed. On failure to retrieve data from the primary source, a backup source is used.
-    
+
     Args:
         ilvl (int, optional): Threshold for filtering items by level. When no item IDs are provided, this is overridden to 201.
             Defaults to 201.
         item_ids (list, optional): List of item IDs to filter the results. If empty or None, filtering is based solely on the item level.
-    
+
     Returns:
         tuple: A four-element tuple containing:
             - dict: Mapping of item IDs (int) to item names (str).

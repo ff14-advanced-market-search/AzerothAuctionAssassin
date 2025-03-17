@@ -1,16 +1,15 @@
 from utils.api_requests import get_raidbots_bonus_ids
 
 
-# add docstring here if needed
 def get_bonus_ids():
     """
     Retrieve and categorize bonus IDs from raidbot data.
-    
+
     This function obtains bonus ID information and groups the bonuses by their attributes.
     The resulting dictionary includes bonus categories such as sockets, leech, avoidance, speed,
     level additions (ilvl_addition), haste, crit, mastery, and versatility based on the presence of
     specific keys or stat entries in the raw data.
-    
+
     Returns:
         dict: A dictionary mapping each bonus category to its corresponding bonus ID entries.
     """
@@ -62,11 +61,10 @@ def get_bonus_ids():
     }
 
 
-# add docstring here if needed
 def get_bonus_id_sets():
     # get raw data
     """Retrieve sets of bonus IDs categorized by type.
-    
+
     Returns:
         tuple: A tuple containing:
             - set: IDs for socket bonuses.
@@ -90,12 +88,11 @@ def get_bonus_id_sets():
     )  # , bonus_ids["ilvl_base"]
 
 
-# add docstring here if needed
 def get_secondary_stats():
     # get raw data
     """
     Extract secondary stat bonus IDs.
-    
+
     Returns:
         tuple[set, set, set, set]: A tuple containing sets of bonus IDs for haste, crit,
         mastery, and versatility respectively.
