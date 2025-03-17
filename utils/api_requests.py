@@ -4,6 +4,7 @@ from utils.helpers import get_wow_russian_realm_ids
 
 
 ## DISCORD API CALLS ##
+# add docstring here if needed
 def send_embed_discord(embed, webhook_url):
     # Send message
     """Send an embed message to a specified Discord webhook URL.
@@ -31,6 +32,7 @@ def send_embed_discord(embed, webhook_url):
 
 
 @retry(stop=stop_after_attempt(3))
+# add docstring here if needed
 def send_discord_message(message, webhook_url):
     """Send a message to a Discord channel using a webhook.
     Parameters:
@@ -55,6 +57,7 @@ def send_discord_message(message, webhook_url):
 
 ## BLIZZARD API CALLS ##
 @retry(stop=stop_after_attempt(3))
+# add docstring here if needed
 def get_wow_access_token(client_id, client_secret):
     access_token = requests.post(
         "https://oauth.battle.net/token",
@@ -65,6 +68,7 @@ def get_wow_access_token(client_id, client_secret):
 
 
 @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
+# add docstring here if needed
 def get_listings_single(connectedRealmId: int, access_token: str, region: str):
     """Fetches auction listings for a specific connected realm and region in the World of Warcraft game using the Blizzard API.
     Parameters:
@@ -96,6 +100,7 @@ def get_listings_single(connectedRealmId: int, access_token: str, region: str):
     return auction_info["auctions"]
 
 
+# add docstring here if needed
 def get_petnames(access_token):
     """Get a dictionary of pet IDs and names from the World of Warcraft API.
     Parameters:
@@ -125,6 +130,7 @@ RAW_GITHUB_BACKUP_PATH = "https://raw.githubusercontent.com/ff14-advanced-market
 SADDLEBAG_URL = "http://api.saddlebagexchange.com"
 
 
+# add docstring here if needed
 def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     """Get backup of update timers for a specific region, optionally excluding Russian realms.
     Parameters:
@@ -157,6 +163,7 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     return server_update_times
 
 
+# add docstring here if needed
 def get_itemnames():
     """Get item names from a specified API or fallback to a GitHub backup.
     Returns:
@@ -176,6 +183,7 @@ def get_itemnames():
     return item_names
 
 
+# add docstring here if needed
 def get_pet_names_backup():
     """Fetches pet names from a specified API endpoint or a backup source if the request fails.
     Returns:
@@ -196,6 +204,7 @@ def get_pet_names_backup():
     return pet_info
 
 
+# add docstring here if needed
 def get_raidbots_bonus_ids():
     """Fetch bonus IDs from an external source and return them in a dictionary format.
     Returns:
@@ -215,6 +224,7 @@ def get_raidbots_bonus_ids():
     return {int(id): data for id, data in bonus_ids.items()}
 
 
+# add docstring here if needed
 def get_ilvl_items(ilvl=201, item_ids=[]):
     """Get item details based on the item level and item IDs provided.
     Parameters:

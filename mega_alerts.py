@@ -16,6 +16,7 @@ import utils.mega_data_setup
 
 # Add at the beginning of the file, after imports
 class StreamToFile:
+    # add docstring here if needed
     def __init__(self, filepath):
         self.filepath = filepath
         self.terminal_out = sys.stdout
@@ -30,11 +31,13 @@ class StreamToFile:
         sys.stdout = self
         sys.stderr = self
 
+    # add docstring here if needed
     def write(self, text):
         self.terminal_out.write(text)
         with open(self.filepath, "a", encoding="utf-8") as f:
             f.write(text)
 
+    # add docstring here if needed
     def flush(self):
         self.terminal_out.flush()
         self.terminal_err.flush()
@@ -44,6 +47,7 @@ class Alerts(QThread):
     completed = pyqtSignal(int)
     progress = pyqtSignal(str)
 
+    # add docstring here if needed
     def __init__(
         self,
         path_to_data_files=None,
@@ -72,8 +76,10 @@ class Alerts(QThread):
         print(f"Starting Mega Alerts at {datetime.now()}")
         print(f"Log file created at: {log_file}")
 
+    # add docstring here if needed
     def run(self):
         #### FUNCTIONS ####
+        # add docstring here if needed
         def pull_single_realm_data(connected_id):
             auctions = mega_data.get_listings_single(connected_id)
             clean_auctions = clean_listing_data(auctions, connected_id)
@@ -202,6 +208,7 @@ class Alerts(QThread):
                     )
                     mega_data.send_discord_embed(item_embed)
 
+        # add docstring here if needed
         def clean_listing_data(auctions, connected_id):
             all_ah_buyouts = {}
             all_ah_bids = {}
@@ -214,6 +221,7 @@ class Alerts(QThread):
                 print(f"no listings found on {connected_id} of {mega_data.REGION}")
                 return
 
+            # add docstring here if needed
             def add_price_to_dict(price, item_id, price_dict, is_pet=False):
                 if is_pet:
                     if price < mega_data.DESIRED_PETS[item_id] * 10000:
@@ -331,6 +339,7 @@ class Alerts(QThread):
                     pet_ilvl_ah_buyouts,
                 )
 
+        # add docstring here if needed
         def check_tertiary_stats_generic(
             auction,
             socket_ids,
@@ -460,6 +469,7 @@ class Alerts(QThread):
                     "required_lvl": required_lvl,
                 }
 
+        # add docstring here if needed
         def format_alert_messages(
             all_ah_buyouts,
             all_ah_bids,
@@ -580,6 +590,7 @@ class Alerts(QThread):
             # end of the line alerts go out from here
             return results
 
+        # add docstring here if needed
         def results_dict(
             auction, itemlink, connected_id, realm_names, id, idType, priceType
         ):
@@ -595,6 +606,7 @@ class Alerts(QThread):
                 f"{priceType}_prices": json.dumps(auction),
             }
 
+        # add docstring here if needed
         def ilvl_results_dict(
             auction, itemlink, connected_id, realm_names, id, idType, priceType
         ):
@@ -615,6 +627,7 @@ class Alerts(QThread):
                 "required_lvl": auction["required_lvl"],
             }
 
+        # add docstring here if needed
         def pet_ilvl_results_dict(
             auction, itemlink, connected_id, realm_names, id, idType, priceType
         ):
@@ -632,6 +645,7 @@ class Alerts(QThread):
                 "breed": auction["breed"],
             }
 
+        # add docstring here if needed
         def check_pet_ilvl_stats(item, desired_pet_list):
             """
             Check if a pet auction meets the desired level and price criteria
@@ -687,6 +701,7 @@ class Alerts(QThread):
             }
 
         #### MAIN ####
+        # add docstring here if needed
         def main():
             while self.running:
                 current_min = int(datetime.now().minute)
@@ -733,11 +748,13 @@ class Alerts(QThread):
             self.progress.emit("Stopped alerts!")
             self.completed.emit(1)
 
+        # add docstring here if needed
         def main_single():
             # run everything once slow
             for connected_id in set(mega_data.WOW_SERVER_NAMES.values()):
                 pull_single_realm_data(connected_id)
 
+        # add docstring here if needed
         def main_fast():
             self.progress.emit("Sending alerts!")
             # run everything once fast

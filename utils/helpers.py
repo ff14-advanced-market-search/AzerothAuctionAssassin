@@ -1,6 +1,7 @@
 import time
 
 
+# add docstring here if needed
 def create_oribos_exchange_pet_link(realm_name, pet_id, region):
     fixed_realm_name = realm_name.lower().replace("'", "").replace(" ", "-")
     if region == "NA":
@@ -10,6 +11,7 @@ def create_oribos_exchange_pet_link(realm_name, pet_id, region):
     return f"https://undermine.exchange/#{url_region}-{fixed_realm_name}/82800-{pet_id}"
 
 
+# add docstring here if needed
 def create_oribos_exchange_item_link(realm_name, item_id, region):
     fixed_realm_name = realm_name.lower().replace("'", "").replace(" ", "-")
     if region == "NA":
@@ -19,10 +21,12 @@ def create_oribos_exchange_item_link(realm_name, item_id, region):
     return f"https://undermine.exchange/#{url_region}-{fixed_realm_name}/{item_id}"
 
 
+# add docstring here if needed
 def create_saddlebag_link(item_id):
     return f"https://saddlebagexchange.com/wow/item-data/{item_id}"
 
 
+# add docstring here if needed
 def get_wow_russian_realm_ids():
     retail_realms = [1602, 1604, 1605, 1614, 1615, 1623, 1923, 1925, 1928, 1929, 1922]
     classic_realms = [4452, 4474]
@@ -30,6 +34,7 @@ def get_wow_russian_realm_ids():
     return retail_realms + classic_realms + sod_realms
 
 
+# add docstring here if needed
 def create_embed(title, description, fields):
     """Create a Discord embed with specified title, description, and fields.
     Parameters:
@@ -55,5 +60,6 @@ def create_embed(title, description, fields):
     return embed
 
 
+# add docstring here if needed
 def split_list(lst, max_size):
     return [lst[i : i + max_size] for i in range(0, len(lst), max_size)]

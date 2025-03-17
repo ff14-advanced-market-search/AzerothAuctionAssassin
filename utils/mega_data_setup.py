@@ -18,6 +18,7 @@ from collections import defaultdict
 
 
 class MegaData:
+    # add docstring here if needed
     def __init__(
         self,
         path_to_data_files=None,
@@ -124,6 +125,7 @@ class MegaData:
 
     #### VARIABLE RELATED FUNCTIONS ####
     @staticmethod
+    # add docstring here if needed
     def __set_mega_vars(var_name, raw_mega_data, required=False):
         if len(raw_mega_data) != 0 and var_name in raw_mega_data.keys():
             print(f"loading {var_name} from AzerothAuctionAssassinData/mega_data.json")
@@ -195,6 +197,7 @@ class MegaData:
                 var_value = 1
 
         # handle cases where we need a default value to be true or false
+        # add docstring here if needed
         def process_var(var_value, default_behaviour):
             if (
                 str(var_value).lower() == str(default_behaviour).lower()
@@ -216,6 +219,7 @@ class MegaData:
 
     # access token setter
     @retry(stop=stop_after_attempt(10))
+    # add docstring here if needed
     def check_access_token(self):
         # tokens are valid for 24 hours
         if (
@@ -247,6 +251,7 @@ class MegaData:
             self.access_token_creation_unix_time = int(datetime.now().timestamp())
             return self.access_token
 
+    # add docstring here if needed
     def __set_item_names(self):
         item_names = get_itemnames()
         item_names = {
@@ -256,6 +261,7 @@ class MegaData:
         }
         return item_names
 
+    # add docstring here if needed
     def __set_desired_items(self, item_list_name, path_to_data=None):
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
@@ -290,6 +296,7 @@ class MegaData:
             desired_items[int(k)] = float(v)
         return desired_items
 
+    # add docstring here if needed
     def __set_desired_ilvl_list(self, path_to_data=None):
         item_list_name = "desired_ilvl_list"
         file_name = f"{item_list_name}.json"
@@ -359,6 +366,7 @@ class MegaData:
 
         return DESIRED_ILVL_LIST
 
+    # add docstring here if needed
     def __set_desired_ilvl(
         self, ilvl_info, item_names, base_ilvls, base_required_levels
     ):
@@ -446,6 +454,7 @@ class MegaData:
 
         return snipe_info, ilvl_info["ilvl"]
 
+    # add docstring here if needed
     def __set_desired_pet_ilvl_list(self, path_to_data=None):
         item_list_name = "desired_pet_ilvl_list"
         file_name = f"{item_list_name}.json"
@@ -511,6 +520,7 @@ class MegaData:
 
         return processed_pet_list
 
+    # add docstring here if needed
     def __set_realm_names(self):
         realm_names = json.load(
             open(
@@ -524,6 +534,7 @@ class MegaData:
             }
         return realm_names
 
+    # add docstring here if needed
     def __validate_snipe_lists(self):
         if (
             len(self.DESIRED_ITEMS) == 0
@@ -542,12 +553,15 @@ class MegaData:
             error_message += "- desired_pet_ilvl_list.json\n"
             raise Exception(error_message)
 
+    # add docstring here if needed
     def get_upload_time_list(self):
         return list(self.upload_timers.values())
 
+    # add docstring here if needed
     def get_upload_time_minutes(self):
         return set(realm["lastUploadMinute"] for realm in self.get_upload_time_list())
 
+    # add docstring here if needed
     def get_realm_names(self, connectedRealmId):
         realm_names = [
             name for name, id in self.WOW_SERVER_NAMES.items() if id == connectedRealmId
@@ -557,6 +571,7 @@ class MegaData:
 
     #### AH API CALLS ####
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
+    # add docstring here if needed
     def get_listings_single(self, connectedRealmId: int):
         if connectedRealmId in [-1, -2]:
             print(f"gather data from {self.REGION} commodities")
@@ -596,6 +611,7 @@ class MegaData:
 
         return all_auctions
 
+    # add docstring here if needed
     def construct_api_url(self, connectedRealmId, endpoint):
         base_url = (
             "https://us.api.blizzard.com"
@@ -619,6 +635,7 @@ class MegaData:
         retry=retry_if_exception_type(requests.RequestException),
         retry_error_callback=lambda retry_state: {"auctions": []},
     )
+    # add docstring here if needed
     def make_ah_api_request(self, url, connectedRealmId):
         headers = {"Authorization": f"Bearer {self.check_access_token()}"}
         req = requests.get(url, headers=headers, timeout=20)
@@ -661,6 +678,7 @@ class MegaData:
         auction_info = req.json()
         return auction_info
 
+    # add docstring here if needed
     def update_local_timers(self, dataSetID, lastUploadTimeRaw):
         if dataSetID == -1:
             tableName = f"{self.REGION}_retail_commodityListings"
@@ -692,6 +710,7 @@ class MegaData:
         retry=retry_if_exception_type(requests.RequestException),
         retry_error_callback=lambda retry_state: {"auctions": []},
     )
+    # add docstring here if needed
     def make_commodity_ah_api_request(self):
         if self.REGION == "NA":
             url = f"https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
@@ -743,8 +762,10 @@ class MegaData:
         return auction_info
 
     #### GENERAL USE FUNCTIONS ####
+    # add docstring here if needed
     def send_discord_message(self, message):
         send_discord_message(message, self.WEBHOOK_URL)
 
+    # add docstring here if needed
     def send_discord_embed(self, embed):
         send_embed_discord(embed, self.WEBHOOK_URL)

@@ -56,6 +56,7 @@ if sys.platform == "win32":
 
 # Add at the beginning of the file after imports
 class StreamToFile:
+    # add docstring here if needed
     def __init__(self, filepath):
         self.filepath = filepath
         self.terminal_out = sys.stdout
@@ -70,11 +71,13 @@ class StreamToFile:
         sys.stdout = self
         sys.stderr = self
 
+    # add docstring here if needed
     def write(self, text):
         self.terminal_out.write(text)
         with open(self.filepath, "a", encoding="utf-8") as f:
             f.write(text)
 
+    # add docstring here if needed
     def flush(self):
         self.terminal_out.flush()
         self.terminal_err.flush()
@@ -83,17 +86,20 @@ class StreamToFile:
 class Item_And_Pet_Statistics(QThread):
     completed = pyqtSignal(pd.DataFrame, pd.DataFrame)
 
+    # add docstring here if needed
     def __init__(self, parent=None):
         super(Item_And_Pet_Statistics, self).__init__(parent)
         self.parent = parent
         self.region = "EU"  # Default to EU
 
+    # add docstring here if needed
     def set_region(self, region):
         """Update region and refresh statistics"""
         if region in ["NA", "EU"]:
             self.region = region
             self.start()  # Refresh the statistics with new region
 
+    # add docstring here if needed
     def run(self):
         item_statistics = pd.DataFrame(
             data=requests.post(
@@ -115,6 +121,7 @@ class Item_And_Pet_Statistics(QThread):
 
 
 class App(QMainWindow):
+    # add docstring here if needed
     def __init__(self):
         try:
             super(App, self).__init__()
@@ -233,6 +240,7 @@ class App(QMainWindow):
             print("=== END CRASH REPORT ===")
             raise
 
+    # add docstring here if needed
     def handle_exception(self, exc_type, exc_value, exc_traceback):
         """Handle uncaught exceptions"""
         if issubclass(exc_type, KeyboardInterrupt):
@@ -250,6 +258,7 @@ class App(QMainWindow):
         print("".join(traceback.format_tb(exc_traceback)))
         print("=== END CRASH REPORT ===")
 
+    # add docstring here if needed
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
@@ -325,6 +334,7 @@ class App(QMainWindow):
 
         self.show()
 
+    # add docstring here if needed
     def make_realm_page(self, realm_page):
 
         self.realm_region = QComboBox(realm_page)
@@ -388,6 +398,7 @@ class App(QMainWindow):
         self.realm_list_display.itemClicked.connect(self.realm_list_clicked)
         self.realms_page_layout.addWidget(self.realm_list_display, 0, 1, 11, 2)
 
+    # add docstring here if needed
     def make_side_buttons(self):
         self.go_to_home_button = QPushButton("Home Page")
         self.go_to_home_button.setFixedSize(150, 25)
@@ -465,6 +476,7 @@ class App(QMainWindow):
         self.mega_alerts_progress.setFixedSize(150, 100)
         self.layout_area.addWidget(self.mega_alerts_progress, 12, 0)
 
+    # add docstring here if needed
     def make_home_page(self, home_page):
 
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
@@ -519,6 +531,7 @@ class App(QMainWindow):
         self.guides_link.setOpenExternalLinks(True)
         self.home_page_layout.addWidget(self.guides_link, 5, 0)
 
+    # add docstring here if needed
     def make_settings_page(self, settings_page):
 
         self.discord_webhook_input = QLineEdit(settings_page)
@@ -660,11 +673,13 @@ class App(QMainWindow):
 
         self.settings_page_layout.addWidget(self.import_config_button, 18, 0, 1, 1)
 
+    # add docstring here if needed
     def on_region_changed(self, new_region):
         """Handle region changes and refresh statistics if needed"""
         if new_region in ["NA", "EU"]:
             self.api_data_thread.set_region(new_region)
 
+    # add docstring here if needed
     def make_pet_page(self, pet_page):
 
         self.pet_id_input = QLineEdit(pet_page)
@@ -730,6 +745,7 @@ class App(QMainWindow):
         self.convert_pets_to_pbs_button.clicked.connect(self.convert_pets_to_pbs)
         self.pet_page_layout.addWidget(self.convert_pets_to_pbs_button, 18, 1, 1, 1)
 
+    # add docstring here if needed
     def make_item_page(self, item_page):
 
         self.item_id_input = QLineEdit(item_page)
@@ -795,6 +811,7 @@ class App(QMainWindow):
         self.convert_to_pbs_button.clicked.connect(self.convert_to_pbs)
         self.item_page_layout.addWidget(self.convert_to_pbs_button, 18, 1, 1, 1)
 
+    # add docstring here if needed
     def make_ilvl_page(self, ilvl_page):
 
         self.ilvl_item_input = QLineEdit(ilvl_page)
@@ -928,27 +945,35 @@ class App(QMainWindow):
         self.ilvl_page_layout.addWidget(self.ilvl_bonus_lists_input_label, 16, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_bonus_lists_input, 17, 0, 1, 1)
 
+    # add docstring here if needed
     def go_to_home_page(self):
         self.stacked_widget.setCurrentIndex(0)
 
+    # add docstring here if needed
     def go_to_pet_page(self):
         self.stacked_widget.setCurrentIndex(1)
 
+    # add docstring here if needed
     def go_to_item_page(self):
         self.stacked_widget.setCurrentIndex(2)
 
+    # add docstring here if needed
     def go_to_ilvl_page(self):
         self.stacked_widget.setCurrentIndex(3)
 
+    # add docstring here if needed
     def go_to_settings_page(self):
         self.stacked_widget.setCurrentIndex(4)
 
+    # add docstring here if needed
     def go_to_realms_page(self):
         self.stacked_widget.setCurrentIndex(5)
 
+    # add docstring here if needed
     def go_to_pet_ilvl_page(self):
         self.stacked_widget.setCurrentIndex(6)
 
+    # add docstring here if needed
     def api_data_received(self, pet_statistics, item_statistics):
         self.pet_statistics = pet_statistics
         self.item_statistics = item_statistics
@@ -986,6 +1011,7 @@ class App(QMainWindow):
             "QComboBox::drop-down { border: 0px; }"
         )
 
+    # add docstring here if needed
     def on_combo_box_item_changed(self, index):
         # This function will be called whenever the user selects a different item
 
@@ -1020,6 +1046,7 @@ class App(QMainWindow):
 
         self.item_id_input.setText(str(selected_item_id))
 
+    # add docstring here if needed
     def on_combo_box_pet_changed(self, index):
         # This function will be called whenever the user selects a different item
         selected_pet = self.pet_name_input.currentText()
@@ -1050,6 +1077,7 @@ class App(QMainWindow):
 
         self.pet_id_input.setText(str(selected_pet_id))
 
+    # add docstring here if needed
     def on_combo_box_region_changed(self, index):
         self.realm_list_display.clear()
         self.realm_name_combobox.clear()
@@ -1119,6 +1147,7 @@ class App(QMainWindow):
                 self.realm_list_display.count(), f"Name: {key}; ID: {value};"
             )
 
+    # add docstring here if needed
     def on_combo_box_realm_name_changed(self, index):
         selected_realm_name = self.realm_name_combobox.currentText()
         if selected_realm_name == "":
@@ -1158,6 +1187,7 @@ class App(QMainWindow):
         self.realm_name_input.setText(str(selected_realm_name))
         self.realm_id_input.setText(str(realm_list[selected_realm_name]))
 
+    # add docstring here if needed
     def add_realm_to_list(self):
         if self.realm_name_input.text() == "":
             return 0
@@ -1200,6 +1230,7 @@ class App(QMainWindow):
 
         self.save_json_file(data_to_insert, data)
 
+    # add docstring here if needed
     def remove_realm_to_list(self):
         if self.realm_name_input.text() == "":
             return 0
@@ -1254,6 +1285,7 @@ class App(QMainWindow):
 
         self.save_json_file(data_to_insert, data)
 
+    # add docstring here if needed
     def reset_realm_list(self):
         selected_realm = self.realm_region.currentText()
         match selected_realm:
@@ -1309,6 +1341,7 @@ class App(QMainWindow):
                 self.realm_list_display.count(), f"Name: {key}; ID: {value};"
             )
 
+    # add docstring here if needed
     def check_config_file(self, path_to_config):
         try:
             with open(path_to_config, encoding="utf-8") as json_file:
@@ -1375,6 +1408,7 @@ class App(QMainWindow):
                 f"Could not load config settings from {path_to_config}",
             )
 
+    # add docstring here if needed
     def check_for_settings(self):
         """
         Initializes required directories, configuration, and user data files.
@@ -1497,6 +1531,7 @@ class App(QMainWindow):
                     self.ilvl_list_display.count(), display_string
                 )
 
+    # add docstring here if needed
     def ilvl_list_double_clicked(self, item):
         # Parse the display string more carefully
         """
@@ -1539,6 +1574,7 @@ class App(QMainWindow):
         bonus_lists = parts[10].split(":")[1].strip()
         self.ilvl_bonus_lists_input.setText(bonus_lists.strip("[]").replace(" ", ""))
 
+    # add docstring here if needed
     def realm_list_clicked(self, item):
         """
         Handles a realm list item selection by updating the realm input fields.
@@ -1555,6 +1591,7 @@ class App(QMainWindow):
 
         self.realm_id_input.setText(realm_id)
 
+    # add docstring here if needed
     def log_list_widget_contents(self, list_widget, message=""):
         """Log all items in the provided QListWidget.
 
@@ -1567,6 +1604,7 @@ class App(QMainWindow):
             print(f"Item {i}: {item.text()}")
         print("=== End List Contents ===\n")
 
+    # add docstring here if needed
     def add_ilvl_to_list(self):
         """
         Add or update an item level filter entry from the UI inputs.
@@ -1784,6 +1822,7 @@ class App(QMainWindow):
 
         return True
 
+    # add docstring here if needed
     def remove_ilvl_to_list(self):
         """
         Removes an item level rule matching the specified criteria from the list.
@@ -1870,6 +1909,7 @@ class App(QMainWindow):
                 "No exact match found for the selected criteria.",
             )
 
+    # add docstring here if needed
     def entries_match(self, entry, compare_dict):
         """
         Compare two entry dictionaries while ignoring the 'buyout' field.
@@ -1892,6 +1932,7 @@ class App(QMainWindow):
         entry_copy.pop("buyout")
         return entry_copy == compare_dict
 
+    # add docstring here if needed
     def erase_ilvl_data(self):
         """
         Resets all item level data after user confirmation.
@@ -1910,6 +1951,7 @@ class App(QMainWindow):
             self.ilvl_list_display.clear()
             self.ilvl_list = []
 
+    # add docstring here if needed
     def import_ilvl_data(self):
         """
         Imports and validates item level data from a JSON file.
@@ -2023,6 +2065,7 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
 
+    # add docstring here if needed
     def item_list_double_clicked(self, item):
         item_split = item.text().replace(" ", "").split(":")
         item_id = item_split[1].split(",")[0]
@@ -2039,6 +2082,7 @@ class App(QMainWindow):
         except:
             self.item_name_input.setCurrentText("Item ID not found")
 
+    # add docstring here if needed
     def add_item_to_dict(self):
         item_id = self.item_id_input.text()
         item_price = self.item_price_input.text()
@@ -2091,6 +2135,7 @@ class App(QMainWindow):
 
         return True
 
+    # add docstring here if needed
     def remove_item_to_dict(self):
         if self.item_id_input.text() in self.items_list:
             for x in range(self.item_list_display.count()):
@@ -2102,6 +2147,7 @@ class App(QMainWindow):
                     del self.items_list[self.item_id_input.text()]
                     return
 
+    # add docstring here if needed
     def erase_item_data(self):
         reply = QMessageBox.question(
             self,
@@ -2114,6 +2160,7 @@ class App(QMainWindow):
             self.item_list_display.clear()
             self.items_list = {}
 
+    # add docstring here if needed
     def process_import_data(self, data_source, is_file=False, data_type="item"):
         try:
             # Load the JSON data from the appropriate source
@@ -2167,6 +2214,7 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
 
+    # add docstring here if needed
     def import_item_data(self):
         text, ok = QInputDialog.getMultiLineText(
             self,
@@ -2179,6 +2227,7 @@ class App(QMainWindow):
         self.process_import_data(text, data_type="item")
 
     # an option if we want to switch to a file import instead of a text import
+    # add docstring here if needed
     def import_item_data_from_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
@@ -2191,6 +2240,7 @@ class App(QMainWindow):
 
         self.process_import_data(file_path, is_file=True, data_type="item")
 
+    # add docstring here if needed
     def import_pbs_data(self):
         # Open a dialog to allow users to paste the PBS data
         """
@@ -2280,6 +2330,7 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
 
+    # add docstring here if needed
     def convert_to_pbs(self):
         try:
             # Assuming `self.items_list` is the AAA JSON list of items and prices
@@ -2295,6 +2346,7 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Conversion Error", str(e))
 
+    # add docstring here if needed
     def convert_aaa_json_to_pbs(self, json_data):
         # Prepare the PBS list
         pbs_list = []
@@ -2321,6 +2373,7 @@ class App(QMainWindow):
 
         return pbs_string
 
+    # add docstring here if needed
     def pet_list_double_clicked(self, item):
         item_split = item.text().replace(" ", "").split(":")
         pet_id = item_split[1].split(",")[0]
@@ -2336,6 +2389,7 @@ class App(QMainWindow):
         except:
             self.pet_name_input.setCurrentText("Item ID not found")
 
+    # add docstring here if needed
     def add_pet_to_dict(self):
         pet_id = self.pet_id_input.text()
         pet_price = self.pet_price_input.text()
@@ -2388,6 +2442,7 @@ class App(QMainWindow):
 
         return True
 
+    # add docstring here if needed
     def remove_pet_to_dict(self):
         if self.pet_id_input.text() in self.pet_list:
             for x in range(self.pet_list_display.count()):
@@ -2399,6 +2454,7 @@ class App(QMainWindow):
                     del self.pet_list[self.pet_id_input.text()]
                     return
 
+    # add docstring here if needed
     def erase_pet_data(self):
         reply = QMessageBox.question(
             self,
@@ -2411,6 +2467,7 @@ class App(QMainWindow):
             self.pet_list_display.clear()
             self.pet_list = {}
 
+    # add docstring here if needed
     def import_pet_data(self):
         text, ok = QInputDialog.getMultiLineText(
             self,
@@ -2422,6 +2479,7 @@ class App(QMainWindow):
         self.process_import_data(text, data_type="pet")
 
     # an option if we want to switch to a file import instead of a text import
+    # add docstring here if needed
     def import_pet_data_from_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
@@ -2433,12 +2491,14 @@ class App(QMainWindow):
             return
         self.process_import_data(file_path, is_file=True, data_type="pet")
 
+    # add docstring here if needed
     def import_configs(self):
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
             return
         self.check_config_file(pathname)
 
+    # add docstring here if needed
     def reset_app_data(self):
         reply = QMessageBox.question(
             self,
@@ -2474,6 +2534,7 @@ class App(QMainWindow):
 
             self.save_data_to_json(reset=True)
 
+    # add docstring here if needed
     def validate_application_settings(self, reset=False):
         wow_region = self.wow_region.currentText()
         mega_threads = self.number_of_mega_threads.text()
@@ -2591,6 +2652,7 @@ class App(QMainWindow):
         }
         return config_json
 
+    # add docstring here if needed
     def validate_item_lists(self, reset=False):
         # When resetting, we don't need to validate since lists will be empty
         if reset:
@@ -2674,6 +2736,7 @@ class App(QMainWindow):
 
         return True
 
+    # add docstring here if needed
     def paid_save_data_to_json(self):
         response = requests.post(
             self.token_auth_url,
@@ -2729,6 +2792,7 @@ class App(QMainWindow):
             "Save Sucessful!\nHappy scanning!",
         )
 
+    # add docstring here if needed
     def save_data_to_json(self, reset=False):
         # Validate application settings
         """
@@ -2819,6 +2883,7 @@ class App(QMainWindow):
 
         return True
 
+    # add docstring here if needed
     def save_json_file(self, path, data):
         """
         Save data to a JSON file with UTF-8 encoding and formatted indentation.
@@ -2834,6 +2899,7 @@ class App(QMainWindow):
         with open(path, "w", encoding="utf-8") as json_file:
             json.dump(data, json_file, ensure_ascii=False, indent=4)
 
+    # add docstring here if needed
     def start_alerts(self):
         reply = QMessageBox.question(
             self,
@@ -2868,21 +2934,25 @@ class App(QMainWindow):
         self.alerts_thread.progress.connect(self.alerts_progress_changed)
         self.alerts_thread.finished.connect(self.alerts_thread_finished)
 
+    # add docstring here if needed
     def stop_alerts(self):
         self.alerts_thread.running = False
         self.stop_button.setText("Stopping Process")
         self.alerts_progress_changed("Stopping alerts!")
         self.stop_button.setEnabled(False)
 
+    # add docstring here if needed
     def alerts_thread_finished(self):
         self.stop_button.setText("Stop Alerts")
         self.start_button.setEnabled(True)
         self.alerts_progress_changed("Waiting for user to Start!")
 
+    # add docstring here if needed
     def alerts_progress_changed(self, progress_str):
         self.mega_alerts_progress.setText(progress_str)
 
     # Add after the make_ilvl_page method
+    # add docstring here if needed
     def make_pet_ilvl_page(self, pet_ilvl_page):
         # Pet ID input
         """
@@ -3033,6 +3103,7 @@ class App(QMainWindow):
             self.convert_pet_ilvl_to_pbs_button, 17, 1, 1, 1
         )
 
+    # add docstring here if needed
     def add_pet_ilvl_to_list(self):
         """Add or update a pet level rule in the list"""
         try:
@@ -3104,6 +3175,7 @@ class App(QMainWindow):
 
         return True
 
+    # add docstring here if needed
     def remove_pet_ilvl_from_list(self):
         """Remove a pet level rule from the list"""
         current_item = self.pet_ilvl_list_display.currentItem()
@@ -3124,6 +3196,7 @@ class App(QMainWindow):
             self.pet_ilvl_list_display.row(current_item)
         )
 
+    # add docstring here if needed
     def pet_ilvl_list_clicked(self, item):
         """Handle clicking on a pet level rule in the list"""
         # Parse the display string
@@ -3151,6 +3224,7 @@ class App(QMainWindow):
         except:
             self.pet_ilvl_name_input.setCurrentText("Pet ID not found")
 
+    # add docstring here if needed
     def import_pet_ilvl_data(self):
         """Import pet level rules from a file"""
         pathname = QFileDialog().getOpenFileName(self)[0]
@@ -3191,6 +3265,7 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Import Error", str(e))
 
+    # add docstring here if needed
     def erase_pet_ilvl_data(self):
         """Clear all pet level rules"""
         reply = QMessageBox.question(
@@ -3204,6 +3279,7 @@ class App(QMainWindow):
             self.pet_ilvl_list_display.clear()
             self.pet_ilvl_rules = []
 
+    # add docstring here if needed
     def on_combo_box_pet_ilvl_changed(self, index):
         # This function will be called whenever the user selects a different pet
         """
@@ -3243,6 +3319,7 @@ class App(QMainWindow):
             except:
                 self.pet_ilvl_price_input.setText("10")
 
+    # add docstring here if needed
     def import_pbs_pet_ilvl_data(self):
         """
         Import PBS pet data and convert to pet level rules.
@@ -3373,6 +3450,7 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
 
+    # add docstring here if needed
     def convert_pet_ilvl_to_pbs(self):
         """Convert pet level rules to PBS format"""
         try:
@@ -3402,6 +3480,7 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Conversion Error", str(e))
 
+    # add docstring here if needed
     def import_pbs_pet_data(self):
         # Open a dialog to allow users to paste the PBS data
         """
@@ -3490,6 +3569,7 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
 
+    # add docstring here if needed
     def convert_pets_to_pbs(self):
         try:
             # Convert the AAA pet list to PBS format
@@ -3505,6 +3585,7 @@ class App(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Conversion Error", str(e))
 
+    # add docstring here if needed
     def convert_aaa_pets_to_pbs(self, pet_data):
         # Prepare the PBS list
         """
@@ -3550,6 +3631,7 @@ class App(QMainWindow):
 
         return pbs_string
 
+    # add docstring here if needed
     def isfloat(self, value):
         """Check if a value can be converted to float.
 
