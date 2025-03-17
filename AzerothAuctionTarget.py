@@ -60,6 +60,17 @@ if not os.path.exists(data_folder):
 # @coderabbitai add docstring here if needed and remove this comment after
 def save_json_file(path, data):
 
+    """
+    Saves data to a JSON file.
+    
+    Writes the provided JSON-serializable data to the specified file path in JSON format.
+    The file is opened in write mode with UTF-8 encoding, preserving non-ASCII characters and
+    using an indentation of 4 spaces for readability.
+    
+    Args:
+        path: The file system path where the JSON file will be saved.
+        data: The JSON-serializable data to be written to the file.
+    """
     with open(path, "w", encoding="utf-8") as json_file:
         json.dump(data, json_file, ensure_ascii=False, indent=4)
 
@@ -108,27 +119,24 @@ class RecommendationsRequest(QThread):
         minimum_market_value,
         expansion_number,
     ):
-        """Initialize an object with specified parameters for market data request.
-        Parameters:
-            - realm_id (int): Identifier for the realm.
-            - region (str): The region of the market data.
-            - commodity (str): Type of commodity for market evaluation.
-            - desired_avg_price (float): Target average price for the commodity.
-            - desired_sales_per_day (int): Expected sales volume per day.
-            - item_quality (int): Quality level of the item.
-            - required_level (int): Minimum level required for the item use.
-            - item_class (int): Class category of the item.
-            - item_subclass (int): Subclass category of the item.
-            - ilvl (int): Item level indicator.
-            - discount_percent (float): Discount rate applied to market value calculations.
-            - minimum_market_value (float): Threshold for the lowest acceptable market price.
-            - expansion_number (int): Identifier for the game's expansion pack.
-        Returns:
-            - None: This is an initializer method and does not return a value.
-        Processing Logic:
-            - Initializes base class with super().
-            - Creates a dictionary for request data with provided parameters.
-            - Sets discount percent and minimum market value as instance variables."""
+        """
+        Initialize a market data request with given parameters.
+        
+        Args:
+            realm_id (int): Identifier for the realm.
+            region (str): Market region.
+            commodity (str): Type of commodity for evaluation.
+            desired_avg_price (float): Target average price for the commodity.
+            desired_sales_per_day (int): Estimated number of sales per day.
+            item_quality (int): Quality level of the item.
+            required_level (int): Minimum level required for using the item.
+            item_class (int): Class category of the item.
+            item_subclass (int): Subclass category of the item.
+            ilvl (int): Item level indicator.
+            discount_percent (float): Discount rate applied to market value calculations.
+            minimum_market_value (float): Minimum acceptable market price.
+            expansion_number (int): Identifier for the game's expansion pack.
+        """
         super().__init__()
         self.request_data = {
             "homeRealmId": realm_id,
@@ -149,15 +157,12 @@ class RecommendationsRequest(QThread):
     # @coderabbitai add docstring here if needed and remove this comment after
     def run(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Executes a sequence to fetch and process item recommendations based on market share data.
-        Parameters:
-            - None
-        Returns:
-            - None: Emits a signal with recommended items or an empty dictionary if the conditions are not met.
-        Processing Logic:
-            - Validates the 'homeRealmId' from the request data to ensure it is greater than 0.
-            - Sends a POST request to retrieve item statistics from an external API using the provided request data.
-            - Filters items based on their historic market value and calculates recommended prices with a discount.
+        """Fetch and process item recommendations.
+        
+        Sends a POST request to the Saddlebag Exchange API with pre-configured request data. If the home realm ID is invalid 
+        (<= 0), immediately emits an empty dictionary. Otherwise, filters the API response to include only items with a 
+        historic market value above a specified minimum and computes recommended prices by applying a discount factor. The 
+        resulting recommendations are emitted via the completed signal.
         """
         if self.request_data["homeRealmId"] <= 0:
             # return error that commodities are not a realm, tick the box and pick your home server
@@ -201,20 +206,20 @@ class Item_Statistics(QThread):
         # # old way
         # super(Item_Statistics, self).__init__()
         # # coderabbit says do this
+        """Initialize the item statistics thread.
+        
+        Initializes a QThread subclass instance for fetching item statistics from the Saddlebag Exchange API and processing the results into a pandas DataFrame.
+        """
         super().__init__()
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def run(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Retrieves item statistics from the Saddlebag Exchange API and emits the data as a completed signal.
-        Parameters:
-            - self: Implicit first parameter, referring to the class instance.
-        Returns:
-            - None: Emits data as a signal, does not return anything explicitly.
-        Processing Logic:
-            - Sends a POST request to the Saddlebag Exchange API to obtain item statistics.
-            - Converts the JSON response into a pandas DataFrame.
-            - Emits the DataFrame through a completed signal."""
+        """Fetch item statistics from the Saddlebag Exchange API and emit the results.
+        
+        Sends a POST request to the API, converts the JSON response into a pandas DataFrame, and emits the
+        DataFrame via the completed signal.
+        """
         item_statistics = pd.DataFrame(
             data=requests.post(
                 f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
@@ -240,16 +245,12 @@ class RecommendationsPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Initializes the RecommendationsPage class with predefined attributes for realm connections, item qualities, categories, and more.
-        Parameters:
-            - None
-        Returns:
-            - None
-        Processing Logic:
-            - Initializes data paths for EU and NA connected realms.
-            - Loads realm data from JSON files.
-            - Sets up dictionaries for item qualities, categories, expansions, sub-categories, and custom pet categories.
-            - Calls the `make_page()` method to construct the page setup."""
+        """Initialize the RecommendationsPage with realm data and item configuration.
+        
+        This constructor sets up the graphical layout, loads realm information from JSON files,
+        and initializes dictionaries for item qualities, categories, expansions, sub-categories,
+        and custom pet categories. It then builds the page interface by calling the make_page method.
+        """
 
         super(RecommendationsPage, self).__init__()
         self.layout = QGridLayout(self)
@@ -503,15 +504,10 @@ class RecommendationsPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Creates and arranges various input widgets within a grid layout, allowing users to configure parameters for filtering items based on specified criteria.
-        Parameters:
-            - None
-        Returns:
-            - None
-        Processing Logic:
-            - Connects dropdowns and input fields with appropriate signals for user interaction.
-            - Sets default values for various input fields and dropdown selections.
-            - Adds descriptive labels for each input widget to inform users about their purpose.
+        """
+        Create and arrange UI widgets for filtering item recommendations.
+        
+        Builds the layout with input fields, dropdown menus, and checkboxes that allow users to set filtering criteria such as price, sales per day, item levels, realm selection, and more. It also sets default values and connects UI components to their respective event handlers for dynamic updates.
         """
         self.minimum_average_price_input = QLineEdit(self)
         self.minimum_average_price_input.setText("2000")
@@ -638,6 +634,12 @@ class RecommendationsPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def category_combo_changed(self, index):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Updates the subcategory dropdown based on the selected category.
+        
+        If the selected category is not "All", this method clears the current subcategory list and
+        populates it with items corresponding to the selected category.
+        """
         selected_category = self.item_category.currentText()
         if selected_category == "All":
             return
@@ -647,15 +649,11 @@ class RecommendationsPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def region_combo_changed(self, index):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Updates the realm combobox based on the selected region.
-        Parameters:
-            - index (int): Index of the selected item in the region combobox.
-        Returns:
-            - None: This function does not return any value.
-        Processing Logic:
-            - Clears the current items from the realm combobox.
-            - Adds items to the realm combobox based on the selected region.
-            - Enables the realm combobox after updating the items."""
+        """
+        Updates the realm combobox items based on the selected region.
+        
+        Clears the current realm entries and adds the appropriate realms for either "Europe" or "North America", then enables the combobox.
+        """
         self.recommendations_realm_combobox.clear()
         if self.recommendations_region.currentText() == "Europe":
             self.recommendations_realm_combobox.addItems(self.eu_realms)
@@ -679,6 +677,11 @@ class HomePage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Initializes the HomePage widget.
+        
+        Sets up a grid layout for the widget and calls make_page() to configure the UI, which includes an icon and hyperlinks to external resources.
+        """
         super(HomePage, self).__init__()
         self.layout = QGridLayout(self)
         self.make_page()
@@ -687,16 +690,13 @@ class HomePage(QWidget):
     def make_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
-        """Creates a user interface page with an icon, title, and several hyperlinked labels.
-        Parameters:
-            - self: Instance of the class where the method is defined.
-        Returns:
-            - None: This function does not return any value.
-        Processing Logic:
-            - Adjusts icon file path if the app is run from a Windows binary.
-            - Adds an icon image to the layout.
-            - Includes various hyperlinks such as Patreon, Discord, a main website, and guides.
-            - Sets up label positions and font styles in a grid layout."""
+        """
+        Create the main page layout for the application.
+        
+        Checks if the app is run from a Windows binary to adjust the icon path, then builds a grid layout
+        by adding an icon, a title, and hyperlinked labels to external resources such as Patreon, Discord,
+        the main website, and guides.
+        """
         icon_path = "target.png"
         if windowsApp_Path is not None:
             icon_path = f"{windowsApp_Path}\\{icon_path}"
@@ -762,6 +762,12 @@ class ItemPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Initializes the item page widget.
+        
+        Sets up a grid layout for arranging UI components, initializes the item
+        list, and builds the page interface by calling make_page.
+        """
         super(ItemPage, self).__init__()
         self.layout = QGridLayout(self)
         self.items_list = {}
@@ -770,15 +776,13 @@ class ItemPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Creates and arranges UI components for item selection and management.
-        Parameters:
-            - self (object): Instance of the UI class where this method is defined.
-        Returns:
-            - None: This function does not return any value.
-        Processing Logic:
-            - Sets up input fields, labels, and buttons for item ID, price, and name.
-            - Connects buttons to corresponding action methods for adding, removing, and importing items.
-            - Configures a list widget for displaying and sorting items."""
+        """
+        Creates and arranges UI components for item selection and management.
+        
+        This method initializes input fields for item ID and price, a disabled combobox for item
+        names, and buttons to add, remove, and import item data. It also configures a sortable list
+        widget to display the items.
+        """
         self.item_id_input = QLineEdit(self)
         self.item_id_input_label = QLabel("Item ID", self)
         self.item_id_input_label.setToolTip(
@@ -830,16 +834,13 @@ class ItemPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def add_item_to_dict(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Adds an item with its price to a dictionary and updates a display list if input is valid.
-        Parameters:
-            - None
+        """
+        Adds or updates an item in the internal items dictionary and its display list.
+        
+        This method retrieves the item ID and price from the input fields, validates that the ID is an integer between 1 and 500000 and the price is a number between 0 and 10 million, and then updates the internal dictionary. If the inputs are invalid, an error message is shown and no update is performed. If the item already exists, its previous display entry is removed before the update.
+        
         Returns:
-            - bool: True if the item is successfully added or updated, False otherwise.
-        Processing Logic:
-            - Displays error messages in case of invalid or incomplete input.
-            - Ensures the item ID is within the range 1 to 500000.
-            - Ensures the item price is within the range 0 to 10 million.
-            - Removes the item from the display list if it already exists, before updating it.
+            bool: True if the item is successfully added or updated; False otherwise.
         """
         item_id = self.item_id_input.text()
         item_price = self.item_price_input.text()
@@ -895,16 +896,15 @@ class ItemPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def item_list_double_clicked(self, item):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Handles item selection and updates input fields based on the item's details.
-        Parameters:
-            - item (QListWidgetItem): The item that was double-clicked in the item list.
-        Returns:
-            - None: This function does not return a value.
-        Processing Logic:
-            - Parses the item's text to extract its ID and price.
-            - Sets the extracted ID and price to the corresponding input fields.
-            - Searches for the itemName in the item_statistics DataFrame using the item ID.
-            - Updates the item name input field with the found itemName or sets a default message if not found.
+        """
+        Handle double-click on a list item and update input fields accordingly.
+        
+        Extracts the item ID and price from the double-clicked item's text and assigns them to the respective
+        input fields. It also attempts to retrieve the item name from the statistics data based on the item ID,
+        setting a default message if no matching entry is found.
+        
+        Args:
+            item (QListWidgetItem): The double-clicked item.
         """
         item_split = item.text().replace(" ", "").split(":")
         item_id = item_split[1].split(",")[0]
@@ -924,15 +924,12 @@ class ItemPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def remove_item_to_dict(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Remove an item from the items list and update the display accordingly.
-        Parameters:
-            - self (object): An instance of the class containing item display and list attributes.
-        Returns:
-            - None
-        Processing Logic:
-            - Checks if the entered item ID exists in the current item list.
-            - Iterates over displayed items to find and remove the matching item.
-            - Deletes the item from the internal items list once removed from the display.
+        """
+        Remove an item from the internal items list and update the display.
+        
+        If the item ID entered by the user exists in the internal collection, the function scans
+        the display for a matching entry (formatted as "Item ID: {id}, Price: {price}"). When found,
+        it removes the entry from the display and deletes the item from the collection.
         """
         if self.item_id_input.text() in self.items_list:
             for x in range(self.item_list_display.count()):
@@ -947,17 +944,13 @@ class ItemPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def import_item_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Import item data from a JSON file and display it, with validation checks.
-        Parameters:
-            - self (object): Instance of the class containing this method.
-        Returns:
-            - None: This function does not return a value.
-        Processing Logic:
-            - Opens a file dialog for users to select a JSON file containing item data.
-            - Clears the current item display and initializes an item list dictionary.
-            - Validates item IDs to ensure they are between 1 and 500,000 and prices between 0 and 10,000,000.
-            - Displays items in a list view if they pass validation checks.
-            - Handles JSON decoding errors, invalid value errors, and other exceptions with message dialogs.
+        """
+        Imports item data from a JSON file and updates the item display.
+        
+        Opens a file dialog for the user to select a JSON file containing item IDs and prices.
+        Clears the current display and loads the items, validating that each item ID is an integer
+        between 1 and 500,000 and each price is an integer between 0 and 10,000,000.
+        Displays an appropriate error message if the JSON is invalid or any value fails validation.
         """
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
@@ -995,18 +988,10 @@ class ItemPage(QWidget):
     # @coderabbitai add docstring here if needed and remove this comment after
     def import_pbs_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Import and process PBS data from a selected file, updating item list display and internal item list.
-        Parameters:
-            - None
-        Returns:
-            - None
-        Processing Logic:
-            - Opens a file dialog to select a text file for importing data.
-            - Clears the current item list display and internal items list.
-            - Extracts and processes PBS item names from the file.
-            - Matches these names with existing data to find the desired price.
-            - Applies a discount based on user input and updates both the display and internal list.
-            - Handles errors with appropriate message dialogs for value and unknown exceptions.
+        """
+        Import PBS data and update the item list with discounted prices.
+        
+        This function opens a file dialog for selecting a PBS data file, clears the current item list, and builds a new list by matching item names from the file with existing statistics. It calculates discounted prices using a user-specified discount percentage and updates both the display and the internal list. Errors during processing are reported via message dialogs.
         """
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
@@ -1046,16 +1031,15 @@ class ItemPage(QWidget):
     def on_combo_box_item_changed(self, index):
         # @coderabbitai add docstring here if needed and remove this comment after
         # This function will be called whenever the user selects a different item
-        """Handles changes in the combo box selection by updating item details based on the selected item.
-        Parameters:
-            - index (int): Index of the currently selected item in the combo box, although not directly utilized in the function.
-        Returns:
-            - None: The function updates UI elements and does not return a value.
-        Processing Logic:
-            - Retrieves the selected item's name and looks up its statistics.
-            - Determines the selected item's ID and price from available data.
-            - Updates the input fields for item price and ID based on user inputs or default settings.
-            - Applies a discount to the item price if a discount percentage is provided, with a default rate applied on failure to parse the discount.
+        """Handle combo box selection changes and update item-related UI fields.
+        
+        Retrieves the selected item name from the combo box and locates its statistics to update
+        the corresponding UI fields for the item ID and price. If no custom price is set, a recommended
+        price is computed by applying the discount percentage from the discount input field.
+        A default price is used if discount conversion fails.
+        
+        Args:
+            index (int): The index of the selected combo box item (not used directly).
         """
 
         selected_item = self.item_name_input.currentText()
@@ -1104,16 +1088,12 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Initializes the App class and its graphical user interface components.
-        Parameters:
-            None
-        Returns:
-            None
-        Processing Logic:
-            - Sets the application title with the specified version.
-            - Determines the correct path for the icon file based on the environment.
-            - Configures paths for various data files used by the application.
-            - Initiates and connects the API data retrieval thread for handling item statistics.
+        """Initialize the main application window and configure its UI components.
+        
+        This constructor sets the window title, size, and icon while determining the correct
+        resource path based on the execution environment. It also configures file paths for
+        storing auction-related data and starts a background thread to fetch item statistics,
+        connecting its completion signal to the appropriate slot.
         """
         super(App, self).__init__()
         self.title = f"Azeroth Auction Tartet v{AAT_VERSION}"
@@ -1186,15 +1166,12 @@ class App(QMainWindow):
     def initUI(self):
         # @coderabbitai add docstring here if needed and remove this comment after
         """Initialize the main user interface for the application.
-        Parameters:
-            - None
-        Returns:
-            - None
-        Processing Logic:
-            - Sets the window title and geometry using predefined attributes.
-            - Initializes the central widget and layout area with a grid layout.
-            - Adds buttons and pages to a stacked widget for navigation.
-            - Incorporates a QScrollArea to ensure content is scrollable."""
+        
+        This method sets the main window’s title and geometry, establishes a central widget with a grid layout,
+        and integrates a stacked widget containing the HomePage, ItemPage, and RecommendationsPage. It also
+        creates a scroll area to ensure content is viewable and connects the search button on the recommendations
+        page to its handler, finalizing by displaying the window.
+        """
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
@@ -1235,16 +1212,12 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_side_buttons(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Create and configure side buttons for a graphical user interface.
-        Parameters:
-            - None.
-        Returns:
-            - None.
-        Processing Logic:
-            - Creates QPushButton widgets for four functionalities: navigating to home, recommendations, items, and saving or resetting data.
-            - Sets a fixed size (150, 25) for each button for uniform appearance.
-            - Connects each button to a respective method or function to define its behavior when clicked.
-            - Adds each button to the layout at a specified grid position."""
+        """Create and configure side buttons for navigation and data management.
+        
+        Creates QPushButton widgets for navigating to the Home, Recommendations, and Items
+        pages, as well as for saving and resetting application data. Each button is sized
+        to 150x25, connected to its corresponding action, and added to the layout grid.
+        """
         self.go_to_home_button = QPushButton("Home Page")
 
         self.go_to_home_button.setFixedSize(150, 25)
@@ -1285,21 +1258,23 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def go_to_page_number(self, index):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Switches the current page in the stacked widget to the specified index.
+        
+        Args:
+            index: The index of the page to display.
+        """
         self.stacked_widget.setCurrentIndex(index)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def search(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Search for recommendations based on specified criteria.
-        Parameters:
-            - self: Instance of the class where this method belongs.
-        Returns:
-            - None: This function does not return any value.
-        Processing Logic:
-            - Determines realm ID and region based on user selection of recommendations region.
-            - Computes item category and sub-category from user selections; assigns -1 for sub-category if category is invalid.
-            - Converts desired average price to copper units for thread processing.
-            - Initiates a recommendations request thread with the extracted criteria and connects the completion signal to data received handler.
+        """Search for item recommendations based on user-specified criteria.
+        
+        Gathers search parameters from the UI, including the selected region, realm, item
+        category and sub-category, quality, and pricing details. Input values are converted
+        (as needed) before launching a background thread to request recommendations.
+        Upon completion, the thread's output is forwarded to the recommendation data handler.
         """
         if self.recommendation_page.recommendations_region.currentText() == "Europe":
             realm_id = self.recommendation_page.eu_realms[
@@ -1364,16 +1339,17 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def recommendation_data_received(self, recommended_items):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Receives and validates a dictionary of recommended items, displaying them on the item page.
-        Parameters:
-            - recommended_items (dict): A dictionary where keys are item IDs (int) and values are their respective prices (int).
-        Returns:
-            - None: This function does not return a value.
-        Processing Logic:
-            - Clears the current items displayed before displaying new ones.
-            - Validates that each item ID is between 1 and 500,000.
-            - Validates that each price is between 0 and 10,000,000.
-            - Inserts valid items into the item list display on the item page."""
+        """
+        Processes and displays recommended auction items.
+        
+        This method clears the current display on the item page and then adds new items
+        from the provided dictionary. Each item is validated to ensure its ID is between
+        1 and 500,000 and its price is between 0 and 10,000,000. A formatted entry is
+        added for each valid item, and a ValueError is raised if any item fails validation.
+        
+        Args:
+            recommended_items (dict): Mapping of item IDs (int) to their prices (int).
+        """
         self.item_page.item_list_display.clear()
         self.item_page.items_list = recommended_items
 
@@ -1394,15 +1370,14 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def api_data_received(self, item_statistics):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Updates item statistics and configures the item name input in the UI.
-        Parameters:
-            - item_statistics (DataFrame): Contains statistical data about items, including names and other metadata.
-        Returns:
-            - None: This function does not return a value.
-        Processing Logic:
-            - Sorts the item statistics by item name for display in the input field.
-            - Updates the input widget to allow editing and autocompletion of item names.
-            - Connects the input widget change event to a handler for further item change management.
+        """Update the UI with the latest item statistics.
+        
+        Sets the item statistics on the item page and refreshes the item name input with sorted
+        item names. The input widget is configured for editing and autocompletion, and its change
+        event is connected to the appropriate handler.
+        
+        Args:
+            item_statistics (DataFrame): Data containing item names and associated metadata.
         """
         self.item_page.item_statistics = item_statistics
 
@@ -1428,14 +1403,10 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def check_for_settings(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Check for and initialize necessary settings and data directories for the application.
-        Parameters:
-            - self: Instance of the class containing attributes for file paths and item list management.
-        Returns:
-            - None: The function performs initialization and setup tasks but does not return a value.
-        Processing Logic:
-            - Checks and creates a data directory if it does not exist.
-            - Loads desired items from a specified JSON file if it exists and populates a display list with the items and their prices.
+        """Ensure necessary application settings and data directories are set up.
+        
+        Creates the data folder if it does not exist. If a JSON file with desired items is found at a preset path,
+        loads the items and adds entries (item ID and price) to the display list.
         """
         data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
         if not os.path.exists(data_folder):
@@ -1452,6 +1423,11 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def reset_app_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Resets application data to its initial state.
+        
+        Clears the displayed item list and resets the underlying items list, then saves the updated (empty) data to JSON.
+        """
         self.item_page.item_list_display.clear()
         self.item_page.items_list = {}
         self.save_data_to_json()
@@ -1460,14 +1436,13 @@ class App(QMainWindow):
     def validate_item_lists(self):
         # @coderabbitai add docstring here if needed and remove this comment after
         # Check if items_list and pet_list are not empty
-        """Validates lists of items, pets, and ilvl data ensuring they contain valid entries.
-        Parameters:
-            - self: Refers to the instance of the class, providing access to class attributes.
+        """
+        Validates that the items, pets, and ilvl lists contain data and that all item IDs are within a valid range.
+        
+        This method verifies that at least one of the items, pets, or ilvl lists is non-empty. It then checks that every key in the items list is an integer between 1 and 500000. If the lists are all empty or an invalid item ID is detected, an error message is displayed and the method returns False.
+        
         Returns:
-            - bool: Returns False if validation fails, True otherwise.
-        Processing Logic:
-            - Checks if `items_list`, `pet_list`, and `ilvl_list` are all empty and prompts an error if they are.
-            - Validates each item ID in `items_list` to ensure it is an integer between 1 and 500000, showing an error message if any ID is invalid.
+            bool: True if the validation passes; False otherwise.
         """
         if (
             len(self.item_page.items_list) == 0
@@ -1495,6 +1470,15 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def save_data_to_json(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Saves the current items list to a JSON file.
+        
+        This method writes the items from the application's item page to the JSON file
+        specified by the path attribute. It returns True upon completion.
+          
+        Returns:
+            bool: True indicating that the data has been successfully saved.
+        """
         save_json_file(self.path_to_desired_items, self.item_page.items_list)
         return True
 
