@@ -57,6 +57,7 @@ if not os.path.exists(data_folder):
     os.makedirs(data_folder)
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def save_json_file(path, data):
 
     with open(path, "w", encoding="utf-8") as json_file:
@@ -145,7 +146,9 @@ class RecommendationsRequest(QThread):
         self.l_discount_percent = discount_percent
         self.minimum_market_value = minimum_market_value
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def run(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Executes a sequence to fetch and process item recommendations based on market share data.
         Parameters:
             - None
@@ -192,13 +195,17 @@ class Item_Statistics(QThread):
 
     completed = pyqtSignal(pd.DataFrame)
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         # # old way
         # super(Item_Statistics, self).__init__()
         # # coderabbit says do this
         super().__init__()
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def run(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Retrieves item statistics from the Saddlebag Exchange API and emits the data as a completed signal.
         Parameters:
             - self: Implicit first parameter, referring to the class instance.
@@ -230,7 +237,9 @@ class RecommendationsPage(QWidget):
     Returns:
         - None"""
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Initializes the RecommendationsPage class with predefined attributes for realm connections, item qualities, categories, and more.
         Parameters:
             - None
@@ -491,7 +500,9 @@ class RecommendationsPage(QWidget):
 
         self.make_page()
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def make_page(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Creates and arranges various input widgets within a grid layout, allowing users to configure parameters for filtering items based on specified criteria.
         Parameters:
             - None
@@ -624,14 +635,18 @@ class RecommendationsPage(QWidget):
         self.search_button = QPushButton("Search")
         self.layout.addWidget(self.search_button, 12, 0, 1, 2)
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def category_combo_changed(self, index):
+        # @coderabbitai add docstring here if needed and remove this comment after
         selected_category = self.item_category.currentText()
         if selected_category == "All":
             return
         self.item_sub_category.clear()
         self.item_sub_category.addItems(self.item_sub_category_lists[selected_category])
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def region_combo_changed(self, index):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Updates the realm combobox based on the selected region.
         Parameters:
             - index (int): Index of the selected item in the region combobox.
@@ -661,12 +676,16 @@ class HomePage(QWidget):
         - Ensures open external links feature is enabled for the labels containing hyperlinks.
     """
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         super(HomePage, self).__init__()
         self.layout = QGridLayout(self)
         self.make_page()
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def make_page(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
         """Creates a user interface page with an icon, title, and several hyperlinked labels.
         Parameters:
@@ -740,13 +759,17 @@ class ItemPage(QWidget):
         - Implements methods for item addition, removal, and importing item data from files.
     """
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         super(ItemPage, self).__init__()
         self.layout = QGridLayout(self)
         self.items_list = {}
         self.make_page()
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def make_page(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Creates and arranges UI components for item selection and management.
         Parameters:
             - self (object): Instance of the UI class where this method is defined.
@@ -804,7 +827,9 @@ class ItemPage(QWidget):
         self.import_pbs_data_button.clicked.connect(self.import_pbs_data)
         self.layout.addWidget(self.import_pbs_data_button, 17, 1, 1, 1)
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def add_item_to_dict(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Adds an item with its price to a dictionary and updates a display list if input is valid.
         Parameters:
             - None
@@ -867,7 +892,9 @@ class ItemPage(QWidget):
 
         return True
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def item_list_double_clicked(self, item):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Handles item selection and updates input fields based on the item's details.
         Parameters:
             - item (QListWidgetItem): The item that was double-clicked in the item list.
@@ -894,7 +921,9 @@ class ItemPage(QWidget):
         except:
             self.item_name_input.setCurrentText("Item ID not found")
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def remove_item_to_dict(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Remove an item from the items list and update the display accordingly.
         Parameters:
             - self (object): An instance of the class containing item display and list attributes.
@@ -915,7 +944,9 @@ class ItemPage(QWidget):
                     del self.items_list[self.item_id_input.text()]
                     return
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def import_item_data(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Import item data from a JSON file and display it, with validation checks.
         Parameters:
             - self (object): Instance of the class containing this method.
@@ -961,7 +992,9 @@ class ItemPage(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def import_pbs_data(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Import and process PBS data from a selected file, updating item list display and internal item list.
         Parameters:
             - None
@@ -1009,7 +1042,9 @@ class ItemPage(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Unknown Error", str(e))
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def on_combo_box_item_changed(self, index):
+        # @coderabbitai add docstring here if needed and remove this comment after
         # This function will be called whenever the user selects a different item
         """Handles changes in the combo box selection by updating item details based on the selected item.
         Parameters:
@@ -1066,7 +1101,9 @@ class App(QMainWindow):
         - Initiates and connects the API data retrieval thread for handling item statistics.
     """
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Initializes the App class and its graphical user interface components.
         Parameters:
             None
@@ -1145,7 +1182,9 @@ class App(QMainWindow):
 
         self.initUI()
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def initUI(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Initialize the main user interface for the application.
         Parameters:
             - None
@@ -1193,7 +1232,9 @@ class App(QMainWindow):
 
         self.show()
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def make_side_buttons(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Create and configure side buttons for a graphical user interface.
         Parameters:
             - None.
@@ -1241,10 +1282,14 @@ class App(QMainWindow):
         self.reset_data_button.setToolTip("Erase all data and reset the app.")
         self.layout_area.addWidget(self.reset_data_button, 9, 0)
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def go_to_page_number(self, index):
+        # @coderabbitai add docstring here if needed and remove this comment after
         self.stacked_widget.setCurrentIndex(index)
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def search(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Search for recommendations based on specified criteria.
         Parameters:
             - self: Instance of the class where this method belongs.
@@ -1316,7 +1361,9 @@ class App(QMainWindow):
             self.recommendation_data_received
         )
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def recommendation_data_received(self, recommended_items):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Receives and validates a dictionary of recommended items, displaying them on the item page.
         Parameters:
             - recommended_items (dict): A dictionary where keys are item IDs (int) and values are their respective prices (int).
@@ -1344,7 +1391,9 @@ class App(QMainWindow):
                 f"Item ID: {key}, Price: {value}",
             )
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def api_data_received(self, item_statistics):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Updates item statistics and configures the item name input in the UI.
         Parameters:
             - item_statistics (DataFrame): Contains statistical data about items, including names and other metadata.
@@ -1376,7 +1425,9 @@ class App(QMainWindow):
             "QComboBox::drop-down { border: 0px; }"
         )
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def check_for_settings(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         """Check for and initialize necessary settings and data directories for the application.
         Parameters:
             - self: Instance of the class containing attributes for file paths and item list management.
@@ -1398,12 +1449,16 @@ class App(QMainWindow):
                     f"Item ID: {key}, Price: {value}",
                 )
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def reset_app_data(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         self.item_page.item_list_display.clear()
         self.item_page.items_list = {}
         self.save_data_to_json()
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def validate_item_lists(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         # Check if items_list and pet_list are not empty
         """Validates lists of items, pets, and ilvl data ensuring they contain valid entries.
         Parameters:
@@ -1437,7 +1492,9 @@ class App(QMainWindow):
 
         return True
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def save_data_to_json(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         save_json_file(self.path_to_desired_items, self.item_page.items_list)
         return True
 

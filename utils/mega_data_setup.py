@@ -124,7 +124,9 @@ class MegaData:
 
     #### VARIABLE RELATED FUNCTIONS ####
     @staticmethod
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __set_mega_vars(var_name, raw_mega_data, required=False):
+        # @coderabbitai add docstring here if needed and remove this comment after
         if len(raw_mega_data) != 0 and var_name in raw_mega_data.keys():
             print(f"loading {var_name} from AzerothAuctionAssassinData/mega_data.json")
             var_value = raw_mega_data[var_name]
@@ -195,7 +197,9 @@ class MegaData:
                 var_value = 1
 
         # handle cases where we need a default value to be true or false
+        # @coderabbitai add docstring here if needed and remove this comment after
         def process_var(var_value, default_behaviour):
+            # @coderabbitai add docstring here if needed and remove this comment after
             if (
                 str(var_value).lower() == str(default_behaviour).lower()
                 or var_value == default_behaviour
@@ -216,7 +220,9 @@ class MegaData:
 
     # access token setter
     @retry(stop=stop_after_attempt(10))
+    # @coderabbitai add docstring here if needed and remove this comment after
     def check_access_token(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         # tokens are valid for 24 hours
         if (
             int(datetime.now().timestamp()) - self.access_token_creation_unix_time
@@ -247,7 +253,9 @@ class MegaData:
             self.access_token_creation_unix_time = int(datetime.now().timestamp())
             return self.access_token
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __set_item_names(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         item_names = get_itemnames()
         item_names = {
             int(id): name
@@ -256,7 +264,9 @@ class MegaData:
         }
         return item_names
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __set_desired_items(self, item_list_name, path_to_data=None):
+        # @coderabbitai add docstring here if needed and remove this comment after
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
         desired_items_raw = {}
@@ -290,7 +300,9 @@ class MegaData:
             desired_items[int(k)] = float(v)
         return desired_items
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __set_desired_ilvl_list(self, path_to_data=None):
+        # @coderabbitai add docstring here if needed and remove this comment after
         item_list_name = "desired_ilvl_list"
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
@@ -446,7 +458,9 @@ class MegaData:
 
         return snipe_info, ilvl_info["ilvl"]
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __set_desired_pet_ilvl_list(self, path_to_data=None):
+        # @coderabbitai add docstring here if needed and remove this comment after
         item_list_name = "desired_pet_ilvl_list"
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
@@ -511,7 +525,9 @@ class MegaData:
 
         return processed_pet_list
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __set_realm_names(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         realm_names = json.load(
             open(
                 f"AzerothAuctionAssassinData/{str(self.REGION).lower()}-wow-connected-realm-ids.json"
@@ -524,7 +540,9 @@ class MegaData:
             }
         return realm_names
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __validate_snipe_lists(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         if (
             len(self.DESIRED_ITEMS) == 0
             and len(self.DESIRED_PETS) == 0
@@ -542,13 +560,19 @@ class MegaData:
             error_message += "- desired_pet_ilvl_list.json\n"
             raise Exception(error_message)
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def get_upload_time_list(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         return list(self.upload_timers.values())
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def get_upload_time_minutes(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         return set(realm["lastUploadMinute"] for realm in self.get_upload_time_list())
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def get_realm_names(self, connectedRealmId):
+        # @coderabbitai add docstring here if needed and remove this comment after
         realm_names = [
             name for name, id in self.WOW_SERVER_NAMES.items() if id == connectedRealmId
         ]
@@ -557,7 +581,9 @@ class MegaData:
 
     #### AH API CALLS ####
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
+    # @coderabbitai add docstring here if needed and remove this comment after
     def get_listings_single(self, connectedRealmId: int):
+        # @coderabbitai add docstring here if needed and remove this comment after
         if connectedRealmId in [-1, -2]:
             print(f"gather data from {self.REGION} commodities")
             auction_info = self.make_commodity_ah_api_request()
@@ -596,7 +622,9 @@ class MegaData:
 
         return all_auctions
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def construct_api_url(self, connectedRealmId, endpoint):
+        # @coderabbitai add docstring here if needed and remove this comment after
         base_url = (
             "https://us.api.blizzard.com"
             if "NA" in self.REGION
@@ -619,7 +647,9 @@ class MegaData:
         retry=retry_if_exception_type(requests.RequestException),
         retry_error_callback=lambda retry_state: {"auctions": []},
     )
+    # @coderabbitai add docstring here if needed and remove this comment after
     def make_ah_api_request(self, url, connectedRealmId):
+        # @coderabbitai add docstring here if needed and remove this comment after
         headers = {"Authorization": f"Bearer {self.check_access_token()}"}
         req = requests.get(url, headers=headers, timeout=20)
 
@@ -661,7 +691,9 @@ class MegaData:
         auction_info = req.json()
         return auction_info
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def update_local_timers(self, dataSetID, lastUploadTimeRaw):
+        # @coderabbitai add docstring here if needed and remove this comment after
         if dataSetID == -1:
             tableName = f"{self.REGION}_retail_commodityListings"
             dataSetName = [f"{self.REGION} Commodities"]
@@ -692,7 +724,9 @@ class MegaData:
         retry=retry_if_exception_type(requests.RequestException),
         retry_error_callback=lambda retry_state: {"auctions": []},
     )
+    # @coderabbitai add docstring here if needed and remove this comment after
     def make_commodity_ah_api_request(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         if self.REGION == "NA":
             url = f"https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
             connectedRealmId = -1
@@ -743,8 +777,12 @@ class MegaData:
         return auction_info
 
     #### GENERAL USE FUNCTIONS ####
+    # @coderabbitai add docstring here if needed and remove this comment after
     def send_discord_message(self, message):
+        # @coderabbitai add docstring here if needed and remove this comment after
         send_discord_message(message, self.WEBHOOK_URL)
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def send_discord_embed(self, embed):
+        # @coderabbitai add docstring here if needed and remove this comment after
         send_embed_discord(embed, self.WEBHOOK_URL)

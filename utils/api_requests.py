@@ -4,7 +4,9 @@ from utils.helpers import get_wow_russian_realm_ids
 
 
 ## DISCORD API CALLS ##
+# @coderabbitai add docstring here if needed and remove this comment after
 def send_embed_discord(embed, webhook_url):
+    # @coderabbitai add docstring here if needed and remove this comment after
     # Send message
     """Send an embed message to a specified Discord webhook URL.
     Parameters:
@@ -31,7 +33,9 @@ def send_embed_discord(embed, webhook_url):
 
 
 @retry(stop=stop_after_attempt(3))
+# @coderabbitai add docstring here if needed and remove this comment after
 def send_discord_message(message, webhook_url):
+    # @coderabbitai add docstring here if needed and remove this comment after
     """Send a message to a Discord channel using a webhook.
     Parameters:
         - message (str): The message content to send to Discord.
@@ -55,7 +59,9 @@ def send_discord_message(message, webhook_url):
 
 ## BLIZZARD API CALLS ##
 @retry(stop=stop_after_attempt(3))
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_wow_access_token(client_id, client_secret):
+    # @coderabbitai add docstring here if needed and remove this comment after
     access_token = requests.post(
         "https://oauth.battle.net/token",
         data={"grant_type": "client_credentials"},
@@ -65,7 +71,9 @@ def get_wow_access_token(client_id, client_secret):
 
 
 @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_listings_single(connectedRealmId: int, access_token: str, region: str):
+    # @coderabbitai add docstring here if needed and remove this comment after
     """Fetches auction listings for a specific connected realm and region in the World of Warcraft game using the Blizzard API.
     Parameters:
         - connectedRealmId (int): Identifier for the connected realm to fetch auction data from.
@@ -96,7 +104,9 @@ def get_listings_single(connectedRealmId: int, access_token: str, region: str):
     return auction_info["auctions"]
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_petnames(access_token):
+    # @coderabbitai add docstring here if needed and remove this comment after
     """Get a dictionary of pet IDs and names from the World of Warcraft API.
     Parameters:
         - access_token (str): An OAuth access token used for authentication in the API request.
@@ -125,7 +135,9 @@ RAW_GITHUB_BACKUP_PATH = "https://raw.githubusercontent.com/ff14-advanced-market
 SADDLEBAG_URL = "http://api.saddlebagexchange.com"
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
+    # @coderabbitai add docstring here if needed and remove this comment after
     """Get backup of update timers for a specific region, optionally excluding Russian realms.
     Parameters:
         - REGION (str): The region identifier for which update timers are retrieved.
@@ -157,7 +169,9 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     return server_update_times
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_itemnames():
+    # @coderabbitai add docstring here if needed and remove this comment after
     """Get item names from a specified API or fallback to a GitHub backup.
     Returns:
         - list: A list of item names retrieved from the API or GitHub backup.
@@ -176,7 +190,9 @@ def get_itemnames():
     return item_names
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_pet_names_backup():
+    # @coderabbitai add docstring here if needed and remove this comment after
     """Fetches pet names from a specified API endpoint or a backup source if the request fails.
     Returns:
         - dict: A dictionary mapping pet IDs to their names.
@@ -196,7 +212,9 @@ def get_pet_names_backup():
     return pet_info
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_raidbots_bonus_ids():
+    # @coderabbitai add docstring here if needed and remove this comment after
     """Fetch bonus IDs from an external source and return them in a dictionary format.
     Returns:
         - dict: A dictionary of bonus IDs keyed by the ID converted to an integer, with corresponding data as values.
@@ -215,7 +233,9 @@ def get_raidbots_bonus_ids():
     return {int(id): data for id, data in bonus_ids.items()}
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_ilvl_items(ilvl=201, item_ids=[]):
+    # @coderabbitai add docstring here if needed and remove this comment after
     """Get item details based on the item level and item IDs provided.
     Parameters:
         - ilvl (int): The item level threshold for filtering items, default is 201.

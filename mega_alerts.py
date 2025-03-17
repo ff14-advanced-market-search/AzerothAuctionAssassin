@@ -16,7 +16,9 @@ import utils.mega_data_setup
 
 # Add at the beginning of the file, after imports
 class StreamToFile:
+    # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self, filepath):
+        # @coderabbitai add docstring here if needed and remove this comment after
         self.filepath = filepath
         self.terminal_out = sys.stdout
         self.terminal_err = sys.stderr
@@ -30,12 +32,16 @@ class StreamToFile:
         sys.stdout = self
         sys.stderr = self
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def write(self, text):
+        # @coderabbitai add docstring here if needed and remove this comment after
         self.terminal_out.write(text)
         with open(self.filepath, "a", encoding="utf-8") as f:
             f.write(text)
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def flush(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         self.terminal_out.flush()
         self.terminal_err.flush()
 
@@ -72,9 +78,13 @@ class Alerts(QThread):
         print(f"Starting Mega Alerts at {datetime.now()}")
         print(f"Log file created at: {log_file}")
 
+    # @coderabbitai add docstring here if needed and remove this comment after
     def run(self):
+        # @coderabbitai add docstring here if needed and remove this comment after
         #### FUNCTIONS ####
+        # @coderabbitai add docstring here if needed and remove this comment after
         def pull_single_realm_data(connected_id):
+            # @coderabbitai add docstring here if needed and remove this comment after
             auctions = mega_data.get_listings_single(connected_id)
             clean_auctions = clean_listing_data(auctions, connected_id)
             if not clean_auctions or len(clean_auctions) == 0:
@@ -202,7 +212,9 @@ class Alerts(QThread):
                     )
                     mega_data.send_discord_embed(item_embed)
 
+        # @coderabbitai add docstring here if needed and remove this comment after
         def clean_listing_data(auctions, connected_id):
+            # @coderabbitai add docstring here if needed and remove this comment after
             all_ah_buyouts = {}
             all_ah_bids = {}
             pet_ah_buyouts = {}
@@ -214,7 +226,9 @@ class Alerts(QThread):
                 print(f"no listings found on {connected_id} of {mega_data.REGION}")
                 return
 
+            # @coderabbitai add docstring here if needed and remove this comment after
             def add_price_to_dict(price, item_id, price_dict, is_pet=False):
+                # @coderabbitai add docstring here if needed and remove this comment after
                 if is_pet:
                     if price < mega_data.DESIRED_PETS[item_id] * 10000:
                         if item_id not in price_dict:
@@ -632,7 +646,9 @@ class Alerts(QThread):
                 "breed": auction["breed"],
             }
 
+        # @coderabbitai add docstring here if needed and remove this comment after
         def check_pet_ilvl_stats(item, desired_pet_list):
+            # @coderabbitai add docstring here if needed and remove this comment after
             """
             Check if a pet auction meets the desired level and price criteria
 
@@ -687,7 +703,9 @@ class Alerts(QThread):
             }
 
         #### MAIN ####
+        # @coderabbitai add docstring here if needed and remove this comment after
         def main():
+            # @coderabbitai add docstring here if needed and remove this comment after
             while self.running:
                 current_min = int(datetime.now().minute)
 
@@ -733,12 +751,16 @@ class Alerts(QThread):
             self.progress.emit("Stopped alerts!")
             self.completed.emit(1)
 
+        # @coderabbitai add docstring here if needed and remove this comment after
         def main_single():
+            # @coderabbitai add docstring here if needed and remove this comment after
             # run everything once slow
             for connected_id in set(mega_data.WOW_SERVER_NAMES.values()):
                 pull_single_realm_data(connected_id)
 
+        # @coderabbitai add docstring here if needed and remove this comment after
         def main_fast():
+            # @coderabbitai add docstring here if needed and remove this comment after
             self.progress.emit("Sending alerts!")
             # run everything once fast
             pool = ThreadPoolExecutor(max_workers=mega_data.THREADS)

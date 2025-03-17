@@ -1,7 +1,9 @@
 from utils.api_requests import get_raidbots_bonus_ids
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_bonus_ids():
+    # @coderabbitai add docstring here if needed and remove this comment after
     """Get categorized bonus IDs based on specific attributes from raidbot data.
     Returns:
         - dict: A dictionary with keys representing bonus categories and values containing bonus IDs matching category criteria.
@@ -59,7 +61,9 @@ def get_bonus_ids():
     }
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_bonus_id_sets():
+    # @coderabbitai add docstring here if needed and remove this comment after
     # get raw data
     """Get sets of bonus IDs categorized by type.
     Returns:
@@ -83,7 +87,9 @@ def get_bonus_id_sets():
     )  # , bonus_ids["ilvl_base"]
 
 
+# @coderabbitai add docstring here if needed and remove this comment after
 def get_secondary_stats():
+    # @coderabbitai add docstring here if needed and remove this comment after
     # get raw data
     """Extract secondary stat bonus IDs.
     Returns:
