@@ -18,6 +18,15 @@ import utils.mega_data_setup
 class StreamToFile:
     # add docstring here if needed
     def __init__(self, filepath):
+        """
+        Initializes log redirection by setting up the log file and overriding output streams.
+        
+        Ensures the log file's directory exists, clears any existing content, and writes a log header
+        with the current timestamp. Afterwards, redirects both stdout and stderr to this instance.
+            
+        Args:
+            filepath (str): The path to the log file where messages are recorded.
+        """
         self.filepath = filepath
         self.terminal_out = sys.stdout
         self.terminal_err = sys.stderr
@@ -33,12 +42,23 @@ class StreamToFile:
 
     # add docstring here if needed
     def write(self, text):
+        """
+        Writes text to the terminal and appends it to a log file.
+        
+        This method outputs the provided text to the terminal stream and writes it to the file 
+        specified by `self.filepath` using UTF-8 encoding in append mode.
+        """
         self.terminal_out.write(text)
         with open(self.filepath, "a", encoding="utf-8") as f:
             f.write(text)
 
     # add docstring here if needed
     def flush(self):
+        """
+        Flushes terminal output and error streams.
+        
+        This method forces any buffered data in both the terminal output and error streams to be written immediately.
+        """
         self.terminal_out.flush()
         self.terminal_err.flush()
 
@@ -56,6 +76,14 @@ class Alerts(QThread):
         path_to_desired_ilvl_items=None,
         path_to_desired_ilvl_list=None,
     ):
+        """
+        Initialize an Alerts instance with auction file paths and logging configuration.
+        
+        This constructor sets up the Alerts thread by assigning optional file paths for auction data,
+        desired items, desired pets, and item level filters. It also initializes logging by creating a log
+        directory and file, and by redirecting standard output and error to the log file. Startup messages
+        indicate the current time and log file location.
+        """
         super(Alerts, self).__init__()
         self.running = True
         self.path_to_data_files = path_to_data_files
@@ -80,6 +108,16 @@ class Alerts(QThread):
     def run(self):
         #### FUNCTIONS ####
         # add docstring here if needed
+        """
+        Run the alert thread to monitor auction listings and dispatch notifications.
+        
+        This method initializes configuration data and sets up global parameters before
+        entering a loop that periodically polls auction data from various realms. It defines
+        nested helper functions to fetch, clean, and format auction listings and then sends alert
+        messages via Discord. In debug mode the method performs a single comprehensive scan,
+        otherwise it continuously checks for new data using concurrent tasks and emits progress
+        and completion signals accordingly.
+        """
         def pull_single_realm_data(connected_id):
             auctions = mega_data.get_listings_single(connected_id)
             clean_auctions = clean_listing_data(auctions, connected_id)
@@ -210,6 +248,15 @@ class Alerts(QThread):
 
         # add docstring here if needed
         def clean_listing_data(auctions, connected_id):
+            """
+            Processes auction listings to filter for desired items and pets.
+            
+            This function iterates over auction data, grouping bid and buyout prices for regular items and pets based on pre-configured criteria. It further applies checks for item level and tertiary stats, collecting matching data into several groups. If matching listings are found, it returns formatted alert messages; otherwise, it prints an informative message and returns None.
+            
+            Args:
+                auctions: A list of auction listing dictionaries.
+                connected_id: Identifier for the current realm connection.
+            """
             all_ah_buyouts = {}
             all_ah_bids = {}
             pet_ah_buyouts = {}
@@ -223,6 +270,19 @@ class Alerts(QThread):
 
             # add docstring here if needed
             def add_price_to_dict(price, item_id, price_dict, is_pet=False):
+                """
+                Add a normalized price to the price dictionary if it is below the desired threshold.
+                
+                Checks if the given price for an item or pet is below the target threshold from mega_data 
+                (multiplied by 10000) and records the normalized price (price divided by 10000) in the dictionary 
+                if it has not already been added.
+                
+                Args:
+                    price: The auction listing price.
+                    item_id: The identifier for the item or pet.
+                    price_dict: A dictionary mapping item IDs to lists of normalized prices.
+                    is_pet: Boolean flag indicating whether the listing is for a pet (defaults to False).
+                """
                 if is_pet:
                     if price < mega_data.DESIRED_PETS[item_id] * 10000:
                         if item_id not in price_dict:
@@ -350,6 +410,32 @@ class Alerts(QThread):
             DESIRED_ILVL_ITEMS,
             min_ilvl,
         ):
+            """
+            Evaluates if an auction item meets the specified tertiary stat and item level criteria.
+            
+            This function validates an auction record against configured thresholds, including bonus ID
+            matches for tertiary stats (sockets, leech, avoidance, and speed), item level (adjusted via any
+            bonus additions), and price limits. It checks for the presence of bonus data, determines the
+            required level directly or via defaults, and ensures that bonus lists and computed levels conform
+            to the desired configuration. If all conditions are met, a dictionary with the auction details is
+            returned; otherwise, False is returned.
+            
+            Args:
+                auction: Dictionary containing auction data with an "item" key that includes bonus lists,
+                    modifiers, and item ID, as well as pricing information ("buyout" or "bid").
+                socket_ids: Set of bonus IDs representing socket enhancements.
+                leech_ids: Set of bonus IDs representing leech attributes.
+                avoidance_ids: Set of bonus IDs representing avoidance attributes.
+                speed_ids: Set of bonus IDs representing speed attributes.
+                ilvl_addition: Dictionary mapping bonus IDs to additional item level increments.
+                DESIRED_ILVL_ITEMS: Dictionary defining thresholds for base item levels, required levels,
+                    bonus list expectations, tertiary stat requirements, and buyout price limits.
+                min_ilvl: Minimum acceptable item level for the auction item.
+            
+            Returns:
+                A dictionary with details (item_id, buyout, tertiary_stats, bonus_ids, ilvl, required_lvl)
+                if the item meets all criteria; otherwise, False.
+            """
             if "bonus_lists" not in auction["item"]:
                 return False
 
@@ -479,6 +565,26 @@ class Alerts(QThread):
             ilvl_ah_buyouts,
             pet_ilvl_ah_buyouts,
         ):
+            """
+            Formats alert messages for various auction listings.
+            
+            This function aggregates auction data from multiple sources including item and pet
+            auctions with buyout and bid prices, as well as auctions with item level or pet level
+            details. It retrieves realm names using the provided connection identifier and creates
+            formatted alert messages using specialized helper functions.
+            
+            Args:
+                all_ah_buyouts: Dict mapping item IDs to auction buyout data.
+                all_ah_bids: Dict mapping item IDs to auction bid data.
+                connected_id: Identifier used to obtain realm names for link generation.
+                pet_ah_buyouts: Dict mapping pet IDs to pet auction buyout data.
+                pet_ah_bids: Dict mapping pet IDs to pet auction bid data.
+                ilvl_ah_buyouts: List of item auctions containing item level details.
+                pet_ilvl_ah_buyouts: List of pet auctions containing pet level details.
+            
+            Returns:
+                list: A list of dictionaries representing formatted auction alert messages.
+            """
             results = []
             realm_names = mega_data.get_realm_names(connected_id)
             for itemID, auction in all_ah_buyouts.items():
@@ -594,6 +700,23 @@ class Alerts(QThread):
         def results_dict(
             auction, itemlink, connected_id, realm_names, id, idType, priceType
         ):
+            """
+            Constructs a dictionary encapsulating auction result details.
+            
+            This function sorts the auction price list to determine the minimum price and builds a dictionary that includes region information from a global setting, realm identifiers, a dynamic identifier keyed by the provided idType, the item link, the computed minimum price, and the entire auction list serialized as JSON under a key formed from priceType.
+                
+            Parameters:
+                auction (list): A list of auction prices.
+                itemlink: The hyperlink reference for the auction item.
+                connected_id: The unique identifier for the connected realm.
+                realm_names: The name(s) of the realm(s) associated with the auction.
+                id: The auction item or pet identifier.
+                idType (str): The key name under which the identifier is stored in the result.
+                priceType (str): The base key for the auction prices, with "_prices" appended.
+            
+            Returns:
+                dict: A dictionary containing details of the auction result.
+            """
             auction.sort()
             minPrice = auction[0]
             return {
@@ -610,6 +733,37 @@ class Alerts(QThread):
         def ilvl_results_dict(
             auction, itemlink, connected_id, realm_names, id, idType, priceType
         ):
+            """
+            Constructs a dictionary summarizing auction results with item level and pricing details.
+            
+            This function extracts key details from an auction data dictionary and organizes them in a structured
+            output. It collects active tertiary stats, bonus IDs, item level, and required level information. It also
+            incorporates region and realm identifiers and creates dynamic keys for the auction identifier and price fields
+            based on the provided idType and priceType parameters.
+            
+            Args:
+                auction: A dictionary containing raw auction data.
+                itemlink: A string representing the item's hyperlink.
+                connected_id: Identifier for the connected realm.
+                realm_names: Name(s) of the realm(s) associated with the auction.
+                id: The auction item identifier.
+                idType: A string used to define the key name for the auction item identifier in the returned dictionary.
+                priceType: A string used to extract the auction's price from the input and to create a dynamic key for pricing.
+            
+            Returns:
+                A dictionary with the following structure:
+                  - "region": The region value from the global configuration.
+                  - "realmID": The connected realm identifier.
+                  - "realmNames": The realm names.
+                  - A dynamic key (as defined by idType) holding the auction item identifier.
+                  - "itemlink": The provided item link.
+                  - "minPrice": The auction price extracted using priceType.
+                  - A dynamic key (priceType concatenated with "_prices") holding the same auction price.
+                  - "tertiary_stats": A list of active tertiary stats from the auction data.
+                  - "bonus_ids": The bonus IDs associated with the auction item.
+                  - "ilvl": The item level.
+                  - "required_lvl": The required level for the auction.
+            """
             tertiary_stats = [
                 stat for stat, present in auction["tertiary_stats"].items() if present
             ]
@@ -631,7 +785,25 @@ class Alerts(QThread):
         def pet_ilvl_results_dict(
             auction, itemlink, connected_id, realm_names, id, idType, priceType
         ):
-            """Format pet level snipe results for alerts"""
+            """
+            Format pet auction alert results for pet item-level snipe listings.
+            
+            Constructs a dictionary containing key auction data for a pet listing, including region,
+            realm identifiers, dynamic keys for pet ID and pricing based on provided descriptors, and
+            auction attributes such as buyout price, pet level, quality, and breed.
+            
+            Parameters:
+                auction (dict): Auction data with keys "buyout", "current_level", "quality", and "breed".
+                itemlink (str): Formatted link for the pet auction item.
+                connected_id: Identifier for the connected realm.
+                realm_names: Names associated with the realms.
+                id: Pet identifier value used under the dynamic key specified by idType.
+                idType (str): Descriptor for the dynamic key corresponding to the pet identifier.
+                priceType (str): Descriptor for the dynamic key prefix for pricing information.
+            
+            Returns:
+                dict: A dictionary formatted for pet auction alerts.
+            """
             return {
                 "region": mega_data.REGION,
                 "realmID": connected_id,
@@ -648,14 +820,23 @@ class Alerts(QThread):
         # add docstring here if needed
         def check_pet_ilvl_stats(item, desired_pet_list):
             """
-            Check if a pet auction meets the desired level and price criteria
-
+            Validate pet auction entry against desired pet criteria.
+            
+            This function assesses whether an auction entry for a pet meets multiple requirements including species,
+            minimum level, quality, breed restrictions, and buyout price. It first confirms the pet's species is listed
+            in the desired pet criteria and then verifies that the pet's level and quality are at or above the minimum
+            thresholds, that its breed is not excluded, and that its buyout price (converted from copper) does not exceed
+            the specified limit. If all conditions are met, the function returns a dictionary of pet details; otherwise, it returns None.
+            
             Args:
-                item (dict): Auction house item data from Blizzard API
-                desired_pet_list (list): List of dictionaries containing desired pet criteria
-
+                item (dict): Auction house entry containing pet details, including keys such as "pet_species_id",
+                    "pet_level", "pet_quality_id", "pet_breed_id", and "buyout".
+                desired_pet_list (list): List of dictionaries representing desired pet criteria with keys like "petID",
+                    "minLevel", "minQuality", "excludeBreeds", and "price".
+            
             Returns:
-                dict: Pet info if it matches criteria, None if it doesn't match
+                dict or None: Dictionary with pet attributes (pet_species_id, current_level, buyout price in converted units,
+                quality, and breed) if the pet meets all criteria; otherwise, None.
             """
             # Get the pet species ID from the item data
             pet_species_id = item["item"]["pet_species_id"]
@@ -703,6 +884,15 @@ class Alerts(QThread):
         #### MAIN ####
         # add docstring here if needed
         def main():
+            """
+            Runs the alert system's main loop for auction data processing.
+            
+            Continuously monitors the current minute to dispatch alerts for auction listings. At minute 1,
+            if configured, it clears the alert record. It identifies realms with auction updates that fall
+            within defined scanning windows or match extra alert criteria and processes them concurrently
+            via a thread pool. When no updates are due, it emits a progress message and pauses briefly.
+            Upon termination, it signals the completion of alert processing.
+            """
             while self.running:
                 current_min = int(datetime.now().minute)
 
@@ -751,11 +941,26 @@ class Alerts(QThread):
         # add docstring here if needed
         def main_single():
             # run everything once slow
+            """
+            Performs a single sequential auction data check for all connected realms.
+            
+            Iterates over the unique realm identifiers in mega_data.WOW_SERVER_NAMES and invokes
+            pull_single_realm_data for each to fetch and process auction listings. This function
+            executes a comprehensive processing cycle in a single pass.
+            """
             for connected_id in set(mega_data.WOW_SERVER_NAMES.values()):
                 pull_single_realm_data(connected_id)
 
         # add docstring here if needed
         def main_fast():
+            """
+                Send alerts quickly by concurrently processing auction data for each connected realm.
+            
+                This function emits a progress message, then uses a ThreadPoolExecutor with a maximum
+                number of workers from mega_data.THREADS to concurrently submit the pull_single_realm_data
+                task for each unique server identifier in mega_data.WOW_SERVER_NAMES. It waits for all
+                tasks to complete before returning.
+                """
             self.progress.emit("Sending alerts!")
             # run everything once fast
             pool = ThreadPoolExecutor(max_workers=mega_data.THREADS)
