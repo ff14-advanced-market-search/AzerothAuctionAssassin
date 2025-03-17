@@ -59,6 +59,16 @@ class StreamToFile:
     # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self, filepath):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Initializes the StreamToFile logger.
+        
+        Creates the log file directory if necessary, clears any existing log data, and
+        writes an initial timestamp header. It also saves the original stdout and stderr
+        streams and redirects them to this instance to capture further output.
+        
+        Args:
+            filepath: The path to the log file where log messages will be written.
+        """
         self.filepath = filepath
         self.terminal_out = sys.stdout
         self.terminal_err = sys.stderr
@@ -75,6 +85,12 @@ class StreamToFile:
     # @coderabbitai add docstring here if needed and remove this comment after
     def write(self, text):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Writes the given text to both the terminal and an appended log file.
+        
+        This method outputs the specified text to the terminal using the instance's output stream
+        and simultaneously appends it to the log file located at the provided filepath using UTF-8 encoding.
+        """
         self.terminal_out.write(text)
         with open(self.filepath, "a", encoding="utf-8") as f:
             f.write(text)
@@ -82,6 +98,12 @@ class StreamToFile:
     # @coderabbitai add docstring here if needed and remove this comment after
     def flush(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Flushes the output and error stream buffers.
+        
+        This method forces any buffered data in the terminal output and error streams to be
+        written immediately.
+        """
         self.terminal_out.flush()
         self.terminal_err.flush()
 
@@ -92,6 +114,10 @@ class Item_And_Pet_Statistics(QThread):
     # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self, parent=None):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """Initialize the item and pet statistics thread.
+        
+        Initializes the thread with an optional parent and sets the default API region to "EU".
+        """
         super(Item_And_Pet_Statistics, self).__init__(parent)
         self.parent = parent
         self.region = "EU"  # Default to EU
@@ -99,7 +125,15 @@ class Item_And_Pet_Statistics(QThread):
     # @coderabbitai add docstring here if needed and remove this comment after
     def set_region(self, region):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Update region and refresh statistics"""
+        """
+        Update the current region and refresh statistics.
+        
+        If the provided region is either "NA" or "EU", update the instance's region attribute and restart
+        the data-fetching process to refresh item and pet statistics.
+        
+        Args:
+            region: A string representing the region ("NA" or "EU").
+        """
         if region in ["NA", "EU"]:
             self.region = region
             self.start()  # Refresh the statistics with new region
@@ -107,6 +141,14 @@ class Item_And_Pet_Statistics(QThread):
     # @coderabbitai add docstring here if needed and remove this comment after
     def run(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Retrieve and emit World of Warcraft item and pet statistics.
+        
+        Sends POST requests to the saddlebagexchange API using the instance's region and a fixed discount value of 1.
+        The first request fetches item statistics, and the second (with an additional 'pets' flag) retrieves pet statistics.
+        Both responses are converted to pandas DataFrame objects, which are then emitted via the 'completed' signal with
+        the pet statistics provided as the first argument.
+        """
         item_statistics = pd.DataFrame(
             data=requests.post(
                 f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
@@ -130,6 +172,16 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def __init__(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Initialize the main window and configuration for Azeroth Auction Assassin.
+        
+        Sets up logging by creating the necessary directories and log file, installs a custom
+        exception hook, and configures UI properties including the window icon and dimensions.
+        It also establishes file paths for application data and initializes the API thread for
+        fetching item and pet statistics. Previously saved pet level rules are loaded if available,
+        and the user interface is built by calling initUI(). Any errors encountered during
+        initialization are reported with a detailed crash log and then re-raised.
+        """
         try:
             super(App, self).__init__()
             # Setup logging before anything else
@@ -250,7 +302,13 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def handle_exception(self, exc_type, exc_value, exc_traceback):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Handle uncaught exceptions"""
+        """
+        Handles uncaught exceptions by printing a detailed crash report.
+        
+        If the exception is a KeyboardInterrupt, delegates handling to the default system
+        exception hook. Otherwise, logs the timestamp, error type, error message, and full
+        traceback to standard output.
+        """
         if issubclass(exc_type, KeyboardInterrupt):
             # Handle keyboard interrupt differently
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
@@ -269,6 +327,15 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def initUI(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Initialize and configure the main user interface.
+        
+        Sets the window title and geometry, creates a central widget with a grid layout,
+        and establishes a QStackedWidget containing pages for home, pets, items, item levels,
+        settings, realms, and pet item levels. Also configures side buttons, checks settings,
+        starts the API data thread for fetching data, embeds the layout in a scrollable area,
+        and displays the window.
+        """
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
@@ -346,6 +413,18 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_realm_page(self, realm_page):
 
+        """
+        Configures the realm management page with UI widgets for realm control.
+        
+        This method sets up the user interface elements on the realm management page,
+        including combo boxes for selecting WoW regions and realm names, input fields for
+        adding new realm names and IDs, and buttons to add, remove, or reset the realm list.
+        It also adds a sortable list widget to display the realms and connects signals to
+        their corresponding event handlers.
+        
+        Parameters:
+            realm_page: The container widget where the realm page UI components are added.
+        """
         self.realm_region = QComboBox(realm_page)
         self.realm_region_label = QLabel("WoW Region", realm_page)
         self.realm_region_label.setToolTip("")
@@ -410,6 +489,15 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_side_buttons(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Creates and configures side navigation and action buttons in the UI.
+        
+        This method initializes navigation buttons for page switching (Home, Pets, Items,
+        ILvl List, Pet Levels, Application Settings, and Realm Lists) and action buttons for
+        saving data, resetting the app, and controlling alerts. It also adds a visual separator
+        and an alert status label. All widgets are set to fixed sizes and connected to their
+        respective event handlers.
+        """
         self.go_to_home_button = QPushButton("Home Page")
         self.go_to_home_button.setFixedSize(150, 25)
         self.go_to_home_button.clicked.connect(self.go_to_home_page)
@@ -490,6 +578,16 @@ class App(QMainWindow):
     def make_home_page(self, home_page):
 
         # checking if the app is invoked from the windows binary and if yes then change the icon file path.
+        """
+        Creates and sets up the home page layout.
+        
+        Populates the provided widget with the application icon, title, and clickable links to
+        Patreon, Discord, the main website, and guides. The icon file path is adjusted if the
+        application is run from a Windows binary.
+        
+        Args:
+            home_page: The container widget for the home page elements.
+        """
         icon_path = "icon.ico"
         if windowsApp_Path is not None:
             icon_path = f"{windowsApp_Path}\\icon.ico"
@@ -544,6 +642,18 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_settings_page(self, settings_page):
 
+        """
+        Initialize and configure the settings page with configuration widgets.
+        
+        This method populates the provided settings page with various UI elements that let the
+        user configure application settings such as Discord webhook URL, WoW client credentials,
+        authentication token, region selection, thread count, scan timings, price discount, and
+        display preferences. It also sets up tooltips for guidance and connects signal handlers
+        (for example, reacting to region changes).
+        
+        Parameters:
+            settings_page: The widget serving as the container for the settings page.
+        """
         self.discord_webhook_input = QLineEdit(settings_page)
         self.discord_webhook_input_label = QLabel("Discord Webhook", settings_page)
         self.discord_webhook_input_label.setToolTip(
@@ -686,13 +796,32 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def on_region_changed(self, new_region):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Handle region changes and refresh statistics if needed"""
+        """Handle a change in the region setting.
+        
+        If the new region is either "NA" or "EU", update the API data thread's region configuration.
+        No action is taken for any other region identifiers.
+        
+        Parameters:
+            new_region (str): The new region identifier, expected to be "NA" or "EU".
+        """
         if new_region in ["NA", "EU"]:
             self.api_data_thread.set_region(new_region)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_pet_page(self, pet_page):
 
+        """
+        Initialize and layout the pet page UI elements.
+        
+        Constructs and positions the interface components used to manage pet data. This
+        method sets up input fields for pet ID and price, a disabled combo box for pet name
+        selection, buttons for adding/updating and removing pets, a sortable list widget for 
+        displaying pet entries, and additional controls for importing, erasing, and converting 
+        pet data to alternate formats.
+        
+        Args:
+            pet_page: The parent widget that hosts all pet management UI elements.
+        """
         self.pet_id_input = QLineEdit(pet_page)
         self.pet_id_input_label = QLabel("Pet ID", pet_page)
         self.pet_id_input_label.setToolTip(
@@ -759,6 +888,16 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_item_page(self, item_page):
 
+        """
+        Set up the item management page UI.
+        
+        Creates and arranges the input fields, labels, buttons, and list widget within the provided container.
+        This method initializes elements for entering an item ID and price, a disabled dropdown for item names,
+        and interactive buttons to add/update, remove, import, erase, and convert item data for auction sniping.
+        
+        Args:
+            item_page: The parent widget that holds all the item page UI components.
+        """
         self.item_id_input = QLineEdit(item_page)
         self.item_id_input_label = QLabel("Item ID", item_page)
         self.item_id_input_label.setToolTip(
@@ -825,6 +964,15 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_ilvl_page(self, ilvl_page):
 
+        """Constructs and configures the item level configuration page.
+        
+        Creates and arranges the UI elements for setting up item level sniping options.
+        This function adds text inputs for specifying item IDs, minimum and maximum item
+        levels, buyout price, required player levels, and bonus list filters. It also creates
+        checkboxes to filter by item properties such as Sockets, Speed, Leech, and Avoidance,
+        and provides action buttons to add/update, remove, import, or erase item configurations.
+        A list widget is included to display the current item level settings.
+        """
         self.ilvl_item_input = QLineEdit(ilvl_page)
         self.ilvl_item_input_label = QLabel("Item ID(s)", ilvl_page)
         self.ilvl_item_input_label.setToolTip(
@@ -959,41 +1107,88 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def go_to_home_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Switches to the home page of the application.
+        
+        Sets the stacked widget's current index to 0 to display the home view.
+        """
         self.stacked_widget.setCurrentIndex(0)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def go_to_pet_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Switches to the pet page in the application.
+        
+        Updates the stacked widget to display the pet management interface.
+        """
         self.stacked_widget.setCurrentIndex(1)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def go_to_item_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Switches the UI to the item management page.
+        
+        This method updates the stacked widget to display the page where users
+        can manage in-game auction items.
+        """
         self.stacked_widget.setCurrentIndex(2)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def go_to_ilvl_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Switches to the ILvl page.
+        
+        Updates the main interface to display the item level rules page, enabling users to manage item sniping criteria.
+        """
         self.stacked_widget.setCurrentIndex(3)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def go_to_settings_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Switches the display to the settings page.
+        
+        Updates the application's view by setting the current index of the main stack widget to the settings page.
+        """
         self.stacked_widget.setCurrentIndex(4)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def go_to_realms_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Switches the view to the realms page.
+        
+        Sets the main widget's current page to the realm management interface.
+        """
         self.stacked_widget.setCurrentIndex(5)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def go_to_pet_ilvl_page(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Navigates to the pet item level page.
+        """
         self.stacked_widget.setCurrentIndex(6)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def api_data_received(self, pet_statistics, item_statistics):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Update UI dropdown menus with pet and item data.
+        
+        Processes the provided pet and item statistics to extract sorted names and populate the
+        corresponding dropdown menus in the UI. Configures the combo boxes to be editable, applies
+        a consistent style, and connects selection change events to their respective handlers.
+        
+        Args:
+            pet_statistics: A data structure (e.g., a pandas DataFrame) containing pet data with an
+                'itemName' column.
+            item_statistics: A data structure (e.g., a pandas DataFrame) containing item data with an
+                'itemName' column.
+        """
         self.pet_statistics = pet_statistics
         self.item_statistics = item_statistics
 
@@ -1035,6 +1230,17 @@ class App(QMainWindow):
         # @coderabbitai add docstring here if needed and remove this comment after
         # This function will be called whenever the user selects a different item
 
+        """
+        Update item price and ID fields based on the combo box selection.
+        
+        Retrieves the selected item's statistics and determines the appropriate price. If the user has not
+        entered a custom price or if a default price is available, the function calculates a recommended price
+        using a discount factor and updates the item price input field; otherwise, it uses the stored price.
+        Finally, it updates the item ID input field with the corresponding identifier.
+        
+        Args:
+            index (int): The index of the newly selected item in the combo box.
+        """
         selected_item = self.item_name_input.currentText()
         selected_item_stats = self.item_statistics[
             self.item_statistics["itemName"] == selected_item
@@ -1070,6 +1276,17 @@ class App(QMainWindow):
     def on_combo_box_pet_changed(self, index):
         # @coderabbitai add docstring here if needed and remove this comment after
         # This function will be called whenever the user selects a different item
+        """
+        Updates pet price and ID fields based on the combo box selection.
+        
+        When a new pet is selected, this method retrieves the corresponding pet
+        statistics and updates the pet price and ID input fields. It uses a user-defined
+        price if available; otherwise, it computes a recommended price by applying a
+        discount factor to the default price from the pet statistics.
+        
+        Args:
+            index: The new combo box index (unused).
+        """
         selected_pet = self.pet_name_input.currentText()
         selected_pet_stats = self.pet_statistics[
             self.pet_statistics["itemName"] == selected_pet
@@ -1101,6 +1318,14 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def on_combo_box_region_changed(self, index):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Update realm list and combobox when the region selection changes.
+        
+        Clears the existing realm list and name combobox, then loads realm data from a JSON file
+        associated with the selected region (e.g., EU, NA, EUCLASSIC, etc.). Populates the realm name
+        combobox and list display with the retrieved realm names and IDs. If an invalid region is selected,
+        displays a critical error message and halts further processing.
+        """
         self.realm_list_display.clear()
         self.realm_name_combobox.clear()
         selected_realm = self.realm_region.currentText()
@@ -1172,6 +1397,15 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def on_combo_box_realm_name_changed(self, index):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Update realm input fields based on the selected realm name.
+        
+        This method is triggered when the realm name combobox value changes. It retrieves the
+        current realm name and region, then dynamically imports the corresponding realm ID mapping.
+        If no realm name is selected, it returns 0. If the region is invalid, an error message is
+        displayed and the method returns False. Otherwise, it updates the realm name and ID input
+        fields with the appropriate values.
+        """
         selected_realm_name = self.realm_name_combobox.currentText()
         if selected_realm_name == "":
             return 0
@@ -1213,6 +1447,15 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def add_realm_to_list(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Adds a new realm to the connected realms list for the selected region.
+        
+        If the realm name input field is empty, the method returns 0 without making any changes.
+        Based on the region selected in the GUI, it loads the corresponding JSON file containing
+        realm data, adds the new realm using the provided name and numeric ID, updates the display
+        list, and saves the modified data back to the file. If an invalid region is selected,
+        a critical error message is shown and the method returns False.
+        """
         if self.realm_name_input.text() == "":
             return 0
 
@@ -1257,6 +1500,15 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def remove_realm_to_list(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Removes a realm from the connected realms list for the selected region.
+        
+        The function retrieves the realm name from the user input and selects the JSON file
+        associated with the region chosen from the region selector. It attempts to remove the
+        realm from the loaded data; if the realm name is empty or not found, an error dialog is
+        displayed. On successful removal, the realm list display is updated and the changes are
+        saved back to the file.
+        """
         if self.realm_name_input.text() == "":
             return 0
 
@@ -1313,6 +1565,11 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def reset_realm_list(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Resets the realm list file and updates the UI with default realm data.
+        
+        Retrieves the current region from the realm_region widget and maps it to its corresponding default realm identifiers and file path. If a valid region is selected, writes the default realm data in JSON format to the corresponding file and refreshes the realm list display. If the selection is invalid, displays a critical error message and aborts the reset operation by returning False.
+        """
         selected_realm = self.realm_region.currentText()
         match selected_realm:
             case "EU":
@@ -1370,6 +1627,16 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def check_config_file(self, path_to_config):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Load and apply configuration settings from a JSON file.
+        
+        This method reads configuration data from the specified JSON file and updates the UI elements 
+        with the corresponding settings. If the file contains improperly formatted JSON or cannot be 
+        loaded, a critical error message is displayed to notify the user.
+        
+        Parameters:
+            path_to_config (str): The file path of the JSON configuration file.
+        """
         try:
             with open(path_to_config, encoding="utf-8") as json_file:
                 raw_mega_data = json.load(json_file)
@@ -1440,14 +1707,13 @@ class App(QMainWindow):
         # @coderabbitai add docstring here if needed and remove this comment after
         """
         Initializes required directories, configuration, and user data files.
-
-        This method ensures that essential folders and backup directories exist, creating them
-        if necessary. It checks for default realm data files for various regions and writes them
-        using preset data if they are missing. When a configuration file is present, it is
-        validated and used to update the API's region, otherwise the region defaults to EU.
-        Additionally, pet, item, and item level lists are loaded from JSON files and their entries
-        are added to the corresponding display widgets, with missing fields in item level entries
-        being populated with default values.
+        
+        Creates the main data and backup directories if they do not exist, and writes default JSON
+        realm data files for various regions (EU, NA, EU Classic, NA Classic, NASOD Classic, EUSOD Classic)
+        if missing. If a configuration file exists, it is validated and used to set the API region
+        (defaulting to EU if absent). Additionally, pet, item, and item level lists are loaded from JSON
+        files into their corresponding display widgets, with missing item level fields populated with
+        default values.
         """
         data_folder = os.path.join(os.getcwd(), "AzerothAuctionAssassinData")
         if not os.path.exists(data_folder):
@@ -1565,8 +1831,16 @@ class App(QMainWindow):
         # Parse the display string more carefully
         """
         Handles a double-click event on an ilvl list item.
-
-        Parses the semicolon-separated text of the clicked item to extract attributes such as item ID, price, item level, socket and other boolean flags, level requirements, maximum item level, and bonus list. It then populates the corresponding UI fields and checkboxes with these values, clearing any field if the extracted value is empty.
+        
+        Parses the semicolon-separated key-value pairs from the clicked item's text
+        to extract attributes including item ID, price, item level, boolean flags for
+        sockets, speed, leech, and avoidance, as well as minimum and maximum level
+        requirements, maximum item level, and bonus list. The extracted values are used
+        to update the corresponding UI fields and checkboxes in the ilvl configuration panel.
+        
+        Args:
+            item: The list widget item that was double-clicked, containing text in the
+                  expected "key: value" semicolon-separated format.
         """
         parts = item.text().split(";")
 
@@ -1858,13 +2132,13 @@ class App(QMainWindow):
     def remove_ilvl_to_list(self):
         # @coderabbitai add docstring here if needed and remove this comment after
         """
-        Removes an item level rule matching the specified criteria from the list.
-
-        This method constructs a comparison dictionary from various UI input fields—including item level,
-        checkbox states (sockets, speed, leech, avoidance), item IDs, bonus lists, and level limits—and
-        filters the internal list of item level rules to remove entries that match exactly. The display is
-        then refreshed to show the updated list. If the required item level input is empty or no matching
-        entry is found, an appropriate message is displayed.
+        Remove an item level rule based on user-specified criteria.
+        
+        This method reads various UI inputs—including the required item level, checkbox states
+        (sockets, speed, leech, avoidance), item IDs, bonus lists, and level limits—to build a
+        comparison dictionary. It then filters the internal rule list to remove any entries that
+        exactly match the criteria and refreshes the display accordingly. If the item level input is
+        empty, a critical error is shown; if no matching rule is found, an informational message is displayed.
         """
         if len(self.ilvl_input.text()) == 0:
             QMessageBox.critical(
@@ -2104,6 +2378,16 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def item_list_double_clicked(self, item):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Handles a double-click event on an item list entry.
+        
+        Extracts the item ID and price from the clicked item's text and populates the corresponding
+        input fields. It then looks up the item name in the item statistics using the extracted ID,
+        updating the name field accordingly. If the lookup fails, a default error message is displayed.
+        
+        Args:
+            item: The list widget item that was double-clicked, containing the text with item details.
+        """
         item_split = item.text().replace(" ", "").split(":")
         item_id = item_split[1].split(",")[0]
         self.item_id_input.setText(item_id)
@@ -2122,6 +2406,14 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def add_item_to_dict(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Adds or updates an item entry based on user input.
+        
+        Retrieves the item ID and price from the UI input fields and validates that both are provided, numeric, and within acceptable ranges (item ID: 1–500000, price: 0–10,000,000). If validation fails, an error message is displayed and the function returns False. If the item already exists, its previous entry is removed before updating. On success, the item is added or updated in the internal dictionary and list display.
+        
+        Returns:
+            bool: True if the item is successfully added or updated, False otherwise.
+        """
         item_id = self.item_id_input.text()
         item_price = self.item_price_input.text()
 
@@ -2176,6 +2468,13 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def remove_item_to_dict(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Removes an item from the GUI list and internal dictionary based on the entered item ID.
+        
+        Checks if the current input matches an existing item ID in the dictionary. If a match is found,
+        the method iterates through the list display to locate the corresponding formatted entry, removes it,
+        and then deletes the item from the dictionary.
+        """
         if self.item_id_input.text() in self.items_list:
             for x in range(self.item_list_display.count()):
                 if (
@@ -2189,6 +2488,11 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def erase_item_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Resets item data after user confirmation.
+        
+        Displays a confirmation dialog, and if the user confirms by selecting "Yes," clears the item list display and resets the internal items dictionary.
+        """
         reply = QMessageBox.question(
             self,
             "Confirm Reset",
@@ -2203,6 +2507,20 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def process_import_data(self, data_source, is_file=False, data_type="item"):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Processes imported JSON data for auction items or pets.
+        
+        This method reads JSON data from the provided source—either a file or a string—and validates
+        each entry's ID and price against predefined ranges based on the data type ("item" or "pet").
+        It updates the corresponding internal data store and refreshes its display widget with
+        formatted entries. If the JSON is invalid or an entry falls outside the allowed ranges, an
+        error dialog is shown.
+            
+        Parameters:
+            data_source: A file path or JSON string containing the data.
+            is_file: A flag indicating whether data_source refers to a file.
+            data_type: Specifies the data type to process; must be "item" or "pet".
+        """
         try:
             # Load the JSON data from the appropriate source
             if is_file:
@@ -2258,6 +2576,10 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def import_item_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """Prompts the user to paste AAA-Transformer item data and processes it.
+        
+        Displays a multi-line input dialog for pasting item data. If the user cancels or submits empty text, the function exits without action. Otherwise, it processes the pasted data as item data.
+        """
         text, ok = QInputDialog.getMultiLineText(
             self,
             "Import AAA-Transformer Data",
@@ -2272,6 +2594,12 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def import_item_data_from_file(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Opens a file dialog to import item data from a JSON file.
+        
+        Prompts the user to select a JSON file containing AAA-Transformer item data. If a file
+        is selected, the method passes the file path to process_import_data for further processing.
+        """
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Import AAA-Transformer Data from File",
@@ -2288,28 +2616,11 @@ class App(QMainWindow):
         # @coderabbitai add docstring here if needed and remove this comment after
         # Open a dialog to allow users to paste the PBS data
         """
-        Import PBS (Price Breakdown Sheet) data into the application's item tracking system.
-
-        This method allows users to paste PBS data, which contains item names and their corresponding prices. It processes the pasted data, matches item names with the application's item statistics, and updates the item list with prices.
-
-        Parameters:
-            None (uses self context)
-
-        Behavior:
-            - Opens a multi-line input dialog for users to paste PBS data
-            - Parses the pasted data, extracting item names and prices
-            - Matches item names with existing item statistics
-            - Updates item list with PBS prices or calculates discounted prices
-            - Populates the item list display with matched items and their prices
-
-        Raises:
-            ValueError: If invalid numeric values are encountered during price parsing
-            Exception: For any unexpected errors during data processing
-
-        Notes:
-            - Handles items with or without quotes in their names
-            - Supports fallback to discounted default prices if PBS price is not available
-            - Converts item names to lowercase for case-insensitive matching
+        Imports PBS (Price Breakdown Sheet) data to update item prices.
+        
+        Opens a multi-line input dialog for users to paste PBS data and processes the pasted text to extract item price information. For each item, if a valid PBS price is provided, the item’s price is updated; otherwise, a discounted price is computed based on the default price and the current discount percentage. Item names are matched in a case-insensitive manner, with surrounding quotes removed if present.
+        
+        The updated prices are then displayed in the item list.
         """
         text, ok = QInputDialog.getMultiLineText(
             self, "Import PBS Data", "Paste your PBS data here:"
@@ -2377,6 +2688,11 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def convert_to_pbs(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Convert AAA JSON item list to PBS format and copy the result to clipboard.
+        
+        This method converts the internal AAA JSON representation of items and prices into a PBS-formatted string using a helper function. The PBS string is then copied to the system clipboard and a success message is shown. If an error occurs during conversion, an error message is displayed.
+        """
         try:
             # Assuming `self.items_list` is the AAA JSON list of items and prices
             pbs_string = self.convert_aaa_json_to_pbs(self.items_list)
@@ -2395,6 +2711,19 @@ class App(QMainWindow):
     def convert_aaa_json_to_pbs(self, json_data):
         # @coderabbitai add docstring here if needed and remove this comment after
         # Prepare the PBS list
+        """
+        Convert Azeroth Auction Assassin JSON data to a PBS export string.
+        
+        This function iterates over a dictionary of item IDs and prices, retrieves each item's
+        name from the internal item statistics, and constructs a PBS formatted string entry.
+        Items that are not found in the statistics are skipped.
+        
+        Args:
+            json_data (dict): Mapping of item IDs to their price values.
+        
+        Returns:
+            str: A concatenated string of PBS entries for items with valid names.
+        """
         pbs_list = []
 
         for item_id, price in json_data.items():
@@ -2422,6 +2751,16 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def pet_list_double_clicked(self, item):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Handles double-click events on a pet list item.
+        
+        Extracts the pet ID and price from the clicked item's text, updates the corresponding input fields,
+        and sets the pet name based on the pet statistics. If no matching pet is found, the pet name input is
+        set to "Item ID not found".
+        
+        Parameters:
+            item: A list widget item containing pet details in a formatted string.
+        """
         item_split = item.text().replace(" ", "").split(":")
         pet_id = item_split[1].split(",")[0]
         self.pet_id_input.setText(pet_id)
@@ -2439,6 +2778,18 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def add_pet_to_dict(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Add a pet entry to the dictionary and update the display list.
+        
+        Retrieves pet ID and price from input fields and validates that neither is empty,
+        that both values are numeric, and that they fall within acceptable ranges (pet ID 
+        between 1 and 10000, price between 1 and 10 million). If validation fails, an error 
+        message is shown and the method returns False. If an entry with the same pet ID exists, 
+        its display entry is removed before adding the new one.
+        
+        Returns:
+            bool: True if the pet is successfully added, False otherwise.
+        """
         pet_id = self.pet_id_input.text()
         pet_price = self.pet_price_input.text()
 
@@ -2493,6 +2844,11 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def remove_pet_to_dict(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Remove pet entry from UI list and internal dictionary.
+        
+        If the pet ID from the input field exists in the pet dictionary, this method finds the corresponding item in the list widget, removes it, and deletes the entry from the dictionary.
+        """
         if self.pet_id_input.text() in self.pet_list:
             for x in range(self.pet_list_display.count()):
                 if (
@@ -2506,6 +2862,13 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def erase_pet_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Erase pet data after user confirmation.
+        
+        Displays a confirmation dialog that prompts the user to confirm resetting all pet data.
+        If the user confirms by selecting 'Yes', the pet list display is cleared and the internal
+        pet list is reset to an empty dictionary. No changes are made if the user cancels.
+        """
         reply = QMessageBox.question(
             self,
             "Confirm Reset",
@@ -2520,6 +2883,12 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def import_pet_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Prompts the user to import pet data via a multi-line text input dialog.
+        
+        Displays a dialog titled "Import AAA-Transformer Data" where the user can paste pet data from AAA-Transformer.
+        If valid, non-empty input is provided, the input is processed and imported as pet data.
+        """
         text, ok = QInputDialog.getMultiLineText(
             self,
             "Import AAA-Transformer Data",
@@ -2533,6 +2902,13 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def import_pet_data_from_file(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Import pet data from a file.
+        
+        Displays a file dialog for selecting a JSON file containing pet data and, if a file is chosen,
+        processes the data by calling process_import_data with the data type set to "pet". If no file is 
+        selected, the import operation is cancelled.
+        """
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Import AAA-Transformer Pet Data from File",
@@ -2546,6 +2922,11 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def import_configs(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Opens a file dialog to select a configuration file.
+        
+        Prompts the user to choose a configuration file using a file selection dialog. If a file is selected, its path is validated by the check_config_file method; otherwise, the method returns without taking action.
+        """
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname or pathname == "":
             return
@@ -2554,6 +2935,13 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def reset_app_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Reset application data after user confirmation.
+        
+        Displays a confirmation dialog and, if confirmed, clears list displays and resets input
+        fields (text and checkbox states) to their default values. It then empties internal data
+        structures for pets, items, and item levels, and saves the new state.
+        """
         reply = QMessageBox.question(
             self,
             "Confirm Reset",
@@ -2591,6 +2979,23 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def validate_application_settings(self, reset=False):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Validates and returns the application settings configuration.
+        
+        This method checks that required GUI inputs (such as region, client credentials, webhook URL,
+        thread counts, scan times, and boolean flags) contain valid values. It verifies that the region
+        matches one of the accepted values, that required fields are non-empty and of sufficient length,
+        and that numerical and boolean fields are correctly formatted. If any check fails, an error dialog
+        is displayed and the method returns False. When the reset flag is True, validations are bypassed and
+        the current settings are assembled and returned.
+        
+        Args:
+            reset (bool): If True, skips validation checks and returns the current configuration.
+        
+        Returns:
+            dict: A dictionary containing the validated configuration settings.
+            bool: False if a validation error is encountered.
+        """
         wow_region = self.wow_region.currentText()
         mega_threads = self.number_of_mega_threads.text()
         scan_time_max = self.scan_time_max.text()
@@ -2711,6 +3116,20 @@ class App(QMainWindow):
     def validate_item_lists(self, reset=False):
         # @coderabbitai add docstring here if needed and remove this comment after
         # When resetting, we don't need to validate since lists will be empty
+        """
+        Validates auction configuration lists for proper entries.
+        
+        If reset is True, validation is skipped and True is returned. Otherwise, this method
+        ensures that at least one list among items, pets, ilvl data, or pet level rules is non-empty.
+        It then checks that:
+          - Item IDs in items_list are integers between 1 and 500000.
+          - Pet IDs in pet_list are integers between 1 and 10000.
+          - Each entry in ilvl_list has an ilvl value below 1000 and all associated item IDs within 1 to 500000.
+          - Each rule in pet_ilvl_rules has a petID between 1 and 10000, a minLevel between 1 and 25,
+            and a minQuality between -1 and 3.
+        
+        If any check fails, an error message is shown and False is returned. Returns True if all validations pass.
+        """
         if reset:
             return True
 
@@ -2795,6 +3214,14 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def paid_save_data_to_json(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Validates the Auction Assassin token and saves application data to JSON.
+        
+        This method sends a POST request with the current authentication token to verify its 
+        validity. If the token is valid, it attempts to save data to a JSON file. In cases where 
+        the token is missing, invalid, expired, or if the saving process fails, the method 
+        displays an error message to the user via a message box.
+        """
         response = requests.post(
             self.token_auth_url,
             json={"token": f"{self.authentication_token.text()}"},
@@ -2854,31 +3281,21 @@ class App(QMainWindow):
         # @coderabbitai add docstring here if needed and remove this comment after
         # Validate application settings
         """
-        Save application data and configuration to JSON files with backup mechanism.
-
-        This method performs the following key actions:
-        - Validates application settings and item lists
-        - Saves configuration and user-defined lists to primary JSON files
-        - Creates timestamped backup files for data preservation
-
-        Parameters:
-            None
-
+        Save application data and configuration to JSON files with backup.
+        
+        This method first validates application settings and item lists. If validation passes,
+        it writes the current configuration, desired pets, desired items, item level list, and pet
+        item level rules to primary JSON files. It then creates timestamped backup copies of these
+        files in the designated backup directory for data preservation.
+        
+        Args:
+            reset (bool): If True, resets application settings to defaults during validation.
+        
         Returns:
-            bool: True if data saving is successful, False if validation fails
-
-        Raises:
-            No explicit exceptions, but may raise file I/O related errors during JSON saving
-
+            bool: True if data is saved successfully; False if validation fails.
+        
         Side Effects:
-            - Writes JSON files to predefined paths
-            - Creates backup files with timestamp in filename
-            - Modifies filesystem by creating new JSON files
-
-        Notes:
-            - Saves configuration, desired pets, items, item levels, and pet item levels
-            - Backup files are created in 'AzerothAuctionAssassinData/backup' directory
-            - Backup filename includes timestamp for unique identification
+            Writes multiple JSON files to the filesystem, including backup files with timestamped filenames.
         """
         config_json = self.validate_application_settings(reset=reset)
         if not config_json:
@@ -2961,6 +3378,14 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def start_alerts(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Starts the alert scanning thread after confirming that data has been saved.
+        
+        Prompts the user to verify that recent changes have been saved. If the user declines or if saving data
+        to JSON fails, the scanning process is aborted. Otherwise, the method disables the start button, enables
+        the stop button, and starts an alerts thread, connecting its progress and finished signals to the appropriate
+        handlers.
+        """
         reply = QMessageBox.question(
             self,
             "Save Reminder",
@@ -2997,6 +3422,11 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def stop_alerts(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Stops alert processing and adjusts UI elements.
+        
+        This method stops the alert thread by setting its running flag to False, updates the stop button text to indicate that the process is stopping, signals the progress with a message, and disables the stop button to prevent further interaction.
+        """
         self.alerts_thread.running = False
         self.stop_button.setText("Stopping Process")
         self.alerts_progress_changed("Stopping alerts!")
@@ -3005,6 +3435,12 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def alerts_thread_finished(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Handles UI updates after the alerts thread has finished.
+        
+        Resets the interface by updating the stop button text, enabling the start button, and
+        setting the alerts progress message to notify the user that the system is ready for new alerts.
+        """
         self.stop_button.setText("Stop Alerts")
         self.start_button.setEnabled(True)
         self.alerts_progress_changed("Waiting for user to Start!")
@@ -3012,6 +3448,12 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def alerts_progress_changed(self, progress_str):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Updates the alerts progress indicator text.
+        
+        Args:
+            progress_str (str): The message to display as progress.
+        """
         self.mega_alerts_progress.setText(progress_str)
 
     # Add after the make_ilvl_page method
@@ -3170,7 +3612,18 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def add_pet_ilvl_to_list(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Add or update a pet level rule in the list"""
+        """
+        Add or update a pet level rule based on user inputs.
+        
+        Retrieves and validates pet rule details from multiple GUI fields including pet ID,
+        price, minimum level, minimum quality, and excluded breeds. If the inputs are valid,
+        the function updates the internal rule list and refreshes the display by ensuring that
+        only one rule exists per pet ID. If any validation fails, a critical error is shown and
+        False is returned.
+        
+        Returns:
+            bool: True if the rule was added or updated successfully, False otherwise.
+        """
         try:
             # Get and validate inputs
             if not self.pet_ilvl_min_level_input.text().strip():
@@ -3243,7 +3696,13 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def remove_pet_ilvl_from_list(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Remove a pet level rule from the list"""
+        """
+        Remove a pet level rule from the list.
+        
+        This method removes a pet level rule from both the display list and the underlying
+        rules list by extracting a pet ID from the selected item text. If no item is selected,
+        a critical message box is shown to prompt the user to select a pet level rule.
+        """
         current_item = self.pet_ilvl_list_display.currentItem()
         if not current_item:
             QMessageBox.critical(
@@ -3265,7 +3724,14 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def pet_ilvl_list_clicked(self, item):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Handle clicking on a pet level rule in the list"""
+        """Handle a click event on a pet level rule list item.
+        
+        Parses a formatted string from the selected list item to extract the pet ID, 
+        price, minimum level, minimum quality, and excluded breeds, then updates the 
+        corresponding input fields. Attempts to set the pet name dropdown by matching the 
+        pet ID against available pet statistics; if no match is found, displays an error 
+        message in the dropdown.
+        """
         # Parse the display string
         parts = item.text().split(";")
         pet_id = parts[0].split(":")[1].strip()
@@ -3294,7 +3760,13 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def import_pet_ilvl_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Import pet level rules from a file"""
+        """Import pet level rules from a file.
+        
+        Prompts the user to select a JSON file containing pet level rules. Each rule must include the keys
+        "petID", "price", "minLevel", "minQuality", and "excludeBreeds". The current pet level display list is
+        cleared before loading and validating the rules, which are then added as formatted strings. If no file is
+        selected or if the file contains invalid JSON or improperly formatted rules, an error message is displayed.
+        """
         pathname = QFileDialog().getOpenFileName(self)[0]
         if not pathname:
             return
@@ -3336,7 +3808,12 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def erase_pet_ilvl_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Clear all pet level rules"""
+        """
+        Clear all pet level rules after user confirmation.
+        
+        Displays a confirmation dialog and, if confirmed, clears both the GUI list
+        of pet level rules and the internal rule storage.
+        """
         reply = QMessageBox.question(
             self,
             "Confirm Reset",
@@ -3393,35 +3870,12 @@ class App(QMainWindow):
     def import_pbs_pet_ilvl_data(self):
         # @coderabbitai add docstring here if needed and remove this comment after
         """
-        Import PBS pet data and convert to pet level rules.
-
-        This method allows users to paste PBS (Presumably Pet Battle System) pet data and
-        automatically generates pet trading rules based on the imported information.
-
-        Parameters:
-            None (uses self context)
-
-        Functionality:
-            - Opens a multi-line input dialog for users to paste PBS pet data
-            - Parses the pasted data to extract pet names and prices
-            - Creates pet trading rules with extracted information
-            - Handles various data parsing scenarios and edge cases
-            - Provides fallback pricing using default discount mechanism
-            - Updates the pet level rules list and displays the rules
-
-        Raises:
-            QMessageBox warnings/errors for:
-            - Invalid data format
-            - No valid pets imported
-            - Parsing errors
-
-        Returns:
-            None (updates internal state and UI components)
-
-        Notes:
-            - Supports flexible data parsing with multiple semicolon-separated fields
-            - Handles pet names with/without quotes
-            - Provides default pricing if no valid price is found
+        Import and convert PBS pet data for pet level rules.
+        
+        Prompts the user to paste PBS pet data via a multi-line dialog, parses the input to
+        extract pet names and prices (applying default pricing when needed), and updates the
+        internal pet level rules list displayed in the UI. Displays warnings if the input is
+        invalid or if no valid pets are imported.
         """
         text, ok = QInputDialog.getMultiLineText(
             self, "Import PBS Pet Data", "Paste your PBS pet data here:"
@@ -3524,7 +3978,14 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def convert_pet_ilvl_to_pbs(self):
         # @coderabbitai add docstring here if needed and remove this comment after
-        """Convert pet level rules to PBS format"""
+        """
+        Converts pet ILvl rules to PBS format and copies the result to the clipboard.
+        
+        This method iterates over the pet ILvl rules and retrieves the corresponding pet name from the
+        pet statistics data. For each rule with a valid pet name, it builds a PBS-formatted string using
+        the pet name and its associated price. The final aggregated string is then copied to the system
+        clipboard. A success message is displayed upon completion, while any errors trigger an error dialog.
+        """
         try:
             pbs_list = []
             for rule in self.pet_ilvl_rules:
@@ -3557,29 +4018,15 @@ class App(QMainWindow):
         # @coderabbitai add docstring here if needed and remove this comment after
         # Open a dialog to allow users to paste the PBS data
         """
-        Import pet data from PBS (Probably Battle Stones) format into the application.
-
-        This method allows users to paste a formatted text containing pet data, which is then processed
-        to extract pet names and their corresponding prices. The method supports various input formats
-        and handles price extraction with fallback mechanisms.
-
-        Parameters:
-            None (uses self context)
-
-        Raises:
-            ValueError: If invalid data is encountered during parsing
-            Exception: For any unexpected errors during data processing
-
-        Behavior:
-            - Opens a multi-line input dialog for users to paste PBS pet data
-            - Parses the input, extracting pet names and prices
-            - Matches pet names against existing pet statistics
-            - Populates the pet list with extracted prices or calculated discounted prices
-            - Updates the pet list display with imported pet IDs and prices
-            - Handles cases where prices might be missing by applying a default discount
-
-        Example:
-            Input format: "Pet Name;;0;0;0;0;0;0;0;50000^Another Pet;;0;0;0;0;0;0;0;25000"
+        Import PBS pet data and update the pet list display.
+        
+        Prompts the user to paste PBS pet data through a multi-line input dialog.
+        The method cleans and splits the input text to extract pet names and their associated
+        prices from a delimited format. Pet names are normalized by stripping quotes and converting
+        to lowercase before being matched against existing pet statistics. For pets where no price is
+        provided, a discounted default price is computed based on the pet's desired price and a user-specified
+        discount percentage. The resulting pet IDs and prices are then displayed and stored.
+        If the input is empty or invalid, an error message is shown.
         """
         text, ok = QInputDialog.getMultiLineText(
             self, "Import PBS Pet Data", "Paste your PBS pet data here:"
@@ -3645,6 +4092,14 @@ class App(QMainWindow):
     # @coderabbitai add docstring here if needed and remove this comment after
     def convert_pets_to_pbs(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Convert the AAA pet list to PBS format and copy it to the clipboard.
+        
+        This method converts the internal AAA-formatted pet list into a PBS formatted 
+        string using the helper function 'convert_aaa_pets_to_pbs'. It then copies the 
+        result to the system clipboard and displays a success message. If an error occurs 
+        during conversion, it displays an error message.
+        """
         try:
             # Convert the AAA pet list to PBS format
             pbs_string = self.convert_aaa_pets_to_pbs(self.pet_list)
