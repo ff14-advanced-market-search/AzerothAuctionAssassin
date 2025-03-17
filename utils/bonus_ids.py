@@ -65,13 +65,21 @@ def get_bonus_ids():
 def get_bonus_id_sets():
     # @coderabbitai add docstring here if needed and remove this comment after
     # get raw data
-    """Get sets of bonus IDs categorized by type.
+    """
+    Return sets of bonus IDs categorized by type.
+    
+    Retrieves bonus IDs from a predefined data structure via get_bonus_ids() and organizes
+    them into sets for sockets, leech, avoidance, and speed bonuses, along with a list
+    of item level addition bonuses.
+    
     Returns:
-        - tuple: A tuple containing sets of IDs for sockets, leech, avoidance, speed, and a list of item level additions.
-    Processing Logic:
-        - Extracts bonus IDs from a predefined data structure.
-        - Organizes the IDs into sets based on the bonus type.
-        - Retrieves additional item level bonuses separately."""
+        tuple[set, set, set, set, list]: A tuple containing:
+            - set of socket bonus IDs,
+            - set of leech bonus IDs,
+            - set of avoidance bonus IDs,
+            - set of speed bonus IDs,
+            - list of item level addition bonuses.
+    """
     bonus_ids = get_bonus_ids()
     # get ids for each bonus type
     socket_ids = set(bonus_ids["sockets"].keys())
@@ -91,12 +99,15 @@ def get_bonus_id_sets():
 def get_secondary_stats():
     # @coderabbitai add docstring here if needed and remove this comment after
     # get raw data
-    """Extract secondary stat bonus IDs.
+    """
+    Extract and return secondary stat bonus ID sets.
+    
+    This function retrieves a mapping of bonus IDs using `get_bonus_ids()` and extracts the keys
+    for the secondary stats—haste, crit, mastery, and versatility—organizing each into a set.
+    
     Returns:
-        - tuple: A tuple containing four sets representing the bonus IDs for 'haste', 'crit', 'mastery', and 'versatility'.
-    Processing Logic:
-        - Retrieves raw data for bonus IDs using the `get_bonus_ids()` function.
-        - Extracts bonus type IDs from the raw data and organizes them into sets for easy manipulation and access.
+        tuple[set, set, set, set]: A tuple containing four sets, each representing the bonus IDs for
+        haste, crit, mastery, and versatility.
     """
     bonus_ids = get_bonus_ids()
     # get ids for each bonus type

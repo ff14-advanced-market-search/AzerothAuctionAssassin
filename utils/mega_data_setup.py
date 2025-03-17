@@ -127,6 +127,31 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def __set_mega_vars(var_name, raw_mega_data, required=False):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Retrieves and validates a configuration variable.
+        
+        This helper function obtains the value of a configuration variable from a provided
+        data dictionary or the environment. If the variable is found in the raw data, its
+        value is used; otherwise, the corresponding environment variable is checked.
+        If the variable is marked as required and is not found, an exception is raised.
+        For recognized variables such as WOW_REGION, FACTION, MEGA_THREADS, SCAN_TIME_MAX,
+        and SCAN_TIME_MIN, the function applies specific validation rules and defaults.
+        Additionally, boolean-like variables are processed to ensure they adhere to expected
+        default behaviors.
+        
+        Parameters:
+            var_name: The name of the configuration variable.
+            raw_mega_data: A dictionary containing configuration data.
+            required: A flag indicating whether the variable must be present.
+        
+        Returns:
+            The validated value of the configuration variable, which may be a string, integer,
+            boolean, or None.
+        
+        Raises:
+            Exception: If a required variable is missing or if an invalid value is provided for
+            WOW_REGION.
+        """
         if len(raw_mega_data) != 0 and var_name in raw_mega_data.keys():
             print(f"loading {var_name} from AzerothAuctionAssassinData/mega_data.json")
             var_value = raw_mega_data[var_name]
@@ -200,6 +225,21 @@ class MegaData:
         # @coderabbitai add docstring here if needed and remove this comment after
         def process_var(var_value, default_behaviour):
             # @coderabbitai add docstring here if needed and remove this comment after
+            """
+            Process a variable against a default behavior to yield a boolean result.
+            
+            This function compares the input value with the default behavior by both direct
+            equality and by comparing their lowercase string representations. If the input
+            value matches the default behavior, the default is returned; otherwise, the
+            logical negation of the default is returned.
+            
+            Args:
+                var_value: The value to evaluate, which may be a boolean or its string form.
+                default_behaviour: The expected default boolean value.
+            
+            Returns:
+                bool: The default behavior if a match is detected; otherwise, its negation.
+            """
             if (
                 str(var_value).lower() == str(default_behaviour).lower()
                 or var_value == default_behaviour
@@ -224,6 +264,16 @@ class MegaData:
     def check_access_token(self):
         # @coderabbitai add docstring here if needed and remove this comment after
         # tokens are valid for 24 hours
+        """
+        Checks and refreshes the OAuth access token.
+        
+        Returns the current Blizzard OAuth access token if it was created within 20 hours.
+        Otherwise, requests a new token from Blizzard's OAuth service, updates the token and its
+        creation time, and returns the new token.
+        
+        Raises:
+            Exception: If the token request fails or the response does not contain an access token.
+        """
         if (
             int(datetime.now().timestamp()) - self.access_token_creation_unix_time
             < 20 * 60 * 60
@@ -256,6 +306,16 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def __set_item_names(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Retrieves and filters item names for desired items.
+        
+        This method obtains item names using an external source and converts the
+        item IDs to integers. Only items whose IDs are present in the desired items
+        list (DESIRED_ITEMS) are retained.
+        
+        Returns:
+            dict: A mapping of item IDs (int) to their corresponding names (str).
+        """
         item_names = get_itemnames()
         item_names = {
             int(id): name
@@ -267,6 +327,24 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def __set_desired_items(self, item_list_name, path_to_data=None):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Load desired items configuration from a file or environment variable.
+        
+        This method attempts to load a JSON mapping of desired items using the provided
+        item_list_name. If a file path is provided via path_to_data, that file is used;
+        otherwise, it looks for a file named "{item_list_name}.json" within the
+        "AzerothAuctionAssassinData" directory. If the file is not found or contains no
+        data, the method falls back to an environment variable named as the uppercase
+        version of item_list_name. The loaded data is then converted so that keys become
+        integers and values become floats.
+        
+        Parameters:
+            item_list_name: The base name for the desired items configuration.
+            path_to_data: Optional path to a JSON file with desired items.
+        
+        Returns:
+            A dictionary mapping item IDs (int) to their corresponding values (float).
+        """
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
         desired_items_raw = {}
@@ -303,6 +381,16 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def __set_desired_ilvl_list(self, path_to_data=None):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Processes and returns desired item level configurations for auction sniping.
+        
+        This method loads item level configuration data either from a specified JSON file or from a default
+        directory. If the file cannot be found or contains no data, it attempts to load the data from an
+        environment variable. The configurations are grouped by their provided item level, with special
+        handling for entries lacking specific item IDs. Each configuration is processed to generate snipe
+        information using auxiliary methods, and an aggregated list of these configurations is returned.
+        If no configuration data is found, an empty list is returned.
+        """
         item_list_name = "desired_ilvl_list"
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
@@ -375,6 +463,33 @@ class MegaData:
         self, ilvl_info, item_names, base_ilvls, base_required_levels
     ):
         # Set default values if not present
+        """
+        Processes and validates item level configuration for auction sniping.
+        
+        This method sets default values for missing keys in the provided item level
+        configuration and validates that all required keys are present and have the
+        expected types. Depending on whether specific item IDs are provided in the
+        configuration, it constructs a snipe information dictionary using either all
+        available item names or a filtered subset. The method also ensures that bonus
+        lists contain only integers.
+        
+        Parameters:
+            ilvl_info (dict): Configuration for item level criteria, expected to include
+                keys such as "ilvl", "max_ilvl", "buyout", "sockets", "speed", "leech",
+                "avoidance", "item_ids", "required_min_lvl", "required_max_lvl", and "bonus_lists".
+            item_names (dict): Mapping of item IDs to their display names.
+            base_ilvls (dict): Mapping of item IDs to their base item levels.
+            base_required_levels (dict): Mapping of item IDs to their base required levels.
+        
+        Returns:
+            tuple: A tuple containing:
+                - snipe_info (dict): The processed and validated configuration for auction sniping.
+                - int: The target item level from ilvl_info.
+                
+        Raises:
+            Exception: If required keys are missing or if any configuration value does not
+                match the expected data type.
+        """
         ilvl_info["item_ids"] = ilvl_info.get("item_ids", [])
         ilvl_info["required_min_lvl"] = ilvl_info.get("required_min_lvl", 1)
         ilvl_info["required_max_lvl"] = ilvl_info.get("required_max_lvl", 1000)
@@ -461,6 +576,21 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def __set_desired_pet_ilvl_list(self, path_to_data=None):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Load and validate desired pet item level data from a file or environment variable.
+        
+        This method loads pet item level data from a JSON file specified by the optional
+        path_to_data parameter, or from the default file 
+        "AzerothAuctionAssassinData/desired_pet_ilvl_list.json". If no file data is found,
+        it falls back to the 'DESIRED_PET_ILVL_LIST' environment variable. Each pet entry is 
+        validated to ensure it contains the keys 'petID', 'price', 'minLevel', 'minQuality', and 
+        'excludeBreeds', and values are converted to the appropriate types. An exception is raised
+        if any required key is missing, or if 'minLevel' is not between 1 and 25, or if 'price' is 
+        not greater than 0.
+        
+        :param path_to_data: Optional file path to a JSON file containing pet item level data.
+        :return: A list of processed pet entries as dictionaries.
+        """
         item_list_name = "desired_pet_ilvl_list"
         file_name = f"{item_list_name}.json"
         env_var_name = item_list_name.upper()
@@ -528,6 +658,17 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def __set_realm_names(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Load and filter connected realm names based on the configured region.
+        
+        This method reads realm names from a region-specific JSON file within the
+        AzerothAuctionAssassinData directory, using the object's REGION setting.
+        If the NO_RUSSIAN_REALMS flag is enabled, it filters out realms that appear in
+        the list provided by get_wow_russian_realm_ids.
+        
+        Returns:
+            dict: A dictionary mapping connected realm IDs to their corresponding names.
+        """
         realm_names = json.load(
             open(
                 f"AzerothAuctionAssassinData/{str(self.REGION).lower()}-wow-connected-realm-ids.json"
@@ -543,6 +684,13 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def __validate_snipe_lists(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Validates that at least one snipe data list is populated.
+        
+        Checks if all snipe data lists for items, pets, item levels, and pet item levels are empty.
+        If so, raises an Exception with a detailed message suggesting the required environment variables
+        or JSON configuration files to set up snipe data.
+        """
         if (
             len(self.DESIRED_ITEMS) == 0
             and len(self.DESIRED_PETS) == 0
@@ -563,16 +711,40 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def get_upload_time_list(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Retrieves the list of auction upload timer values.
+        
+        Returns:
+            list: A list of timer values extracted from the internal upload_timers.
+        """
         return list(self.upload_timers.values())
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def get_upload_time_minutes(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Retrieves unique upload minutes.
+        
+        This method obtains upload time records via get_upload_time_list and returns a set of the
+        unique "lastUploadMinute" values extracted from each record.
+        
+        Returns:
+            set: A set of unique upload minute values.
+        """
         return set(realm["lastUploadMinute"] for realm in self.get_upload_time_list())
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def get_realm_names(self, connectedRealmId):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Retrieves and sorts realm names for the specified connected realm ID.
+        
+        Args:
+            connectedRealmId: The identifier of the connected realm to match in the WOW_SERVER_NAMES mapping.
+        
+        Returns:
+            A list of realm names sorted in ascending order.
+        """
         realm_names = [
             name for name, id in self.WOW_SERVER_NAMES.items() if id == connectedRealmId
         ]
@@ -584,6 +756,20 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def get_listings_single(self, connectedRealmId: int):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Fetch auction listings for a specific connected realm.
+        
+        Retrieves auction data from the auction house API using the given connected realm identifier.
+        For identifiers -1 and -2, commodity auction data is fetched separately. For all other values,
+        the method determines the appropriate API endpoints based on the region and faction and aggregates
+        auction listings from each. If no auctions are found for an endpoint, that response is skipped.
+        
+        Args:
+            connectedRealmId (int): The identifier of the connected realm; use -1 or -2 for commodity data.
+        
+        Returns:
+            list: A list of auction listings aggregated from the API responses.
+        """
         if connectedRealmId in [-1, -2]:
             print(f"gather data from {self.REGION} commodities")
             auction_info = self.make_commodity_ah_api_request()
@@ -625,6 +811,18 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def construct_api_url(self, connectedRealmId, endpoint):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Constructs the API URL for retrieving auction data.
+        
+        This method builds a Blizzard API URL using the connected realm ID and an endpoint. It determines the base URL, namespace, and locale based on the region associated with the instance. For classic regions, the namespace is further adjusted to reflect legacy endpoints.
+        
+        Args:
+            connectedRealmId: The identifier of the connected realm.
+            endpoint: Additional auction endpoint details to be appended to the URL.
+        
+        Returns:
+            A string representing the fully constructed API URL.
+        """
         base_url = (
             "https://us.api.blizzard.com"
             if "NA" in self.REGION
@@ -650,6 +848,21 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_ah_api_request(self, url, connectedRealmId):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Fetches auction house data from the Blizzard API.
+        
+        Makes a GET request to the specified URL using a current access token. Handles API 
+        errors such as rate limiting (HTTP 429) and other non-200 responses by pausing briefly 
+        and raising an exception. If the response includes a Last-Modified header, updates local 
+        timers based on its value before returning the auction data.
+        
+        Args:
+            url: The API endpoint URL for auction data.
+            connectedRealmId: The identifier of the connected realm for which data is retrieved.
+        
+        Returns:
+            A dictionary containing the auction data parsed from the API response.
+        """
         headers = {"Authorization": f"Bearer {self.check_access_token()}"}
         req = requests.get(url, headers=headers, timeout=20)
 
@@ -694,6 +907,22 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def update_local_timers(self, dataSetID, lastUploadTimeRaw):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Update the local upload timers with API response data.
+        
+        This method computes and stores timing details for the given dataset using a raw
+        upload time string. For dataset IDs -1 or -2, which indicate commodity listings, it
+        sets the table name and dataset names accordingly. For other IDs, it derives the table
+        name using the dataset ID and retrieves corresponding realm names. The raw upload
+        time (expected in the format '%a, %d %b %Y %H:%M:%S %Z') is used to extract the upload
+        minute and to compute the Unix timestamp. The resulting timing information is stored
+        in the instance's upload_timers dictionary.
+            
+        Args:
+            dataSetID: Identifier of the dataset (-1/-2 for commodities; otherwise, a realm ID).
+            lastUploadTimeRaw: Raw timestamp string from the API, formatted as
+                '%a, %d %b %Y %H:%M:%S %Z'.
+        """
         if dataSetID == -1:
             tableName = f"{self.REGION}_retail_commodityListings"
             dataSetName = [f"{self.REGION} Commodities"]
@@ -727,6 +956,17 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def make_commodity_ah_api_request(self):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Fetch commodity auction data from the Blizzard API.
+        
+        Based on the configured region ("NA" or "EU"), this method builds the appropriate endpoint URL 
+        and retrieves commodity auction listings. If a "Last-Modified" header is present in the response, 
+        it updates local upload timers. An exception is raised for an invalid region or on API errors 
+        including rate limiting.
+        
+        Returns:
+            dict: The parsed auction data.
+        """
         if self.REGION == "NA":
             url = f"https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
             connectedRealmId = -1
@@ -780,9 +1020,23 @@ class MegaData:
     # @coderabbitai add docstring here if needed and remove this comment after
     def send_discord_message(self, message):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Sends a Discord message via the configured webhook.
+        
+        Sends the specified plain text message to the Discord webhook URL stored in the instance.
+            
+        Args:
+            message: The message content to be sent.
+        """
         send_discord_message(message, self.WEBHOOK_URL)
 
     # @coderabbitai add docstring here if needed and remove this comment after
     def send_discord_embed(self, embed):
         # @coderabbitai add docstring here if needed and remove this comment after
+        """
+        Sends an embedded message to the Discord webhook.
+        
+        Args:
+            embed: The embed object containing the message details.
+        """
         send_embed_discord(embed, self.WEBHOOK_URL)
