@@ -2194,7 +2194,7 @@ class App(QMainWindow):
     def import_pbs_data(self):
         # Open a dialog to allow users to paste the PBS data
         """
-        Import PBS (Price Breakdown Sheet) data into the application's item tracking system.
+        Import PBS (Point Blank Sniper) data into the application's item tracking system.
 
         This method allows users to paste PBS data, which contains item names and their corresponding prices. It processes the pasted data, matches item names with the application's item statistics, and updates the item list with prices.
 
@@ -3247,7 +3247,7 @@ class App(QMainWindow):
         """
         Import PBS pet data and convert to pet level rules.
 
-        This method allows users to paste PBS (Presumably Pet Battle System) pet data and
+        This method allows users to paste PBS (Point Blank Sniper) pet data and
         automatically generates pet trading rules based on the imported information.
 
         Parameters:
@@ -3405,7 +3405,7 @@ class App(QMainWindow):
     def import_pbs_pet_data(self):
         # Open a dialog to allow users to paste the PBS data
         """
-        Import pet data from PBS (Probably Battle Stones) format into the application.
+        Import pet data from PBS (Point Blank Sniper) format into the application.
 
         This method allows users to paste a formatted text containing pet data, which is then processed
         to extract pet names and their corresponding prices. The method supports various input formats
@@ -3508,7 +3508,7 @@ class App(QMainWindow):
     def convert_aaa_pets_to_pbs(self, pet_data):
         # Prepare the PBS list
         """
-        Convert AAA pet data format to PBS (Panda Bot Sniper) format.
+        Convert AAA pet data format to PBS (Point Blank Sniper) format.
 
         This method transforms a dictionary of pet IDs and prices into a PBS-compatible string
         for use in automated pet sniping tools.
