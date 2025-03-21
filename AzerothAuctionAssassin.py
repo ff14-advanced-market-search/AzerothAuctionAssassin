@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.4.3.3"
+AAA_VERSION = "1.4.4"
 
 windowsApp_Path = None
 try:
@@ -796,7 +796,18 @@ class App(QMainWindow):
         self.item_page_layout.addWidget(self.convert_to_pbs_button, 18, 1, 1, 1)
 
     def make_ilvl_page(self, ilvl_page):
+        """
+        Initialize the item level configuration page UI.
 
+        This method creates and arranges various input fields, labels, checkboxes, and buttons
+        on the provided page widget to allow users to set auction sniping filters based on item level,
+        buyout price, bonus lists, and player level requirements. It configures tooltips for guidance
+        and connects button click events to their respective handler methods for adding, updating,
+        removing, importing, erasing, and converting item level data, including PBS format operations.
+
+        Parameters:
+            ilvl_page: The parent widget for the item level configuration page.
+        """
         self.ilvl_item_input = QLineEdit(ilvl_page)
         self.ilvl_item_input_label = QLabel("Item ID(s)", ilvl_page)
         self.ilvl_item_input_label.setToolTip(
@@ -928,7 +939,27 @@ class App(QMainWindow):
         self.ilvl_page_layout.addWidget(self.ilvl_bonus_lists_input_label, 16, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_bonus_lists_input, 17, 0, 1, 1)
 
+        # Add after the existing import/export buttons in make_ilvl_page method
+        self.import_pbs_ilvl_button = QPushButton("Import PBS ILvl Data")
+        self.import_pbs_ilvl_button.setToolTip(
+            "Import your Point Blank Sniper ilvl text files"
+        )
+        self.import_pbs_ilvl_button.clicked.connect(self.import_pbs_ilvl_data)
+        self.ilvl_page_layout.addWidget(self.import_pbs_ilvl_button, 13, 2, 1, 1)
+
+        self.convert_ilvl_to_pbs_button = QPushButton("Convert AAA to PBS")
+        self.convert_ilvl_to_pbs_button.setToolTip(
+            "Convert your AAA ilvl list to PBS format"
+        )
+        self.convert_ilvl_to_pbs_button.clicked.connect(self.convert_ilvl_to_pbs)
+        self.ilvl_page_layout.addWidget(self.convert_ilvl_to_pbs_button, 14, 2, 1, 1)
+
     def go_to_home_page(self):
+        """
+        Switches the view to the home page.
+
+        Updates the stacked widget to display the home page (index 0).
+        """
         self.stacked_widget.setCurrentIndex(0)
 
     def go_to_pet_page(self):
@@ -3564,6 +3595,184 @@ class App(QMainWindow):
             return True
         except ValueError:
             return False
+
+    def import_pbs_ilvl_data(self):
+        """
+        Import item level rules from a PBS-formatted data string.
+
+        Prompts the user to paste multi-line PBS item level data and parses it to extract
+        item rules including minimum and maximum item levels, required levels, and buyout price.
+        For each valid entry, the function looks up the item ID from the item statistics,
+        creates a corresponding rule, adds it to the internal list, and updates the display.
+        If no valid items are imported or if an error occurs during processing, the user is
+        notified with a warning or error message.
+        """
+        text, ok = QInputDialog.getMultiLineText(
+            self, "Import PBS ILvl Data", "Paste your PBS ilvl data here:"
+        )
+        if not ok or not text.strip():
+            return
+
+        # lets not clear the display for now
+        # people might get mad if this erases their old ilvl rules
+        # self.ilvl_list_display.clear()
+        # self.ilvl_list = []
+
+        try:
+            # Process the pasted PBS data
+            pbs_data = text.replace("\n", "").replace("\r", "").split("^")
+
+            for item in pbs_data:
+                parts = item.split(";;")
+                if len(parts) < 2:
+                    continue
+
+                # Extract item name and remove quotes if present
+                item_name = parts[0].strip()
+                if item_name.startswith('"') and item_name.endswith('"'):
+                    item_name = item_name[1:-1]
+
+                # Parse the numeric values
+                values = parts[1].split(";")
+                if len(values) < 8:  # Need at least 8 values for all fields
+                    continue
+
+                try:
+                    # If all values are 0, skip this item
+                    # should use regular item list for pbs stuff without ilvl or required lvl stuff
+                    if (
+                        values[0] == "0"
+                        and values[1] == "0"
+                        and values[2] == "0"
+                        and values[3] == "0"
+                    ):
+                        continue
+                    min_ilvl = int(values[0]) if values[0] != "0" else 1
+                    max_ilvl = int(values[1]) if values[1] != "0" else 10000
+                    min_level = int(values[2]) if values[2] != "0" else 1
+                    max_level = int(values[3]) if values[3] != "0" else 999
+                    price = float(values[7]) if self.isfloat(values[7]) else 0
+
+                    # Find item ID from name in item_statistics
+                    item_match = self.item_statistics[
+                        self.item_statistics["itemName"].str.lower()
+                        == item_name.lower()
+                    ]
+                    item_ids = []
+                    if not item_match.empty:
+                        item_ids = [int(item_match.iloc[0]["itemID"])]
+
+                    # Create ilvl rule
+                    ilvl_rule = {
+                        "ilvl": min_ilvl,
+                        "max_ilvl": max_ilvl,
+                        "buyout": price,
+                        "sockets": False,
+                        "speed": False,
+                        "leech": False,
+                        "avoidance": False,
+                        "item_ids": item_ids,
+                        "required_min_lvl": min_level,
+                        "required_max_lvl": max_level,
+                        "bonus_lists": [],
+                    }
+
+                    self.ilvl_list.append(ilvl_rule)
+
+                    # Add to display
+                    display_string = (
+                        f"Item ID: {','.join(map(str, item_ids))}; "
+                        f"Price: {price}; "
+                        f"ILvl: {min_ilvl}; "
+                        f"Sockets: False; "
+                        f"Speed: False; "
+                        f"Leech: False; "
+                        f"Avoidance: False; "
+                        f"MinLevel: {min_level}; "
+                        f"MaxLevel: {max_level}; "
+                        f"Max ILvl: {max_ilvl}; "
+                        f"Bonus Lists: []"
+                    )
+                    self.ilvl_list_display.addItem(display_string)
+
+                except (ValueError, IndexError) as e:
+                    print(f"Error processing entry {item_name}: {str(e)}")
+                    continue
+
+            if not self.ilvl_list:
+                QMessageBox.warning(
+                    self,
+                    "Import Warning",
+                    "No valid items were imported. Check the PBS data format.",
+                )
+
+        except Exception as e:
+            QMessageBox.critical(self, "Import Error", str(e))
+
+    def convert_ilvl_to_pbs(self):
+        """
+        Convert item level rules to a PBS-formatted sniping string.
+
+        This method iterates through the internal list of item level rules and constructs a PBS-style entry for each rule. If a rule specifies particular item IDs, the function retrieves the corresponding item name from the item statistics and formats an entry for each ID; otherwise, it creates an entry with a blank name. The first entry is prefixed with "Snipe?". All entries are concatenated into a single string, which is then copied to the system clipboard. A success message is displayed upon completion, and any errors encountered during the process trigger an error message.
+        """
+        try:
+            pbs_list = []
+            # Start with Snipe? for the first entry only
+            first_entry = True
+
+            for rule in self.ilvl_list:
+                if rule["item_ids"]:
+                    # If we have specific item IDs, create an entry for each one
+                    for item_id in rule["item_ids"]:
+                        item_match = self.item_statistics[
+                            self.item_statistics["itemID"] == item_id
+                        ]
+                        item_name = ""
+                        if not item_match.empty:
+                            item_name = f'"{item_match.iloc[0]["itemName"]}"'
+
+                        # Construct PBS entry for this specific item
+                        pbs_entry = (
+                            f"Snipe?"
+                            if first_entry
+                            else ""
+                            f"^{item_name};;"
+                            f'{rule["ilvl"]};'
+                            f'{rule["max_ilvl"]};'
+                            f'{rule["required_min_lvl"]};'
+                            f'{rule["required_max_lvl"]};'
+                            f"0;0;0;"
+                            f'{int(float(rule["buyout"]))};;#;;'
+                        )
+                        pbs_list.append(pbs_entry)
+                        first_entry = False
+                else:
+                    # If no specific items, create a single entry with blank name
+                    pbs_entry = (
+                        f"Snipe?"
+                        if first_entry
+                        else ""
+                        f"^;;"
+                        f'{rule["ilvl"]};'
+                        f'{rule["max_ilvl"]};'
+                        f'{rule["required_min_lvl"]};'
+                        f'{rule["required_max_lvl"]};'
+                        f"0;0;0;"
+                        f'{int(float(rule["buyout"]))};;#;;'
+                    )
+                    pbs_list.append(pbs_entry)
+                    first_entry = False
+
+            # Join all entries and copy to clipboard
+            pbs_string = "".join(pbs_list)
+            clipboard = QApplication.clipboard()
+            clipboard.setText(pbs_string)
+
+            QMessageBox.information(
+                self, "Success", "Converted PBS string copied to clipboard."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Conversion Error", str(e))
 
 
 if __name__ == "__main__":
