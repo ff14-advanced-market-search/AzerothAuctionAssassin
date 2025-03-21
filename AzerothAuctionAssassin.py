@@ -3679,7 +3679,7 @@ class App(QMainWindow):
             pbs_list = []
             for rule in self.ilvl_list:
                 # Get item name if we have an item ID
-                item_name = "Any"
+                item_name = ""
                 if rule["item_ids"]:
                     item_match = self.item_statistics[
                         self.item_statistics["itemID"] == rule["item_ids"][0]
@@ -3689,7 +3689,7 @@ class App(QMainWindow):
 
                 # Construct PBS entry
                 pbs_entry = (
-                    f'Snipe^"{item_name}";;'
+                    f'Snipe^{item_name};;'
                     f'{rule["ilvl"]};'
                     f'{rule["max_ilvl"]};'
                     f'{rule["required_min_lvl"]};'
