@@ -3611,6 +3611,15 @@ class App(QMainWindow):
                     continue
 
                 try:
+                    # If all values are 0, skip this item
+                    # should use regular item list for pbs stuff without ilvl or required lvl stuff
+                    if (
+                        values[0] == "0"
+                        and values[1] == "0"
+                        and values[2] == "0"
+                        and values[3] == "0"
+                    ):
+                        continue
                     min_ilvl = int(values[0]) if values[0] != "0" else 1
                     max_ilvl = int(values[1]) if values[1] != "0" else 10000
                     min_level = int(values[2]) if values[2] != "0" else 1
