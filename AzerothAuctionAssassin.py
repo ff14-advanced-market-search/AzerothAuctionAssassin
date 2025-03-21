@@ -3607,7 +3607,7 @@ class App(QMainWindow):
 
                 # Parse the numeric values
                 values = parts[1].split(";")
-                if len(values) < 9:  # Need at least 9 values for all fields
+                if len(values) < 8:  # Need at least 8 values for all fields
                     continue
 
                 try:
