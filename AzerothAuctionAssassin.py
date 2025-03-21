@@ -797,6 +797,18 @@ class App(QMainWindow):
 
     def make_ilvl_page(self, ilvl_page):
 
+        """
+        Initialize the item level configuration page UI.
+        
+        This method creates and arranges various input fields, labels, checkboxes, and buttons
+        on the provided page widget to allow users to set auction sniping filters based on item level,
+        buyout price, bonus lists, and player level requirements. It configures tooltips for guidance
+        and connects button click events to their respective handler methods for adding, updating,
+        removing, importing, erasing, and converting item level data, including PBS format operations.
+        
+        Parameters:
+            ilvl_page: The parent widget for the item level configuration page.
+        """
         self.ilvl_item_input = QLineEdit(ilvl_page)
         self.ilvl_item_input_label = QLabel("Item ID(s)", ilvl_page)
         self.ilvl_item_input_label.setToolTip(
@@ -944,6 +956,11 @@ class App(QMainWindow):
         self.ilvl_page_layout.addWidget(self.convert_ilvl_to_pbs_button, 14, 2, 1, 1)
 
     def go_to_home_page(self):
+        """
+        Switches the view to the home page.
+        
+        Updates the stacked widget to display the home page (index 0).
+        """
         self.stacked_widget.setCurrentIndex(0)
 
     def go_to_pet_page(self):
@@ -3581,7 +3598,16 @@ class App(QMainWindow):
             return False
 
     def import_pbs_ilvl_data(self):
-        """Import ilvl data from PBS format into the application."""
+        """
+        Import item level rules from a PBS-formatted data string.
+        
+        Prompts the user to paste multi-line PBS item level data and parses it to extract
+        item rules including minimum and maximum item levels, required levels, and buyout price.
+        For each valid entry, the function looks up the item ID from the item statistics,
+        creates a corresponding rule, adds it to the internal list, and updates the display.
+        If no valid items are imported or if an error occurs during processing, the user is
+        notified with a warning or error message.
+        """
         text, ok = QInputDialog.getMultiLineText(
             self, "Import PBS ILvl Data", "Paste your PBS ilvl data here:"
         )
@@ -3686,7 +3712,11 @@ class App(QMainWindow):
             QMessageBox.critical(self, "Import Error", str(e))
 
     def convert_ilvl_to_pbs(self):
-        """Convert ilvl rules to PBS format."""
+        """
+        Convert item level rules to a PBS-formatted sniping string.
+        
+        This method iterates through the internal list of item level rules and constructs a PBS-style entry for each rule. If a rule specifies particular item IDs, the function retrieves the corresponding item name from the item statistics and formats an entry for each ID; otherwise, it creates an entry with a blank name. The first entry is prefixed with "Snipe?". All entries are concatenated into a single string, which is then copied to the system clipboard. A success message is displayed upon completion, and any errors encountered during the process trigger an error message.
+        """
         try:
             pbs_list = []
             # Start with Snipe? for the first entry only
