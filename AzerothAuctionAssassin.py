@@ -3678,26 +3678,39 @@ class App(QMainWindow):
         try:
             pbs_list = []
             for rule in self.ilvl_list:
-                # Get item name if we have an item ID
-                item_name = ""
                 if rule["item_ids"]:
-                    item_match = self.item_statistics[
-                        self.item_statistics["itemID"] == rule["item_ids"][0]
-                    ]
-                    if not item_match.empty:
-                        item_name = item_match.iloc[0]["itemName"]
+                    # If we have specific item IDs, create an entry for each one
+                    for item_id in rule["item_ids"]:
+                        item_match = self.item_statistics[
+                            self.item_statistics["itemID"] == item_id
+                        ]
+                        item_name = ""
+                        if not item_match.empty:
+                            item_name = item_match.iloc[0]["itemName"]
 
-                # Construct PBS entry
-                pbs_entry = (
-                    f'Snipe^{item_name};;'
-                    f'{rule["ilvl"]};'
-                    f'{rule["max_ilvl"]};'
-                    f'{rule["required_min_lvl"]};'
-                    f'{rule["required_max_lvl"]};'
-                    f"0;0;0;"
-                    f'{int(float(rule["buyout"]))};;#;;'
-                )
-                pbs_list.append(pbs_entry)
+                        # Construct PBS entry for this specific item
+                        pbs_entry = (
+                            f"Snipe^{item_name};;"
+                            f'{rule["ilvl"]};'
+                            f'{rule["max_ilvl"]};'
+                            f'{rule["required_min_lvl"]};'
+                            f'{rule["required_max_lvl"]};'
+                            f"0;0;0;"
+                            f'{int(float(rule["buyout"]))};;#;;'
+                        )
+                        pbs_list.append(pbs_entry)
+                else:
+                    # If no specific items, create a single entry with blank name
+                    pbs_entry = (
+                        f"Snipe^;;"
+                        f'{rule["ilvl"]};'
+                        f'{rule["max_ilvl"]};'
+                        f'{rule["required_min_lvl"]};'
+                        f'{rule["required_max_lvl"]};'
+                        f"0;0;0;"
+                        f'{int(float(rule["buyout"]))};;#;;'
+                    )
+                    pbs_list.append(pbs_entry)
 
             # Join all entries and copy to clipboard
             pbs_string = "".join(pbs_list)
