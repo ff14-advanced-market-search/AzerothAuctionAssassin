@@ -3677,6 +3677,9 @@ class App(QMainWindow):
         """Convert ilvl rules to PBS format."""
         try:
             pbs_list = []
+            # Start with Snipe? for the first entry only
+            first_entry = True
+
             for rule in self.ilvl_list:
                 if rule["item_ids"]:
                     # If we have specific item IDs, create an entry for each one
@@ -3686,11 +3689,14 @@ class App(QMainWindow):
                         ]
                         item_name = ""
                         if not item_match.empty:
-                            item_name = item_match.iloc[0]["itemName"]
+                            item_name = f'"{item_match.iloc[0]["itemName"]}"'
 
                         # Construct PBS entry for this specific item
                         pbs_entry = (
-                            f"Snipe^{item_name};;"
+                            f"Snipe?"
+                            if first_entry
+                            else ""
+                            f"^{item_name};;"
                             f'{rule["ilvl"]};'
                             f'{rule["max_ilvl"]};'
                             f'{rule["required_min_lvl"]};'
@@ -3699,10 +3705,14 @@ class App(QMainWindow):
                             f'{int(float(rule["buyout"]))};;#;;'
                         )
                         pbs_list.append(pbs_entry)
+                        first_entry = False
                 else:
                     # If no specific items, create a single entry with blank name
                     pbs_entry = (
-                        f"Snipe^;;"
+                        f"Snipe?"
+                        if first_entry
+                        else ""
+                        f"^;;"
                         f'{rule["ilvl"]};'
                         f'{rule["max_ilvl"]};'
                         f'{rule["required_min_lvl"]};'
@@ -3711,6 +3721,7 @@ class App(QMainWindow):
                         f'{int(float(rule["buyout"]))};;#;;'
                     )
                     pbs_list.append(pbs_entry)
+                    first_entry = False
 
             # Join all entries and copy to clipboard
             pbs_string = "".join(pbs_list)
