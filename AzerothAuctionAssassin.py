@@ -796,16 +796,15 @@ class App(QMainWindow):
         self.item_page_layout.addWidget(self.convert_to_pbs_button, 18, 1, 1, 1)
 
     def make_ilvl_page(self, ilvl_page):
-
         """
         Initialize the item level configuration page UI.
-        
+
         This method creates and arranges various input fields, labels, checkboxes, and buttons
         on the provided page widget to allow users to set auction sniping filters based on item level,
         buyout price, bonus lists, and player level requirements. It configures tooltips for guidance
         and connects button click events to their respective handler methods for adding, updating,
         removing, importing, erasing, and converting item level data, including PBS format operations.
-        
+
         Parameters:
             ilvl_page: The parent widget for the item level configuration page.
         """
@@ -958,7 +957,7 @@ class App(QMainWindow):
     def go_to_home_page(self):
         """
         Switches the view to the home page.
-        
+
         Updates the stacked widget to display the home page (index 0).
         """
         self.stacked_widget.setCurrentIndex(0)
@@ -3600,7 +3599,7 @@ class App(QMainWindow):
     def import_pbs_ilvl_data(self):
         """
         Import item level rules from a PBS-formatted data string.
-        
+
         Prompts the user to paste multi-line PBS item level data and parses it to extract
         item rules including minimum and maximum item levels, required levels, and buyout price.
         For each valid entry, the function looks up the item ID from the item statistics,
@@ -3714,7 +3713,7 @@ class App(QMainWindow):
     def convert_ilvl_to_pbs(self):
         """
         Convert item level rules to a PBS-formatted sniping string.
-        
+
         This method iterates through the internal list of item level rules and constructs a PBS-style entry for each rule. If a rule specifies particular item IDs, the function retrieves the corresponding item name from the item statistics and formats an entry for each ID; otherwise, it creates an entry with a blank name. The first entry is prefixed with "Snipe?". All entries are concatenated into a single string, which is then copied to the system clipboard. A success message is displayed upon completion, and any errors encountered during the process trigger an error message.
         """
         try:
