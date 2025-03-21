@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.4.3.3"
+AAA_VERSION = "1.4.4"
 
 windowsApp_Path = None
 try:
@@ -927,6 +927,21 @@ class App(QMainWindow):
         self.ilvl_bonus_lists_input.setFixedSize(120, 25)
         self.ilvl_page_layout.addWidget(self.ilvl_bonus_lists_input_label, 16, 0, 1, 1)
         self.ilvl_page_layout.addWidget(self.ilvl_bonus_lists_input, 17, 0, 1, 1)
+
+        # Add after the existing import/export buttons in make_ilvl_page method
+        self.import_pbs_ilvl_button = QPushButton("Import PBS ILvl Data")
+        self.import_pbs_ilvl_button.setToolTip(
+            "Import your Point Blank Sniper ilvl text files"
+        )
+        self.import_pbs_ilvl_button.clicked.connect(self.import_pbs_ilvl_data)
+        self.ilvl_page_layout.addWidget(self.import_pbs_ilvl_button, 13, 2, 1, 1)
+
+        self.convert_ilvl_to_pbs_button = QPushButton("Convert AAA to PBS")
+        self.convert_ilvl_to_pbs_button.setToolTip(
+            "Convert your AAA ilvl list to PBS format"
+        )
+        self.convert_ilvl_to_pbs_button.clicked.connect(self.convert_ilvl_to_pbs)
+        self.ilvl_page_layout.addWidget(self.convert_ilvl_to_pbs_button, 14, 2, 1, 1)
 
     def go_to_home_page(self):
         self.stacked_widget.setCurrentIndex(0)
@@ -3564,6 +3579,136 @@ class App(QMainWindow):
             return True
         except ValueError:
             return False
+
+    def import_pbs_ilvl_data(self):
+        """Import ilvl data from PBS format into the application."""
+        text, ok = QInputDialog.getMultiLineText(
+            self, "Import PBS ILvl Data", "Paste your PBS ilvl data here:"
+        )
+        if not ok or not text.strip():
+            return
+
+        self.ilvl_list_display.clear()
+        self.ilvl_list = []
+
+        try:
+            # Process the pasted PBS data
+            pbs_data = text.replace("\n", "").replace("\r", "").split("^")
+
+            for item in pbs_data:
+                parts = item.split(";;")
+                if len(parts) < 2:
+                    continue
+
+                # Extract item name and remove quotes if present
+                item_name = parts[0].strip()
+                if item_name.startswith('"') and item_name.endswith('"'):
+                    item_name = item_name[1:-1]
+
+                # Parse the numeric values
+                values = parts[1].split(";")
+                if len(values) < 9:  # Need at least 9 values for all fields
+                    continue
+
+                try:
+                    min_ilvl = int(values[0]) if values[0] != "0" else 1
+                    max_ilvl = int(values[1]) if values[1] != "0" else 10000
+                    min_level = int(values[2]) if values[2] != "0" else 1
+                    max_level = int(values[3]) if values[3] != "0" else 999
+                    price = float(values[8]) if self.isfloat(values[8]) else 0
+
+                    # Find item ID from name in item_statistics
+                    item_match = self.item_statistics[
+                        self.item_statistics["itemName"].str.lower()
+                        == item_name.lower()
+                    ]
+                    item_ids = []
+                    if not item_match.empty:
+                        item_ids = [int(item_match.iloc[0]["itemID"])]
+
+                    # Create ilvl rule
+                    ilvl_rule = {
+                        "ilvl": min_ilvl,
+                        "max_ilvl": max_ilvl,
+                        "buyout": price,
+                        "sockets": False,
+                        "speed": False,
+                        "leech": False,
+                        "avoidance": False,
+                        "item_ids": item_ids,
+                        "required_min_lvl": min_level,
+                        "required_max_lvl": max_level,
+                        "bonus_lists": [],
+                    }
+
+                    self.ilvl_list.append(ilvl_rule)
+
+                    # Add to display
+                    display_string = (
+                        f"Item ID: {','.join(map(str, item_ids))}; "
+                        f"Price: {price}; "
+                        f"ILvl: {min_ilvl}; "
+                        f"Sockets: False; "
+                        f"Speed: False; "
+                        f"Leech: False; "
+                        f"Avoidance: False; "
+                        f"MinLevel: {min_level}; "
+                        f"MaxLevel: {max_level}; "
+                        f"Max ILvl: {max_ilvl}; "
+                        f"Bonus Lists: []"
+                    )
+                    self.ilvl_list_display.addItem(display_string)
+
+                except (ValueError, IndexError) as e:
+                    print(f"Error processing entry {item_name}: {str(e)}")
+                    continue
+
+            if not self.ilvl_list:
+                QMessageBox.warning(
+                    self,
+                    "Import Warning",
+                    "No valid items were imported. Check the PBS data format.",
+                )
+
+        except Exception as e:
+            QMessageBox.critical(self, "Import Error", str(e))
+
+    def convert_ilvl_to_pbs(self):
+        """Convert ilvl rules to PBS format."""
+        try:
+            pbs_list = []
+            for rule in self.ilvl_list:
+                # Get item name if we have an item ID
+                item_name = "Any"
+                if rule["item_ids"]:
+                    item_match = self.item_statistics[
+                        self.item_statistics["itemID"] == rule["item_ids"][0]
+                    ]
+                    if not item_match.empty:
+                        item_name = item_match.iloc[0]["itemName"]
+
+                # Construct PBS entry
+                pbs_entry = (
+                    f'Snipe^"{item_name}";;'
+                    f'{rule["ilvl"]};'
+                    f'{rule["max_ilvl"]};'
+                    f'{rule["required_min_lvl"]};'
+                    f'{rule["required_max_lvl"]};'
+                    f"0;0;0;"
+                    f'{int(float(rule["buyout"]))};;#;;'
+                )
+                pbs_list.append(pbs_entry)
+
+            # Join all entries and copy to clipboard
+            pbs_string = "".join(pbs_list)
+            clipboard = QApplication.clipboard()
+            clipboard.setText(pbs_string)
+
+            QMessageBox.information(
+                self, "Success", "Converted PBS string copied to clipboard."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Conversion Error", str(e))
 
 
 if __name__ == "__main__":
