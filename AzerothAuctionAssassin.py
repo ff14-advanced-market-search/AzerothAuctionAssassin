@@ -3616,8 +3616,7 @@ class App(QMainWindow):
         # lets not clear the display for now
         # people might get mad if this erases their old ilvl rules
         # self.ilvl_list_display.clear()
-
-        self.ilvl_list = []
+        # self.ilvl_list = []
 
         try:
             # Process the pasted PBS data
