@@ -3588,7 +3588,10 @@ class App(QMainWindow):
         if not ok or not text.strip():
             return
 
-        self.ilvl_list_display.clear()
+        # lets not clear the display for now
+        # people might get mad if this erases their old ilvl rules
+        # self.ilvl_list_display.clear()
+
         self.ilvl_list = []
 
         try:
