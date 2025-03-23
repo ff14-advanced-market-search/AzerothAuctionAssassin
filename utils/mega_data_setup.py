@@ -399,10 +399,10 @@ class MegaData:
         int_vars = [
             "ilvl",
             "max_ilvl",
-            "buyout",
             "required_min_lvl",
             "required_max_lvl",
         ]
+        float_vars = ["buyout"]
         for key, value in ilvl_info.items():
             if key in bool_vars:
                 if isinstance(ilvl_info[key], bool):
@@ -414,6 +414,11 @@ class MegaData:
                     snipe_info[key] = value
                 else:
                     raise Exception(f"error in ilvl info '{key}' must be an int")
+            elif key in float_vars:
+                if isinstance(ilvl_info[key], float):
+                    snipe_info[key] = value
+                else:
+                    raise Exception(f"error in ilvl info '{key}' must be a float")
 
         # Validate bonus lists are integers
         if ilvl_info["bonus_lists"] != [] and not all(
