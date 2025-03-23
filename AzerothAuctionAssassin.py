@@ -3651,7 +3651,7 @@ class App(QMainWindow):
                     max_ilvl = int(values[1]) if values[1] != "0" else 10000
                     min_level = int(values[2]) if values[2] != "0" else 1
                     max_level = int(values[3]) if values[3] != "0" else 999
-                    price = float(values[7]) if self.isfloat(values[7]) else 0
+                    price = int(values[7]) if values[7] else 0
 
                     # Find item ID from name in item_statistics
                     item_match = self.item_statistics[
