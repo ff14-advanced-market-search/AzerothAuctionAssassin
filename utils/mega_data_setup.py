@@ -416,11 +416,10 @@ class MegaData:
                     raise Exception(f"error in ilvl info '{key}' must be an int")
             elif key in float_vars:
                 # buyout can be a float or an int
-                snipe_info[key] = value
-                # if isinstance(ilvl_info[key], float):
-                #     snipe_info[key] = value
-                # else:
-                #     raise Exception(f"error in ilvl info '{key}' must be a float")
+                if isinstance(ilvl_info[key], float) or isinstance(ilvl_info[key], int):
+                    snipe_info[key] = value
+                else:
+                    raise Exception(f"error in ilvl info '{key}' must be a float")
 
         # Validate bonus lists are integers
         if ilvl_info["bonus_lists"] != [] and not all(
