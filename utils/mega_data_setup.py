@@ -415,7 +415,8 @@ class MegaData:
                 else:
                     raise Exception(f"error in ilvl info '{key}' must be an int")
             elif key in float_vars:
-                if isinstance(ilvl_info[key], float):
+                # buyout can be a float or an int
+                if isinstance(ilvl_info[key], float) or isinstance(ilvl_info[key], int):
                     snipe_info[key] = value
                 else:
                     raise Exception(f"error in ilvl info '{key}' must be a float")
