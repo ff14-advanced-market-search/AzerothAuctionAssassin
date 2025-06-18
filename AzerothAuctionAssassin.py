@@ -1544,6 +1544,7 @@ class App(QMainWindow):
         if not item_ids:
             return ["All"]
         names = []
+        processed_ids = set()
         # Try to use item_statistics if available
         stats = getattr(self, "item_statistics", None)
         if stats is not None:
@@ -1551,6 +1552,7 @@ class App(QMainWindow):
                 try:
                     name = stats[stats["itemID"] == int(item_id)]["itemName"].iloc[0]
                     names.append(str(name))
+                    processed_ids.add(str(item_id))
                 except Exception:
                     continue
         # Fallback to StaticData/item_names.json if any names missing
@@ -1561,17 +1563,15 @@ class App(QMainWindow):
                 with open("StaticData/item_names.json", "r", encoding="utf-8") as f:
                     item_names_dict = json.load(f)
                 for item_id in item_ids:
-                    if str(item_id) not in [str(i) for i in item_ids[: len(names)]]:
+                    if str(item_id) not in processed_ids:
                         name = item_names_dict.get(str(item_id), str(item_id))
-                        if name not in names:
-                            names.append(name)
+                        names.append(name)
             except Exception:
                 # fallback: just show IDs for missing
                 for item_id in item_ids:
-                    if str(item_id) not in [str(i) for i in item_ids[: len(names)]]:
+                    if str(item_id) not in processed_ids:
                         names.append(str(item_id))
         return names if names else ["All"]
-
     def ilvl_list_double_clicked(self, item):
         # Parse the display string more carefully
         """
