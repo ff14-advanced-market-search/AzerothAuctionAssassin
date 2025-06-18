@@ -1572,6 +1572,7 @@ class App(QMainWindow):
                     if str(item_id) not in processed_ids:
                         names.append(str(item_id))
         return names if names else ["All"]
+
     def ilvl_list_double_clicked(self, item):
         # Parse the display string more carefully
         """
