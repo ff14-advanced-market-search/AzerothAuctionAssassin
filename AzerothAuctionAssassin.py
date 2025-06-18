@@ -970,6 +970,7 @@ class App(QMainWindow):
 
     def go_to_ilvl_page(self):
         self.stacked_widget.setCurrentIndex(3)
+        self.refresh_ilvl_list_display_with_names()
 
     def go_to_settings_page(self):
         self.stacked_widget.setCurrentIndex(4)
@@ -1538,40 +1539,47 @@ class App(QMainWindow):
     def get_item_names_from_ids(self, item_ids):
         """
         Helper to get item names from a list of item IDs.
-        Uses self.item_statistics if available, else falls back to StaticData/item_names.json.
+        Uses self.item_statistics only. If not found, returns the ID as a string.
         Returns a list of names (strings).
         """
         if not item_ids:
             return ["All"]
         names = []
-        processed_ids = set()
-        # Try to use item_statistics if available
         stats = getattr(self, "item_statistics", None)
-        if stats is not None:
-            for item_id in item_ids:
+        for item_id in item_ids:
+            name = str(item_id)
+            if stats is not None:
                 try:
                     name = stats[stats["itemID"] == int(item_id)]["itemName"].iloc[0]
-                    names.append(str(name))
-                    processed_ids.add(str(item_id))
                 except Exception:
-                    continue
-        # Fallback to StaticData/item_names.json if any names missing
-        if len(names) < len(item_ids):
-            try:
-                import json
-
-                with open("StaticData/item_names.json", "r", encoding="utf-8") as f:
-                    item_names_dict = json.load(f)
-                for item_id in item_ids:
-                    if str(item_id) not in processed_ids:
-                        name = item_names_dict.get(str(item_id), str(item_id))
-                        names.append(name)
-            except Exception:
-                # fallback: just show IDs for missing
-                for item_id in item_ids:
-                    if str(item_id) not in processed_ids:
-                        names.append(str(item_id))
+                    pass
+            names.append(str(name))
         return names if names else ["All"]
+
+    def refresh_ilvl_list_display_with_names(self):
+        """
+        Rebuilds the ilvl_list_display using the latest item_statistics for names.
+        """
+        self.ilvl_list_display.clear()
+        for entry in self.ilvl_list:
+            item_ids = entry["item_ids"]
+            item_names = self.get_item_names_from_ids(item_ids)
+            item_names_str = "All" if not item_ids else f"[{', '.join(item_names)}]"
+            display_string = (
+                f"Item(s): {item_names_str}; "
+                f"IDs: {','.join(map(str, item_ids))}; "
+                f"Price: {entry['buyout']}; "
+                f"ILvl: {entry['ilvl']}; "
+                f"Sockets: {entry['sockets']}; "
+                f"Speed: {entry['speed']}; "
+                f"Leech: {entry['leech']}; "
+                f"Avoidance: {entry['avoidance']}; "
+                f"MinLevel: {entry['required_min_lvl']}; "
+                f"MaxLevel: {entry['required_max_lvl']}; "
+                f"Max ILvl: {entry['max_ilvl']}; "
+                f"Bonus Lists: {entry['bonus_lists']}"
+            )
+            self.ilvl_list_display.addItem(display_string)
 
     def ilvl_list_double_clicked(self, item):
         # Parse the display string more carefully
