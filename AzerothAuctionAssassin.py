@@ -1677,7 +1677,7 @@ class App(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Invalid Input",
-                "Min Ilvl, Max Ilvl, and price should be numbers.",
+                "Min Ilvl, Max Ilvl, and price should be numbers. No decimals.",
             )
             return False
 
