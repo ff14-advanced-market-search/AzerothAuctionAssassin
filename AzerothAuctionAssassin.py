@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.4.4.2"
+AAA_VERSION = "1.5"
 
 windowsApp_Path = None
 try:
@@ -1510,8 +1510,15 @@ class App(QMainWindow):
 
                 # Create a formatted string with the item data
                 item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
+                item_names = self.get_item_names_from_ids(ilvl_dict_data["item_ids"])
+                item_names_str = (
+                    "All"
+                    if not ilvl_dict_data["item_ids"]
+                    else f"[{', '.join(item_names)}]"
+                )
                 display_string = (
-                    f"Item ID: {item_ids}; "
+                    f"Item(s): {item_names_str}; "
+                    f"IDs: {item_ids}; "
                     f"Price: {ilvl_dict_data['buyout']}; "
                     f"ILvl: {ilvl_dict_data['ilvl']}; "
                     f"Sockets: {ilvl_dict_data['sockets']}; "
@@ -1528,6 +1535,43 @@ class App(QMainWindow):
                     self.ilvl_list_display.count(), display_string
                 )
 
+    def get_item_names_from_ids(self, item_ids):
+        """
+        Helper to get item names from a list of item IDs.
+        Uses self.item_statistics if available, else falls back to StaticData/item_names.json.
+        Returns a list of names (strings).
+        """
+        if not item_ids:
+            return ["All"]
+        names = []
+        # Try to use item_statistics if available
+        stats = getattr(self, "item_statistics", None)
+        if stats is not None:
+            for item_id in item_ids:
+                try:
+                    name = stats[stats["itemID"] == int(item_id)]["itemName"].iloc[0]
+                    names.append(str(name))
+                except Exception:
+                    continue
+        # Fallback to StaticData/item_names.json if any names missing
+        if len(names) < len(item_ids):
+            try:
+                import json
+
+                with open("StaticData/item_names.json", "r", encoding="utf-8") as f:
+                    item_names_dict = json.load(f)
+                for item_id in item_ids:
+                    if str(item_id) not in [str(i) for i in item_ids[: len(names)]]:
+                        name = item_names_dict.get(str(item_id), str(item_id))
+                        if name not in names:
+                            names.append(name)
+            except Exception:
+                # fallback: just show IDs for missing
+                for item_id in item_ids:
+                    if str(item_id) not in [str(i) for i in item_ids[: len(names)]]:
+                        names.append(str(item_id))
+        return names if names else ["All"]
+
     def ilvl_list_double_clicked(self, item):
         # Parse the display string more carefully
         """
@@ -1538,36 +1582,36 @@ class App(QMainWindow):
         parts = item.text().split(";")
 
         # Extract item IDs (handle empty case)
-        item_id_part = parts[0].split(":")[1].strip()
-        self.ilvl_item_input.setText(item_id_part if item_id_part else "")
+        item_id_part = parts[1].split(":")[1].strip()
+        self.ilvl_item_input.setText(item_id_part if item_id_part != "All" else "")
 
         # Extract price
-        price = parts[1].split(":")[1].strip()
+        price = parts[2].split(":")[1].strip()
         self.ilvl_price_input.setText(price)
 
         # Extract ilvl
-        ilvl = parts[2].split(":")[1].strip()
+        ilvl = parts[3].split(":")[1].strip()
         self.ilvl_input.setText(ilvl)
 
         # Set checkboxes
-        self.ilvl_sockets.setChecked(parts[3].split(":")[1].strip() == "True")
-        self.ilvl_speed.setChecked(parts[4].split(":")[1].strip() == "True")
-        self.ilvl_leech.setChecked(parts[5].split(":")[1].strip() == "True")
-        self.ilvl_avoidance.setChecked(parts[6].split(":")[1].strip() == "True")
+        self.ilvl_sockets.setChecked(parts[4].split(":")[1].strip() == "True")
+        self.ilvl_speed.setChecked(parts[5].split(":")[1].strip() == "True")
+        self.ilvl_leech.setChecked(parts[6].split(":")[1].strip() == "True")
+        self.ilvl_avoidance.setChecked(parts[7].split(":")[1].strip() == "True")
 
         # Extract level requirements
-        min_level = parts[7].split(":")[1].strip()
+        min_level = parts[8].split(":")[1].strip()
         self.ilvl_min_required_lvl_input.setText(min_level)
 
-        max_level = parts[8].split(":")[1].strip()
+        max_level = parts[9].split(":")[1].strip()
         self.ilvl_max_required_lvl_input.setText(max_level)
 
         # Extract max ilvl
-        max_ilvl = parts[9].split(":")[1].strip()
+        max_ilvl = parts[10].split(":")[1].strip()
         self.ilvl_max_input.setText(max_ilvl)
 
         # Extract bonus lists
-        bonus_lists = parts[10].split(":")[1].strip()
+        bonus_lists = parts[11].split(":")[1].strip()
         self.ilvl_bonus_lists_input.setText(bonus_lists.strip("[]").replace(" ", ""))
 
     def realm_list_clicked(self, item):
@@ -1794,9 +1838,12 @@ class App(QMainWindow):
         # Clear and rebuild display
         self.ilvl_list_display.clear()
         for entry in self.ilvl_list:
-            item_ids = ",".join(map(str, entry["item_ids"]))
+            item_ids = entry["item_ids"]
+            item_names = self.get_item_names_from_ids(item_ids)
+            item_names_str = "All" if not item_ids else f"[{', '.join(item_names)}]"
             display_string = (
-                f"Item ID: {item_ids}; "
+                f"Item(s): {item_names_str}; "
+                f"IDs: {','.join(map(str, item_ids))}; "
                 f"Price: {entry['buyout']}; "
                 f"ILvl: {entry['ilvl']}; "
                 f"Sockets: {entry['sockets']}; "
@@ -1875,9 +1922,12 @@ class App(QMainWindow):
         # Clear and rebuild display
         self.ilvl_list_display.clear()
         for entry in self.ilvl_list:
-            item_ids = ",".join(map(str, entry["item_ids"]))
+            item_ids = entry["item_ids"]
+            item_names = self.get_item_names_from_ids(item_ids)
+            item_names_str = "All" if not item_ids else f"[{', '.join(item_names)}]"
             display_string = (
-                f"Item ID: {item_ids}; "
+                f"Item(s): {item_names_str}; "
+                f"IDs: {','.join(map(str, item_ids))}; "
                 f"Price: {entry['buyout']}; "
                 f"ILvl: {entry['ilvl']}; "
                 f"Sockets: {entry['sockets']}; "
@@ -1967,6 +2017,8 @@ class App(QMainWindow):
             self.ilvl_list_display.clear()
             for ilvl_dict_data in self.ilvl_list:
                 item_ids = ilvl_dict_data.get("item_ids", [])
+                item_names = self.get_item_names_from_ids(item_ids)
+                item_names_str = "All" if not item_ids else f"[{', '.join(item_names)}]"
                 buyout_price = ilvl_dict_data["buyout"]
                 ilvl = ilvl_dict_data["ilvl"]
                 sockets = ilvl_dict_data["sockets"]
@@ -2029,7 +2081,8 @@ class App(QMainWindow):
                     )
 
                 string_with_data = (
-                    f"Item ID: {','.join(map(str, item_ids))}; "
+                    f"Item(s): {item_names_str}; "
+                    f"IDs: {','.join(map(str, item_ids))}; "
                     f"Price: {buyout_price}; "
                     f"ILvl: {ilvl}; "
                     f"Sockets: {sockets}; "
