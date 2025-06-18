@@ -2930,7 +2930,7 @@ class App(QMainWindow):
         if reply == QMessageBox.No:
             return
 
-        if not self.save_data_to_json():
+        if not self.paid_save_data_to_json():
             QMessageBox.critical(
                 self,
                 "Save Error",
