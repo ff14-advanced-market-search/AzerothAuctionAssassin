@@ -920,11 +920,16 @@ class App(QMainWindow):
         self.erase_ilvl_data_button.clicked.connect(self.erase_ilvl_data)
         self.ilvl_page_layout.addWidget(self.erase_ilvl_data_button, 14, 1, 1, 1)
 
+        # Add search box above the ilvl_list_display
+        self.ilvl_search_box = QLineEdit(ilvl_page)
+        self.ilvl_search_box.setPlaceholderText("Search ilvl rules...")
+        self.ilvl_search_box.textChanged.connect(self.search_ilvl_list_display)
+        self.ilvl_page_layout.addWidget(self.ilvl_search_box, 0, 1, 1, 2)
+
         self.ilvl_list_display = QListWidget(ilvl_page)
         self.ilvl_list_display.setSortingEnabled(True)
-
         self.ilvl_list_display.itemClicked.connect(self.ilvl_list_double_clicked)
-        self.ilvl_page_layout.addWidget(self.ilvl_list_display, 0, 1, 11, 2)
+        self.ilvl_page_layout.addWidget(self.ilvl_list_display, 1, 1, 10, 2)
 
         # Add new bonus lists input after the existing ilvl inputs
         self.ilvl_bonus_lists_input = QLineEdit(ilvl_page)
@@ -3835,6 +3840,28 @@ class App(QMainWindow):
             )
         except Exception as e:
             QMessageBox.critical(self, "Conversion Error", str(e))
+
+    def search_ilvl_list_display(self, search_text):
+        """
+        Highlights all ilvl_list_display items that match the search_text (case-insensitive).
+        Scrolls to the first match if any.
+        """
+        search_text = search_text.strip().lower()
+        first_match_row = None
+        for i in range(self.ilvl_list_display.count()):
+            item = self.ilvl_list_display.item(i)
+            if search_text and search_text in item.text().lower():
+                # Highlight
+                item.setBackground(QtGui.QColor("#2e8b57"))  # SeaGreen
+                if first_match_row is None:
+                    first_match_row = i
+            else:
+                # Remove highlight
+                item.setBackground(QtGui.QColor("#232629"))  # Default dark
+        if first_match_row is not None:
+            self.ilvl_list_display.scrollToItem(
+                self.ilvl_list_display.item(first_match_row)
+            )
 
 
 if __name__ == "__main__":
