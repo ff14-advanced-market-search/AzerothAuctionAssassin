@@ -197,7 +197,7 @@ class MegaData:
 
         if var_name == "TOKEN_PRICE":
             if str(var_value).isnumeric() or isinstance(var_value, int):
-                if 1 <= int(var_value) <= 100000000:
+                if 1 <= int(var_value) <= 10000000:
                     var_value = int(var_value)
                 else:
                     var_value = 1
@@ -803,10 +803,7 @@ class MegaData:
             print(f"Invalid token data structure: {token_data}")
             return None
 
-        return {
-            "price": token_data["price"],
-            "last_updated_timestamp": token_data["last_updated_timestamp"],
-        }
+        return token_data["price"] / 10000
 
     #### GENERAL USE FUNCTIONS ####
     def send_discord_message(self, message):
