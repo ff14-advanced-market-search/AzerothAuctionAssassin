@@ -45,6 +45,7 @@ class MegaData:
         )
         self.DEBUG = self.__set_mega_vars("DEBUG", raw_mega_data)
         self.NO_LINKS = self.__set_mega_vars("NO_LINKS", raw_mega_data)
+        self.TOKEN_PRICE = self.__set_mega_vars("TOKEN_PRICE", raw_mega_data)
 
         # set required env vars
         self.WOW_CLIENT_ID = self.__set_mega_vars("WOW_CLIENT_ID", raw_mega_data, True)
@@ -188,6 +189,15 @@ class MegaData:
                 var_value, int
             ):
                 if -10 <= int(var_value) < 10:
+                    var_value = int(var_value)
+                else:
+                    var_value = 1
+            else:
+                var_value = 1
+
+        if var_name == "TOKEN_PRICE":
+            if str(var_value).isnumeric() or isinstance(var_value, int):
+                if 1 <= int(var_value) <= 100000000:
                     var_value = int(var_value)
                 else:
                     var_value = 1
@@ -747,6 +757,56 @@ class MegaData:
 
         auction_info = req.json()
         return auction_info
+
+    @retry(
+        stop=stop_after_attempt(10),
+        retry=retry_if_exception_type(requests.RequestException),
+        retry_error_callback=lambda retry_state: None,
+    )
+    def get_wow_token_price(self):
+        """
+        Get the current WoW token price from the Blizzard API.
+
+        Returns:
+            dict: Token price data containing 'price' and 'last_updated_timestamp'
+                 Returns None if the request fails
+        """
+        if self.REGION == "NA":
+            url = "https://us.api.blizzard.com/data/wow/token/index?namespace=dynamic-us&locale=en_US"
+        elif self.REGION == "EU":
+            url = "https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale=en_EU"
+        else:
+            print(f"WoW tokens not available for region {self.REGION}")
+            return None
+
+        headers = {"Authorization": f"Bearer {self.check_access_token()}"}
+        req = requests.get(url, headers=headers, timeout=20)
+
+        # check for api errors
+        if req.status_code == 429:
+            error_message = f"{req} BLIZZARD too many requests error getting WoW token price for {self.REGION}"
+            print(error_message)
+            time.sleep(3)
+            raise Exception(error_message)
+        elif req.status_code != 200:
+            error_message = (
+                f"{req} BLIZZARD error getting WoW token price for {self.REGION}"
+            )
+            print(error_message)
+            time.sleep(1)
+            raise Exception(error_message)
+
+        token_data = req.json()
+
+        # Validate the response structure
+        if "price" not in token_data or "last_updated_timestamp" not in token_data:
+            print(f"Invalid token data structure: {token_data}")
+            return None
+
+        return {
+            "price": token_data["price"],
+            "last_updated_timestamp": token_data["last_updated_timestamp"],
+        }
 
     #### GENERAL USE FUNCTIONS ####
     def send_discord_message(self, message):
