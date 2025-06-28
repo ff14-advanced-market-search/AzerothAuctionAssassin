@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.5"
+AAA_VERSION = "1.5.1"
 
 windowsApp_Path = None
 try:
@@ -611,6 +611,15 @@ class App(QMainWindow):
         )
         self.settings_page_layout.addWidget(self.discount_percent_label, 14, 1, 1, 1)
         self.settings_page_layout.addWidget(self.discount_percent, 15, 1, 1, 1)
+
+        self.token_price = QLineEdit(settings_page)
+        self.token_price.setText("1")
+        self.token_price_label = QLabel("Token Price", settings_page)
+        self.token_price_label.setToolTip(
+            "Set a minimum price to alert on wow token prices"
+        )
+        self.settings_page_layout.addWidget(self.token_price_label, 16, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.token_price, 17, 1, 1, 1)
 
         self.show_bid_prices = QCheckBox("Show Bid Prices", settings_page)
         self.show_bid_prices.setToolTip(
@@ -1386,6 +1395,9 @@ class App(QMainWindow):
 
             if "DISCOUNT_PERCENT" in raw_mega_data:
                 self.discount_percent.setText(str(raw_mega_data["DISCOUNT_PERCENT"]))
+
+            if "TOKEN_PRICE" in raw_mega_data:
+                self.token_price.setText(str(raw_mega_data["TOKEN_PRICE"]))
 
             if "NO_RUSSIAN_REALMS" in raw_mega_data:
                 self.russian_realms.setChecked(raw_mega_data["NO_RUSSIAN_REALMS"])
@@ -2560,6 +2572,7 @@ class App(QMainWindow):
             self.wow_head_link.setChecked(False),
             self.no_links.setChecked(False),
             self.discount_percent.setText("10"),
+            self.token_price.setText("1"),
             self.russian_realms.setChecked(True),
             self.refresh_alerts.setChecked(True),
             self.scan_time_min.setText("1"),
@@ -2578,6 +2591,7 @@ class App(QMainWindow):
         scan_time_max = self.scan_time_max.text()
         scan_time_min = self.scan_time_min.text()
         discount_percent = self.discount_percent.text()
+        token_price = self.token_price.text()
         faction = self.faction.currentText()
         show_bids = self.show_bid_prices.isChecked()
         wowhead = self.wow_head_link.isChecked()
@@ -2640,6 +2654,7 @@ class App(QMainWindow):
                 "SCAN_TIME_MAX": scan_time_max,
                 "SCAN_TIME_MIN": scan_time_min,
                 "DISCOUNT_PERCENT": discount_percent,
+                "TOKEN_PRICE": token_price,
             }
 
             for field, value in integer_fields.items():
@@ -2680,6 +2695,7 @@ class App(QMainWindow):
             "WOWHEAD_LINK": wowhead,
             "NO_LINKS": no_links,
             "DISCOUNT_PERCENT": int(discount_percent),
+            "TOKEN_PRICE": int(token_price),
             "NO_RUSSIAN_REALMS": no_russians,
             "REFRESH_ALERTS": refresh_alerts,
             "SCAN_TIME_MAX": int(scan_time_max),
