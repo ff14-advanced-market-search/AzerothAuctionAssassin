@@ -768,8 +768,7 @@ class MegaData:
         Get the current WoW token price from the Blizzard API.
 
         Returns:
-            dict: Token price data containing 'price' and 'last_updated_timestamp'
-                 Returns None if the request fails
+            float: Token price in gold, or None if the request fails
         """
         if self.REGION == "NA":
             url = "https://us.api.blizzard.com/data/wow/token/index?namespace=dynamic-us&locale=en_US"
