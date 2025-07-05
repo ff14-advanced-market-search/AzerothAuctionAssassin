@@ -77,6 +77,8 @@ class Alerts(QThread):
         def pull_single_realm_data(connected_id):
             auctions = mega_data.get_listings_single(connected_id)
             clean_auctions = clean_listing_data(auctions, connected_id)
+            if connected_id in [-1, -2]:
+                check_token_price()
             if not clean_auctions or len(clean_auctions) == 0:
                 return
 
@@ -201,6 +203,21 @@ class Alerts(QThread):
                         f"{mega_data.REGION} SNIPE FOUND!", desc, chunk
                     )
                     mega_data.send_discord_embed(item_embed)
+
+        def check_token_price():
+            try:
+                # check if token price is below threshold durring commodity run
+                if mega_data.TOKEN_PRICE:
+                    token_price = mega_data.get_wow_token_price()
+                    if mega_data.TOKEN_PRICE is not None and mega_data.TOKEN_PRICE > 0:
+                        token_embed = create_embed(
+                            f"WoW Token Alert - {mega_data.REGION}",
+                            f"**Token Price:** {token_price:,} gold\n**Threshold:** {mega_data.TOKEN_PRICE:,} gold\n**Region:** {mega_data.REGION}",
+                            [],
+                        )
+                        mega_data.send_discord_embed(token_embed)
+            except Exception as e:
+                print(f"Error checking token price: {e}")
 
         def clean_listing_data(auctions, connected_id):
             all_ah_buyouts = {}
