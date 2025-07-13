@@ -13,6 +13,13 @@ This tool enables you to quickly find the most amazing deals **across all realms
 If the EXE doesnt install right try the [Installation with python](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Install-with-Python).
 
 
+# Video Guides
+
+[![How to install](https://img.youtube.com/vi/BbP7NTPohIU/0.jpg)](https://www.youtube.com/watch?v=BbP7NTPohIU)
+
+[<img width="500" alt="Screenshot 2025-01-12 at 12 31 57 PM" src="https://github.com/user-attachments/assets/3b96a1f0-91a9-4e13-a86a-f255ce8c1ae9" />](https://www.youtube.com/watch?v=7mtAEN6HUN0)
+
+
 # Desktop GUI 
 
 <img width="500" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/9f1c7e15-6b07-4b56-83ba-b14b998d6ec7">
@@ -47,7 +54,7 @@ https://www.patreon.com/indopan
 - [How to update the app](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/How-to-update)
 - [All other guides](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki)
 
-# [Azeroth Auction Target - Automatic Recommended Snipe Lists](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Azeroth-Auction-Target-%E2%80%90-Automatic-Recommended-Snipe-Lists)
+<!-- # [Azeroth Auction Target - Automatic Recommended Snipe Lists](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Azeroth-Auction-Target-%E2%80%90-Automatic-Recommended-Snipe-Lists)
 
 <img width="550" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/653e383f-c875-4195-878c-b481c03dcb79">
-
+ -->
