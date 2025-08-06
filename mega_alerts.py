@@ -209,7 +209,7 @@ class Alerts(QThread):
                 # check if token price is below threshold durring commodity run
                 if mega_data.TOKEN_PRICE:
                     token_price = mega_data.get_wow_token_price()
-                    if mega_data.TOKEN_PRICE is not None and mega_data.TOKEN_PRICE > 0:
+                    if token_price and token_price < mega_data.TOKEN_PRICE:
                         token_embed = create_embed(
                             f"WoW Token Alert - {mega_data.REGION}",
                             f"**Token Price:** {token_price:,} gold\n**Threshold:** {mega_data.TOKEN_PRICE:,} gold\n**Region:** {mega_data.REGION}",
