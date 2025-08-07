@@ -7,9 +7,9 @@
         "EU Commodities"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": -1,
@@ -18,9 +18,9 @@
         "NA Commodities"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:18:33 GMT",
-      "lastUploadMinute": 18,
-      "lastUploadUnix": 1754486313
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:36:48 GMT",
+      "lastUploadMinute": 36,
+      "lastUploadUnix": 1754530608
     },
     {
       "dataSetID": 4,
@@ -30,9 +30,9 @@
         "Winterhoof"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 5,
@@ -41,9 +41,9 @@
         "Proudmoore"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:48 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486208
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:55 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530495
     },
     {
       "dataSetID": 9,
@@ -52,9 +52,9 @@
         "Kil'jaeden"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 11,
@@ -63,9 +63,9 @@
         "Tichondrius"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:48 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486208
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:55 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530495
     },
     {
       "dataSetID": 12,
@@ -76,9 +76,9 @@
         "Farstriders"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 47,
@@ -88,9 +88,9 @@
         "Shu'halo"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:53 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530493
     },
     {
       "dataSetID": 52,
@@ -102,9 +102,9 @@
         "Khadgar"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:25 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486245
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:36 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530536
     },
     {
       "dataSetID": 53,
@@ -118,9 +118,9 @@
         "Eredar"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:24 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486244
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 54,
@@ -130,9 +130,9 @@
         "Galakrond"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:24 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486244
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 55,
@@ -142,9 +142,9 @@
         "Dentarg"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:24 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486244
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:35 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530535
     },
     {
       "dataSetID": 57,
@@ -153,9 +153,9 @@
         "Illidan"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:32 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486252
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:44 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530544
     },
     {
       "dataSetID": 58,
@@ -164,9 +164,9 @@
         "Stormreaver"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:33 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530533
     },
     {
       "dataSetID": 60,
@@ -175,9 +175,9 @@
         "Stormrage"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:32 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486252
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:44 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530544
     },
     {
       "dataSetID": 61,
@@ -186,9 +186,9 @@
         "Zul'jin"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:27 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486247
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:38 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530538
     },
     {
       "dataSetID": 63,
@@ -198,9 +198,9 @@
         "Ysera"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:33 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530533
     },
     {
       "dataSetID": 64,
@@ -210,9 +210,9 @@
         "Duskwood"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:24 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486244
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:35 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530535
     },
     {
       "dataSetID": 67,
@@ -225,9 +225,9 @@
         "Gilneas"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:24 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486244
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 69,
@@ -236,9 +236,9 @@
         "Arthas"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:07 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486227
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:18 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530518
     },
     {
       "dataSetID": 71,
@@ -253,9 +253,9 @@
         "Anvilmar"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:10 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486230
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:20 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530520
     },
     {
       "dataSetID": 73,
@@ -264,9 +264,9 @@
         "Bleeding Hollow"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:10 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486230
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:22 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530522
     },
     {
       "dataSetID": 75,
@@ -276,9 +276,9 @@
         "The Scryers"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:25 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486245
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:35 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530535
     },
     {
       "dataSetID": 76,
@@ -287,9 +287,9 @@
         "Sargeras"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:14 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486234
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:24 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530524
     },
     {
       "dataSetID": 77,
@@ -304,9 +304,9 @@
         "Azshara"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:28 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486248
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:39 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530539
     },
     {
       "dataSetID": 78,
@@ -318,9 +318,9 @@
         "Altar of Storms"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 84,
@@ -335,9 +335,9 @@
         "Antonidas"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 86,
@@ -353,9 +353,9 @@
         "Shadowsong"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:48 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486208
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 96,
@@ -372,9 +372,9 @@
         "Scilla"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:26 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486246
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:37 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530537
     },
     {
       "dataSetID": 99,
@@ -384,9 +384,9 @@
         "Arygos"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 100,
@@ -395,9 +395,9 @@
         "Earthen Ring"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:24 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486244
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 104,
@@ -411,9 +411,9 @@
         "Burning Blade"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:25 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486245
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:36 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530536
     },
     {
       "dataSetID": 106,
@@ -423,9 +423,9 @@
         "Fizzcrank"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:24 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486244
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:33 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530533
     },
     {
       "dataSetID": 113,
@@ -437,9 +437,9 @@
         "Draka"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 114,
@@ -449,9 +449,9 @@
         "Fenris"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 115,
@@ -461,9 +461,9 @@
         "Echo Isles"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:53 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530493
     },
     {
       "dataSetID": 117,
@@ -473,9 +473,9 @@
         "Shandris"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:53 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530493
     },
     {
       "dataSetID": 118,
@@ -485,9 +485,9 @@
         "Scarlet Crusade"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 120,
@@ -496,9 +496,9 @@
         "Darkspear"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 121,
@@ -511,9 +511,9 @@
         "Khaz Modan"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 125,
@@ -525,9 +525,9 @@
         "Blackwater Raiders"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 127,
@@ -543,9 +543,9 @@
         "Stormscale"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 151,
@@ -555,9 +555,9 @@
         "Uther"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 154,
@@ -571,9 +571,9 @@
         "Haomarush"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:33 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530533
     },
     {
       "dataSetID": 155,
@@ -585,9 +585,9 @@
         "Deathwing"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:09 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486229
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:20 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530520
     },
     {
       "dataSetID": 157,
@@ -600,9 +600,9 @@
         "Dalvengyr"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:09 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486229
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:20 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530520
     },
     {
       "dataSetID": 158,
@@ -612,9 +612,9 @@
         "Tanaris"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 160,
@@ -626,9 +626,9 @@
         "Azuremyst"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:24 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486244
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:35 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530535
     },
     {
       "dataSetID": 162,
@@ -637,9 +637,9 @@
         "Emerald Dream"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:27 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486247
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:38 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530538
     },
     {
       "dataSetID": 163,
@@ -652,9 +652,9 @@
         "Ravenholdt"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:25 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486245
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:36 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530536
     },
     {
       "dataSetID": 509,
@@ -665,9 +665,9 @@
         "Ner'zhul"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 510,
@@ -677,9 +677,9 @@
         "Chants eternels"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 512,
@@ -691,9 +691,9 @@
         "Throk'Feroth"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 531,
@@ -706,9 +706,9 @@
         "Terrordar"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 570,
@@ -720,9 +720,9 @@
         "Krag'jin"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 578,
@@ -737,9 +737,9 @@
         "Tirion"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 580,
@@ -750,9 +750,9 @@
         "Lordaeron"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:52 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530312
     },
     {
       "dataSetID": 581,
@@ -761,9 +761,9 @@
         "Blackrock"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 604,
@@ -774,9 +774,9 @@
         "Ambossar"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 612,
@@ -791,9 +791,9 @@
         "Nera'thor"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 633,
@@ -809,9 +809,9 @@
         "Burning Steppes"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1070,
@@ -821,9 +821,9 @@
         "Terokkar"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:24 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486244
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:35 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530535
     },
     {
       "dataSetID": 1071,
@@ -834,9 +834,9 @@
         "Sentinels"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 1072,
@@ -846,9 +846,9 @@
         "Uldaman"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:10 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486230
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:19 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530519
     },
     {
       "dataSetID": 1080,
@@ -858,9 +858,9 @@
         "Bloodhoof"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1082,
@@ -871,9 +871,9 @@
         "Anachronos"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1084,
@@ -883,9 +883,9 @@
         "Tarren Mill"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:54 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:53 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487114
+      "lastUploadUnix": 1754530313
     },
     {
       "dataSetID": 1085,
@@ -896,9 +896,9 @@
         "The Sha'tar"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1091,
@@ -912,9 +912,9 @@
         "Hakkar"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1092,
@@ -924,9 +924,9 @@
         "Burning Blade"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1096,
@@ -941,9 +941,9 @@
         "The Venture Co"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1097,
@@ -953,9 +953,9 @@
         "Malorne"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1098,
@@ -965,9 +965,9 @@
         "Malfurion"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1099,
@@ -977,9 +977,9 @@
         "Alleria"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1104,
@@ -993,9 +993,9 @@
         "Nathrezim"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1105,
@@ -1009,9 +1009,9 @@
         "Anub'arak"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1121,
@@ -1027,9 +1027,9 @@
         "Die Silberne Hand"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1122,
@@ -1041,9 +1041,9 @@
         "Eitrigg"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1127,
@@ -1058,9 +1058,9 @@
         "Conseil des Ombres"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1129,
@@ -1077,9 +1077,9 @@
         "Jaedenar"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:27 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486247
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:37 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530537
     },
     {
       "dataSetID": 1136,
@@ -1093,9 +1093,9 @@
         "Daggerspine"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:48 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486208
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 1138,
@@ -1111,9 +1111,9 @@
         "Crushridge"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 1147,
@@ -1123,9 +1123,9 @@
         "Bladefist"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:53 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530493
     },
     {
       "dataSetID": 1151,
@@ -1135,9 +1135,9 @@
         "Misha"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:53 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530493
     },
     {
       "dataSetID": 1168,
@@ -1152,9 +1152,9 @@
         "Perenolde"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 1171,
@@ -1163,9 +1163,9 @@
         "Wyrmrest Accord"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:48 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486208
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 1175,
@@ -1181,9 +1181,9 @@
         "Ghostlands"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:27 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486247
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:38 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530538
     },
     {
       "dataSetID": 1184,
@@ -1194,9 +1194,9 @@
         "Nesingwary"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 1185,
@@ -1211,9 +1211,9 @@
         "Stonemaul"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 1190,
@@ -1223,9 +1223,9 @@
         "Doomhammer"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 1301,
@@ -1234,9 +1234,9 @@
         "Outland"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1302,
@@ -1245,9 +1245,9 @@
         "Archimonde"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1303,
@@ -1258,9 +1258,9 @@
         "Frostmane"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1305,
@@ -1269,9 +1269,9 @@
         "Kazzak"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:54 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:52 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487114
+      "lastUploadUnix": 1754530312
     },
     {
       "dataSetID": 1307,
@@ -1280,9 +1280,9 @@
         "Chamber of Aspects"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1309,
@@ -1291,9 +1291,9 @@
         "Pozzo dell'Eternita"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1313,
@@ -1303,9 +1303,9 @@
         "Thunderhorn"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1315,
@@ -1315,9 +1315,9 @@
         "Varimathras"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1316,
@@ -1326,9 +1326,9 @@
         "Nemesis"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1325,
@@ -1338,9 +1338,9 @@
         "Hellscream"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1329,
@@ -1349,9 +1349,9 @@
         "Ravencrest"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1331,
@@ -1361,9 +1361,9 @@
         "Medivh"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1335,
@@ -1372,9 +1372,9 @@
         "Ysondre"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1378,
@@ -1384,9 +1384,9 @@
         "C'Thun"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1379,
@@ -1398,9 +1398,9 @@
         "Shen'dralar"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1384,
@@ -1411,9 +1411,9 @@
         "Colinas Pardas"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1385,
@@ -1423,9 +1423,9 @@
         "Minahonda"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1388,
@@ -1435,9 +1435,9 @@
         "Mazrigos"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1390,
@@ -1446,9 +1446,9 @@
         "Hyjal"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1393,
@@ -1458,9 +1458,9 @@
         "Nordrassil"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1396,
@@ -1470,9 +1470,9 @@
         "Azjol-Nerub"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1400,
@@ -1483,9 +1483,9 @@
         "Area 52"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1401,
@@ -1498,9 +1498,9 @@
         "Teldrassil"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1402,
@@ -1510,9 +1510,9 @@
         "Doomhammer"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1403,
@@ -1521,9 +1521,9 @@
         "Draenor"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:54 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:52 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487114
+      "lastUploadUnix": 1754530312
     },
     {
       "dataSetID": 1405,
@@ -1537,9 +1537,9 @@
         "Die Nachtwache"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1406,
@@ -1549,9 +1549,9 @@
         "Khaz'goroth"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1408,
@@ -1561,9 +1561,9 @@
         "Dun Morogh"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1416,
@@ -1576,9 +1576,9 @@
         "Bronzebeard"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1417,
@@ -1588,9 +1588,9 @@
         "Stormrage"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1425,
@@ -1599,9 +1599,9 @@
         "Drakkari"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:33 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530533
     },
     {
       "dataSetID": 1426,
@@ -1610,9 +1610,9 @@
         "Aerie Peak"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:23 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486243
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:34 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530534
     },
     {
       "dataSetID": 1427,
@@ -1621,9 +1621,9 @@
         "Ragnaros"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:27 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486247
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:37 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530537
     },
     {
       "dataSetID": 1428,
@@ -1632,9 +1632,9 @@
         "Quel'Thalas"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:26 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486246
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:36 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530536
     },
     {
       "dataSetID": 1587,
@@ -1647,9 +1647,9 @@
         "Nagrand"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1596,
@@ -1663,9 +1663,9 @@
         "Deathwing"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1597,
@@ -1677,9 +1677,9 @@
         "Jaedenar"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1598,
@@ -1697,9 +1697,9 @@
         "Boulderfist"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1602,
@@ -1708,9 +1708,9 @@
         "Gordunni"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1604,
@@ -1719,9 +1719,9 @@
         "Soulflayer"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1605,
@@ -1730,9 +1730,9 @@
         "Deathguard"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1614,
@@ -1743,9 +1743,9 @@
         "Razuvious"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1615,
@@ -1754,9 +1754,9 @@
         "Howling Fjord"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 1618,
@@ -1765,9 +1765,9 @@
         "Die Aldor"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1621,
@@ -1780,9 +1780,9 @@
         "Dalaran"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1623,
@@ -1791,9 +1791,9 @@
         "Fordragon"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1624,
@@ -1805,9 +1805,9 @@
         "Temple noir"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1922,
@@ -1816,9 +1816,9 @@
         "Azuregos"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1923,
@@ -1827,9 +1827,9 @@
         "Ashenvale"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1925,
@@ -1838,9 +1838,9 @@
         "Eversong"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 1928,
@@ -1851,9 +1851,9 @@
         "Greymane"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 1929,
@@ -1867,9 +1867,9 @@
         "Booty Bay"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:50 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487110
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 2073,
@@ -1878,9 +1878,9 @@
         "Stormscale"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 2074,
@@ -1890,9 +1890,9 @@
         "Emerald Dream"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 3207,
@@ -1901,9 +1901,9 @@
         "Goldrinn"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:10 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486230
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:20 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530520
     },
     {
       "dataSetID": 3208,
@@ -1913,9 +1913,9 @@
         "Tol Barad"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:10 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486230
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:20 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530520
     },
     {
       "dataSetID": 3209,
@@ -1924,9 +1924,9 @@
         "Azralon"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:26 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486246
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:36 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530536
     },
     {
       "dataSetID": 3234,
@@ -1935,9 +1935,9 @@
         "Gallywix"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:22 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486242
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:33 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530533
     },
     {
       "dataSetID": 3391,
@@ -1946,9 +1946,9 @@
         "Silvermoon"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:54 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:52 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487114
+      "lastUploadUnix": 1754530312
     },
     {
       "dataSetID": 3656,
@@ -1961,9 +1961,9 @@
         "Haomarush"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 3657,
@@ -1977,9 +1977,9 @@
         "Darksorrow"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 3661,
@@ -1988,9 +1988,9 @@
         "Hyjal"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 3666,
@@ -2000,9 +2000,9 @@
         "Aszune"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 3674,
@@ -2011,9 +2011,9 @@
         "Twisting Nether"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:52 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530312
     },
     {
       "dataSetID": 3675,
@@ -2022,9 +2022,9 @@
         "Moon Guard"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:49 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486209
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:55 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530495
     },
     {
       "dataSetID": 3676,
@@ -2033,9 +2033,9 @@
         "Area 52"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:17 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486237
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:29 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530529
     },
     {
       "dataSetID": 3678,
@@ -2044,9 +2044,9 @@
         "Thrall"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:15 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486235
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:27 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530527
     },
     {
       "dataSetID": 3679,
@@ -2055,9 +2055,9 @@
         "Aegwynn"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 3681,
@@ -2066,9 +2066,9 @@
         "Magtheridon"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 3682,
@@ -2077,9 +2077,9 @@
         "Ragnaros"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 3683,
@@ -2088,9 +2088,9 @@
         "Dalaran"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:14 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486234
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:25 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530525
     },
     {
       "dataSetID": 3684,
@@ -2099,9 +2099,9 @@
         "Mal'Ganis"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:27 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486247
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:39 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530539
     },
     {
       "dataSetID": 3685,
@@ -2110,9 +2110,9 @@
         "Turalyon"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:08 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486228
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:19 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530519
     },
     {
       "dataSetID": 3686,
@@ -2121,9 +2121,9 @@
         "Antonidas"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 3690,
@@ -2132,9 +2132,9 @@
         "Khaz Modan"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 3691,
@@ -2146,9 +2146,9 @@
         "Taerar"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:53 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:51 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487113
+      "lastUploadUnix": 1754530311
     },
     {
       "dataSetID": 3692,
@@ -2157,9 +2157,9 @@
         "Eredar"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 3693,
@@ -2168,9 +2168,9 @@
         "Kel'Thuzad"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:17:09 GMT",
-      "lastUploadMinute": 17,
-      "lastUploadUnix": 1754486229
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:35:19 GMT",
+      "lastUploadMinute": 35,
+      "lastUploadUnix": 1754530519
     },
     {
       "dataSetID": 3694,
@@ -2179,9 +2179,9 @@
         "Lightbringer"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:16:47 GMT",
-      "lastUploadMinute": 16,
-      "lastUploadUnix": 1754486207
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:34:54 GMT",
+      "lastUploadMinute": 34,
+      "lastUploadUnix": 1754530494
     },
     {
       "dataSetID": 3696,
@@ -2193,9 +2193,9 @@
         "Proudmoore"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 3702,
@@ -2204,9 +2204,9 @@
         "Argent Dawn"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:54 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:53 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487114
+      "lastUploadUnix": 1754530313
     },
     {
       "dataSetID": 3703,
@@ -2215,9 +2215,9 @@
         "Frostwolf"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:51 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:49 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487111
+      "lastUploadUnix": 1754530309
     },
     {
       "dataSetID": 3713,
@@ -2229,9 +2229,9 @@
         "Burning Legion"
       ],
       "region": "EU",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:31:52 GMT",
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:31:50 GMT",
       "lastUploadMinute": 31,
-      "lastUploadUnix": 1754487112
+      "lastUploadUnix": 1754530310
     },
     {
       "dataSetID": 3721,
@@ -2242,9 +2242,9 @@
         "Saurfang"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:18:30 GMT",
-      "lastUploadMinute": 18,
-      "lastUploadUnix": 1754486310
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:36:44 GMT",
+      "lastUploadMinute": 36,
+      "lastUploadUnix": 1754530604
     },
     {
       "dataSetID": 3723,
@@ -2253,9 +2253,9 @@
         "Barthilas"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:18:30 GMT",
-      "lastUploadMinute": 18,
-      "lastUploadUnix": 1754486310
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:36:42 GMT",
+      "lastUploadMinute": 36,
+      "lastUploadUnix": 1754530602
     },
     {
       "dataSetID": 3725,
@@ -2268,9 +2268,9 @@
         "Gundrak"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:18:39 GMT",
-      "lastUploadMinute": 18,
-      "lastUploadUnix": 1754486319
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:36:55 GMT",
+      "lastUploadMinute": 36,
+      "lastUploadUnix": 1754530615
     },
     {
       "dataSetID": 3726,
@@ -2281,9 +2281,9 @@
         "Dath'Remar"
       ],
       "region": "NA",
-      "lastUploadTimeRaw": "Wed, 6 Aug 2025 13:18:32 GMT",
-      "lastUploadMinute": 18,
-      "lastUploadUnix": 1754486312
+      "lastUploadTimeRaw": "Thu, 7 Aug 2025 01:36:47 GMT",
+      "lastUploadMinute": 36,
+      "lastUploadUnix": 1754530607
     }
   ]
 }
