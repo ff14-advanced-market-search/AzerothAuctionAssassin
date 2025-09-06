@@ -10895,6 +10895,102 @@
     "ilvl": 610,
     "is_stackable": 0
   },
+  "238027": {
+    "itemID": 238027,
+    "itemName": "Harvested Creephide Cord",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 2,
+    "purchase_price": 2640187,
+    "sell_price": 528037,
+    "ilvl": 662,
+    "is_stackable": 0
+  },
+  "238028": {
+    "itemID": 238028,
+    "itemName": "Bone-Melted Faceplate",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 4,
+    "purchase_price": 3944745,
+    "sell_price": 788949,
+    "ilvl": 662,
+    "is_stackable": 0
+  },
+  "238030": {
+    "itemID": 238030,
+    "itemName": "Voidhound Trainer's Boots",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 3,
+    "purchase_price": 3973287,
+    "sell_price": 794657,
+    "ilvl": 662,
+    "is_stackable": 0
+  },
+  "238031": {
+    "itemID": 238031,
+    "itemName": "Veiled Manta Vest",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 2,
+    "purchase_price": 5327152,
+    "sell_price": 1065430,
+    "ilvl": 662,
+    "is_stackable": 0
+  },
+  "238032": {
+    "itemID": 238032,
+    "itemName": "Acolyte's Infused Leggings",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 3,
+    "purchase_price": 5346478,
+    "sell_price": 1069295,
+    "ilvl": 662,
+    "is_stackable": 0
+  },
+  "238033": {
+    "itemID": 238033,
+    "itemName": "Zadus's Liturgical Hat",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 1,
+    "purchase_price": 4016687,
+    "sell_price": 803337,
+    "ilvl": 662,
+    "is_stackable": 0
+  },
+  "238034": {
+    "itemID": 238034,
+    "itemName": "Jak'tull's Intruder Stompers",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 4,
+    "purchase_price": 4030763,
+    "sell_price": 806152,
+    "ilvl": 662,
+    "is_stackable": 0
+  },
+  "238036": {
+    "itemID": 238036,
+    "itemName": "Entropy",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 3408906,
+    "sell_price": 681781,
+    "ilvl": 662,
+    "is_stackable": 0
+  },
   "241033": {
     "itemID": 241033,
     "itemName": "Arathi Templar's Claymore",
@@ -10929,6 +11025,18 @@
     "purchase_price": 8907092,
     "sell_price": 1781418,
     "ilvl": 610,
+    "is_stackable": 0
+  },
+  "243048": {
+    "itemID": 243048,
+    "itemName": "Technomancer's Service Sandals",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 1,
+    "purchase_price": 3874365,
+    "sell_price": 774873,
+    "ilvl": 662,
     "is_stackable": 0
   },
   "244473": {
