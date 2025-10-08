@@ -1,0 +1,47 @@
+From 7ddd080c0223d68ca2aa4b1df732397b17374209 Mon Sep 17 00:00:00 2001
+From: Cursor Agent <cursoragent@cursor.com>
+Date: Wed, 8 Oct 2025 18:50:36 +0000
+Subject: [PATCH] Fix hour-boundary wrap-around bug for minute 59
+ updates\n\nFixes #222\n\nUse modulo 60 arithmetic for minute window and
+ handle wrap case.
+
+---
+ mega_alerts.py | 22 +++++++++++++++-------
+ 1 file changed, 15 insertions(+), 7 deletions(-)
+
+diff --git a/mega_alerts.py b/mega_alerts.py
+index f1a22e4..3f02f1d 100644
+--- a/mega_alerts.py
++++ b/mega_alerts.py
+@@ -714,13 +714,21 @@ class Alerts(QThread):
+                     print("\n\nClearing Alert Record\n\n")
+                     self.alert_record = []
+ 
+-                matching_realms = [
+-                    realm["dataSetID"]
+-                    for realm in mega_data.get_upload_time_list()
+-                    if realm["lastUploadMinute"] + mega_data.SCAN_TIME_MIN
+-                    <= current_min
+-                    <= realm["lastUploadMinute"] + mega_data.SCAN_TIME_MAX
+-                ]
++                matching_realms = []
++                for realm in mega_data.get_upload_time_list():
++                    last_min = realm["lastUploadMinute"]
++                    start_min = (last_min + mega_data.SCAN_TIME_MIN) % 60
++                    end_min = (last_min + mega_data.SCAN_TIME_MAX) % 60
++
++                    # If the scan window does not wrap past 59 -> normal range check
++                    if start_min <= end_min:
++                        matches = start_min <= current_min <= end_min
++                    else:
++                        # Window wraps across the hour boundary; match if in either side
++                        matches = current_min >= start_min or current_min <= end_min
++
++                    if matches:
++                        matching_realms.append(realm["dataSetID"])
+                 # mega wants extra alerts
+                 if mega_data.EXTRA_ALERTS:
+                     extra_alert_mins = json.loads(mega_data.EXTRA_ALERTS)
+-- 
+2.48.1
+
