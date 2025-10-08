@@ -714,13 +714,23 @@ class Alerts(QThread):
                     print("\n\nClearing Alert Record\n\n")
                     self.alert_record = []
 
-                matching_realms = [
-                    realm["dataSetID"]
-                    for realm in mega_data.get_upload_time_list()
-                    if realm["lastUploadMinute"] + mega_data.SCAN_TIME_MIN
-                    <= current_min
-                    <= realm["lastUploadMinute"] + mega_data.SCAN_TIME_MAX
-                ]
+                # Handle hour-boundary wrap-around for minute 59
+                matching_realms = []
+                for realm in mega_data.get_upload_time_list():
+                    last_min = realm["lastUploadMinute"]
+                    start_min = (last_min + mega_data.SCAN_TIME_MIN) % 60
+                    end_min = (last_min + mega_data.SCAN_TIME_MAX) % 60
+                    
+                    # Handle wrap-around case (e.g., window 59->0->1->2)
+                    if start_min <= end_min:
+                        # Normal case: no wrap-around
+                        matches = start_min <= current_min <= end_min
+                    else:
+                        # Wrap case: window crosses hour boundary
+                        matches = current_min >= start_min or current_min <= end_min
+                    
+                    if matches:
+                        matching_realms.append(realm["dataSetID"])
                 # mega wants extra alerts
                 if mega_data.EXTRA_ALERTS:
                     extra_alert_mins = json.loads(mega_data.EXTRA_ALERTS)
