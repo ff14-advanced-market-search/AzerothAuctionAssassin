@@ -720,7 +720,7 @@ class Alerts(QThread):
                     last_min = realm["lastUploadMinute"]
                     start_min = (last_min + mega_data.SCAN_TIME_MIN) % 60
                     end_min = (last_min + mega_data.SCAN_TIME_MAX) % 60
-                    
+
                     # Handle wrap-around case (e.g., window 59->0->1->2)
                     if start_min <= end_min:
                         # Normal case: no wrap-around
@@ -728,7 +728,7 @@ class Alerts(QThread):
                     else:
                         # Wrap case: window crosses hour boundary
                         matches = current_min >= start_min or current_min <= end_min
-                    
+
                     if matches:
                         matching_realms.append(realm["dataSetID"])
                 # mega wants extra alerts
