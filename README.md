@@ -19,6 +19,14 @@ If the EXE doesnt install right try the [Installation with python](https://githu
 
 [<img width="500" alt="Screenshot 2025-01-12 at 12 31 57 PM" src="https://github.com/user-attachments/assets/3b96a1f0-91a9-4e13-a86a-f255ce8c1ae9" />](https://www.youtube.com/watch?v=7mtAEN6HUN0)
 
+# Node GUI (Electron)
+
+Prefer to avoid the PyQt desktop UI? A lightweight Node/Electron GUI manages the same JSON configs and can launch the scanner.
+
+- Requires Node 18+. Run with `npm start` (downloads Electron on first run).
+- Edit `mega_data.json`, desired item/pet targets, ilvl rules, and pet ilvl rules with structured forms.
+- Uses the files in `AzerothAuctionAssassinData/` (creates them if missing) and can start `mega_alerts.py` with your current settings.
+
 
 # Desktop GUI 
 

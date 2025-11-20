@@ -1,0 +1,23 @@
+{
+  "name": "aaa-node-ui",
+  "version": "0.2.0",
+  "description": "Node-based GUI to manage Azeroth Auction Assassin configs and run mega_alerts.py",
+  "license": "MIT",
+  "main": "node-ui/main.js",
+  "scripts": {
+    "start": "electron .",
+    "alerts:ts": "node -r ts-node/register src/mega-alerts.ts"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.1",
+    "electron": "^29.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "undici": "^6.19.8"
+  }
+}

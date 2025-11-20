@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Azeroth Auction Assassin 2</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Azeroth Auction Assassin</div>
+          <div class="title">Version: 2.0</div>
+        </div>
+        <div class="actions">
+          <button class="ghost" id="reload-btn">Reload from disk</button>
+          <button class="primary" id="save-settings-btn">Save settings</button>
+          <button class="success" id="start-btn">Start Alerts</button>
+          <button class="danger" id="stop-btn" disabled>Stop</button>
+        </div>
+      </header>
+
+      <div class="status-row">
+        <div class="status-pill" id="process-state">Not running</div>
+      </div>
+
+      <div class="nav">
+        <button class="nav-btn active" data-view-target="home">Home</button>
+        <button class="nav-btn" data-view-target="settings">Settings</button>
+        <button class="nav-btn" data-view-target="items">Items</button>
+        <button class="nav-btn" data-view-target="ilvl">BOE Ilvl Gear/Weapons</button>
+        <button class="nav-btn" data-view-target="pet-ilvl">Pets</button>
+        <button class="nav-btn" data-view-target="logs">Logs</button>
+      </div>
+
+      <main class="grid">
+        <section class="card span-2 view" data-view="home">
+          <div class="home-hero">
+            <div>
+              <div class="eyebrow">Azeroth Auction Assassin</div>
+              <h1>Fast AH sniping, now with a Node GUI.</h1>
+              <p class="muted">
+                Configure your snipes, launch alerts, and track logs from one place.
+              </p>
+              <div class="home-links">
+                <a class="ghost-link" href="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki" target="_blank">Guides</a>
+                <a class="ghost-link" href="https://www.patreon.com/indopan" target="_blank">Patreon</a>
+                <a class="ghost-link" href="https://discord.gg/9dHx2rEq9F" target="_blank">Discord</a>
+              </div>
+            </div>
+            <img src="../icon.png" alt="AAA" class="home-icon" />
+          </div>
+        </section>
+
+        <section class="card span-2 view" data-view="settings" id="settings-card">
+          <div class="card-head">
+            <h2>Settings (mega_data.json)</h2>
+            <p class="muted">These map directly to mega_data.json keys.</p>
+          </div>
+          <form id="mega-form" class="form-grid">
+            <label>
+              Discord Webhook URL
+              <input name="MEGA_WEBHOOK_URL" type="text" autocomplete="off" />
+            </label>
+            <label>
+              WoW Client ID
+              <input name="WOW_CLIENT_ID" type="text" autocomplete="off" />
+            </label>
+            <label>
+              WoW Client Secret
+              <input
+                name="WOW_CLIENT_SECRET"
+                type="password"
+                autocomplete="off"
+              />
+            </label>
+            <label>
+              Region
+              <select name="WOW_REGION">
+                <option value="EU">EU</option>
+                <option value="NA">NA</option>
+                <option value="EUCLASSIC">EUCLASSIC</option>
+                <option value="NACLASSIC">NACLASSIC</option>
+                <option value="NASODCLASSIC">NASODCLASSIC</option>
+                <option value="EUSODCLASSIC">EUSODCLASSIC</option>
+              </select>
+            </label>
+            <label>
+              Threads
+              <input name="MEGA_THREADS" type="number" min="1" />
+            </label>
+            <label>
+              Scan start offset (min)
+              <input name="SCAN_TIME_MIN" type="number" />
+            </label>
+            <label>
+              Scan end offset (min)
+              <input name="SCAN_TIME_MAX" type="number" />
+            </label>
+            <label>
+              Token alert min price
+              <input name="TOKEN_PRICE" type="number" />
+            </label>
+            <label>
+              Faction (classic)
+              <input name="FACTION" type="text" />
+            </label>
+            <label>
+              Extra alerts (JSON array)
+              <input name="EXTRA_ALERTS" type="text" />
+            </label>
+            <div class="toggles">
+              <label><input type="checkbox" name="SHOW_BID_PRICES" /> Show bid prices</label>
+              <label><input type="checkbox" name="NO_LINKS" /> Disable links</label>
+              <label><input type="checkbox" name="WOWHEAD_LINK" /> Use wowhead links</label>
+              <label><input type="checkbox" name="NO_RUSSIAN_REALMS" /> Exclude RU realms</label>
+              <label><input type="checkbox" name="REFRESH_ALERTS" /> Refresh alerts hourly</label>
+              <label><input type="checkbox" name="DEBUG" /> Debug mode</label>
+            </div>
+            <div class="import-row">
+              <button type="button" class="ghost" id="import-config-btn">Import from AAA file</button>
+              <button type="button" class="ghost" id="export-config-btn">Export to AAA file</button>
+              <button type="button" class="ghost" id="paste-config-btn">Import AAA</button>
+              <button type="button" class="ghost" id="copy-config-btn">Copy AAA to clipboard</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card view" data-view="items">
+          <div class="card-head">
+            <h2>Desired Items</h2>
+            <p class="muted">Write to desired_items.json</p>
+          </div>
+          <div class="search-block">
+            <div class="search-row">
+              <input
+                type="text"
+                id="item-search-input"
+                list="item-search-suggest"
+                placeholder="Search items by name (retrieves live list, cached after first search)"
+              />
+              <datalist id="item-search-suggest"></datalist>
+              <button type="button" id="item-search-btn" class="ghost">
+                Search
+              </button>
+            </div>
+            <div id="item-search-status" class="muted tiny"></div>
+            <div class="search-results" id="item-search-results"></div>
+          </div>
+          <form id="item-form" class="inline-form">
+            <input type="text" name="id" placeholder="Item ID" />
+            <input type="number" name="price" placeholder="Max price" />
+            <button type="submit">Add / update</button>
+          </form>
+          <div class="import-row">
+            <button type="button" class="ghost" id="import-items-btn">Import from AAA file</button>
+            <button type="button" class="ghost" id="export-items-btn">Export to AAA file</button>
+            <button type="button" class="ghost" id="paste-items-btn">Import AAA</button>
+            <button type="button" class="ghost" id="copy-items-btn">Copy AAA to clipboard</button>
+            <button type="button" class="ghost" id="paste-pbs-items-btn">Import PBS</button>
+            <button type="button" class="ghost" id="copy-pbs-items-btn">Copy PBS to clipboard</button>
+          </div>
+          <ul class="list" id="item-list"></ul>
+        </section>
+
+        <section class="card span-2 view" data-view="ilvl">
+          <div class="card-head">
+            <h2>Item level rules</h2>
+            <p class="muted">Write to desired_ilvl_list.json</p>
+          </div>
+          <div class="search-block">
+            <div class="search-row">
+              <input
+                type="text"
+                id="ilvl-search-input"
+                list="ilvl-search-suggest"
+                placeholder="Search items to include in this rule"
+              />
+              <datalist id="ilvl-search-suggest"></datalist>
+              <button type="button" id="ilvl-search-btn" class="ghost">Search</button>
+            </div>
+            <div id="ilvl-search-status" class="muted tiny"></div>
+            <div class="search-results" id="ilvl-search-results"></div>
+          </div>
+          <form id="ilvl-form" class="ilvl-grid">
+            <label>Min ilvl<input name="ilvl" type="number" value="450" /></label>
+            <label>Max ilvl<input name="max_ilvl" type="number" value="10000" /></label>
+            <label>Buyout<input name="buyout" type="number" value="100000" /></label>
+            <label>Item IDs (comma separated)<input name="item_ids" type="text" /></label>
+            <label>Bonus list IDs<input name="bonus_lists" type="text" /></label>
+            <label>Min player level<input name="required_min_lvl" type="number" value="1" /></label>
+            <label>Max player level<input name="required_max_lvl" type="number" value="1000" /></label>
+            <div class="toggles">
+              <label><input type="checkbox" name="sockets" /> Sockets</label>
+              <label><input type="checkbox" name="speed" /> Speed</label>
+              <label><input type="checkbox" name="leech" /> Leech</label>
+              <label><input type="checkbox" name="avoidance" /> Avoidance</label>
+            </div>
+            <button type="submit" class="primary">Add rule</button>
+          </form>
+          <div class="import-row">
+            <button type="button" class="ghost" id="import-ilvl-btn">Import from AAA file</button>
+            <button type="button" class="ghost" id="export-ilvl-btn">Export to AAA file</button>
+            <button type="button" class="ghost" id="paste-ilvl-btn">Import AAA</button>
+            <button type="button" class="ghost" id="copy-ilvl-btn">Copy AAA to clipboard</button>
+            <button type="button" class="ghost" id="paste-pbs-ilvl-btn">Import PBS</button>
+            <button type="button" class="ghost" id="copy-pbs-ilvl-btn">Copy PBS to clipboard</button>
+          </div>
+          <div class="table" id="ilvl-table"></div>
+        </section>
+
+        <section class="card span-2 view" data-view="pet-ilvl">
+          <div class="card-head">
+            <h2>Pet level rules</h2>
+            <p class="muted">Write to desired_pet_ilvl_list.json</p>
+          </div>
+          <div class="search-block">
+            <div class="search-row">
+              <input
+                type="text"
+                id="pet-ilvl-search-input"
+                list="pet-ilvl-search-suggest"
+                placeholder="Search pets to include in this rule"
+              />
+              <datalist id="pet-ilvl-search-suggest"></datalist>
+              <button type="button" id="pet-ilvl-search-btn" class="ghost">Search</button>
+            </div>
+            <div id="pet-ilvl-search-status" class="muted tiny"></div>
+            <div class="search-results" id="pet-ilvl-search-results"></div>
+          </div>
+          <form id="pet-ilvl-form" class="ilvl-grid">
+            <label>Pet ID<input name="petID" type="number" /></label>
+            <label>Max price<input name="price" type="number" /></label>
+            <label>Min level<input name="minLevel" type="number" value="25" /></label>
+            <label>Min quality (-1 any)<input name="minQuality" type="number" value="-1" /></label>
+            <label>Exclude breeds (comma)<input name="excludeBreeds" type="text" /></label>
+            <button type="submit" class="primary">Add pet rule</button>
+          </form>
+          <div class="import-row">
+            <button type="button" class="ghost" id="import-pet-ilvl-btn">Import from AAA file</button>
+            <button type="button" class="ghost" id="export-pet-ilvl-btn">Export to AAA file</button>
+            <button type="button" class="ghost" id="paste-pet-ilvl-btn">Import AAA</button>
+            <button type="button" class="ghost" id="copy-pet-ilvl-btn">Copy AAA to clipboard</button>
+            <button type="button" class="ghost" id="paste-pbs-pet-ilvl-btn">Import PBS</button>
+            <button type="button" class="ghost" id="copy-pbs-pet-ilvl-btn">Copy PBS to clipboard</button>
+          </div>
+          <div class="table" id="pet-ilvl-table"></div>
+        </section>
+
+        <section class="card span-2 view" data-view="logs">
+          <div class="card-head">
+            <h2>Logs</h2>
+            <p class="muted">Output from alerts</p>
+          </div>
+          <pre id="log-panel"></pre>
+        </section>
+      </main>
+    </div>
+    <script src="./renderer.js"></script>
+  </body>
+</html>
