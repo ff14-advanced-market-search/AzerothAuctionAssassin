@@ -17,6 +17,9 @@ output
 dist
 venv
 
+# Node / Electron / Typescript
+node_modules/
+
 # C extensions
 *.so
 
