@@ -22,6 +22,7 @@ const itemSearchInput = document.getElementById("item-search-input");
 const itemSearchBtn = document.getElementById("item-search-btn");
 const itemSearchResults = document.getElementById("item-search-results");
 const itemSearchStatus = document.getElementById("item-search-status");
+const itemFilterInput = document.getElementById("item-filter-input");
 const petIlvlSearchInput = document.getElementById("pet-ilvl-search-input");
 const petIlvlSearchBtn = document.getElementById("pet-ilvl-search-btn");
 const petIlvlSearchResults = document.getElementById("pet-ilvl-search-results");
@@ -80,10 +81,7 @@ function ensureItemName(id, name) {
   fetchItemNames().then(() => {
     const match = itemSearchCache?.find((row) => String(row.itemID) === key);
     if (match?.itemName) itemNameMap[key] = match.itemName;
-    renderKVList(itemList, state.desiredItems, removeItem, (itemId, p) => {
-      const nm = itemNameMap[itemId];
-      return `<strong>${itemId}${nm ? ` • ${nm}` : ""}</strong> → ${p}`;
-    });
+    renderItemList();
   });
 }
 
@@ -483,6 +481,27 @@ function renderKVList(target, data, onRemove, labelFn) {
   });
 }
 
+function renderItemList() {
+  const filterTerm = itemFilterInput ? itemFilterInput.value.toLowerCase().trim() : "";
+  let filteredData = { ...state.desiredItems };
+  
+  if (filterTerm) {
+    filteredData = {};
+    Object.entries(state.desiredItems).forEach(([id, price]) => {
+      const name = itemNameMap[id] || "";
+      const searchText = `${id} ${name}`.toLowerCase();
+      if (searchText.includes(filterTerm)) {
+        filteredData[id] = price;
+      }
+    });
+  }
+  
+  renderKVList(itemList, filteredData, removeItem, (itemId, p) => {
+    const name = itemNameMap[itemId];
+    return `<strong>${itemId}${name ? ` • ${name}` : ""}</strong> → ${p}`;
+  });
+}
+
 function renderIlvlRules() {
   ilvlTable.innerHTML = "";
   if (!state.ilvlList.length) {
@@ -568,19 +587,13 @@ async function loadState() {
   state.petIlvlList = payload.petIlvlList || [];
   setRunning(Boolean(payload.processRunning));
   renderMegaForm(state.megaData);
-  renderKVList(itemList, state.desiredItems, removeItem, (id, price) => {
-    const name = itemNameMap[id];
-    return `<strong>${id}${name ? ` • ${name}` : ""}</strong> → ${price}`;
-  });
+  renderItemList();
   renderIlvlRules();
   renderPetIlvlRules();
 
   // attempt to hydrate name maps so existing lists show names once fetched
   fetchItemNames().then(() => {
-    renderKVList(itemList, state.desiredItems, removeItem, (id, price) => {
-      const name = itemNameMap[id];
-      return `<strong>${id}${name ? ` • ${name}` : ""}</strong> → ${price}`;
-    });
+    renderItemList();
     renderIlvlRules();
   });
   fetchPetNames().then(() => {
@@ -822,10 +835,7 @@ async function saveMegaData() {
 async function removeItem(id) {
   delete state.desiredItems[id];
   state.desiredItems = await window.aaa.saveItems(state.desiredItems);
-  renderKVList(itemList, state.desiredItems, removeItem, (itemId, price) => {
-    const name = itemNameMap[itemId];
-    return `<strong>${itemId}${name ? ` • ${name}` : ""}</strong> → ${price}`;
-  });
+  renderItemList();
 }
 
 async function removeIlvlRule(idx) {
@@ -850,10 +860,7 @@ document.getElementById("item-form").addEventListener("submit", async (e) => {
   // try to keep name map
   ensureItemName(id);
   state.desiredItems = await window.aaa.saveItems(state.desiredItems);
-  renderKVList(itemList, state.desiredItems, removeItem, (itemId, p) => {
-    const name = itemNameMap[itemId];
-    return `<strong>${itemId}${name ? ` • ${name}` : ""}</strong> → ${p}`;
-  });
+  renderItemList();
   e.target.reset();
 });
 
@@ -978,6 +985,7 @@ pasteItemsBtn?.addEventListener("click", () => handlePasteAAA("desiredItems", pa
 copyItemsBtn?.addEventListener("click", () => handleCopyAAA("desiredItems", copyItemsBtn));
 pastePBSItemsBtn?.addEventListener("click", () => handlePastePBSItems(pastePBSItemsBtn));
 copyPBSItemsBtn?.addEventListener("click", () => handleCopyPBSItems(copyPBSItemsBtn));
+itemFilterInput?.addEventListener("input", () => renderItemList());
 importIlvlBtn?.addEventListener("click", () => handleImport("ilvlList", importIlvlBtn));
 exportIlvlBtn?.addEventListener("click", () => handleExport("ilvlList", exportIlvlBtn));
 pasteIlvlBtn?.addEventListener("click", () => handlePasteAAA("ilvlList", pasteIlvlBtn));

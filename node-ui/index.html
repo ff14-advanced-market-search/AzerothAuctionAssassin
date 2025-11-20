@@ -40,7 +40,7 @@
           <div class="home-hero">
             <div>
               <div class="eyebrow">Azeroth Auction Assassin</div>
-              <h1>Fast AH sniping, now with a Node GUI.</h1>
+              <h1>Fast AH Discount Sniping!</h1>
               <p class="muted">
                 Configure your snipes, launch alerts, and track logs from one place.
               </p>
@@ -128,41 +128,62 @@
           </form>
         </section>
 
-        <section class="card view" data-view="items">
+        <section class="card span-2 view" data-view="items">
           <div class="card-head">
             <h2>Desired Items</h2>
             <p class="muted">Write to desired_items.json</p>
           </div>
-          <div class="search-block">
-            <div class="search-row">
-              <input
-                type="text"
-                id="item-search-input"
-                list="item-search-suggest"
-                placeholder="Search items by name (retrieves live list, cached after first search)"
-              />
-              <datalist id="item-search-suggest"></datalist>
-              <button type="button" id="item-search-btn" class="ghost">
-                Search
-              </button>
+          <div class="items-layout">
+            <div class="items-sidebar">
+              <div class="search-block">
+                <div class="search-row">
+                  <input
+                    type="text"
+                    id="item-search-input"
+                    list="item-search-suggest"
+                    placeholder="Search items by name (retrieves live list, cached after first search)"
+                  />
+                  <datalist id="item-search-suggest"></datalist>
+                  <button type="button" id="item-search-btn" class="ghost">
+                    Search
+                  </button>
+                </div>
+                <div id="item-search-status" class="muted tiny"></div>
+                <div class="search-results" id="item-search-results"></div>
+              </div>
+              <form id="item-form" class="item-form-vertical">
+                <label>
+                  Item ID
+                  <input type="text" name="id" placeholder="Item ID" />
+                </label>
+                <label>
+                  Max price
+                  <input type="number" name="price" placeholder="Max price" />
+                </label>
+                <button type="submit" class="primary">Add / update</button>
+              </form>
+              <div class="import-vertical">
+                <button type="button" class="ghost" id="import-items-btn">Import from AAA file</button>
+                <button type="button" class="ghost" id="export-items-btn">Export to AAA file</button>
+                <button type="button" class="ghost" id="paste-items-btn">Import AAA</button>
+                <button type="button" class="ghost" id="copy-items-btn">Copy AAA to clipboard</button>
+                <button type="button" class="ghost" id="paste-pbs-items-btn">Import PBS</button>
+                <button type="button" class="ghost" id="copy-pbs-items-btn">Copy PBS to clipboard</button>
+              </div>
             </div>
-            <div id="item-search-status" class="muted tiny"></div>
-            <div class="search-results" id="item-search-results"></div>
+            <div class="items-list-panel">
+              <div class="items-list-header">
+                <h3>Your Items</h3>
+                <input
+                  type="text"
+                  id="item-filter-input"
+                  placeholder="Filter items by name or ID..."
+                  class="filter-input"
+                />
+              </div>
+              <ul class="list" id="item-list"></ul>
+            </div>
           </div>
-          <form id="item-form" class="inline-form">
-            <input type="text" name="id" placeholder="Item ID" />
-            <input type="number" name="price" placeholder="Max price" />
-            <button type="submit">Add / update</button>
-          </form>
-          <div class="import-row">
-            <button type="button" class="ghost" id="import-items-btn">Import from AAA file</button>
-            <button type="button" class="ghost" id="export-items-btn">Export to AAA file</button>
-            <button type="button" class="ghost" id="paste-items-btn">Import AAA</button>
-            <button type="button" class="ghost" id="copy-items-btn">Copy AAA to clipboard</button>
-            <button type="button" class="ghost" id="paste-pbs-items-btn">Import PBS</button>
-            <button type="button" class="ghost" id="copy-pbs-items-btn">Copy PBS to clipboard</button>
-          </div>
-          <ul class="list" id="item-list"></ul>
         </section>
 
         <section class="card span-2 view" data-view="ilvl">

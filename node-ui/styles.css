@@ -317,14 +317,73 @@ select:focus {
   margin-bottom: 12px;
 }
 
+.items-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.items-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.item-form-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-form-vertical label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: var(--text);
+  gap: 6px;
+}
+
+.import-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.items-list-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.items-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.items-list-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.filter-input {
+  flex: 1;
+  max-width: 300px;
+}
+
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   gap: 8px;
-  max-height: 260px;
+  max-height: 600px;
   overflow: auto;
+  flex: 1;
 }
 
 .list li {
@@ -456,5 +515,15 @@ pre#log-panel {
   .table-row {
     grid-template-columns: 1fr;
     align-items: flex-start;
+  }
+  .items-layout {
+    grid-template-columns: 1fr;
+  }
+  .items-list-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-input {
+    max-width: 100%;
   }
 }
