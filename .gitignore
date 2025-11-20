@@ -181,3 +181,6 @@ AzerothAuctionAssassin-windows/AzerothAuctionAssassin/bin
 AzerothAuctionAssassin-windows/AzerothAuctionAssassin/obj
 AzerothAuctionAssassin-windows/AzerothAuctionAssassin/Properties/PublishProfiles/FolderProfile.pubxml.user
 AzerothAuctionAssassin-windows/AzerothAuctionAssassin/AzerothAuctionAssassin.csproj.user
+
+#Ignore cursor AI rules
+.cursor/rules/codacy.mdc
