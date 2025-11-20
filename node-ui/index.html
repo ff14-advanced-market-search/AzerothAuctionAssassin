@@ -133,24 +133,24 @@
             <h2>Desired Items</h2>
             <p class="muted">Write to desired_items.json</p>
           </div>
+          <div class="search-block items-search-full">
+            <div class="search-row">
+              <input
+                type="text"
+                id="item-search-input"
+                list="item-search-suggest"
+                placeholder="Search items by name (retrieves live list, cached after first search)"
+              />
+              <datalist id="item-search-suggest"></datalist>
+              <button type="button" id="item-search-btn" class="ghost">
+                Search
+              </button>
+            </div>
+            <div id="item-search-status" class="muted tiny"></div>
+            <div class="search-results" id="item-search-results"></div>
+          </div>
           <div class="items-layout">
             <div class="items-sidebar">
-              <div class="search-block">
-                <div class="search-row">
-                  <input
-                    type="text"
-                    id="item-search-input"
-                    list="item-search-suggest"
-                    placeholder="Search items by name (retrieves live list, cached after first search)"
-                  />
-                  <datalist id="item-search-suggest"></datalist>
-                  <button type="button" id="item-search-btn" class="ghost">
-                    Search
-                  </button>
-                </div>
-                <div id="item-search-status" class="muted tiny"></div>
-                <div class="search-results" id="item-search-results"></div>
-              </div>
               <form id="item-form" class="item-form-vertical">
                 <label>
                   Item ID

@@ -317,11 +317,15 @@ select:focus {
   margin-bottom: 12px;
 }
 
+.items-search-full {
+  margin-top: 12px;
+  margin-bottom: 20px;
+}
+
 .items-layout {
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 20px;
-  margin-top: 12px;
 }
 
 .items-sidebar {
@@ -468,8 +472,12 @@ pre#log-panel {
   margin-top: 10px;
   display: grid;
   gap: 8px;
-  max-height: 220px;
+  max-height: 300px;
   overflow: auto;
+}
+
+.items-search-full .search-results {
+  max-height: 400px;
 }
 
 .search-result {
@@ -525,5 +533,8 @@ pre#log-panel {
   }
   .filter-input {
     max-width: 100%;
+  }
+  .items-search-full .search-results {
+    max-height: 250px;
   }
 }
