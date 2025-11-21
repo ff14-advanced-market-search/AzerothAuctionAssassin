@@ -811,6 +811,12 @@ function renderPetIlvlRules() {
 function appendLog(line) {
   logPanel.textContent += line;
   logPanel.scrollTop = logPanel.scrollHeight;
+  // Also write to log file
+  if (window.aaa?.writeLog) {
+    window.aaa.writeLog(line).catch(() => {
+      // Silently fail if log file isn't available
+    });
+  }
 }
 
 async function loadState() {

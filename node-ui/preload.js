@@ -25,4 +25,5 @@ contextBridge.exposeInMainWorld("aaa", {
   canGoForward: () => ipcRenderer.invoke("can-go-forward"),
   goBack: () => ipcRenderer.invoke("go-back"),
   goForward: () => ipcRenderer.invoke("go-forward"),
+  writeLog: (line) => ipcRenderer.invoke("write-log", line),
 });

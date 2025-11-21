@@ -25,6 +25,7 @@ const REALM_FILES = {
 
 let alertsProcess = null;
 let mainWindow = null;
+let logFileStream = null;
 
 function readJson(filePath, fallback) {
   try {
@@ -72,6 +73,26 @@ function saveBackup(fileType, data) {
 
 function ensureDataFiles() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.mkdirSync(BACKUP_DIR, { recursive: true });
+  
+  // Create logs directory
+  const LOGS_DIR = path.join(DATA_DIR, "logs");
+  fs.mkdirSync(LOGS_DIR, { recursive: true });
+  
+  // Create timestamped log file
+  if (!logFileStream) {
+    const now = new Date();
+    const timestamp = now.getFullYear().toString() +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      String(now.getDate()).padStart(2, '0') + '_' +
+      String(now.getHours()).padStart(2, '0') +
+      String(now.getMinutes()).padStart(2, '0') +
+      String(now.getSeconds()).padStart(2, '0');
+    const logFilePath = path.join(LOGS_DIR, `aaa_log_${timestamp}.txt`);
+    logFileStream = fs.createWriteStream(logFilePath, { flags: 'a', encoding: 'utf8' });
+    const startMessage = `=== Log started at ${now.toISOString()} ===\n`;
+    logFileStream.write(startMessage);
+  }
 
   const defaults = {
     [FILES.megaData]: readJson(
@@ -336,6 +357,14 @@ function setupIpc() {
     return mainWindow?.webContents.canGoForward() || false;
   });
 
+  // Write log to file (for renderer logs)
+  ipcMain.handle("write-log", (_event, line) => {
+    if (logFileStream) {
+      logFileStream.write(line);
+    }
+    return { success: true };
+  });
+
   ipcMain.handle("import-json", async (_event, { target }) => {
     const targetPath = FILES[target];
     if (!targetPath) return { error: "Unknown target" };
@@ -371,8 +400,13 @@ function setupIpc() {
       return { alreadyRunning: true };
     }
 
-    // Set up log callback to send to renderer
+    // Set up log callback to send to renderer and write to file
     const sendLog = (line) => {
+      // Write to log file
+      if (logFileStream) {
+        logFileStream.write(line);
+      }
+      // Send to renderer for UI display
       BrowserWindow.getAllWindows().forEach((win) =>
         win.webContents.send("mega-log", line)
       );
@@ -461,7 +495,7 @@ function setupIpc() {
 }
 
 app.whenReady().then(() => {
-  ensureDataFiles();
+  ensureDataFiles(); // This creates the log file
   createWindow();
   setupIpc();
 
@@ -475,5 +509,15 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
+  }
+});
+
+app.on("before-quit", () => {
+  // Close log file stream on app quit
+  if (logFileStream) {
+    const endMessage = `=== Log ended at ${new Date().toISOString()} ===\n`;
+    logFileStream.write(endMessage);
+    logFileStream.end();
+    logFileStream = null;
   }
 });

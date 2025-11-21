@@ -57,10 +57,8 @@
         }
       ],
       "icon": "icon.ico",
-      "signingHashAlgorithms": ["sha256"],
-      "certificateFile": "${env.WIN_CERT_FILE}",
-      "certificatePassword": "${env.WIN_CERT_PASSWORD}",
-      "publisherName": "Azeroth Auction Assassin"
+      "publisherName": "Azeroth Auction Assassin",
+      "sign": null
     },
     "mac": {
       "target": [
@@ -78,7 +76,8 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "sign": null
     },
     "nsis": {
       "oneClick": false,
