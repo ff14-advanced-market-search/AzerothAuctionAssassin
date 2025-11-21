@@ -160,7 +160,7 @@
           <div class="items-layout">
             <div class="items-sidebar">
               <form id="item-form" class="item-form-vertical">
-                <label title="Add the item id of any item you want to buy. You can search by name for them here with recommended prices https://temp.saddlebagexchange.com/megaitemnames">
+                <label title="Add the item id of any item you want to buy.">
                   Item ID
                   <input type="text" name="id" placeholder="Item ID" />
                 </label>
@@ -314,8 +314,14 @@
                   <input name="minLevel" type="number" value="25" />
                 </label>
                 <label title="Minimum pet quality (-1 for any, 0-3 for Poor to Rare)">
-                  Min quality (-1 any)
-                  <input name="minQuality" type="number" value="-1" />
+                  Min quality
+                  <select name="minQuality">
+                    <option value="-1">All</option>
+                    <option value="0">Poor</option>
+                    <option value="1">Common</option>
+                    <option value="2">Uncommon</option>
+                    <option value="3">Rare</option>
+                  </select>
                 </label>
                 <label title="Comma-separated list of breed IDs to exclude. Breed IDs can be found on warcraftpets.com (https://www.warcraftpets.com/wow-pet-battles/breeds/). For the best pets exclude: 7, 17, 8, 18, 9, 19, 10, 20, 3, 13, 11, 21, 2, 22">
                   Exclude breeds (comma)

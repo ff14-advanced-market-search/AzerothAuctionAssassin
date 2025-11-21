@@ -94,11 +94,30 @@ function clearIlvlForm() {
     form.max_ilvl.value = 10000;
     form.buyout.value = 100000;
     form.required_min_lvl.value = 1;
-    form.required_max_lvl.value = 1000;
+    form.required_max_lvl.value = 999;
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.textContent = "Add rule";
     form.ilvl.focus();
   }
+}
+
+/**
+ * Clear pet ilvl form and reset to "add new" mode
+ */
+/**
+ * Convert pet quality integer to human-readable label
+ * @param {number} quality - Quality value (-1, 0, 1, 2, or 3)
+ * @returns {string} Human-readable quality label
+ */
+function getQualityLabel(quality) {
+  const qualityMap = {
+    "-1": "All",
+    "0": "Poor",
+    "1": "Common",
+    "2": "Uncommon",
+    "3": "Rare",
+  };
+  return qualityMap[String(quality)] || "All";
 }
 
 /**
@@ -110,11 +129,21 @@ function clearPetIlvlForm() {
   if (form) {
     form.reset();
     form.minLevel.value = 25;
-    form.minQuality.value = -1;
+    form.minQuality.value = "-1"; // Set dropdown to "All"
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.textContent = "Add pet rule";
     form.petID.focus();
   }
+}
+
+/**
+ * Get item name with fallback to "Unknown item name" if not found
+ * @param {string|number} id - Item ID
+ * @returns {string} Item name or "Unknown item name"
+ */
+function getItemName(id) {
+  const key = String(id);
+  return itemNameMap[key] || "Unknown item name";
 }
 
 function ensureItemName(id, name) {
@@ -136,6 +165,16 @@ function ensureItemName(id, name) {
     if (match?.itemName) itemNameMap[key] = match.itemName;
     renderItemList();
   });
+}
+
+/**
+ * Get pet name with fallback to "Unknown pet name" if not found
+ * @param {string|number} id - Pet ID
+ * @returns {string} Pet name or "Unknown pet name"
+ */
+function getPetName(id) {
+  const key = String(id);
+  return petNameMap[key] || "Unknown pet name";
 }
 
 function ensurePetName(id, name) {
@@ -373,7 +412,7 @@ async function handleCopyPBSItems(btn) {
   const entries = [];
   let first = true;
   for (const [id, price] of Object.entries(state.desiredItems)) {
-    const name = itemNameMap[id] || id;
+    const name = getItemName(id);
     const prefix = first ? "Snipe?" : "";
     entries.push(`${prefix}"${name}";;0;0;0;0;0;0;0;${Math.trunc(Number(price))};;#;;`);
     first = false;
@@ -441,7 +480,7 @@ async function handleCopyPBSIlvl(btn) {
   for (const rule of state.ilvlList) {
     const ids = rule.item_ids && rule.item_ids.length ? rule.item_ids : [0];
     for (const id of ids) {
-      const name = itemNameMap[id] || "";
+      const name = getItemName(id);
       const prefix = first ? "Snipe?" : "";
       entries.push(
         `${prefix}"${name}";;${rule.ilvl};${rule.max_ilvl};${rule.required_min_lvl || 0};${rule.required_max_lvl || 0};0;0;0;${Math.trunc(
@@ -495,7 +534,7 @@ async function handleCopyPBSPetIlvl(btn) {
   const entries = [];
   for (let i = 0; i < state.petIlvlList.length; i++) {
     const rule = state.petIlvlList[i];
-    const name = petNameMap[rule.petID] || rule.petID;
+    const name = getPetName(rule.petID);
     const prefix = i === 0 ? "Snipe^" : "";
     entries.push(`${prefix}"${name}";;0;0;0;0;0;0;0;${Math.trunc(Number(rule.price) || 0)};;#;;`);
   }
@@ -577,7 +616,7 @@ function renderItemList() {
   if (filterTerm) {
     filteredData = {};
     Object.entries(state.desiredItems).forEach(([id, price]) => {
-      const name = itemNameMap[id] || "";
+      const name = getItemName(id);
       const searchText = `${id} ${name}`.toLowerCase();
       if (searchText.includes(filterTerm)) {
         filteredData[id] = price;
@@ -595,8 +634,8 @@ function renderItemList() {
   };
   
   renderKVList(itemList, filteredData, removeItem, (itemId, p) => {
-    const name = itemNameMap[itemId];
-    return `<strong>${itemId}${name ? ` • ${name}` : ""}</strong> → ${p}`;
+    const name = getItemName(itemId);
+    return `<strong>${itemId} • ${name}</strong> → ${p}`;
   }, handleItemClick);
 }
 
@@ -617,7 +656,7 @@ function renderIlvlRules() {
   if (filterTerm) {
     filteredRules = state.ilvlList.filter((rule) => {
       const itemIds = (rule.item_ids || []).map(String);
-      const itemNames = itemIds.map((id) => itemNameMap[id] || "").filter(Boolean);
+      const itemNames = itemIds.map((id) => getItemName(id));
       const searchText = `${itemIds.join(" ")} ${itemNames.join(" ")} ${rule.bonus_lists?.join(" ") || ""}`.toLowerCase();
       return searchText.includes(filterTerm);
     });
@@ -635,8 +674,8 @@ function renderIlvlRules() {
   filteredRules.forEach((rule, filteredIdx) => {
     const idx = state.ilvlList.indexOf(rule);
     const names = (rule.item_ids || []).map((id) => {
-      const nm = itemNameMap[String(id)];
-      return nm ? `${nm} (${id})` : id;
+      const nm = getItemName(id);
+      return `${nm} (${id})`;
     });
     const row = document.createElement("div");
     row.className = "table-row";
@@ -708,7 +747,7 @@ function renderPetIlvlRules() {
 
   if (filterTerm) {
     filteredRules = state.petIlvlList.filter((rule) => {
-      const name = petNameMap[String(rule.petID)] || "";
+      const name = getPetName(rule.petID);
       const searchText = `${rule.petID} ${name}`.toLowerCase();
       return searchText.includes(filterTerm);
     });
@@ -725,15 +764,15 @@ function renderPetIlvlRules() {
 
   filteredRules.forEach((rule, filteredIdx) => {
     const idx = state.petIlvlList.indexOf(rule);
-    const name = petNameMap[String(rule.petID)];
+    const name = getPetName(rule.petID);
     const row = document.createElement("div");
     row.className = "table-row";
     row.style.cursor = "pointer";
     row.innerHTML = `
       <div class="pill">#${filteredIdx + 1}</div>
-      <div>Pet ${rule.petID}${name ? ` • ${name}` : ""}</div>
+      <div>Pet ${rule.petID} • ${name}</div>
       <div>${rule.price} gold</div>
-      <div class="bonuses">Min lvl ${rule.minLevel}, quality ${rule.minQuality}, exclude breeds: ${rule.excludeBreeds?.join(",") || "none"}</div>
+      <div class="bonuses">Min lvl ${rule.minLevel}, quality ${getQualityLabel(rule.minQuality)}, exclude breeds: ${rule.excludeBreeds?.join(",") || "none"}</div>
     `;
     const button = document.createElement("button");
     button.textContent = "Remove";
@@ -753,7 +792,7 @@ function renderPetIlvlRules() {
         form.petID.value = rule.petID || "";
         form.price.value = rule.price || "";
         form.minLevel.value = rule.minLevel || 25;
-        form.minQuality.value = rule.minQuality !== undefined ? rule.minQuality : -1;
+        form.minQuality.value = rule.minQuality !== undefined ? String(rule.minQuality) : "-1";
         form.excludeBreeds.value = (rule.excludeBreeds || []).join(", ");
         const submitBtn = form.querySelector('button[type="submit"]');
         if (submitBtn) submitBtn.textContent = "Update pet rule";
@@ -1378,10 +1417,11 @@ document
     const petID = Number(petIdStr);
     const price = Number(priceStr);
     const minLevel = Number(minLevelStr);
-    const minQuality = form.minQuality.value === "" ? -1 : Number(form.minQuality.value) || -1;
+    // Get minQuality from dropdown (already an integer string)
+    const minQuality = form.minQuality.value === "" ? -1 : Number(form.minQuality.value);
     
     if (Number.isNaN(petID) || Number.isNaN(price) || Number.isNaN(minLevel) || Number.isNaN(minQuality)) {
-      const errorMsg = "Pet ID, Price, Min Level, and Min Quality should be numbers.";
+      const errorMsg = "Pet ID, Price, and Min Level should be numbers.";
       showToast(errorMsg, "error");
       form.petID.focus();
       return;

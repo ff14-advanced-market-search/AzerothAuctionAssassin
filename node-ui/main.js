@@ -85,7 +85,7 @@ function ensureDataFiles() {
         SHOW_BID_PRICES: false,
         MEGA_THREADS: 10,
         WOWHEAD_LINK: false,
-        SCAN_TIME_MIN: 1,
+        SCAN_TIME_MIN: -1,
         SCAN_TIME_MAX: 3,
         NO_LINKS: false,
         NO_RUSSIAN_REALMS: false,
