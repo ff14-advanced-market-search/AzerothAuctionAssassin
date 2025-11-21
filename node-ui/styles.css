@@ -142,6 +142,7 @@ button.ghost:hover:not(:disabled) {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: 16px;
   margin-bottom: 14px;
 }
 
@@ -207,6 +208,26 @@ button.ghost:hover:not(:disabled) {
 
 .card-head {
   margin-bottom: 12px;
+}
+
+.page-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.page-title h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.page-title .muted {
+  font-size: 14px;
+  color: var(--muted);
 }
 
 .card h2 {

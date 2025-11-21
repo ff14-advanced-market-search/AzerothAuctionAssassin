@@ -15,16 +15,13 @@
           <div class="title">Version: 2.0.0</div>
         </div>
         <div class="actions">
+          <div class="status-pill" id="process-state">Not running</div>
           <button class="ghost" id="reload-btn">Reload from disk</button>
           <button class="primary" id="save-settings-btn">Save settings</button>
           <button class="success" id="start-btn">Start Alerts</button>
           <button class="danger" id="stop-btn" disabled>Stop</button>
         </div>
       </header>
-
-      <div class="status-row">
-        <div class="status-pill" id="process-state">Not running</div>
-      </div>
 
       <div class="nav">
         <button class="nav-btn active" data-view-target="home">Home</button>
@@ -56,9 +53,9 @@
         </section>
 
         <section class="card span-2 view" data-view="settings" id="settings-card">
-          <div class="card-head">
-            <h2>Settings (mega_data.json)</h2>
-            <p class="muted">These map directly to mega_data.json keys.</p>
+          <div class="page-title">
+            <h2>Settings</h2>
+            <span class="muted">Configure mega_data.json settings</span>
           </div>
           <form id="mega-form" class="form-grid">
             <label title="Setup a discord channel with a webhook url for sending the alert messages.">
@@ -130,9 +127,9 @@
         </section>
 
         <section class="card span-2 view" data-view="items">
-          <div class="card-head">
+          <div class="page-title">
             <h2>Desired Items</h2>
-            <p class="muted">Write to desired_items.json</p>
+            <span class="muted">Manage items to snipe (desired_items.json)</span>
           </div>
           <div class="search-block items-search-full">
             <div class="search-row">
@@ -188,9 +185,9 @@
         </section>
 
         <section class="card span-2 view" data-view="ilvl">
-          <div class="card-head">
-            <h2>Item level rules</h2>
-            <p class="muted">Write to desired_ilvl_list.json</p>
+          <div class="page-title">
+            <h2>Item Level Rules</h2>
+            <span class="muted">Configure BOE ilvl sniping rules (desired_ilvl_list.json)</span>
           </div>
           <div class="search-block items-search-full">
             <div class="search-row">
@@ -271,9 +268,9 @@
         </section>
 
         <section class="card span-2 view" data-view="pet-ilvl">
-          <div class="card-head">
-            <h2>Pet level rules</h2>
-            <p class="muted">Write to desired_pet_ilvl_list.json</p>
+          <div class="page-title">
+            <h2>Pet Level Rules</h2>
+            <span class="muted">Configure pet sniping rules (desired_pet_ilvl_list.json)</span>
           </div>
           <div class="search-block items-search-full">
             <div class="search-row">
@@ -340,9 +337,9 @@
         </section>
 
         <section class="card span-2 view" data-view="realms">
-          <div class="card-head">
+          <div class="page-title">
             <h2>Realm Lists</h2>
-            <p class="muted">Manage connected realm lists</p>
+            <span class="muted">Manage connected realm lists for your region</span>
           </div>
           <div class="items-layout">
             <div class="items-sidebar">
@@ -389,9 +386,9 @@
         </section>
 
         <section class="card span-2 view" data-view="logs">
-          <div class="card-head">
+          <div class="page-title">
             <h2>Logs</h2>
-            <p class="muted">Output from alerts</p>
+            <span class="muted">Output from alerts and system messages</span>
           </div>
           <pre id="log-panel"></pre>
         </section>
