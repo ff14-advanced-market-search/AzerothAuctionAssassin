@@ -46,7 +46,7 @@ const originalLog = console.log;
 console.log = (...args) => {
   originalLog(...args);
   if (logCallback) {
-    logCallback(args.join(" "));
+    logCallback(args.join(" ") + "\n");
   }
 };
 
