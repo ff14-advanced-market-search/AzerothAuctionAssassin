@@ -1,8 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
-const { Worker } = require("worker_threads");
 const path = require("path");
 const fs = require("fs");
-const { spawn } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
@@ -43,8 +41,8 @@ function writeJson(filePath, data) {
 function getTimestampInt() {
   const now = new Date();
   return (
-    now.getFullYear() * 1000000 +
-    (now.getMonth() + 1) * 10000 +
+    now.getFullYear() * 1_000_000 +
+    (now.getMonth() + 1) * 10_000 +
     now.getDate() * 100 +
     now.getHours()
   );
@@ -295,39 +293,67 @@ function setupIpc() {
       return { alreadyRunning: true };
     }
 
-    const tsEntry = path.join(ROOT, "src", "mega-alerts.ts");
-    alertsProcess = new Worker(tsEntry, {
-      execArgv: ["-r", "ts-node/register"],
-    });
+    // Set up log callback to send to renderer
+    const sendLog = (line) => {
+      BrowserWindow.getAllWindows().forEach((win) =>
+        win.webContents.send("mega-log", line)
+      );
+    };
 
-    alertsProcess.on("message", (msg) => {
-      if (msg?.type === "log") {
-        BrowserWindow.getAllWindows().forEach((win) =>
-          win.webContents.send("mega-log", msg.data)
-        );
-      }
-    });
-
-    alertsProcess.on("exit", (code) => {
+    const sendExit = (code) => {
       BrowserWindow.getAllWindows().forEach((win) =>
         win.webContents.send("mega-exit", code)
       );
       alertsProcess = null;
-    });
+    };
 
-    alertsProcess.on("error", (err) => {
-      BrowserWindow.getAllWindows().forEach((win) =>
-        win.webContents.send("mega-log", `Error launching alerts: ${err}`)
-      );
+    try {
+      // Load and run mega-alerts directly in this process
+      const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
+      const megaAlerts = require(megaAlertsPath);
+      
+      // Set up callbacks
+      if (megaAlerts.setLogCallback) {
+        megaAlerts.setLogCallback(sendLog);
+      }
+      if (megaAlerts.setStopCallback) {
+        megaAlerts.setStopCallback(() => sendExit(0));
+      }
+
+      // Run in background (don't await - it runs continuously)
+      megaAlerts.main().catch((err) => {
+        sendLog(`Error in mega alerts: ${err.message || err}`);
+        if (err.stack) {
+          sendLog(err.stack);
+        }
+        sendExit(1);
+      });
+
+      alertsProcess = true; // Mark as running
+      return { started: true };
+    } catch (err) {
       alertsProcess = null;
-    });
-
-    return { started: true };
+      sendLog(`Error launching alerts: ${err.message || err}`);
+      if (err.stack) {
+        sendLog(err.stack);
+      }
+      sendExit(1);
+      return { error: err.message || String(err) };
+    }
   });
 
   ipcMain.handle("stop-mega", () => {
     if (alertsProcess) {
-      alertsProcess.postMessage("stop");
+      try {
+        const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
+        const megaAlerts = require(megaAlertsPath);
+        if (megaAlerts.requestStop) {
+          megaAlerts.requestStop();
+        }
+      } catch (err) {
+        console.error("Error stopping alerts:", err);
+      }
+      alertsProcess = null;
     }
     return { stopped: true };
   });
