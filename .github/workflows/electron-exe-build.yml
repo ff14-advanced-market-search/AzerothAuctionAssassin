@@ -5,7 +5,7 @@ env:
 
 on:
   workflow_dispatch:
-  push:
+  # push:
 
 jobs:
   build-windows:
@@ -77,7 +77,8 @@ jobs:
 
     - name: Encode and Save Upload URL as Base64
       id: b64encode_upload_url
-      run: echo "::set-output name=upload_url_base64::$(echo -n '${{ steps.create_release.outputs.upload_url }}' | base64 --wrap=0)"
+      run: |
+        echo "upload_url_base64=$(echo -n '${{ steps.create_release.outputs.upload_url }}' | base64 --wrap=0)" >> $GITHUB_OUTPUT
 
     - name: Upload Windows Installer to Release
       uses: actions/upload-release-asset@v1
@@ -153,7 +154,11 @@ jobs:
 
     - name: Decode Upload URL
       run: |
-        echo "decoded_upload_url=$(echo ${{ needs.build-windows.outputs.upload_url_base64 }} | base64 --decode)" >> $GITHUB_ENV
+        if [ -z "${{ needs.build-windows.outputs.upload_url_base64 }}" ]; then
+          echo "Error: upload_url_base64 is empty"
+          exit 1
+        fi
+        echo "decoded_upload_url=$(echo '${{ needs.build-windows.outputs.upload_url_base64 }}' | base64 --decode)" >> $GITHUB_ENV
 
     - name: Upload macOS DMG to Release
       uses: actions/upload-release-asset@v1
@@ -164,7 +169,7 @@ jobs:
         asset_path: ./dist-electron/Azeroth Auction Assassin-${{ env.AAA_VERSION }}.dmg
         asset_name: AzerothAuctionAssassin-${{ env.AAA_VERSION }}-macOS.dmg
         asset_content_type: application/octet-stream
-      if: ${{ always() }}
+      if: ${{ always() && needs.build-windows.outputs.upload_url_base64 != '' }}
 
     - name: Upload macOS ZIP to Release
       uses: actions/upload-release-asset@v1
@@ -175,5 +180,5 @@ jobs:
         asset_path: ./dist-electron/Azeroth Auction Assassin-${{ env.AAA_VERSION }}-mac.zip
         asset_name: AzerothAuctionAssassin-${{ env.AAA_VERSION }}-macOS.zip
         asset_content_type: application/zip
-      if: ${{ always() }}
+      if: ${{ always() && needs.build-windows.outputs.upload_url_base64 != '' }}
 
