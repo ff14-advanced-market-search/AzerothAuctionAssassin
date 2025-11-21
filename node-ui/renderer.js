@@ -35,6 +35,10 @@ const realmIdInput = document.getElementById("realm-id-input");
 const realmFilterInput = document.getElementById("realm-filter-input");
 const resetRealmBtn = document.getElementById("reset-realm-btn");
 const removeRealmBtn = document.getElementById("remove-realm-btn");
+const resetSettingsBtn = document.getElementById("reset-settings-btn");
+const resetItemsBtn = document.getElementById("reset-items-btn");
+const resetIlvlBtn = document.getElementById("reset-ilvl-btn");
+const resetPetsBtn = document.getElementById("reset-pets-btn");
 const petIlvlSearchBtn = document.getElementById("pet-ilvl-search-btn");
 const petIlvlSearchResults = document.getElementById("pet-ilvl-search-results");
 const petIlvlSearchStatus = document.getElementById("pet-ilvl-search-status");
@@ -1096,6 +1100,39 @@ document.getElementById("new-ilvl-btn")?.addEventListener("click", () => {
 
 document.getElementById("new-pet-ilvl-btn")?.addEventListener("click", () => {
   clearPetIlvlForm();
+});
+
+// Reset button handlers
+resetSettingsBtn?.addEventListener("click", async () => {
+  if (confirm("Reset all settings to defaults? This will clear all your current settings.")) {
+    await window.aaa.resetMegaData();
+    await loadState();
+    flashButton(resetSettingsBtn, "Reset!");
+  }
+});
+
+resetItemsBtn?.addEventListener("click", async () => {
+  if (confirm("Clear all items? This will remove all items from your snipe list.")) {
+    await window.aaa.resetItems();
+    await loadState();
+    flashButton(resetItemsBtn, "Reset!");
+  }
+});
+
+resetIlvlBtn?.addEventListener("click", async () => {
+  if (confirm("Clear all ilvl rules? This will remove all ilvl sniping rules.")) {
+    await window.aaa.resetIlvl();
+    await loadState();
+    flashButton(resetIlvlBtn, "Reset!");
+  }
+});
+
+resetPetsBtn?.addEventListener("click", async () => {
+  if (confirm("Clear all pet rules? This will remove all pet sniping rules.")) {
+    await window.aaa.resetPetIlvl();
+    await loadState();
+    flashButton(resetPetsBtn, "Reset!");
+  }
 });
 
 saveSettingsBtn.addEventListener("click", async () => {

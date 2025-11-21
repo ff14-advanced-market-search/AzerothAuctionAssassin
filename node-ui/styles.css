@@ -329,7 +329,7 @@ select:focus {
 }
 
 .item-form-vertical .toggles {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .toggles label {

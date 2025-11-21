@@ -258,6 +258,56 @@ function setupIpc() {
     return normalized;
   });
 
+  // Reset handlers - clear data for each page
+  ipcMain.handle("reset-mega-data", () => {
+    const defaultData = readJson(
+      path.join(DATA_DIR, "example_mega_data.json"),
+      {
+        MEGA_WEBHOOK_URL: "",
+        WOW_CLIENT_ID: "",
+        WOW_CLIENT_SECRET: "",
+        WOW_REGION: "EU",
+        EXTRA_ALERTS: "[]",
+        SHOW_BID_PRICES: false,
+        MEGA_THREADS: 10,
+        WOWHEAD_LINK: false,
+        SCAN_TIME_MIN: 1,
+        SCAN_TIME_MAX: 3,
+        NO_LINKS: false,
+        NO_RUSSIAN_REALMS: false,
+        TOKEN_PRICE: 0,
+        REFRESH_ALERTS: false,
+        DEBUG: false,
+        FACTION: "all",
+      }
+    );
+    const normalized = normalizeMegaData(defaultData);
+    writeJson(FILES.megaData, normalized);
+    saveBackup("megaData", normalized);
+    return normalized;
+  });
+
+  ipcMain.handle("reset-items", () => {
+    const normalized = normalizeKV({});
+    writeJson(FILES.desiredItems, normalized);
+    saveBackup("desiredItems", normalized);
+    return normalized;
+  });
+
+  ipcMain.handle("reset-ilvl", () => {
+    const normalized = normalizeIlvlRules([]);
+    writeJson(FILES.ilvlList, normalized);
+    saveBackup("ilvlList", normalized);
+    return normalized;
+  });
+
+  ipcMain.handle("reset-pet-ilvl", () => {
+    const normalized = normalizePetIlvlRules([]);
+    writeJson(FILES.petIlvlList, normalized);
+    saveBackup("petIlvlList", normalized);
+    return normalized;
+  });
+
   ipcMain.handle("import-json", async (_event, { target }) => {
     const targetPath = FILES[target];
     if (!targetPath) return { error: "Unknown target" };
