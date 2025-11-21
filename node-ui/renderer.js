@@ -66,6 +66,9 @@ let itemSearchLoading = false;
 let petSearchCache = null;
 let petSearchLoading = false;
 
+let editingIlvlIndex = null;
+let editingPetIlvlIndex = null;
+
 function ensureItemName(id, name) {
   const key = String(id);
   if (name) {
@@ -595,6 +598,7 @@ function renderIlvlRules() {
       if (e.target === button || e.target.closest("button")) return;
       const form = document.getElementById("ilvl-form");
       if (form) {
+        editingIlvlIndex = idx;
         form.ilvl.value = rule.ilvl || 450;
         form.max_ilvl.value = rule.max_ilvl || 10000;
         form.buyout.value = rule.buyout || 100000;
@@ -606,6 +610,8 @@ function renderIlvlRules() {
         form.speed.checked = rule.speed || false;
         form.leech.checked = rule.leech || false;
         form.avoidance.checked = rule.avoidance || false;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.textContent = "Update rule";
         form.ilvl.focus();
       }
     };
@@ -671,11 +677,14 @@ function renderPetIlvlRules() {
       if (e.target === button || e.target.closest("button")) return;
       const form = document.getElementById("pet-ilvl-form");
       if (form) {
+        editingPetIlvlIndex = idx;
         form.petID.value = rule.petID || "";
         form.price.value = rule.price || "";
         form.minLevel.value = rule.minLevel || 25;
         form.minQuality.value = rule.minQuality !== undefined ? rule.minQuality : -1;
         form.excludeBreeds.value = (rule.excludeBreeds || []).join(", ");
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.textContent = "Update pet rule";
         form.petID.focus();
       }
     };
@@ -990,9 +999,16 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     required_min_lvl: Number(form.required_min_lvl.value) || 1,
     required_max_lvl: Number(form.required_max_lvl.value) || 1000,
   };
-  state.ilvlList.push(rule);
+  if (editingIlvlIndex !== null && editingIlvlIndex >= 0 && editingIlvlIndex < state.ilvlList.length) {
+    state.ilvlList[editingIlvlIndex] = rule;
+    editingIlvlIndex = null;
+  } else {
+    state.ilvlList.push(rule);
+  }
   state.ilvlList = await window.aaa.saveIlvl(state.ilvlList);
   renderIlvlRules();
+  const submitBtn = form.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = "Add rule";
   form.reset();
 });
 
@@ -1012,10 +1028,17 @@ document
       excludeBreeds: parseNums(form.excludeBreeds.value),
     };
     if (!rule.petID || !rule.price) return;
-    state.petIlvlList.push(rule);
+    if (editingPetIlvlIndex !== null && editingPetIlvlIndex >= 0 && editingPetIlvlIndex < state.petIlvlList.length) {
+      state.petIlvlList[editingPetIlvlIndex] = rule;
+      editingPetIlvlIndex = null;
+    } else {
+      state.petIlvlList.push(rule);
+    }
     ensurePetName(rule.petID);
     state.petIlvlList = await window.aaa.savePetIlvl(state.petIlvlList);
     renderPetIlvlRules();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = "Add pet rule";
     form.reset();
   });
 
