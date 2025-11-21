@@ -96,13 +96,18 @@ button.danger {
 }
 
 button.ghost {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border);
   color: var(--text);
 }
 
 button:hover:not(:disabled) {
   transform: translateY(-1px);
+}
+
+button.ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-2);
 }
 
 .status-row {
@@ -356,6 +361,12 @@ select:focus {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.items-list-panel .import-vertical {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 12px;
 }
 
 .items-list-panel {
