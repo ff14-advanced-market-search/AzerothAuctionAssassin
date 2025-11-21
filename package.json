@@ -31,6 +31,7 @@
   "build": {
     "appId": "com.azerothauctionassassin.app",
     "productName": "Azeroth Auction Assassin",
+    "publish": null,
     "directories": {
       "output": "dist-electron"
     },
