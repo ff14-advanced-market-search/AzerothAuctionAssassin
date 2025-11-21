@@ -60,15 +60,15 @@
             <p class="muted">These map directly to mega_data.json keys.</p>
           </div>
           <form id="mega-form" class="form-grid">
-            <label>
+            <label title="Setup a discord channel with a webhook url for sending the alert messages.">
               Discord Webhook URL
               <input name="MEGA_WEBHOOK_URL" type="text" autocomplete="off" />
             </label>
-            <label>
+            <label title="Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids.">
               WoW Client ID
               <input name="WOW_CLIENT_ID" type="text" autocomplete="off" />
             </label>
-            <label>
+            <label title="Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids.">
               WoW Client Secret
               <input
                 name="WOW_CLIENT_SECRET"
@@ -76,7 +76,7 @@
                 autocomplete="off"
               />
             </label>
-            <label>
+            <label title="Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic.">
               Region
               <select name="WOW_REGION">
                 <option value="EU">EU</option>
@@ -87,23 +87,23 @@
                 <option value="EUSODCLASSIC">EUSODCLASSIC</option>
               </select>
             </label>
-            <label>
+            <label title="Change the thread count. Do 100 for the fastest scans, but RIP to ur CPU and MEM.">
               Threads
               <input name="MEGA_THREADS" type="number" min="1" />
             </label>
-            <label>
+            <label title="Increase or decrease the minutes before or after the data update to start timed scans.">
               Scan start offset (min)
               <input name="SCAN_TIME_MIN" type="number" />
             </label>
-            <label>
+            <label title="Increase or decrease the minutes before or after the data update to stop running scans.">
               Scan end offset (min)
               <input name="SCAN_TIME_MAX" type="number" />
             </label>
-            <label>
+            <label title="Set a minimum price to alert on wow token prices">
               Token alert min price
               <input name="TOKEN_PRICE" type="number" />
             </label>
-            <label>
+            <label title="Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH.">
               Faction (classic)
               <input name="FACTION" type="text" />
             </label>
@@ -112,15 +112,15 @@
               <input name="EXTRA_ALERTS" type="text" />
             </label>
             <div class="toggles">
-              <label><input type="checkbox" name="SHOW_BID_PRICES" /> Show bid prices</label>
-              <label><input type="checkbox" name="NO_LINKS" /> Disable links</label>
-              <label><input type="checkbox" name="WOWHEAD_LINK" /> Use wowhead links</label>
-              <label><input type="checkbox" name="NO_RUSSIAN_REALMS" /> Exclude RU realms</label>
-              <label><input type="checkbox" name="REFRESH_ALERTS" /> Refresh alerts hourly</label>
-              <label><input type="checkbox" name="DEBUG" /> Debug mode</label>
+              <label title="Show items with Bid prices below your price limit on Desired Items"><input type="checkbox" name="SHOW_BID_PRICES" /> Show bid prices</label>
+              <label title="Disable all Wowhead, undemine and saddlebag links from discord messages."><input type="checkbox" name="NO_LINKS" /> Disable links</label>
+              <label title="Uses wowhead links instead of Undermine and shows pictures."><input type="checkbox" name="WOWHEAD_LINK" /> Use wowhead links</label>
+              <label title="Removes alerts from Russian Realms."><input type="checkbox" name="NO_RUSSIAN_REALMS" /> Exclude RU realms</label>
+              <label title="Set to true to refresh alerts every 1 hour."><input type="checkbox" name="REFRESH_ALERTS" /> Refresh alerts hourly</label>
+              <label title="Trigger a scan on all realms once. Use this to test make sure your data is working."><input type="checkbox" name="DEBUG" /> Debug mode</label>
             </div>
             <div class="import-row">
-              <button type="button" class="ghost" id="import-config-btn">Import from AAA file</button>
+              <button type="button" class="ghost" id="import-config-btn" title="Import your mega_data.json config.">Import from AAA file</button>
               <button type="button" class="ghost" id="export-config-btn">Export to AAA file</button>
               <button type="button" class="ghost" id="paste-config-btn">Import AAA</button>
               <button type="button" class="ghost" id="copy-config-btn">Copy AAA to clipboard</button>
@@ -152,22 +152,22 @@
           <div class="items-layout">
             <div class="items-sidebar">
               <form id="item-form" class="item-form-vertical">
-                <label>
+                <label title="Add the item id of any item you want to buy. You can search by name for them here with recommended prices https://temp.saddlebagexchange.com/megaitemnames">
                   Item ID
                   <input type="text" name="id" placeholder="Item ID" />
                 </label>
-                <label>
+                <label title="Pick a price you want to buy at or under.">
                   Max price
                   <input type="number" name="price" placeholder="Max price" />
                 </label>
-                <button type="submit" class="primary">Add / update</button>
+                <button type="submit" class="primary" title="Add/Update item to your snipe list.">Add / update</button>
               </form>
               <div class="import-vertical">
-                <button type="button" class="ghost" id="import-items-btn">Import from AAA file</button>
+                <button type="button" class="ghost" id="import-items-btn" title="Import your desired_items.json config">Import from AAA file</button>
                 <button type="button" class="ghost" id="export-items-btn">Export to AAA file</button>
                 <button type="button" class="ghost" id="paste-items-btn">Import AAA</button>
                 <button type="button" class="ghost" id="copy-items-btn">Copy AAA to clipboard</button>
-                <button type="button" class="ghost" id="paste-pbs-items-btn">Import PBS</button>
+                <button type="button" class="ghost" id="paste-pbs-items-btn" title="Import your Point Blank Sniper text files">Import PBS</button>
                 <button type="button" class="ghost" id="copy-pbs-items-btn">Copy PBS to clipboard</button>
               </div>
             </div>
@@ -208,41 +208,41 @@
           <div class="items-layout">
             <div class="items-sidebar">
               <form id="ilvl-form" class="item-form-vertical">
-                <label>
+                <label title="Set the minimum item level (ilvl) you want to snipe. Ex: 400 ilvl.">
                   Min ilvl
                   <input name="ilvl" type="number" value="450" />
                 </label>
-                <label>
+                <label title="Set the maximum item level (ilvl) you want to snipe. Ex: 500 ilvl.">
                   Max ilvl
                   <input name="max_ilvl" type="number" value="10000" />
                 </label>
-                <label>
+                <label title="Set the maximum buyout you want to snipe.">
                   Buyout
                   <input name="buyout" type="number" value="100000" />
                 </label>
-                <label>
+                <label title="Leave blank to snipe all items at this Ilvl. Add the Item IDs of the BOE you want to snipe specific items separated by a comma ex: 1,2,99,420420">
                   Item IDs (comma separated)
                   <input name="item_ids" type="text" />
                 </label>
-                <label>
+                <label title="Comma-separated list of bonus IDs to match. Example: 6652,10844 Leave empty to match any bonus lists.">
                   Bonus list IDs
                   <input name="bonus_lists" type="text" />
                 </label>
-                <label>
+                <label title="Set the minimum required character level to use gear. Ex: required level 80 for TWW items, 70 for DF items, etc.">
                   Min player level
                   <input name="required_min_lvl" type="number" value="1" />
                 </label>
-                <label>
+                <label title="Set the maximum required character level to use gear. Ex: required level 70 for TWW twink items, etc.">
                   Max player level
                   <input name="required_max_lvl" type="number" value="1000" />
                 </label>
                 <div class="toggles">
-                  <label><input type="checkbox" name="sockets" /> Sockets</label>
-                  <label><input type="checkbox" name="speed" /> Speed</label>
-                  <label><input type="checkbox" name="leech" /> Leech</label>
-                  <label><input type="checkbox" name="avoidance" /> Avoidance</label>
+                  <label title="Do you want the item to have Sockets?"><input type="checkbox" name="sockets" /> Sockets</label>
+                  <label title="Do you want the item to have Speed?"><input type="checkbox" name="speed" /> Speed</label>
+                  <label title="Do you want the item to have Leech?"><input type="checkbox" name="leech" /> Leech</label>
+                  <label title="Do you want the item to have Avoidance?"><input type="checkbox" name="avoidance" /> Avoidance</label>
                 </div>
-                <button type="submit" class="primary">Add rule</button>
+                <button type="submit" class="primary" title="Add/Update item to your snipe list.">Add rule</button>
               </form>
             </div>
             <div class="items-list-panel">
@@ -257,11 +257,11 @@
               </div>
               <div class="table" id="ilvl-table"></div>
               <div class="import-vertical">
-                <button type="button" class="ghost" id="import-ilvl-btn">Import from AAA file</button>
+                <button type="button" class="ghost" id="import-ilvl-btn" title="Import your desired_ilvl_list.json config">Import from AAA file</button>
                 <button type="button" class="ghost" id="export-ilvl-btn">Export to AAA file</button>
                 <button type="button" class="ghost" id="paste-ilvl-btn">Import AAA</button>
                 <button type="button" class="ghost" id="copy-ilvl-btn">Copy AAA to clipboard</button>
-                <button type="button" class="ghost" id="paste-pbs-ilvl-btn">Import PBS</button>
+                <button type="button" class="ghost" id="paste-pbs-ilvl-btn" title="Import your Point Blank Sniper ilvl text files">Import PBS</button>
                 <button type="button" class="ghost" id="copy-pbs-ilvl-btn">Copy PBS to clipboard</button>
               </div>
             </div>
@@ -290,23 +290,23 @@
           <div class="items-layout">
             <div class="items-sidebar">
               <form id="pet-ilvl-form" class="item-form-vertical">
-                <label>
+                <label title="Enter the Pet ID you want to snipe">
                   Pet ID
                   <input name="petID" type="number" />
                 </label>
-                <label>
+                <label title="Maximum price you're willing to pay">
                   Max price
                   <input name="price" type="number" />
                 </label>
-                <label>
+                <label title="Minimum pet level (1-25)">
                   Min level
                   <input name="minLevel" type="number" value="25" />
                 </label>
-                <label>
+                <label title="Minimum pet quality (-1 for any, 0-3 for Poor to Rare)">
                   Min quality (-1 any)
                   <input name="minQuality" type="number" value="-1" />
                 </label>
-                <label>
+                <label title="Comma-separated list of breed IDs to exclude. Breed IDs can be found on warcraftpets.com (https://www.warcraftpets.com/wow-pet-battles/breeds/). For the best pets exclude: 7, 17, 8, 18, 9, 19, 10, 20, 3, 13, 11, 21, 2, 22">
                   Exclude breeds (comma)
                   <input name="excludeBreeds" type="text" />
                 </label>
@@ -317,7 +317,7 @@
                 <button type="button" class="ghost" id="export-pet-ilvl-btn">Export to AAA file</button>
                 <button type="button" class="ghost" id="paste-pet-ilvl-btn">Import AAA</button>
                 <button type="button" class="ghost" id="copy-pet-ilvl-btn">Copy AAA to clipboard</button>
-                <button type="button" class="ghost" id="paste-pbs-pet-ilvl-btn">Import PBS</button>
+                <button type="button" class="ghost" id="paste-pbs-pet-ilvl-btn" title="Import your Point Blank Sniper pet text files">Import PBS</button>
                 <button type="button" class="ghost" id="copy-pbs-pet-ilvl-btn">Copy PBS to clipboard</button>
               </div>
             </div>
