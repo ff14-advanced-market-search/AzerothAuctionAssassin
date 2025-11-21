@@ -29,13 +29,14 @@ jobs:
     - name: Decode Certificate
       run: |
         $cert_content = '${{ secrets.CERT_BASE64 }}'
-        $cert_bytes = [Convert]::FromBase64String($cert_content)
-        $cert_path = "certificate.pfx"
-        [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
-        echo "WIN_CERT_FILE=$cert_path" >> $env:GITHUB_ENV
-        echo "WIN_CERT_PASSWORD=${{ secrets.CERT_PASSWORD }}" >> $env:GITHUB_ENV
+        if ($cert_content -and $cert_content -ne '') {
+          $cert_bytes = [Convert]::FromBase64String($cert_content)
+          $cert_path = "certificate.pfx"
+          [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
+          echo "WIN_CERT_FILE=$cert_path" >> $env:GITHUB_ENV
+          echo "WIN_CERT_PASSWORD=${{ secrets.CERT_PASSWORD }}" >> $env:GITHUB_ENV
+        }
       shell: pwsh
-      if: ${{ secrets.CERT_BASE64 != '' }}
 
     - name: Build Windows executable
       run: npm run build:win
@@ -61,7 +62,6 @@ jobs:
           }
         }
       shell: pwsh
-      if: ${{ secrets.CERT_BASE64 != '' }}
 
     - name: Create Release
       id: create_release
@@ -119,18 +119,20 @@ jobs:
 
     - name: Decode Certificate
       run: |
-        echo "${{ secrets.CERT_BASE64 }}" | base64 -d > certificate.pfx
-        # Convert PFX to P12 for macOS if needed, or use directly
-        # For self-signed certs, we'll try to import the PFX directly
-        security create-keychain -p "" build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p "" build.keychain
-        # Try importing as PFX first, if that fails, try converting
-        security import certificate.pfx -k build.keychain -P "${{ secrets.CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/productsign 2>/dev/null || \
-        (openssl pkcs12 -in certificate.pfx -out certificate.p12 -nodes -passin pass:"${{ secrets.CERT_PASSWORD }}" && \
-         security import certificate.p12 -k build.keychain -P "${{ secrets.CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/productsign)
-        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
-      if: ${{ secrets.CERT_BASE64 != '' }}
+        CERT_BASE64="${{ secrets.CERT_BASE64 }}"
+        if [ -n "$CERT_BASE64" ]; then
+          echo "$CERT_BASE64" | base64 -d > certificate.pfx
+          # Convert PFX to P12 for macOS if needed, or use directly
+          # For self-signed certs, we'll try to import the PFX directly
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          # Try importing as PFX first, if that fails, try converting
+          security import certificate.pfx -k build.keychain -P "${{ secrets.CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/productsign 2>/dev/null || \
+          (openssl pkcs12 -in certificate.pfx -out certificate.p12 -nodes -passin pass:"${{ secrets.CERT_PASSWORD }}" && \
+           security import certificate.p12 -k build.keychain -P "${{ secrets.CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/productsign)
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+        fi
 
     - name: Build macOS executable
       run: npm run build:mac
@@ -146,7 +148,6 @@ jobs:
             codesign --deep --force --verify --verbose --sign "$CERT_IDENTITY" --keychain build.keychain --options runtime dist-electron/*.zip || true
           fi
         fi
-      if: ${{ secrets.CERT_BASE64 != '' }}
 
     - name: Decode Upload URL
       run: |
