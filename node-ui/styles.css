@@ -527,6 +527,20 @@ select:focus {
   transition: color 0.2s ease;
 }
 
+/* Wowhead tooltip links styling */
+.list li a,
+.table-row a {
+  color: var(--accent-2);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.list li a:hover,
+.table-row a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
 .list li > div:hover {
   color: var(--accent-2);
 }

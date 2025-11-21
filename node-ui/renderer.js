@@ -635,7 +635,8 @@ function renderItemList() {
   
   renderKVList(itemList, filteredData, removeItem, (itemId, p) => {
     const name = getItemName(itemId);
-    return `<strong>${itemId} • ${name}</strong> → ${p}`;
+    const itemLink = `https://www.wowhead.com/item=${itemId}`;
+    return `<strong><a href="${itemLink}" data-wowhead="item=${itemId}">${itemId}</a> • ${name}</strong> → ${p}`;
   }, handleItemClick);
 }
 
@@ -675,7 +676,8 @@ function renderIlvlRules() {
     const idx = state.ilvlList.indexOf(rule);
     const names = (rule.item_ids || []).map((id) => {
       const nm = getItemName(id);
-      return `${nm} (${id})`;
+      const itemLink = `https://www.wowhead.com/item=${id}`;
+      return `${nm} (<a href="${itemLink}" data-wowhead="item=${id}">${id}</a>)`;
     });
     const row = document.createElement("div");
     row.className = "table-row";
