@@ -26,6 +26,7 @@ const REALM_FILES = {
 let alertsProcess = null;
 let mainWindow = null;
 let logFileStream = null;
+let originalConsoleError = null;
 
 function readJson(filePath, fallback) {
   try {

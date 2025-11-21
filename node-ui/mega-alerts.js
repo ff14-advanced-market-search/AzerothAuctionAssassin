@@ -43,10 +43,25 @@ function requestStop() {
 
 // Override console.log to use callback if set (for Electron integration)
 const originalLog = console.log;
+const originalError = console.error;
 console.log = (...args) => {
   originalLog(...args);
   if (logCallback) {
     logCallback(args.join(" ") + "\n");
+  }
+};
+// Override console.error to also use callback
+console.error = (...args) => {
+  originalError(...args);
+  if (logCallback) {
+    // Format error messages properly, including stack traces for Error objects
+    const errorMsg = args.map(arg => {
+      if (arg instanceof Error) {
+        return `${arg.message}\n${arg.stack || ''}`;
+      }
+      return String(arg);
+    }).join(" ");
+    logCallback(`[ERROR] ${errorMsg}\n`);
   }
 };
 
