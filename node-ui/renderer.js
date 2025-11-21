@@ -1045,15 +1045,47 @@ async function removePetIlvlRule(idx) {
 // Event wiring
 document.getElementById("item-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const id = e.target.id.value.trim();
-  const price = Number(e.target.price.value);
-  if (!id || Number.isNaN(price)) return;
+  const form = e.target;
+  const id = form.id.value.trim();
+  const price = Number(form.price.value);
+  
+  // Validation
+  if (!id || form.price.value === "") {
+    const errorMsg = "All fields are required.";
+    showToast(errorMsg, "error");
+    form.id.focus();
+    return;
+  }
+  
+  if (Number.isNaN(price)) {
+    const errorMsg = "Item ID and Price should be numbers.";
+    showToast(errorMsg, "error");
+    form.price.focus();
+    return;
+  }
+  
+  const itemIdInt = Number(id);
+  if (!(1 <= itemIdInt && itemIdInt <= 500000)) {
+    const errorMsg = "Item ID must be between 1 and 500000.";
+    showToast(errorMsg, "error");
+    form.id.focus();
+    return;
+  }
+  
+  if (!(0 <= price && price <= 10000000)) {
+    const errorMsg = "Price must be between 0 and 10 million.";
+    showToast(errorMsg, "error");
+    form.price.focus();
+    return;
+  }
+  
   state.desiredItems[id] = price;
   // try to keep name map
   ensureItemName(id);
   state.desiredItems = await window.aaa.saveItems(state.desiredItems);
   renderItemList();
-  e.target.reset();
+  form.reset();
+  showToast("Item saved successfully!", "success", 2000);
 });
 
 document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
@@ -1061,31 +1093,90 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
   const form = e.target;
   
   // Validation
-  const ilvl = Number(form.ilvl.value);
-  const maxIlvl = Number(form.max_ilvl.value) || ilvl;
-  const buyout = Number(form.buyout.value);
+  const ilvlStr = form.ilvl.value.trim();
+  const maxIlvlStr = form.max_ilvl.value.trim();
+  const buyoutStr = form.buyout.value.trim();
   
-  if (!ilvl || ilvl <= 0) {
-    const errorMsg = "Min ilvl must be greater than 0";
-    appendLog(`Error: ${errorMsg}\n`);
+  if (!ilvlStr || !buyoutStr) {
+    const errorMsg = "Both ilvl and buyout fields are required.";
     showToast(errorMsg, "error");
     form.ilvl.focus();
     return;
   }
   
-  if (maxIlvl < ilvl) {
-    const errorMsg = "Max ilvl must be greater than or equal to Min ilvl";
-    appendLog(`Error: ${errorMsg}\n`);
+  const ilvl = Number(ilvlStr);
+  const maxIlvl = Number(maxIlvlStr) || 10000;
+  const buyout = Number(buyoutStr);
+  
+  if (Number.isNaN(ilvl) || Number.isNaN(maxIlvl) || Number.isNaN(buyout)) {
+    const errorMsg = "Min Ilvl, Max Ilvl, and price should be numbers. No decimals.";
+    showToast(errorMsg, "error");
+    form.ilvl.focus();
+    return;
+  }
+  
+  if (!(1 <= ilvl && ilvl <= 999)) {
+    const errorMsg = "Ilvl must be between 1 and 999.";
+    showToast(errorMsg, "error");
+    form.ilvl.focus();
+    return;
+  }
+  
+  if (!(ilvl <= maxIlvl && maxIlvl <= 10000)) {
+    const errorMsg = "Max Ilvl must be between Ilvl and a max of 10000.";
     showToast(errorMsg, "error");
     form.max_ilvl.focus();
     return;
   }
   
-  if (!buyout || buyout <= 0) {
-    const errorMsg = "Buyout must be greater than 0";
-    appendLog(`Error: ${errorMsg}\n`);
+  if (!(1 <= buyout && buyout <= 10000000)) {
+    const errorMsg = "Price must be between 1 and 10 million.";
     showToast(errorMsg, "error");
     form.buyout.focus();
+    return;
+  }
+  
+  // Validate item IDs if provided
+  const itemIdsText = form.item_ids.value.trim();
+  if (itemIdsText) {
+    try {
+      const itemIds = parseNums(itemIdsText);
+      if (!itemIds.every(id => 1 <= id && id <= 500000)) {
+        const errorMsg = "All item IDs should be between 1 and 500,000.";
+        showToast(errorMsg, "error");
+        form.item_ids.focus();
+        return;
+      }
+    } catch (err) {
+      const errorMsg = "Item IDs should be numbers.";
+      showToast(errorMsg, "error");
+      form.item_ids.focus();
+      return;
+    }
+  }
+  
+  // Validate player levels
+  const minLevel = Number(form.required_min_lvl.value) || 1;
+  const maxLevel = Number(form.required_max_lvl.value) || 1000;
+  
+  if (!(1 <= minLevel && minLevel <= 999)) {
+    const errorMsg = "Min level must be between 1 and 999.";
+    showToast(errorMsg, "error");
+    form.required_min_lvl.focus();
+    return;
+  }
+  
+  if (!(1 <= maxLevel && maxLevel <= 999)) {
+    const errorMsg = "Max level must be between 1 and 999.";
+    showToast(errorMsg, "error");
+    form.required_max_lvl.focus();
+    return;
+  }
+  
+  if (maxLevel < minLevel) {
+    const errorMsg = "Max level must be greater than or equal to Min level.";
+    showToast(errorMsg, "error");
+    form.required_max_lvl.focus();
     return;
   }
   
@@ -1099,8 +1190,8 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     avoidance: form.avoidance.checked,
     item_ids: parseNums(form.item_ids.value),
     bonus_lists: parseNums(form.bonus_lists.value),
-    required_min_lvl: Number(form.required_min_lvl.value) || 1,
-    required_max_lvl: Number(form.required_max_lvl.value) || 1000,
+    required_min_lvl: minLevel,
+    required_max_lvl: maxLevel,
   };
   
   if (editingIlvlIndex !== null && editingIlvlIndex >= 0 && editingIlvlIndex < state.ilvlList.length) {
@@ -1121,17 +1212,79 @@ document
   .addEventListener("submit", async (e) => {
     e.preventDefault();
     const form = e.target;
+    
+    // Validation
+    const petIdStr = form.petID.value.trim();
+    const priceStr = form.price.value.trim();
+    const minLevelStr = form.minLevel.value.trim();
+    
+    if (!petIdStr || !priceStr || !minLevelStr) {
+      const errorMsg = "Please set a pet level (1-25)";
+      showToast(errorMsg, "error");
+      form.minLevel.focus();
+      return;
+    }
+    
+    const petID = Number(petIdStr);
+    const price = Number(priceStr);
+    const minLevel = Number(minLevelStr);
+    const minQuality = form.minQuality.value === "" ? -1 : Number(form.minQuality.value) || -1;
+    
+    if (Number.isNaN(petID) || Number.isNaN(price) || Number.isNaN(minLevel) || Number.isNaN(minQuality)) {
+      const errorMsg = "Pet ID, Price, Min Level, and Min Quality should be numbers.";
+      showToast(errorMsg, "error");
+      form.petID.focus();
+      return;
+    }
+    
+    if (!(1 <= petID && petID <= 10000)) {
+      const errorMsg = "Pet ID must be between 1 and 10000";
+      showToast(errorMsg, "error");
+      form.petID.focus();
+      return;
+    }
+    
+    if (price <= 0) {
+      const errorMsg = "Price must be greater than 0";
+      showToast(errorMsg, "error");
+      form.price.focus();
+      return;
+    }
+    
+    if (!(1 <= minLevel && minLevel <= 25)) {
+      const errorMsg = "Minimum level must be between 1 and 25";
+      showToast(errorMsg, "error");
+      form.minLevel.focus();
+      return;
+    }
+    
+    if (!(-1 <= minQuality && minQuality <= 3)) {
+      const errorMsg = "Minimum quality must be between -1 and 3";
+      showToast(errorMsg, "error");
+      form.minQuality.focus();
+      return;
+    }
+    
+    // Validate excluded breeds
+    let excludeBreeds = [];
+    if (form.excludeBreeds.value.trim()) {
+      try {
+        excludeBreeds = parseNums(form.excludeBreeds.value);
+      } catch (err) {
+        const errorMsg = "Excluded breeds should be comma-separated numbers.";
+        showToast(errorMsg, "error");
+        form.excludeBreeds.focus();
+        return;
+      }
+    }
+    
     const rule = {
-      petID: Number(form.petID.value) || 0,
-      price: Number(form.price.value) || 0,
-      minLevel: Number(form.minLevel.value) || 1,
-      minQuality:
-        form.minQuality.value === ""
-          ? -1
-          : Number(form.minQuality.value) || -1,
-      excludeBreeds: parseNums(form.excludeBreeds.value),
+      petID: petID,
+      price: price,
+      minLevel: minLevel,
+      minQuality: minQuality,
+      excludeBreeds: excludeBreeds,
     };
-    if (!rule.petID || !rule.price) return;
     if (editingPetIlvlIndex !== null && editingPetIlvlIndex >= 0 && editingPetIlvlIndex < state.petIlvlList.length) {
       state.petIlvlList[editingPetIlvlIndex] = rule;
       editingPetIlvlIndex = null;
@@ -1141,9 +1294,8 @@ document
     ensurePetName(rule.petID);
     state.petIlvlList = await window.aaa.savePetIlvl(state.petIlvlList);
     renderPetIlvlRules();
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) submitBtn.textContent = "Add pet rule";
-    form.reset();
+    clearPetIlvlForm();
+    showToast("Pet rule saved successfully!", "success", 2000);
   });
 
 // Add event listeners for "New Item" buttons
