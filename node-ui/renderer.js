@@ -423,9 +423,11 @@ async function handlePastePBSPetIlvl(btn) {
 async function handleCopyPBSPetIlvl(btn) {
   await fetchPetNames();
   const entries = [];
-  for (const rule of state.petIlvlList) {
+  for (let i = 0; i < state.petIlvlList.length; i++) {
+    const rule = state.petIlvlList[i];
     const name = petNameMap[rule.petID] || rule.petID;
-    entries.push(`Snipe^"${name}";;0;0;0;0;0;0;0;${Math.trunc(Number(rule.price) || 0)};;#;;`);
+    const prefix = i === 0 ? "Snipe^" : "";
+    entries.push(`${prefix}"${name}";;0;0;0;0;0;0;0;${Math.trunc(Number(rule.price) || 0)};;#;;`);
   }
   const out = entries.join("");
   await navigator.clipboard.writeText(out);
