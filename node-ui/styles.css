@@ -317,6 +317,38 @@ select:focus {
   gap: 8px;
 }
 
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #dc3545;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  font-weight: 600;
+  animation: toastSlideIn 0.3s ease-out;
+  max-width: 500px;
+  text-align: center;
+}
+
+.toast.success {
+  background: #28a745;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 .toggles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

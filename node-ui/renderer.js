@@ -231,6 +231,28 @@ function flashButton(btn, label = "Done") {
   }, 900);
 }
 
+/**
+ * Show a toast notification message
+ * @param {string} message - The message to display
+ * @param {string} type - 'error' or 'success' (default: 'error')
+ * @param {number} duration - Duration in milliseconds (default: 3000)
+ */
+function showToast(message, type = "error", duration = 3000) {
+  // Remove any existing toast
+  const existing = document.querySelector(".toast");
+  if (existing) existing.remove();
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type === "success" ? "success" : ""}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = "toastSlideIn 0.3s ease-out reverse";
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
 function showPasteModal(title, placeholder, onSubmit) {
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
@@ -1044,19 +1066,25 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
   const buyout = Number(form.buyout.value);
   
   if (!ilvl || ilvl <= 0) {
-    appendLog("Error: Min ilvl must be greater than 0\n");
+    const errorMsg = "Min ilvl must be greater than 0";
+    appendLog(`Error: ${errorMsg}\n`);
+    showToast(errorMsg, "error");
     form.ilvl.focus();
     return;
   }
   
   if (maxIlvl < ilvl) {
-    appendLog("Error: Max ilvl must be greater than or equal to Min ilvl\n");
+    const errorMsg = "Max ilvl must be greater than or equal to Min ilvl";
+    appendLog(`Error: ${errorMsg}\n`);
+    showToast(errorMsg, "error");
     form.max_ilvl.focus();
     return;
   }
   
   if (!buyout || buyout <= 0) {
-    appendLog("Error: Buyout must be greater than 0\n");
+    const errorMsg = "Buyout must be greater than 0";
+    appendLog(`Error: ${errorMsg}\n`);
+    showToast(errorMsg, "error");
     form.buyout.focus();
     return;
   }
@@ -1085,6 +1113,7 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
   renderIlvlRules();
   clearIlvlForm();
   appendLog("Ilvl rule saved successfully\n");
+  showToast("Rule saved successfully!", "success", 2000);
 });
 
 document
