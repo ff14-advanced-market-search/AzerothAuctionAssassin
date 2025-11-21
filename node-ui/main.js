@@ -6,6 +6,7 @@ const { spawn } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
+const BACKUP_DIR = path.join(DATA_DIR, "backup");
 
 const FILES = {
   megaData: path.join(DATA_DIR, "mega_data.json"),
@@ -28,6 +29,37 @@ function readJson(filePath, fallback) {
 
 function writeJson(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+}
+
+function getTimestampInt() {
+  const now = new Date();
+  return (
+    now.getFullYear() * 1000000 +
+    (now.getMonth() + 1) * 10000 +
+    now.getDate() * 100 +
+    now.getHours()
+  );
+}
+
+function saveBackup(fileType, data) {
+  try {
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const timestamp = getTimestampInt();
+    const backupFilenames = {
+      megaData: `${timestamp}_mega_data.json`,
+      desiredItems: `${timestamp}_desired_items.json`,
+      desiredPets: `${timestamp}_desired_pets.json`,
+      ilvlList: `${timestamp}_desired_ilvl_list.json`,
+      petIlvlList: `${timestamp}_desired_pet_ilvl_list.json`,
+    };
+    const backupFilename = backupFilenames[fileType];
+    if (backupFilename) {
+      const backupPath = path.join(BACKUP_DIR, backupFilename);
+      writeJson(backupPath, data);
+    }
+  } catch (err) {
+    console.error("Failed to create backup:", err);
+  }
 }
 
 function ensureDataFiles() {
@@ -179,30 +211,35 @@ function setupIpc() {
   ipcMain.handle("save-mega-data", (_event, payload) => {
     const normalized = normalizeMegaData(payload || {});
     writeJson(FILES.megaData, normalized);
+    saveBackup("megaData", normalized);
     return normalized;
   });
 
   ipcMain.handle("save-items", (_event, payload) => {
     const normalized = normalizeKV(payload || {});
     writeJson(FILES.desiredItems, normalized);
+    saveBackup("desiredItems", normalized);
     return normalized;
   });
 
   ipcMain.handle("save-pets", (_event, payload) => {
     const normalized = normalizeKV(payload || {});
     writeJson(FILES.desiredPets, normalized);
+    saveBackup("desiredPets", normalized);
     return normalized;
   });
 
   ipcMain.handle("save-ilvl", (_event, payload) => {
     const normalized = normalizeIlvlRules(payload || []);
     writeJson(FILES.ilvlList, normalized);
+    saveBackup("ilvlList", normalized);
     return normalized;
   });
 
   ipcMain.handle("save-pet-ilvl", (_event, payload) => {
     const normalized = normalizePetIlvlRules(payload || []);
     writeJson(FILES.petIlvlList, normalized);
+    saveBackup("petIlvlList", normalized);
     return normalized;
   });
 
@@ -218,6 +255,7 @@ function setupIpc() {
     const data = readJson(src, null);
     if (data === null) return { error: "Failed to read JSON" };
     writeJson(targetPath, data);
+    saveBackup(target, data);
     return { data };
   });
 
