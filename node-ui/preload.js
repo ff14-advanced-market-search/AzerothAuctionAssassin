@@ -21,4 +21,8 @@ contextBridge.exposeInMainWorld("aaa", {
   resetItems: () => ipcRenderer.invoke("reset-items"),
   resetIlvl: () => ipcRenderer.invoke("reset-ilvl"),
   resetPetIlvl: () => ipcRenderer.invoke("reset-pet-ilvl"),
+  canGoBack: () => ipcRenderer.invoke("can-go-back"),
+  canGoForward: () => ipcRenderer.invoke("can-go-forward"),
+  goBack: () => ipcRenderer.invoke("go-back"),
+  goForward: () => ipcRenderer.invoke("go-forward"),
 });

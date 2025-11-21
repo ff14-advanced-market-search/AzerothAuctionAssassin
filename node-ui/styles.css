@@ -61,6 +61,18 @@ body {
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
+}
+
+.nav-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-btn-small {
+  padding: 8px 12px;
+  font-size: 14px;
+  min-width: 36px;
 }
 
 button {

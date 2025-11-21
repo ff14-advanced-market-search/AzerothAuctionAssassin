@@ -24,6 +24,7 @@ const REALM_FILES = {
 };
 
 let alertsProcess = null;
+let mainWindow = null;
 
 function readJson(filePath, fallback) {
   try {
@@ -198,7 +199,7 @@ function normalizePetIlvlRules(list) {
 }
 
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 900,
     minWidth: 1000,
@@ -310,6 +311,29 @@ function setupIpc() {
     writeJson(FILES.petIlvlList, normalized);
     saveBackup("petIlvlList", normalized);
     return normalized;
+  });
+
+  // Navigation handlers
+  ipcMain.handle("can-go-back", () => {
+    return mainWindow?.webContents.canGoBack() || false;
+  });
+
+  ipcMain.handle("can-go-forward", () => {
+    return mainWindow?.webContents.canGoForward() || false;
+  });
+
+  ipcMain.handle("go-back", () => {
+    if (mainWindow?.webContents.canGoBack()) {
+      mainWindow.webContents.goBack();
+    }
+    return mainWindow?.webContents.canGoBack() || false;
+  });
+
+  ipcMain.handle("go-forward", () => {
+    if (mainWindow?.webContents.canGoForward()) {
+      mainWindow.webContents.goForward();
+    }
+    return mainWindow?.webContents.canGoForward() || false;
   });
 
   ipcMain.handle("import-json", async (_event, { target }) => {

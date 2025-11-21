@@ -18,6 +18,8 @@ const saveSettingsBtn = document.getElementById("save-settings-btn");
 const reloadBtn = document.getElementById("reload-btn");
 const startBtn = document.getElementById("start-btn");
 const stopBtn = document.getElementById("stop-btn");
+const backBtn = document.getElementById("back-btn");
+const forwardBtn = document.getElementById("forward-btn");
 const navButtons = Array.from(document.querySelectorAll(".nav-btn"));
 const itemSearchInput = document.getElementById("item-search-input");
 const itemSearchBtn = document.getElementById("item-search-btn");
@@ -636,7 +638,7 @@ function renderItemList() {
   renderKVList(itemList, filteredData, removeItem, (itemId, p) => {
     const name = getItemName(itemId);
     const itemLink = `https://www.wowhead.com/item=${itemId}`;
-    return `<strong><a href="${itemLink}" data-wowhead="item=${itemId}">${itemId}</a> • ${name}</strong> → ${p}`;
+    return `<strong><a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${itemId}">${itemId}</a> • ${name}</strong> → ${p}`;
   }, handleItemClick);
 }
 
@@ -677,7 +679,7 @@ function renderIlvlRules() {
     const names = (rule.item_ids || []).map((id) => {
       const nm = getItemName(id);
       const itemLink = `https://www.wowhead.com/item=${id}`;
-      return `${nm} (<a href="${itemLink}" data-wowhead="item=${id}">${id}</a>)`;
+      return `${nm} (<a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${id}">${id}</a>)`;
     });
     const row = document.createElement("div");
     row.className = "table-row";
@@ -1544,6 +1546,29 @@ reloadBtn.addEventListener("click", async () => {
   flashButton(reloadBtn, "Reloaded ✓");
 });
 
+// Navigation history management
+function updateNavigationButtons() {
+  window.aaa.canGoBack().then((canBack) => {
+    if (backBtn) backBtn.disabled = !canBack;
+  });
+  window.aaa.canGoForward().then((canForward) => {
+    if (forwardBtn) forwardBtn.disabled = !canForward;
+  });
+}
+
+backBtn?.addEventListener("click", async () => {
+  await window.aaa.goBack();
+  updateNavigationButtons();
+});
+
+forwardBtn?.addEventListener("click", async () => {
+  await window.aaa.goForward();
+  updateNavigationButtons();
+});
+
+// Update navigation buttons periodically to reflect navigation state
+setInterval(updateNavigationButtons, 500);
+
 startBtn.addEventListener("click", async () => {
   // Validate and save before starting
   const saved = await saveMegaData();
@@ -1768,4 +1793,5 @@ navButtons.forEach((btn) => {
 window.addEventListener("DOMContentLoaded", async () => {
   await loadState();
   showView("home");
+  updateNavigationButtons();
 });
