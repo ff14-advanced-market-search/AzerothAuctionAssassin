@@ -1,13 +1,10 @@
-name: Build Electron App
+name: Build EXE & DMG for Electron App
 
 env:
   AAA_VERSION: "2.0.0"
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - main
 
 jobs:
   build-windows:
