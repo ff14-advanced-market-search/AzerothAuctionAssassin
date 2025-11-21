@@ -384,9 +384,13 @@ select:focus {
   gap: 8px;
 }
 
-.items-list-panel .import-vertical {
-  flex-direction: row;
-  flex-wrap: wrap;
+.import-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.items-list-panel .import-grid {
   margin-top: 12px;
 }
 
@@ -607,10 +611,14 @@ pre#log-panel {
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   padding: 12px;
-  max-height: 240px;
+  min-height: 600px;
+  max-height: 80vh;
   overflow-y: scroll;
   white-space: pre-wrap;
+  word-wrap: break-word;
   font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 pre#log-panel::-webkit-scrollbar {
