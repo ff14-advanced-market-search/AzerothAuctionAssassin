@@ -4,6 +4,7 @@ const state = {
   desiredPets: {},
   ilvlList: [],
   petIlvlList: [],
+  realmLists: {},
   processRunning: false,
 };
 
@@ -26,6 +27,14 @@ const itemFilterInput = document.getElementById("item-filter-input");
 const ilvlFilterInput = document.getElementById("ilvl-filter-input");
 const petIlvlFilterInput = document.getElementById("pet-ilvl-filter-input");
 const petIlvlSearchInput = document.getElementById("pet-ilvl-search-input");
+const realmList = document.getElementById("realm-list");
+const realmForm = document.getElementById("realm-form");
+const realmRegionSelect = document.getElementById("realm-region-select");
+const realmNameInput = document.getElementById("realm-name-input");
+const realmIdInput = document.getElementById("realm-id-input");
+const realmFilterInput = document.getElementById("realm-filter-input");
+const resetRealmBtn = document.getElementById("reset-realm-btn");
+const removeRealmBtn = document.getElementById("remove-realm-btn");
 const petIlvlSearchBtn = document.getElementById("pet-ilvl-search-btn");
 const petIlvlSearchResults = document.getElementById("pet-ilvl-search-results");
 const petIlvlSearchStatus = document.getElementById("pet-ilvl-search-status");
@@ -711,6 +720,7 @@ async function loadState() {
   renderItemList();
   renderIlvlRules();
   renderPetIlvlRules();
+  await loadRealmLists();
 
   // attempt to hydrate name maps so existing lists show names once fetched
   fetchItemNames().then(() => {
@@ -1109,6 +1119,130 @@ petIlvlSearchInput.addEventListener("input", async () => {
 itemSearchInput.addEventListener("focus", () => fetchItemNames());
 ilvlSearchInput.addEventListener("focus", () => fetchItemNames());
 petIlvlSearchInput.addEventListener("focus", () => fetchPetNames());
+
+// Realm list functions
+function renderRealmList() {
+  if (!realmList) return;
+  const region = realmRegionSelect?.value || "EU";
+  const realms = state.realmLists[region] || {};
+  const filter = realmFilterInput?.value?.toLowerCase() || "";
+  
+  realmList.innerHTML = "";
+  
+  const entries = Object.entries(realms)
+    .filter(([name, id]) => {
+      if (!filter) return true;
+      return name.toLowerCase().includes(filter) || String(id).includes(filter);
+    })
+    .sort(([a], [b]) => a.localeCompare(b));
+  
+  for (const [name, id] of entries) {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div>Name: ${name}; ID: ${id};</div>
+      <button class="remove-btn" data-name="${name}" data-id="${id}">Remove</button>
+    `;
+    li.onclick = (e) => {
+      if (e.target.classList.contains("remove-btn")) return;
+      realmNameInput.value = name;
+      realmIdInput.value = id;
+    };
+    const removeBtn = li.querySelector(".remove-btn");
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      removeRealm(name, id);
+    };
+    realmList.appendChild(li);
+  }
+}
+
+async function loadRealmLists() {
+  try {
+    const lists = await window.aaa.loadRealmLists();
+    state.realmLists = lists || {};
+    renderRealmList();
+  } catch (err) {
+    console.error("Failed to load realm lists:", err);
+  }
+}
+
+async function saveRealmList(region) {
+  try {
+    const realms = state.realmLists[region] || {};
+    await window.aaa.saveRealmList(region, realms);
+  } catch (err) {
+    console.error("Failed to save realm list:", err);
+  }
+}
+
+async function addRealm(region, name, id) {
+  if (!name || !id) return;
+  if (!state.realmLists[region]) {
+    state.realmLists[region] = {};
+  }
+  state.realmLists[region][name] = Number(id);
+  await saveRealmList(region);
+  renderRealmList();
+  realmNameInput.value = "";
+  realmIdInput.value = "";
+}
+
+async function removeRealm(name, id) {
+  const region = realmRegionSelect?.value || "EU";
+  if (!state.realmLists[region]) return;
+  delete state.realmLists[region][name];
+  await saveRealmList(region);
+  renderRealmList();
+}
+
+async function resetRealmList() {
+  const region = realmRegionSelect?.value || "EU";
+  if (!window.REALM_DATA) {
+    console.error("Realm data not loaded");
+    return;
+  }
+  const defaultList = window.REALM_DATA.getRealmListByRegion(region);
+  if (!defaultList) {
+    console.error(`No default list for region: ${region}`);
+    return;
+  }
+  state.realmLists[region] = { ...defaultList };
+  await saveRealmList(region);
+  renderRealmList();
+}
+
+realmForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const region = formData.get("region") || "EU";
+  const name = formData.get("realmName")?.trim();
+  const id = formData.get("realmId");
+  if (name && id) {
+    await addRealm(region, name, Number(id));
+  }
+});
+
+realmRegionSelect?.addEventListener("change", () => {
+  renderRealmList();
+});
+
+realmFilterInput?.addEventListener("input", () => {
+  renderRealmList();
+});
+
+resetRealmBtn?.addEventListener("click", () => {
+  if (confirm(`Reset realm list for ${realmRegionSelect?.value || "EU"}?`)) {
+    resetRealmList();
+  }
+});
+
+removeRealmBtn?.addEventListener("click", () => {
+  const name = realmNameInput.value.trim();
+  const id = realmIdInput.value;
+  if (name && id) {
+    removeRealm(name, Number(id));
+  }
+});
 
 importConfigBtn?.addEventListener("click", () => handleImport("megaData", importConfigBtn));
 exportConfigBtn?.addEventListener("click", () => handleExport("megaData", exportConfigBtn));

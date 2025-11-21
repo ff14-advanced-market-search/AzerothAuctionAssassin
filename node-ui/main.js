@@ -16,6 +16,15 @@ const FILES = {
   petIlvlList: path.join(DATA_DIR, "desired_pet_ilvl_list.json"),
 };
 
+const REALM_FILES = {
+  EU: path.join(DATA_DIR, "eu-wow-connected-realm-ids.json"),
+  NA: path.join(DATA_DIR, "na-wow-connected-realm-ids.json"),
+  EUCLASSIC: path.join(DATA_DIR, "euclassic-wow-connected-realm-ids.json"),
+  NACLASSIC: path.join(DATA_DIR, "naclassic-wow-connected-realm-ids.json"),
+  NASODCLASSIC: path.join(DATA_DIR, "nasodclassic-wow-connected-realm-ids.json"),
+  EUSODCLASSIC: path.join(DATA_DIR, "eusodclassic-wow-connected-realm-ids.json"),
+};
+
 let alertsProcess = null;
 
 function readJson(filePath, fallback) {
@@ -96,6 +105,14 @@ function ensureDataFiles() {
   for (const [filePath, fallback] of Object.entries(defaults)) {
     if (!fs.existsSync(filePath)) {
       writeJson(filePath, fallback);
+    }
+  }
+
+  // Initialize realm list files if they don't exist (empty objects)
+  // They will be populated by the reset function using hardcoded data
+  for (const [region, filePath] of Object.entries(REALM_FILES)) {
+    if (!fs.existsSync(filePath)) {
+      writeJson(filePath, {});
     }
   }
 }
@@ -313,6 +330,29 @@ function setupIpc() {
       alertsProcess.postMessage("stop");
     }
     return { stopped: true };
+  });
+
+  // Realm list handlers
+  ipcMain.handle("load-realm-lists", () => {
+    const lists = {};
+    for (const [region, filePath] of Object.entries(REALM_FILES)) {
+      lists[region] = readJson(filePath, {});
+    }
+    return lists;
+  });
+
+  ipcMain.handle("save-realm-list", (_event, region, realms) => {
+    const filePath = REALM_FILES[region];
+    if (!filePath) return { error: "Unknown region" };
+    const normalized = {};
+    Object.entries(realms || {}).forEach(([k, v]) => {
+      const id = Number(v);
+      if (!Number.isNaN(id)) {
+        normalized[String(k)] = id;
+      }
+    });
+    writeJson(filePath, normalized);
+    return normalized;
   });
 }
 

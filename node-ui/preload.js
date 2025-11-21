@@ -15,4 +15,6 @@ contextBridge.exposeInMainWorld("aaa", {
     ipcRenderer.on("mega-log", (_event, line) => callback(line)),
   onMegaExit: (callback) =>
     ipcRenderer.on("mega-exit", (_event, code) => callback(code)),
+  loadRealmLists: () => ipcRenderer.invoke("load-realm-lists"),
+  saveRealmList: (region, realms) => ipcRenderer.invoke("save-realm-list", region, realms),
 });

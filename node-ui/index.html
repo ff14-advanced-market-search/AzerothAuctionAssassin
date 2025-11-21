@@ -32,6 +32,7 @@
         <button class="nav-btn" data-view-target="items">Items</button>
         <button class="nav-btn" data-view-target="ilvl">BOE Ilvl Gear/Weapons</button>
         <button class="nav-btn" data-view-target="pet-ilvl">Pets</button>
+        <button class="nav-btn" data-view-target="realms">Realm Lists</button>
         <button class="nav-btn" data-view-target="logs">Logs</button>
       </div>
 
@@ -336,6 +337,55 @@
           </div>
         </section>
 
+        <section class="card span-2 view" data-view="realms">
+          <div class="card-head">
+            <h2>Realm Lists</h2>
+            <p class="muted">Manage connected realm lists</p>
+          </div>
+          <div class="items-layout">
+            <div class="items-sidebar">
+              <form id="realm-form" class="item-form-vertical">
+                <label>
+                  WoW Region
+                  <select name="region" id="realm-region-select">
+                    <option value="EU">EU</option>
+                    <option value="NA">NA</option>
+                    <option value="EUCLASSIC">EUCLASSIC</option>
+                    <option value="NACLASSIC">NACLASSIC</option>
+                    <option value="NASODCLASSIC">NASODCLASSIC</option>
+                    <option value="EUSODCLASSIC">EUSODCLASSIC</option>
+                  </select>
+                </label>
+                <label>
+                  Realm Name
+                  <input type="text" name="realmName" id="realm-name-input" placeholder="Realm Name" />
+                </label>
+                <label>
+                  Realm ID
+                  <input type="number" name="realmId" id="realm-id-input" placeholder="Realm ID" />
+                </label>
+                <button type="submit" class="primary">Add Realm</button>
+              </form>
+              <div class="import-vertical">
+                <button type="button" class="ghost" id="reset-realm-btn">Reset Realm List</button>
+                <button type="button" class="ghost" id="remove-realm-btn">Remove Realm</button>
+              </div>
+            </div>
+            <div class="items-list-panel">
+              <div class="items-list-header">
+                <h3>Your Realms</h3>
+                <input
+                  type="text"
+                  id="realm-filter-input"
+                  placeholder="Filter realms by name or ID..."
+                  class="filter-input"
+                />
+              </div>
+              <ul class="list" id="realm-list"></ul>
+            </div>
+          </div>
+        </section>
+
         <section class="card span-2 view" data-view="logs">
           <div class="card-head">
             <h2>Logs</h2>
@@ -345,6 +395,7 @@
         </section>
       </main>
     </div>
+    <script src="./realm-data.js"></script>
     <script src="./renderer.js"></script>
   </body>
 </html>
