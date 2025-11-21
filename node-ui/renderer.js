@@ -1081,9 +1081,75 @@ async function saveMegaData(skipValidation = false) {
   const data = readMegaForm();
   
   if (!skipValidation) {
-    // Validate discount percent
+    // Validate required string fields
+    const requiredFields = {
+      "MEGA_WEBHOOK_URL": { value: (data.MEGA_WEBHOOK_URL || "").trim(), field: megaForm.MEGA_WEBHOOK_URL, label: "Discord Webhook URL" },
+      "WOW_CLIENT_ID": { value: (data.WOW_CLIENT_ID || "").trim(), field: megaForm.WOW_CLIENT_ID, label: "WoW Client ID" },
+      "WOW_CLIENT_SECRET": { value: (data.WOW_CLIENT_SECRET || "").trim(), field: megaForm.WOW_CLIENT_SECRET, label: "WoW Client Secret" },
+    };
+    
+    for (const [key, { value, field, label }] of Object.entries(requiredFields)) {
+      if (!value) {
+        const errorMsg = `${label} cannot be empty.`;
+        showToast(errorMsg, "error");
+        field?.focus();
+        return false;
+      }
+      if (value.length < 20) {
+        const errorMsg = `${label} value is invalid. Contact the devs on discord.`;
+        showToast(errorMsg, "error");
+        field?.focus();
+        return false;
+      }
+    }
+    
+    // Validate that Client ID and Secret are not the same
+    if (requiredFields.WOW_CLIENT_ID.value === requiredFields.WOW_CLIENT_SECRET.value) {
+      const errorMsg = "Client ID and Secret cannot be the same value. Read the wiki:\n\nhttps://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Installation-Guide#4-go-to-httpsdevelopbattlenetaccessclients-and-create-a-client-get-the-blizzard-oauth-client-and-secret-ids--you-will-use-these-values-for-the-wow_client_id-and-wow_client_secret-later-on";
+      showToast(errorMsg, "error");
+      megaForm.WOW_CLIENT_SECRET.focus();
+      return false;
+    }
+    
+    // Validate WOW_REGION
+    const validRegions = ["EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"];
+    const region = (data.WOW_REGION || "").trim();
+    if (!validRegions.includes(region)) {
+      const errorMsg = `WOW region must be either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'EUSODCLASSIC' or 'NASODCLASSIC'.`;
+      showToast(errorMsg, "error");
+      megaForm.WOW_REGION.focus();
+      return false;
+    }
+    
+    // Validate all integer fields
+    const integerFields = {
+      "MEGA_THREADS": { value: data.MEGA_THREADS, field: megaForm.MEGA_THREADS, label: "Threads" },
+      "SCAN_TIME_MIN": { value: data.SCAN_TIME_MIN, field: megaForm.SCAN_TIME_MIN, label: "Scan start offset" },
+      "SCAN_TIME_MAX": { value: data.SCAN_TIME_MAX, field: megaForm.SCAN_TIME_MAX, label: "Scan end offset" },
+      "DISCOUNT_PERCENT": { value: data.DISCOUNT_PERCENT, field: megaForm.DISCOUNT_PERCENT, label: "Discount vs Average" },
+      "TOKEN_PRICE": { value: data.TOKEN_PRICE, field: megaForm.TOKEN_PRICE, label: "Token alert min price" },
+    };
+    
+    for (const [key, { value, field, label }] of Object.entries(integerFields)) {
+      if (value === "" || value === null || value === undefined) {
+        const errorMsg = `${label} is required and must be an integer.`;
+        showToast(errorMsg, "error");
+        field?.focus();
+        return false;
+      }
+      
+      const numValue = Number(value);
+      if (Number.isNaN(numValue) || !Number.isInteger(numValue)) {
+        const errorMsg = `${label} should be an integer.`;
+        showToast(errorMsg, "error");
+        field?.focus();
+        return false;
+      }
+    }
+    
+    // Validate discount percent range (1-99)
     const discount = Number(data.DISCOUNT_PERCENT);
-    if (Number.isNaN(discount) || !(1 <= discount && discount <= 99)) {
+    if (!(1 <= discount && discount <= 99)) {
       const errorMsg = "Discount vs Average must be between 1 and 99.";
       showToast(errorMsg, "error");
       megaForm.DISCOUNT_PERCENT.focus();
