@@ -302,6 +302,10 @@ select:focus {
   border-radius: 10px;
 }
 
+.item-form-vertical .toggles {
+  grid-template-columns: 1fr 1fr;
+}
+
 .toggles label {
   font-weight: 600;
   color: var(--muted);
@@ -438,6 +442,9 @@ select:focus {
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
+  max-height: 600px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .table-row {

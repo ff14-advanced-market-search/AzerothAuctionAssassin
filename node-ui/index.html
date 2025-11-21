@@ -191,7 +191,7 @@
             <h2>Item level rules</h2>
             <p class="muted">Write to desired_ilvl_list.json</p>
           </div>
-          <div class="search-block">
+          <div class="search-block items-search-full">
             <div class="search-row">
               <input
                 type="text"
@@ -205,31 +205,67 @@
             <div id="ilvl-search-status" class="muted tiny"></div>
             <div class="search-results" id="ilvl-search-results"></div>
           </div>
-          <form id="ilvl-form" class="ilvl-grid">
-            <label>Min ilvl<input name="ilvl" type="number" value="450" /></label>
-            <label>Max ilvl<input name="max_ilvl" type="number" value="10000" /></label>
-            <label>Buyout<input name="buyout" type="number" value="100000" /></label>
-            <label>Item IDs (comma separated)<input name="item_ids" type="text" /></label>
-            <label>Bonus list IDs<input name="bonus_lists" type="text" /></label>
-            <label>Min player level<input name="required_min_lvl" type="number" value="1" /></label>
-            <label>Max player level<input name="required_max_lvl" type="number" value="1000" /></label>
-            <div class="toggles">
-              <label><input type="checkbox" name="sockets" /> Sockets</label>
-              <label><input type="checkbox" name="speed" /> Speed</label>
-              <label><input type="checkbox" name="leech" /> Leech</label>
-              <label><input type="checkbox" name="avoidance" /> Avoidance</label>
+          <div class="items-layout">
+            <div class="items-sidebar">
+              <form id="ilvl-form" class="item-form-vertical">
+                <label>
+                  Min ilvl
+                  <input name="ilvl" type="number" value="450" />
+                </label>
+                <label>
+                  Max ilvl
+                  <input name="max_ilvl" type="number" value="10000" />
+                </label>
+                <label>
+                  Buyout
+                  <input name="buyout" type="number" value="100000" />
+                </label>
+                <label>
+                  Item IDs (comma separated)
+                  <input name="item_ids" type="text" />
+                </label>
+                <label>
+                  Bonus list IDs
+                  <input name="bonus_lists" type="text" />
+                </label>
+                <label>
+                  Min player level
+                  <input name="required_min_lvl" type="number" value="1" />
+                </label>
+                <label>
+                  Max player level
+                  <input name="required_max_lvl" type="number" value="1000" />
+                </label>
+                <div class="toggles">
+                  <label><input type="checkbox" name="sockets" /> Sockets</label>
+                  <label><input type="checkbox" name="speed" /> Speed</label>
+                  <label><input type="checkbox" name="leech" /> Leech</label>
+                  <label><input type="checkbox" name="avoidance" /> Avoidance</label>
+                </div>
+                <button type="submit" class="primary">Add rule</button>
+              </form>
+              <div class="import-vertical">
+                <button type="button" class="ghost" id="import-ilvl-btn">Import from AAA file</button>
+                <button type="button" class="ghost" id="export-ilvl-btn">Export to AAA file</button>
+                <button type="button" class="ghost" id="paste-ilvl-btn">Import AAA</button>
+                <button type="button" class="ghost" id="copy-ilvl-btn">Copy AAA to clipboard</button>
+                <button type="button" class="ghost" id="paste-pbs-ilvl-btn">Import PBS</button>
+                <button type="button" class="ghost" id="copy-pbs-ilvl-btn">Copy PBS to clipboard</button>
+              </div>
             </div>
-            <button type="submit" class="primary">Add rule</button>
-          </form>
-          <div class="import-row">
-            <button type="button" class="ghost" id="import-ilvl-btn">Import from AAA file</button>
-            <button type="button" class="ghost" id="export-ilvl-btn">Export to AAA file</button>
-            <button type="button" class="ghost" id="paste-ilvl-btn">Import AAA</button>
-            <button type="button" class="ghost" id="copy-ilvl-btn">Copy AAA to clipboard</button>
-            <button type="button" class="ghost" id="paste-pbs-ilvl-btn">Import PBS</button>
-            <button type="button" class="ghost" id="copy-pbs-ilvl-btn">Copy PBS to clipboard</button>
+            <div class="items-list-panel">
+              <div class="items-list-header">
+                <h3>Your Rules</h3>
+                <input
+                  type="text"
+                  id="ilvl-filter-input"
+                  placeholder="Filter rules by item name or ID..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="table" id="ilvl-table"></div>
+            </div>
           </div>
-          <div class="table" id="ilvl-table"></div>
         </section>
 
         <section class="card span-2 view" data-view="pet-ilvl">
@@ -237,7 +273,7 @@
             <h2>Pet level rules</h2>
             <p class="muted">Write to desired_pet_ilvl_list.json</p>
           </div>
-          <div class="search-block">
+          <div class="search-block items-search-full">
             <div class="search-row">
               <input
                 type="text"
@@ -251,23 +287,53 @@
             <div id="pet-ilvl-search-status" class="muted tiny"></div>
             <div class="search-results" id="pet-ilvl-search-results"></div>
           </div>
-          <form id="pet-ilvl-form" class="ilvl-grid">
-            <label>Pet ID<input name="petID" type="number" /></label>
-            <label>Max price<input name="price" type="number" /></label>
-            <label>Min level<input name="minLevel" type="number" value="25" /></label>
-            <label>Min quality (-1 any)<input name="minQuality" type="number" value="-1" /></label>
-            <label>Exclude breeds (comma)<input name="excludeBreeds" type="text" /></label>
-            <button type="submit" class="primary">Add pet rule</button>
-          </form>
-          <div class="import-row">
-            <button type="button" class="ghost" id="import-pet-ilvl-btn">Import from AAA file</button>
-            <button type="button" class="ghost" id="export-pet-ilvl-btn">Export to AAA file</button>
-            <button type="button" class="ghost" id="paste-pet-ilvl-btn">Import AAA</button>
-            <button type="button" class="ghost" id="copy-pet-ilvl-btn">Copy AAA to clipboard</button>
-            <button type="button" class="ghost" id="paste-pbs-pet-ilvl-btn">Import PBS</button>
-            <button type="button" class="ghost" id="copy-pbs-pet-ilvl-btn">Copy PBS to clipboard</button>
+          <div class="items-layout">
+            <div class="items-sidebar">
+              <form id="pet-ilvl-form" class="item-form-vertical">
+                <label>
+                  Pet ID
+                  <input name="petID" type="number" />
+                </label>
+                <label>
+                  Max price
+                  <input name="price" type="number" />
+                </label>
+                <label>
+                  Min level
+                  <input name="minLevel" type="number" value="25" />
+                </label>
+                <label>
+                  Min quality (-1 any)
+                  <input name="minQuality" type="number" value="-1" />
+                </label>
+                <label>
+                  Exclude breeds (comma)
+                  <input name="excludeBreeds" type="text" />
+                </label>
+                <button type="submit" class="primary">Add pet rule</button>
+              </form>
+              <div class="import-vertical">
+                <button type="button" class="ghost" id="import-pet-ilvl-btn">Import from AAA file</button>
+                <button type="button" class="ghost" id="export-pet-ilvl-btn">Export to AAA file</button>
+                <button type="button" class="ghost" id="paste-pet-ilvl-btn">Import AAA</button>
+                <button type="button" class="ghost" id="copy-pet-ilvl-btn">Copy AAA to clipboard</button>
+                <button type="button" class="ghost" id="paste-pbs-pet-ilvl-btn">Import PBS</button>
+                <button type="button" class="ghost" id="copy-pbs-pet-ilvl-btn">Copy PBS to clipboard</button>
+              </div>
+            </div>
+            <div class="items-list-panel">
+              <div class="items-list-header">
+                <h3>Your Rules</h3>
+                <input
+                  type="text"
+                  id="pet-ilvl-filter-input"
+                  placeholder="Filter rules by pet name or ID..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="table" id="pet-ilvl-table"></div>
+            </div>
           </div>
-          <div class="table" id="pet-ilvl-table"></div>
         </section>
 
         <section class="card span-2 view" data-view="logs">

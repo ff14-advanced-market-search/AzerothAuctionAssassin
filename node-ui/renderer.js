@@ -23,6 +23,8 @@ const itemSearchBtn = document.getElementById("item-search-btn");
 const itemSearchResults = document.getElementById("item-search-results");
 const itemSearchStatus = document.getElementById("item-search-status");
 const itemFilterInput = document.getElementById("item-filter-input");
+const ilvlFilterInput = document.getElementById("ilvl-filter-input");
+const petIlvlFilterInput = document.getElementById("pet-ilvl-filter-input");
 const petIlvlSearchInput = document.getElementById("pet-ilvl-search-input");
 const petIlvlSearchBtn = document.getElementById("pet-ilvl-search-btn");
 const petIlvlSearchResults = document.getElementById("pet-ilvl-search-results");
@@ -534,7 +536,29 @@ function renderIlvlRules() {
     return;
   }
 
-  state.ilvlList.forEach((rule, idx) => {
+  const filterTerm = ilvlFilterInput ? ilvlFilterInput.value.toLowerCase().trim() : "";
+  let filteredRules = state.ilvlList;
+
+  if (filterTerm) {
+    filteredRules = state.ilvlList.filter((rule) => {
+      const itemIds = (rule.item_ids || []).map(String);
+      const itemNames = itemIds.map((id) => itemNameMap[id] || "").filter(Boolean);
+      const searchText = `${itemIds.join(" ")} ${itemNames.join(" ")} ${rule.bonus_lists?.join(" ") || ""}`.toLowerCase();
+      return searchText.includes(filterTerm);
+    });
+  }
+
+  if (!filteredRules.length) {
+    const div = document.createElement("div");
+    div.className = "table-row";
+    div.textContent = filterTerm ? "No rules match your filter." : "No ilvl rules yet.";
+    div.style.color = "#90a4b8";
+    ilvlTable.appendChild(div);
+    return;
+  }
+
+  filteredRules.forEach((rule, filteredIdx) => {
+    const idx = state.ilvlList.indexOf(rule);
     const names = (rule.item_ids || []).map((id) => {
       const nm = itemNameMap[String(id)];
       return nm ? `${nm} (${id})` : id;
@@ -543,7 +567,7 @@ function renderIlvlRules() {
     row.className = "table-row";
     row.style.cursor = "pointer";
     row.innerHTML = `
-      <div class="pill">#${idx + 1}</div>
+      <div class="pill">#${filteredIdx + 1}</div>
       <div>ilvl ${rule.ilvl}-${rule.max_ilvl}</div>
       <div>${rule.buyout} gold</div>
       <div>
@@ -601,13 +625,34 @@ function renderPetIlvlRules() {
     return;
   }
 
-  state.petIlvlList.forEach((rule, idx) => {
+  const filterTerm = petIlvlFilterInput ? petIlvlFilterInput.value.toLowerCase().trim() : "";
+  let filteredRules = state.petIlvlList;
+
+  if (filterTerm) {
+    filteredRules = state.petIlvlList.filter((rule) => {
+      const name = petNameMap[String(rule.petID)] || "";
+      const searchText = `${rule.petID} ${name}`.toLowerCase();
+      return searchText.includes(filterTerm);
+    });
+  }
+
+  if (!filteredRules.length) {
+    const div = document.createElement("div");
+    div.className = "table-row";
+    div.textContent = filterTerm ? "No rules match your filter." : "No pet rules yet.";
+    div.style.color = "#90a4b8";
+    petIlvlTable.appendChild(div);
+    return;
+  }
+
+  filteredRules.forEach((rule, filteredIdx) => {
+    const idx = state.petIlvlList.indexOf(rule);
     const name = petNameMap[String(rule.petID)];
     const row = document.createElement("div");
     row.className = "table-row";
     row.style.cursor = "pointer";
     row.innerHTML = `
-      <div class="pill">#${idx + 1}</div>
+      <div class="pill">#${filteredIdx + 1}</div>
       <div>Pet ${rule.petID}${name ? ` • ${name}` : ""}</div>
       <div>${rule.price} gold</div>
       <div class="bonuses">Min lvl ${rule.minLevel}, quality ${rule.minQuality}, exclude breeds: ${rule.excludeBreeds?.join(",") || "none"}</div>
@@ -1051,6 +1096,8 @@ copyItemsBtn?.addEventListener("click", () => handleCopyAAA("desiredItems", copy
 pastePBSItemsBtn?.addEventListener("click", () => handlePastePBSItems(pastePBSItemsBtn));
 copyPBSItemsBtn?.addEventListener("click", () => handleCopyPBSItems(copyPBSItemsBtn));
 itemFilterInput?.addEventListener("input", () => renderItemList());
+ilvlFilterInput?.addEventListener("input", () => renderIlvlRules());
+petIlvlFilterInput?.addEventListener("input", () => renderPetIlvlRules());
 importIlvlBtn?.addEventListener("click", () => handleImport("ilvlList", importIlvlBtn));
 exportIlvlBtn?.addEventListener("click", () => handleExport("ilvlList", exportIlvlBtn));
 pasteIlvlBtn?.addEventListener("click", () => handlePasteAAA("ilvlList", pasteIlvlBtn));
