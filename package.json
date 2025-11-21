@@ -5,8 +5,7 @@
   "license": "MIT",
   "main": "node-ui/main.js",
   "scripts": {
-    "start": "electron .",
-    "alerts:ts": "node -r ts-node/register src/mega-alerts.ts"
+    "start": "electron ."
   },
   "engines": {
     "node": ">=18.0.0"
