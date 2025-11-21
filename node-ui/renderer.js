@@ -1037,10 +1037,34 @@ document.getElementById("item-form").addEventListener("submit", async (e) => {
 document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
+  
+  // Validation
+  const ilvl = Number(form.ilvl.value);
+  const maxIlvl = Number(form.max_ilvl.value) || ilvl;
+  const buyout = Number(form.buyout.value);
+  
+  if (!ilvl || ilvl <= 0) {
+    appendLog("Error: Min ilvl must be greater than 0\n");
+    form.ilvl.focus();
+    return;
+  }
+  
+  if (maxIlvl < ilvl) {
+    appendLog("Error: Max ilvl must be greater than or equal to Min ilvl\n");
+    form.max_ilvl.focus();
+    return;
+  }
+  
+  if (!buyout || buyout <= 0) {
+    appendLog("Error: Buyout must be greater than 0\n");
+    form.buyout.focus();
+    return;
+  }
+  
   const rule = {
-    ilvl: Number(form.ilvl.value) || 0,
-    max_ilvl: Number(form.max_ilvl.value) || Number(form.ilvl.value) || 0,
-    buyout: Number(form.buyout.value) || 0,
+    ilvl: ilvl,
+    max_ilvl: maxIlvl,
+    buyout: buyout,
     sockets: form.sockets.checked,
     speed: form.speed.checked,
     leech: form.leech.checked,
@@ -1050,6 +1074,7 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     required_min_lvl: Number(form.required_min_lvl.value) || 1,
     required_max_lvl: Number(form.required_max_lvl.value) || 1000,
   };
+  
   if (editingIlvlIndex !== null && editingIlvlIndex >= 0 && editingIlvlIndex < state.ilvlList.length) {
     state.ilvlList[editingIlvlIndex] = rule;
     editingIlvlIndex = null;
@@ -1058,9 +1083,8 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
   }
   state.ilvlList = await window.aaa.saveIlvl(state.ilvlList);
   renderIlvlRules();
-  const submitBtn = form.querySelector('button[type="submit"]');
-  if (submitBtn) submitBtn.textContent = "Add rule";
-  form.reset();
+  clearIlvlForm();
+  appendLog("Ilvl rule saved successfully\n");
 });
 
 document
