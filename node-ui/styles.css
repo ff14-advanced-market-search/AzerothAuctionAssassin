@@ -447,10 +447,16 @@ select:focus {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   align-items: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .table-row:nth-child(odd) {
   background: rgba(255, 255, 255, 0.02);
+}
+
+.table-row:hover {
+  background: rgba(78, 167, 255, 0.08) !important;
+  border-color: var(--accent-2);
 }
 
 .table-row .bonuses {

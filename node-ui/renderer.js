@@ -541,6 +541,7 @@ function renderIlvlRules() {
     });
     const row = document.createElement("div");
     row.className = "table-row";
+    row.style.cursor = "pointer";
     row.innerHTML = `
       <div class="pill">#${idx + 1}</div>
       <div>ilvl ${rule.ilvl}-${rule.max_ilvl}</div>
@@ -559,8 +560,32 @@ function renderIlvlRules() {
     const button = document.createElement("button");
     button.textContent = "Remove";
     button.className = "ghost";
-    button.onclick = () => removeIlvlRule(idx);
+    button.onclick = (e) => {
+      e.stopPropagation();
+      removeIlvlRule(idx);
+    };
     row.appendChild(button);
+    
+    // Make row clickable to populate form
+    row.onclick = (e) => {
+      if (e.target === button || e.target.closest("button")) return;
+      const form = document.getElementById("ilvl-form");
+      if (form) {
+        form.ilvl.value = rule.ilvl || 450;
+        form.max_ilvl.value = rule.max_ilvl || 10000;
+        form.buyout.value = rule.buyout || 100000;
+        form.item_ids.value = (rule.item_ids || []).join(", ");
+        form.bonus_lists.value = (rule.bonus_lists || []).join(", ");
+        form.required_min_lvl.value = rule.required_min_lvl || 1;
+        form.required_max_lvl.value = rule.required_max_lvl || 1000;
+        form.sockets.checked = rule.sockets || false;
+        form.speed.checked = rule.speed || false;
+        form.leech.checked = rule.leech || false;
+        form.avoidance.checked = rule.avoidance || false;
+        form.ilvl.focus();
+      }
+    };
+    
     ilvlTable.appendChild(row);
   });
 }
@@ -580,6 +605,7 @@ function renderPetIlvlRules() {
     const name = petNameMap[String(rule.petID)];
     const row = document.createElement("div");
     row.className = "table-row";
+    row.style.cursor = "pointer";
     row.innerHTML = `
       <div class="pill">#${idx + 1}</div>
       <div>Pet ${rule.petID}${name ? ` • ${name}` : ""}</div>
@@ -589,8 +615,26 @@ function renderPetIlvlRules() {
     const button = document.createElement("button");
     button.textContent = "Remove";
     button.className = "ghost";
-    button.onclick = () => removePetIlvlRule(idx);
+    button.onclick = (e) => {
+      e.stopPropagation();
+      removePetIlvlRule(idx);
+    };
     row.appendChild(button);
+    
+    // Make row clickable to populate form
+    row.onclick = (e) => {
+      if (e.target === button || e.target.closest("button")) return;
+      const form = document.getElementById("pet-ilvl-form");
+      if (form) {
+        form.petID.value = rule.petID || "";
+        form.price.value = rule.price || "";
+        form.minLevel.value = rule.minLevel || 25;
+        form.minQuality.value = rule.minQuality !== undefined ? rule.minQuality : -1;
+        form.excludeBreeds.value = (rule.excludeBreeds || []).join(", ");
+        form.petID.focus();
+      }
+    };
+    
     petIlvlTable.appendChild(row);
   });
 }
