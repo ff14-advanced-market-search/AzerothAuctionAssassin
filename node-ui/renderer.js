@@ -458,7 +458,7 @@ function readMegaForm() {
   return out;
 }
 
-function renderKVList(target, data, onRemove, labelFn) {
+function renderKVList(target, data, onRemove, labelFn, onClick) {
   target.innerHTML = "";
   const entries = Object.entries(data);
   if (entries.length === 0) {
@@ -471,11 +471,23 @@ function renderKVList(target, data, onRemove, labelFn) {
   entries.forEach(([id, price]) => {
     const li = document.createElement("li");
     const label = labelFn ? labelFn(id, price) : `<strong>${id}</strong> → ${price}`;
-    li.innerHTML = `<div>${label}</div>`;
+    const labelDiv = document.createElement("div");
+    labelDiv.innerHTML = label;
+    if (onClick) {
+      labelDiv.style.cursor = "pointer";
+      labelDiv.onclick = (e) => {
+        e.stopPropagation();
+        onClick(id, price);
+      };
+    }
+    li.appendChild(labelDiv);
     const btn = document.createElement("button");
     btn.textContent = "Remove";
     btn.className = "ghost";
-    btn.onclick = () => onRemove(id);
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      onRemove(id);
+    };
     li.appendChild(btn);
     target.appendChild(li);
   });
@@ -496,10 +508,19 @@ function renderItemList() {
     });
   }
   
+  const itemForm = document.getElementById("item-form");
+  const handleItemClick = (itemId, price) => {
+    if (itemForm) {
+      itemForm.id.value = itemId;
+      itemForm.price.value = price;
+      itemForm.id.focus();
+    }
+  };
+  
   renderKVList(itemList, filteredData, removeItem, (itemId, p) => {
     const name = itemNameMap[itemId];
     return `<strong>${itemId}${name ? ` • ${name}` : ""}</strong> → ${p}`;
-  });
+  }, handleItemClick);
 }
 
 function renderIlvlRules() {

@@ -398,6 +398,21 @@ select:focus {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
   border-radius: 10px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.list li > div {
+  flex: 1;
+  transition: color 0.2s ease;
+}
+
+.list li > div:hover {
+  color: var(--accent-2);
+}
+
+.list li:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--accent-2);
 }
 
 .pill {
