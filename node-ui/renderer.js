@@ -78,6 +78,41 @@ let petSearchLoading = false;
 let editingIlvlIndex = null;
 let editingPetIlvlIndex = null;
 
+/**
+ * Clear ilvl form and reset to "add new" mode
+ */
+function clearIlvlForm() {
+  editingIlvlIndex = null;
+  const form = document.getElementById("ilvl-form");
+  if (form) {
+    form.reset();
+    form.ilvl.value = 450;
+    form.max_ilvl.value = 10000;
+    form.buyout.value = 100000;
+    form.required_min_lvl.value = 1;
+    form.required_max_lvl.value = 1000;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = "Add rule";
+    form.ilvl.focus();
+  }
+}
+
+/**
+ * Clear pet ilvl form and reset to "add new" mode
+ */
+function clearPetIlvlForm() {
+  editingPetIlvlIndex = null;
+  const form = document.getElementById("pet-ilvl-form");
+  if (form) {
+    form.reset();
+    form.minLevel.value = 25;
+    form.minQuality.value = -1;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = "Add pet rule";
+    form.petID.focus();
+  }
+}
+
 function ensureItemName(id, name) {
   const key = String(id);
   if (name) {
@@ -1053,6 +1088,15 @@ document
     if (submitBtn) submitBtn.textContent = "Add pet rule";
     form.reset();
   });
+
+// Add event listeners for "New Item" buttons
+document.getElementById("new-ilvl-btn")?.addEventListener("click", () => {
+  clearIlvlForm();
+});
+
+document.getElementById("new-pet-ilvl-btn")?.addEventListener("click", () => {
+  clearPetIlvlForm();
+});
 
 saveSettingsBtn.addEventListener("click", async () => {
   await saveMegaData();
