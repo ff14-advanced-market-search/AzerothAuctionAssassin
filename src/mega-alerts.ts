@@ -6,6 +6,10 @@ import { parentPort } from "worker_threads";
 
 type Json = Record<string, any>;
 
+/**
+ * Configuration type for mega_data.json
+ * Contains all settings for the auction house sniper
+ */
 type MegaConfig = {
   MEGA_WEBHOOK_URL: string;
   WOW_CLIENT_ID: string;
@@ -25,6 +29,10 @@ type MegaConfig = {
   FACTION?: "all" | "horde" | "alliance" | "booty bay";
 };
 
+/**
+ * Item level rule configuration
+ * Defines criteria for sniping items based on item level, tertiary stats, and bonus lists
+ */
 type IlvlRule = {
   ilvl: number;
   max_ilvl: number;
@@ -42,6 +50,10 @@ type IlvlRule = {
   base_required_levels: Record<number, number>;
 };
 
+/**
+ * Pet level rule configuration
+ * Defines criteria for sniping battle pets based on level, quality, and breed
+ */
 type PetIlvlRule = {
   petID: number;
   price: number;
@@ -50,6 +62,9 @@ type PetIlvlRule = {
   excludeBreeds: number[];
 };
 
+/**
+ * Upload timer information for tracking when auction house data was last updated
+ */
 type UploadTimer = {
   dataSetID: number;
   dataSetName: string[];
@@ -62,11 +77,15 @@ type UploadTimer = {
 
 type Auction = any;
 
+// Directory paths
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
 const STATIC_DIR = path.join(ROOT, "StaticData");
 const SADDLEBAG_URL = "http://api.saddlebagexchange.com";
 
+/**
+ * Read JSON file with fallback value
+ */
 function readJson<T>(p: string, fallback: T): T {
   try {
     const raw = fs.readFileSync(p, "utf8");
@@ -76,6 +95,10 @@ function readJson<T>(p: string, fallback: T): T {
   }
 }
 
+/**
+ * Get list of Russian realm IDs to exclude if NO_RUSSIAN_REALMS is enabled
+ * Returns retail, classic, and SoD (Season of Discovery) Russian realm IDs
+ */
 function getRussianRealmIds(): number[] {
   const retail = [1602, 1604, 1605, 1614, 1615, 1623, 1923, 1925, 1928, 1929, 1922];
   const classic = [4452, 4474];
@@ -83,11 +106,15 @@ function getRussianRealmIds(): number[] {
   return [...retail, ...classic, ...sod];
 }
 
+/**
+ * Create a Discord embed with specified title, description, and fields
+ * Uses blurple color code (0x7289da) and adds current UTC time as footer
+ */
 function createEmbed(title: string, description: string, fields: any[]) {
   return {
     title,
     description,
-    color: 0x7289da,
+    color: 0x7289da, // Blurple color code
     fields,
     footer: {
       text: new Date().toLocaleString("en-US", {
@@ -103,12 +130,19 @@ function createEmbed(title: string, description: string, fields: any[]) {
   };
 }
 
+/**
+ * Split a list into chunks of maximum size
+ */
 function splitList<T>(lst: T[], maxSize: number): T[][] {
   const res: T[][] = [];
   for (let i = 0; i < lst.length; i += maxSize) res.push(lst.slice(i, i + maxSize));
   return res;
 }
 
+/**
+ * HTTP request helper with retry logic
+ * Retries up to 3 times with 500ms delay between attempts
+ */
 async function httpJson(url: string, opts: any = {}, retries = 3): Promise<any> {
   let lastErr: any;
   for (let i = 0; i < retries; i++) {
@@ -128,6 +162,10 @@ async function httpJson(url: string, opts: any = {}, retries = 3): Promise<any> 
   throw lastErr;
 }
 
+/**
+ * HTTP request helper for binary data with retry logic
+ * Retries up to 3 times with 500ms delay between attempts
+ */
 async function httpBuffer(url: string, opts: any = {}, retries = 3): Promise<Buffer> {
   let lastErr: any;
   for (let i = 0; i < retries; i++) {
@@ -148,6 +186,9 @@ async function httpBuffer(url: string, opts: any = {}, retries = 3): Promise<Buf
   throw lastErr;
 }
 
+/**
+ * Send a Discord embed message to the webhook
+ */
 async function sendDiscordEmbed(webhook: string, embed: any) {
   await fetch(webhook, {
     method: "POST",
@@ -156,6 +197,9 @@ async function sendDiscordEmbed(webhook: string, embed: any) {
   });
 }
 
+/**
+ * Send a plain text Discord message to the webhook
+ */
 async function sendDiscordMessage(webhook: string, message: string) {
   await fetch(webhook, {
     method: "POST",
@@ -164,6 +208,10 @@ async function sendDiscordMessage(webhook: string, message: string) {
   });
 }
 
+/**
+ * Main data class for managing auction house sniper configuration and state
+ * Handles loading configuration, desired items, ilvl rules, and pet rules
+ */
 class MegaData {
   cfg: MegaConfig;
   desiredItems: Record<number, number>;
@@ -197,48 +245,73 @@ class MegaData {
   ilvl_addition: Record<number, number> = {};
 
   constructor() {
+    // Load the raw configuration file (the raw file users can write their input into)
     this.cfg = readJson<MegaConfig>(path.join(DATA_DIR, "mega_data.json"), {} as any);
     this.WEBHOOK_URL = this.cfg.MEGA_WEBHOOK_URL;
     this.REGION = this.cfg.WOW_REGION;
-    this.THREADS = this.normalizeInt(this.cfg.MEGA_THREADS, 48);
-    this.SCAN_TIME_MIN = this.normalizeInt(this.cfg.SCAN_TIME_MIN, 1);
-    this.SCAN_TIME_MAX = this.normalizeInt(this.cfg.SCAN_TIME_MAX, 3);
-    this.REFRESH_ALERTS = Boolean(this.cfg.REFRESH_ALERTS);
-    this.SHOW_BIDPRICES = String(this.cfg.SHOW_BID_PRICES ?? false);
-    this.EXTRA_ALERTS = this.cfg.EXTRA_ALERTS;
-    this.NO_RUSSIAN_REALMS = Boolean(this.cfg.NO_RUSSIAN_REALMS);
-    this.DEBUG = Boolean(this.cfg.DEBUG);
-    this.NO_LINKS = Boolean(this.cfg.NO_LINKS);
+    
+    // Set optional configuration variables with defaults
+    this.THREADS = this.normalizeInt(this.cfg.MEGA_THREADS, 48); // Default to 48 threads
+    this.SCAN_TIME_MIN = this.normalizeInt(this.cfg.SCAN_TIME_MIN, 1); // Minutes before data update to start scans
+    this.SCAN_TIME_MAX = this.normalizeInt(this.cfg.SCAN_TIME_MAX, 3); // Minutes after data update to stop scans
+    this.REFRESH_ALERTS = Boolean(this.cfg.REFRESH_ALERTS); // Refresh alerts every 1 hour
+    this.SHOW_BIDPRICES = String(this.cfg.SHOW_BID_PRICES ?? false); // Show items with bid prices
+    this.EXTRA_ALERTS = this.cfg.EXTRA_ALERTS; // JSON array of extra alert minutes
+    this.NO_RUSSIAN_REALMS = Boolean(this.cfg.NO_RUSSIAN_REALMS); // Removes alerts from Russian Realms
+    this.DEBUG = Boolean(this.cfg.DEBUG); // Trigger a scan on all realms once for testing
+    this.NO_LINKS = Boolean(this.cfg.NO_LINKS); // Disable all Wowhead, undermine and saddlebag links
     this.TOKEN_PRICE =
       typeof this.cfg.TOKEN_PRICE === "number" ? this.cfg.TOKEN_PRICE : undefined;
-    // classic regions set wowhead_link true in python if classic
+    
+    // Classic regions don't have undermine exchange, so use wowhead links
+    // Classic also needs faction selection (all, horde, alliance, booty bay)
     if (String(this.REGION).includes("CLASSIC")) {
       this.WOWHEAD_LINK = true;
       this.FACTION = this.cfg.FACTION ?? "all";
     } else {
       this.WOWHEAD_LINK = Boolean(this.cfg.WOWHEAD_LINK);
-      this.FACTION = "all";
+      this.FACTION = "all"; // Retail uses cross-faction AH by default
     }
 
+    // Setup items to snipe
     this.desiredItems = this.loadDesiredItems();
     this.desiredIlvlList = this.loadDesiredIlvlList();
     this.desiredPetIlvlList = this.loadDesiredPetIlvlList();
     this.validateSnipeLists();
+    
+    // Load realm names (filtered by NO_RUSSIAN_REALMS if enabled)
     this.WOW_SERVER_NAMES = this.loadRealmNames();
+    
+    // Get static lists of ALL bonus id values from raidbots
+    // This is the index for all ilvl gear (sockets, leech, avoidance, speed, ilvl additions)
     this.setBonusIds();
+    
+    // Get name dictionaries - only get names of desired items to limit data
     this.ITEM_NAMES = this.loadItemNames();
     // PET_NAMES from saddlebags (or backup)
     this.PET_NAMES = this.loadPetNamesBackup();
+    
+    // Get item names from desired ilvl entries
     this.buildIlvlNames();
+    
+    // Get upload times - initially empty, will be populated dynamically from each scan
     this.upload_timers = this.loadUploadTimers();
   }
 
+  /**
+   * Normalize integer value with fallback
+   * Converts string numbers to integers, returns fallback if invalid
+   */
   normalizeInt(val: any, fallback: number) {
     if (typeof val === "number" && Number.isFinite(val)) return val;
     const n = Number(val);
     return Number.isFinite(n) ? n : fallback;
   }
 
+  /**
+   * Load desired items from JSON file
+   * Converts string keys to integer keys and float values
+   */
   loadDesiredItems(): Record<number, number> {
     const raw = readJson<Record<string, number>>(
       path.join(DATA_DIR, "desired_items.json"),
@@ -252,11 +325,17 @@ class MegaData {
     return out;
   }
 
+  /**
+   * Load desired ilvl list from JSON file
+   * Groups items by ilvl and handles both specific item_ids and broad groups
+   * Broad groups don't care about ilvl or item_ids - same generic info for all
+   */
   loadDesiredIlvlList(): IlvlRule[] {
     const file = path.join(DATA_DIR, "desired_ilvl_list.json");
     const list = readJson<any[]>(file, []);
     if (!Array.isArray(list) || list.length === 0) return [];
 
+    // Group items by ilvl - separate specific item_ids from broad groups
     const grouped: Record<number, number[][]> = {};
     const broad: any[] = [];
     for (const entry of list) {
@@ -335,6 +414,10 @@ class MegaData {
     return out;
   }
 
+  /**
+   * Load realm names from JSON file
+   * Filters out Russian realms if NO_RUSSIAN_REALMS is enabled
+   */
   loadRealmNames(): Record<string, number> {
     const file = path.join(
       DATA_DIR,
@@ -350,6 +433,10 @@ class MegaData {
     return realmNames;
   }
 
+  /**
+   * Validate that at least one snipe list has data
+   * Throws error if all lists are empty
+   */
   validateSnipeLists() {
     if (
       Object.keys(this.desiredItems).length === 0 &&
@@ -360,7 +447,13 @@ class MegaData {
     }
   }
 
+  /**
+   * Fetch or return cached Blizzard OAuth access token
+   * Tokens are valid for 24 hours, but we refresh after 20 hours to be safe
+   * If over 20 hours, make a new token and reset the creation time
+   */
   async fetchAccessToken(): Promise<string> {
+    // Check if token is still valid (less than 20 hours old)
     if (this.access_token && Date.now() / 1000 - this.access_token_creation_unix_time < 20 * 60 * 60) {
       return this.access_token;
     }
@@ -440,13 +533,18 @@ class MegaData {
       .sort();
   }
 
+  /**
+   * Make auction house API request for a specific connected realm
+   * Updates local timers with last-modified header if available
+   */
   async makeAhRequest(url: string, connectedRealmId: number) {
     const headers = { Authorization: `Bearer ${await this.fetchAccessToken()}` };
     const res = await fetch(url, { headers });
-    if (res.status === 429) throw new Error("429");
+    if (res.status === 429) throw new Error("429"); // Rate limited
     if (res.status !== 200) throw new Error(`${res.status}`);
     const data = await res.json();
 
+    // Update local timers with last-modified header
     const lastMod = res.headers.get("last-modified");
     if (lastMod) {
       this.update_local_timers(connectedRealmId, lastMod);
@@ -454,6 +552,10 @@ class MegaData {
     return data;
   }
 
+  /**
+   * Make commodity auction house API request
+   * Commodities use connected realm IDs -1 (NA) or -2 (EU)
+   */
   async makeCommodityRequest() {
     const region = this.REGION;
     const endpoint =
@@ -463,7 +565,7 @@ class MegaData {
     const connectedId = region === "NA" ? -1 : -2;
     const headers = { Authorization: `Bearer ${await this.fetchAccessToken()}` };
     const res = await fetch(endpoint, { headers });
-    if (res.status === 429) throw new Error("429");
+    if (res.status === 429) throw new Error("429"); // Rate limited
     if (res.status !== 200) throw new Error(`${res.status}`);
     const data = await res.json();
     const lastMod = res.headers.get("last-modified");
@@ -584,6 +686,11 @@ class MegaData {
     }
   }
 
+  /**
+   * Load bonus IDs from static data file
+   * Gets static lists of ALL bonus id values from raidbots
+   * This is the index for all ilvl gear (sockets, leech, avoidance, speed, ilvl additions)
+   */
   setBonusIds() {
     try {
       const bonus = readJson<Record<string, any>>(
@@ -613,6 +720,11 @@ class MegaData {
     }
   }
 
+  /**
+   * Get ilvl items from static data file
+   * Filters by ilvl and optional item_ids list
+   * Returns item names, IDs, base ilvls, and base required levels
+   */
   getIlvlItems(
     ilvl = 201,
     item_ids: number[] = []
@@ -626,6 +738,7 @@ class MegaData {
       path.join(STATIC_DIR, "ilvl_items.json"),
       {}
     );
+    // Filter by item_ids if provided
     if (item_ids && item_ids.length) {
       for (const key of Object.keys(results)) {
         if (!item_ids.includes(Number(key))) {
@@ -645,6 +758,10 @@ class MegaData {
     return { itemNames, itemIds: new Set(Object.keys(itemNames).map(Number)), baseIlvls, baseReq };
   }
 
+  /**
+   * Build dictionary of item names for desired ilvl entries
+   * Used for displaying item names in alerts
+   */
   buildIlvlNames() {
     this.DESIRED_ILVL_NAMES = {};
     for (const rule of this.desiredIlvlList) {
@@ -674,8 +791,10 @@ type AlertResult = {
   required_lvl?: number;
 };
 
+// Stop flag for worker thread communication
 let STOP_REQUESTED = false;
 if (parentPort) {
+  // Redirect console.log to parent thread for logging
   const origLog = console.log;
   console.log = (...args) => {
     origLog(...args);
@@ -688,18 +807,34 @@ if (parentPort) {
   });
 }
 
+/**
+ * Main alert processing function
+ * Runs continuously (unless runOnce=true) checking auction house data
+ * Blizzard API data only updates 1 time per hour
+ * The updates will come on minute X of each hour
+ * 
+ * @param state - MegaData instance with configuration and snipe lists
+ * @param progress - Callback function for progress updates
+ * @param runOnce - If true, run once and exit (for DEBUG mode)
+ */
 async function runAlerts(
   state: MegaData,
   progress: (msg: string) => void,
   runOnce = false
 ) {
   let running = true;
-  const alert_record: any[] = [];
+  const alert_record: any[] = []; // Track sent alerts to avoid duplicates
   state.upload_timers = await state.getUploadTimers();
 
+  /**
+   * Pull auction data for a single connected realm
+   * Processes auctions, checks for matches, and sends Discord alerts
+   */
   const pull_single_realm_data = async (connected_id: number) => {
     const auctions = await state.get_listings_single(connected_id);
     const clean = clean_listing_data(auctions, connected_id);
+    
+    // Check token price during commodity run (connected_id -1 or -2)
     if (connected_id === -1 || connected_id === -2) {
       await check_token_price();
     }
@@ -875,6 +1010,13 @@ async function runAlerts(
     };
   }
 
+  /**
+   * Check if an auction matches the ilvl rule criteria
+   * Validates tertiary stats (sockets, leech, avoidance, speed), ilvl, required level, bonus lists, and price
+   * 
+   * Check for a modifier with type 9 and get its value (modifier 9 value equals required playerLevel)
+   * If no modifier["type"] == 9 found, use the base required level for report
+   */
   function check_tertiary_stats_generic(
     auction: any,
     rule: IlvlRule,
@@ -882,10 +1024,13 @@ async function runAlerts(
   ) {
     if (!auction.item?.bonus_lists) return false;
     const item_bonus_ids = new Set<number>(auction.item.bonus_lists);
+    
+    // Check for required level modifier (type 9)
     const required_lvl =
       auction.item.modifiers?.find((m: any) => m.type === 9)?.value ??
       rule.base_required_levels[auction.item.id];
 
+    // Look for intersection of bonus_ids and tertiary stat lists
     const tertiary_stats = {
       sockets: intersection(item_bonus_ids, state.socket_ids),
       leech: intersection(item_bonus_ids, state.leech_ids),
@@ -898,22 +1043,31 @@ async function runAlerts(
       avoidance: rule.avoidance,
       speed: rule.speed,
     };
+    
+    // If we're looking for sockets, leech, avoidance, or speed, skip if none of those are present
+    // Check if any of the desired stats are True, then check if all desired stats are present
     if (Object.values(desired).some(Boolean)) {
       for (const [stat, want] of Object.entries(desired)) {
         if (want && !(tertiary_stats as any)[stat]) return false;
       }
     }
 
+    // Calculate ilvl: base_ilvl + sum of ilvl additions from bonus IDs
     const base_ilvl = rule.base_ilvls[auction.item.id];
     const ilvl_addition = [...item_bonus_ids]
       .map((b) => state.ilvl_addition[b] || 0)
       .reduce((a, b) => a + b, 0);
     const ilvl = base_ilvl + ilvl_addition;
+    
+    // Skip if ilvl is too low or too high
     if (ilvl < min_ilvl) return false;
     if (ilvl > rule.max_ilvl) return false;
+    
+    // Skip if required_lvl is too low or too high
     if (required_lvl < rule.required_min_lvl) return false;
     if (required_lvl > rule.required_max_lvl) return false;
 
+    // Skip if bonus_lists don't match exactly (unless bonus_lists is empty or [-1])
     if (
       rule.bonus_lists.length &&
       rule.bonus_lists[0] !== -1 &&
@@ -921,21 +1075,30 @@ async function runAlerts(
     ) {
       return false;
     }
+    
+    // If bonus_lists is [-1], check if item has more than 3 bonus IDs (excluding tertiary stats)
+    // This is when someone wants an item at base stats with no level modifiers
     if (rule.bonus_lists.length === 1 && rule.bonus_lists[0] === -1) {
       const temp = new Set(item_bonus_ids);
+      // Remove all tertiary stat bonus IDs
       for (const bid of state.socket_ids) temp.delete(bid);
       for (const bid of state.leech_ids) temp.delete(bid);
       for (const bid of state.avoidance_ids) temp.delete(bid);
       for (const bid of state.speed_ids) temp.delete(bid);
+      // If more than 3 bonus IDs remain, skip this item
       if (temp.size > 3) return false;
+      // Some rare ids don't work like this, so we skip them
       const bad_ids = [224637];
       if (bad_ids.includes(auction.item.id)) return false;
     }
 
+    // If no buyout, use bid
     if (!auction.buyout && auction.bid) auction.buyout = auction.bid;
     if (!auction.buyout) return false;
     const buyout = Math.round((auction.buyout / 10000) * 100) / 100;
     if (buyout > rule.buyout) return false;
+    
+    // If we get through everything and still haven't skipped, return match info
     return {
       item_id: auction.item.id,
       buyout,
@@ -946,16 +1109,41 @@ async function runAlerts(
     };
   }
 
+  /**
+   * Check if a pet auction meets the desired level and price criteria
+   * 
+   * Args:
+   *   item: Auction house item data from Blizzard API
+   *   desired_pet_list: List of pet ilvl rules containing desired pet criteria
+   * 
+   * Returns:
+   *   Pet info if it matches criteria, null if it doesn't match
+   * 
+   * Breed IDs can be found on warcraftpets.com
+   * 4, 14 are the best power
+   * 5, 15 are the best speed
+   * 6, 16 are the best health
+   */
   function check_pet_ilvl_stats(item: any, desired_pet_list: PetIlvlRule[]) {
     const pet_species_id = item.item.pet_species_id;
     const desired = desired_pet_list.find((p) => p.petID === pet_species_id);
     if (!desired) return null;
+    
+    // Check if pet meets level requirement
     const pet_level = item.item.pet_level;
     if (pet_level == null || pet_level < desired.minLevel) return null;
+    
+    // Check if quality meets requirement
     if (item.item.pet_quality_id < desired.minQuality) return null;
+    
+    // Check if breed is excluded
     if (desired.excludeBreeds.includes(item.item.pet_breed_id)) return null;
+    
+    // Check if price meets requirement (buyout price should be less than desired price)
     const buyout = item.buyout;
     if (buyout == null || buyout / 10000 > desired.price) return null;
+    
+    // If we get here, the pet matches all criteria
     return {
       pet_species_id,
       current_level: pet_level,
@@ -965,6 +1153,11 @@ async function runAlerts(
     };
   }
 
+  /**
+   * Clean and process auction listing data
+   * Separates auctions into different categories: regular items, pets, ilvl items, pet ilvl items
+   * All caged battle pets have item id 82800
+   */
   function clean_listing_data(auctions: Auction[], connected_id: number): AlertResult[] | undefined {
     const all_ah_buyouts: Record<number, number[]> = {};
     const all_ah_bids: Record<number, number[]> = {};
@@ -978,6 +1171,10 @@ async function runAlerts(
       return;
     }
 
+    /**
+     * Add price to dictionary, converting from copper to gold
+     * Only adds unique prices to avoid duplicates
+     */
     const add_price_to_dict = (
       price: number,
       item_id: number,
@@ -995,19 +1192,24 @@ async function runAlerts(
       const item_id = item.item?.id;
       if (!item_id) continue;
 
+      // Regular items (not pet cages)
       if (item_id in state.desiredItems && item_id !== 82800) {
         if ("bid" in item && state.SHOW_BIDPRICES === "true") {
           add_price_to_dict(item.bid, item_id, all_ah_bids);
         }
         if ("buyout" in item) add_price_to_dict(item.buyout, item_id, all_ah_buyouts);
         if ("unit_price" in item) add_price_to_dict(item.unit_price, item_id, all_ah_buyouts);
-      } else if (item_id === 82800) {
+      } 
+      // All caged battle pets have item id 82800
+      else if (item_id === 82800) {
+        // Check for desired pet ilvl items
         if (state.desiredPetIlvlList.length) {
           const info = check_pet_ilvl_stats(item, state.desiredPetIlvlList);
           if (info) pet_ilvl_ah_buyouts.push(info);
         }
       }
 
+      // Check ilvl snipe items
       for (const desired_ilvl_item of state.desiredIlvlList) {
         if (desired_ilvl_item.item_ids.includes(item_id)) {
           const info = check_tertiary_stats_generic(item, desired_ilvl_item, desired_ilvl_item.ilvl);
@@ -1089,7 +1291,9 @@ async function runAlerts(
     return true;
   }
 
-  // initial fast run across all realms
+  // Initial fast run across all realms
+  // Run once to get the current data so no one asks about the waiting time
+  // After the first run we will trigger once per hour when the new data updates
   const initialRealms = Array.from(new Set(Object.values(state.WOW_SERVER_NAMES)));
   if (initialRealms.length) {
     progress("Sending alerts!");
@@ -1101,14 +1305,23 @@ async function runAlerts(
 
   if (runOnce) return;
 
+  // Main loop - runs continuously checking for new auction house data
   while (running && !STOP_REQUESTED) {
     const current_min = new Date().getMinutes();
+    
+    // Refresh alerts 1 time per hour (at minute 1)
     if (current_min === 1 && state.REFRESH_ALERTS) {
       alert_record.length = 0;
     }
+    
+    // Get upload timers if we don't have them yet
     if (!Object.keys(state.upload_timers).length) {
       state.upload_timers = await state.getUploadTimers();
     }
+    
+    // Find realms that match the scan time window
+    // Scan starts at lastUploadMinute + SCAN_TIME_MIN
+    // Scan ends at lastUploadMinute + SCAN_TIME_MAX
     let matching_realms = state
       .get_upload_time_list()
       .filter(
@@ -1117,6 +1330,8 @@ async function runAlerts(
           current_min <= realm.lastUploadMinute + state.SCAN_TIME_MAX
       )
       .map((r) => r.dataSetID);
+    
+    // Check for extra alerts (JSON array of minutes to trigger on)
     if (state.EXTRA_ALERTS) {
       try {
         const extra = JSON.parse(state.EXTRA_ALERTS) as number[];
@@ -1143,23 +1358,34 @@ async function runAlerts(
           state.get_upload_time_minutes()
         )} of each hour. ${new Date().toISOString()} is not the update time.`
       );
-      await delay(20000);
+      await delay(20000); // Wait 20 seconds before checking again
     }
   }
 }
 
+/**
+ * Create Undermine Exchange link for a pet
+ * All caged battle pets use item ID 82800
+ */
 function create_oribos_exchange_pet_link(realm_name: string, pet_id: number, region: string) {
   const fixed_realm_name = realm_name.toLowerCase().replace("'", "").replace(/ /g, "-");
   const url_region = region === "NA" ? "us" : "eu";
   return `https://undermine.exchange/#${url_region}-${fixed_realm_name}/82800-${pet_id}`;
 }
 
+/**
+ * Create Undermine Exchange link for an item
+ */
 function create_oribos_exchange_item_link(realm_name: string, item_id: number, region: string) {
   const fixed_realm_name = realm_name.toLowerCase().replace("'", "").replace(/ /g, "-");
   const url_region = region === "NA" ? "us" : "eu";
   return `https://undermine.exchange/#${url_region}-${fixed_realm_name}/${item_id}`;
 }
 
+/**
+ * Run tasks in parallel with concurrency limit
+ * Uses a pool pattern to limit concurrent executions
+ */
 async function runPool(tasks: (() => Promise<any>)[], concurrency: number) {
   const results: any[] = [];
   const executing: Promise<any>[] = [];
@@ -1179,6 +1405,10 @@ async function runPool(tasks: (() => Promise<any>)[], concurrency: number) {
   return Promise.all(results);
 }
 
+/**
+ * Main entry point
+ * Initializes MegaData and starts alert processing
+ */
 async function main() {
   const state = new MegaData();
   console.log(
@@ -1187,6 +1417,7 @@ async function main() {
     ).length}, ilvl rules=${state.desiredIlvlList.length}, pet ilvl rules=${state.desiredPetIlvlList.length}`
   );
   if (state.DEBUG) {
+    // DEBUG MODE: starting mega alerts to run once and then exit operations
     await sendDiscordMessage(
       state.WEBHOOK_URL,
       "DEBUG MODE: starting mega alerts to run once and then exit operations"

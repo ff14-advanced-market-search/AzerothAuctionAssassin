@@ -25,7 +25,14 @@ Prefer to avoid the PyQt desktop UI? A lightweight Node/Electron GUI manages the
 
 - Requires Node 18+. Run with `npm start` (downloads Electron on first run).
 - Edit `mega_data.json`, desired item/pet targets, ilvl rules, and pet ilvl rules with structured forms.
-- Uses the files in `AzerothAuctionAssassinData/` (creates them if missing) and can start `mega_alerts.py` with your current settings.
+- Uses the files in `AzerothAuctionAssassinData/` (creates them if missing) and uses `src/mega_alerts.ts` instead of `mega_alerts.py` for scanning.
+
+```
+npm install
+npm start
+# if it doesnt start 
+#	rm -rf node_modules/
+````
 
 
 # Desktop GUI 
