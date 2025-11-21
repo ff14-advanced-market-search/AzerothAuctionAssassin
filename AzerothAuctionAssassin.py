@@ -2808,7 +2808,7 @@ class App(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Auction Assassin Token",
-                "Please provide a valid Auction Assassin token to save data!",
+                "AAA token expired or invalid. Please provide a valid Auction Assassin token to save data!",
             )
             return
 
@@ -2816,7 +2816,7 @@ class App(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Auction Assassin Token",
-                "Please provide a valid Auction Assassin token to save data!",
+                "AAA token expired or invalid. Please provide a valid Auction Assassin token to save data!",
             )
             return
 

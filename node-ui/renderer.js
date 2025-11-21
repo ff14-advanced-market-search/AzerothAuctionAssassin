@@ -1018,10 +1018,94 @@ async function handlePetSearch() {
   renderPetSearchResults(matches);
 }
 
-async function saveMegaData() {
+/**
+ * Validate authentication token by calling the checkmegatoken API
+ * @param {string} token - The authentication token to validate
+ * @returns {Promise<{valid: boolean, error?: string}>}
+ */
+async function validateToken(token) {
+  if (!token || !token.trim()) {
+    return { valid: false, error: "Please provide a valid Auction Assassin token to save data!" };
+  }
+  
+  try {
+    const response = await fetch("http://api.saddlebagexchange.com/api/wow/checkmegatoken", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({ token: token.trim() }),
+    });
+    
+    if (response.status !== 200) {
+      return { 
+        valid: false, 
+        error: `Could not reach server, status code: ${response.status}` 
+      };
+    }
+    
+    const responseData = await response.json();
+    
+    if (!responseData || Object.keys(responseData).length === 0) {
+      return { 
+        valid: false, 
+        error: "Please provide a valid Auction Assassin token to save data!" 
+      };
+    }
+    
+    if (!("succeeded" in responseData)) {
+      return { 
+        valid: false, 
+        error: "Please provide a valid Auction Assassin token to save data!" 
+      };
+    }
+    
+    if (!responseData.succeeded) {
+      return { 
+        valid: false, 
+        error: "Your Auction Assassin token is incorrect or expired!\n\nYou must run the bot command once every 14 days to get a new token." 
+      };
+    }
+    
+    return { valid: true };
+  } catch (err) {
+    return { 
+      valid: false, 
+      error: `Request error: ${err.message || String(err)}` 
+    };
+  }
+}
+
+async function saveMegaData(skipValidation = false) {
   const data = readMegaForm();
+  
+  if (!skipValidation) {
+    // Validate discount percent
+    const discount = Number(data.DISCOUNT_PERCENT);
+    if (Number.isNaN(discount) || !(1 <= discount && discount <= 99)) {
+      const errorMsg = "Discount vs Average must be between 1 and 99.";
+      showToast(errorMsg, "error");
+      megaForm.DISCOUNT_PERCENT.focus();
+      return false;
+    }
+    
+    // Validate authentication token
+    const token = data.AUTHENTICATION_TOKEN || "";
+    const tokenValidation = await validateToken(token);
+    if (!tokenValidation.valid) {
+      showToast(tokenValidation.error || "Invalid token", "error");
+      megaForm.AUTHENTICATION_TOKEN.focus();
+      return false;
+    }
+  }
+  
   state.megaData = await window.aaa.saveMegaData(data);
   renderMegaForm(state.megaData);
+  if (!skipValidation) {
+    showToast("Settings saved successfully!", "success", 2000);
+  }
+  return true;
 }
 
 async function removeItem(id) {
@@ -1341,8 +1425,10 @@ resetPetsBtn?.addEventListener("click", async () => {
 });
 
 saveSettingsBtn.addEventListener("click", async () => {
-  await saveMegaData();
-  flashButton(saveSettingsBtn, "Saved ✓");
+  const saved = await saveMegaData();
+  if (saved) {
+    flashButton(saveSettingsBtn, "Saved ✓");
+  }
 });
 
 reloadBtn.addEventListener("click", async () => {
@@ -1351,7 +1437,12 @@ reloadBtn.addEventListener("click", async () => {
 });
 
 startBtn.addEventListener("click", async () => {
-  await saveMegaData();
+  // Validate and save before starting
+  const saved = await saveMegaData();
+  if (!saved) {
+    return; // Validation failed, don't start
+  }
+  
   await window.aaa.runMega();
   setRunning(true);
 });

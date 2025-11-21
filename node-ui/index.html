@@ -102,9 +102,9 @@
               Scan end offset (min)
               <input name="SCAN_TIME_MAX" type="number" />
             </label>
-            <label title="Set the price recommendation discount. 1 to 100, smaller number means a better price. ex: if you set 10 percent and avg price is 100k, it recommends you snipe for 10k.">
+            <label title="Set the price recommendation discount. 1 to 99, smaller number means a better price. ex: if you set 10 percent and avg price is 100k, it recommends you snipe for 10k.">
               Discount vs Average
-              <input name="DISCOUNT_PERCENT" type="number" />
+              <input name="DISCOUNT_PERCENT" type="number" min="1" max="99" />
             </label>
             <label title="Set a minimum price to alert on wow token prices">
               Token alert min price
