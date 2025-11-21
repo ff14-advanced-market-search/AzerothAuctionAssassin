@@ -1,11 +1,18 @@
 {
   "name": "aaa-node-ui",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "description": "Node-based GUI to manage Azeroth Auction Assassin configs and run mega_alerts.py",
   "license": "MIT",
   "main": "node-ui/main.js",
+  "author": {
+    "name": "Azeroth Auction Assassin"
+  },
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:all": "electron-builder --win --mac"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -13,11 +20,74 @@
   "devDependencies": {
     "@types/node": "^22.9.1",
     "electron": "^29.3.0",
+    "electron-builder": "^24.13.3",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "undici": "^6.19.8"
+  },
+  "build": {
+    "appId": "com.azerothauctionassassin.app",
+    "productName": "Azeroth Auction Assassin",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "node-ui/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "StaticData",
+        "to": "StaticData",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "icon.ico",
+      "signingHashAlgorithms": ["sha256"],
+      "certificateFile": "${env.WIN_CERT_FILE}",
+      "certificatePassword": "${env.WIN_CERT_PASSWORD}",
+      "publisherName": "Azeroth Auction Assassin"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "icon.png",
+      "category": "public.app-category.utilities",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
   }
 }

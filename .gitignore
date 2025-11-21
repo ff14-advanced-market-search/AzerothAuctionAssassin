@@ -19,6 +19,7 @@ venv
 
 # Node / Electron / Typescript
 node_modules/
+dist-electron/
 
 # C extensions
 *.so

@@ -1,0 +1,167 @@
+name: Build Electron App
+
+env:
+  AAA_VERSION: "2.0.0"
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    outputs:
+      upload_url_base64: ${{ steps.b64encode_upload_url.outputs.upload_url_base64 }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Decode Windows Certificate
+      run: |
+        $cert_content = '${{ secrets.WIN_CERT_BASE64 }}'
+        $cert_bytes = [Convert]::FromBase64String($cert_content)
+        $cert_path = "certificate.pfx"
+        [IO.File]::WriteAllBytes($cert_path, $cert_bytes)
+        echo "WIN_CERT_FILE=$cert_path" >> $env:GITHUB_ENV
+        echo "WIN_CERT_PASSWORD=${{ secrets.WIN_CERT_PASSWORD }}" >> $env:GITHUB_ENV
+      shell: pwsh
+      if: ${{ secrets.WIN_CERT_BASE64 != '' }}
+
+    - name: Build Windows executable
+      run: npm run build:win
+      env:
+        WIN_CERT_FILE: ${{ env.WIN_CERT_FILE }}
+        WIN_CERT_PASSWORD: ${{ env.WIN_CERT_PASSWORD }}
+
+    - name: Sign Windows Executable (if certificate available)
+      run: |
+        if (Test-Path "certificate.pfx") {
+          $cert_path = "certificate.pfx"
+          $password = "${{ secrets.WIN_CERT_PASSWORD }}"
+          $timestamp_url = "http://timestamp.digicert.com"
+          $executable_path = ".\dist-electron\Azeroth Auction Assassin Setup ${{ env.AAA_VERSION }}.exe"
+          if (Test-Path $executable_path) {
+            $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
+            & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
+          }
+        }
+      shell: pwsh
+      if: ${{ secrets.WIN_CERT_BASE64 != '' }}
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "v${{env.AAA_VERSION}}"
+        release_name: "Release v${{env.AAA_VERSION}}"
+        draft: false
+        prerelease: false
+
+    - name: Encode and Save Upload URL as Base64
+      id: b64encode_upload_url
+      run: echo "::set-output name=upload_url_base64::$(echo -n '${{ steps.create_release.outputs.upload_url }}' | base64 --wrap=0)"
+
+    - name: Upload Windows Installer to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: .\dist-electron\Azeroth Auction Assassin Setup ${{ env.AAA_VERSION }}.exe
+        asset_name: AzerothAuctionAssassin-Setup-${{ env.AAA_VERSION }}.exe
+        asset_content_type: application/octet-stream
+      if: ${{ always() }}
+
+    - name: Upload Windows Portable to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: .\dist-electron\Azeroth Auction Assassin-${{ env.AAA_VERSION }}-portable.exe
+        asset_name: AzerothAuctionAssassin-${{ env.AAA_VERSION }}-portable.exe
+        asset_content_type: application/octet-stream
+      if: ${{ always() }}
+
+  build-mac:
+    needs: build-windows
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Decode macOS Certificate
+      run: |
+        echo "${{ secrets.MAC_CERT_BASE64 }}" | base64 -d > certificate.p12
+        security create-keychain -p "" build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "" build.keychain
+        security import certificate.p12 -k build.keychain -P "${{ secrets.MAC_CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/productsign
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+      if: ${{ secrets.MAC_CERT_BASE64 != '' }}
+
+    - name: Build macOS executable
+      run: npm run build:mac
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+    - name: Sign macOS Executable (if certificate available)
+      run: |
+        if [ -f "certificate.p12" ]; then
+          codesign --deep --force --verify --verbose --sign "Developer ID Application: ${{ secrets.APPLE_TEAM_NAME }}" --options runtime dist-electron/*.dmg || true
+          codesign --deep --force --verify --verbose --sign "Developer ID Application: ${{ secrets.APPLE_TEAM_NAME }}" --options runtime dist-electron/*.zip || true
+        fi
+      if: ${{ secrets.MAC_CERT_BASE64 != '' }}
+
+    - name: Decode Upload URL
+      run: |
+        echo "decoded_upload_url=$(echo ${{ needs.build-windows.outputs.upload_url_base64 }} | base64 --decode)" >> $GITHUB_ENV
+
+    - name: Upload macOS DMG to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ env.decoded_upload_url }}
+        asset_path: ./dist-electron/Azeroth Auction Assassin-${{ env.AAA_VERSION }}.dmg
+        asset_name: AzerothAuctionAssassin-${{ env.AAA_VERSION }}-macOS.dmg
+        asset_content_type: application/octet-stream
+      if: ${{ always() }}
+
+    - name: Upload macOS ZIP to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ env.decoded_upload_url }}
+        asset_path: ./dist-electron/Azeroth Auction Assassin-${{ env.AAA_VERSION }}-mac.zip
+        asset_name: AzerothAuctionAssassin-${{ env.AAA_VERSION }}-macOS.zip
+        asset_content_type: application/zip
+      if: ${{ always() }}
+
