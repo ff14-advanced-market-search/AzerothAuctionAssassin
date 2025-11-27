@@ -586,9 +586,8 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+  // Quit the app when all windows are closed (including on macOS)
+  app.quit();
 });
 
 app.on("before-quit", () => {
