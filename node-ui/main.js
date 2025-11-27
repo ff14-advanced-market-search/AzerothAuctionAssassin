@@ -2,9 +2,32 @@ const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
-const ROOT = path.resolve(__dirname, "..");
-const DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
+// In production (packaged app), __dirname is inside app.asar (read-only)
+// In development, __dirname points to the actual node-ui directory
+const ROOT = app.isPackaged 
+  ? path.dirname(app.getPath("exe")) // Executable location (MacOS folder)
+  : path.resolve(__dirname, "..");
+  
+// For data directory:
+// - In development: use project root (same as before)
+// - In production: use the directory containing the .app bundle (so data is next to the app)
+const DATA_DIR = app.isPackaged
+  ? path.join(path.dirname(path.dirname(path.dirname(app.getPath("exe")))), "AzerothAuctionAssassinData")
+  : path.join(ROOT, "AzerothAuctionAssassinData");
+  
 const BACKUP_DIR = path.join(DATA_DIR, "backup");
+
+// Log paths for debugging (only in development or if DEBUG env var is set)
+if (!app.isPackaged || process.env.DEBUG) {
+  console.log("App paths:", {
+    isPackaged: app.isPackaged,
+    exePath: app.getPath("exe"),
+    userData: app.getPath("userData"),
+    __dirname: __dirname,
+    ROOT: ROOT,
+    DATA_DIR: DATA_DIR,
+  });
+}
 
 const FILES = {
   megaData: path.join(DATA_DIR, "mega_data.json"),
@@ -227,12 +250,48 @@ function createWindow() {
     minWidth: 1000,
     minHeight: 720,
     backgroundColor: "#0c1116",
+    show: true, // Show immediately
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, "index.html"));
+  const htmlPath = path.join(__dirname, "index.html");
+  console.log("Loading HTML from:", htmlPath);
+  
+  mainWindow.loadFile(htmlPath).catch((err) => {
+    console.error("Failed to load HTML:", err);
+    // Show error in window if load fails
+    mainWindow.webContents.send("error", err.message);
+  });
+
+  // Ensure window is visible and focused when ready
+  mainWindow.once("ready-to-show", () => {
+    console.log("Window ready to show");
+    if (!mainWindow.isVisible()) {
+      mainWindow.show();
+    }
+    mainWindow.focus();
+  });
+
+  // Fallback: show window after a short delay if ready-to-show doesn't fire
+  setTimeout(() => {
+    if (mainWindow && !mainWindow.isVisible()) {
+      console.log("Fallback: showing window");
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  }, 1000);
+
+  // Handle page load errors
+  mainWindow.webContents.on("did-fail-load", (event, errorCode, errorDescription) => {
+    console.error("Failed to load page:", errorCode, errorDescription);
+  });
+
+  // Open DevTools in development (uncomment for debugging)
+  // mainWindow.webContents.openDevTools();
 }
 
 function setupIpc() {
@@ -496,9 +555,14 @@ function setupIpc() {
 }
 
 app.whenReady().then(() => {
-  ensureDataFiles(); // This creates the log file
+  // Create window first for faster startup
   createWindow();
   setupIpc();
+  
+  // Initialize data files asynchronously (don't block window creation)
+  setTimeout(() => {
+    ensureDataFiles(); // This creates the log file
+  }, 0);
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
