@@ -16,6 +16,14 @@ const ROOT = app.isPackaged
 const DATA_DIR = app.isPackaged
   ? path.join(path.dirname(path.dirname(path.dirname(app.getPath("exe")))), "AzerothAuctionAssassinData")
   : path.join(ROOT, "AzerothAuctionAssassinData");
+
+// For static data directory:
+// - In development: use project root
+// - In production: use Resources folder (where extraResources are placed)
+// Calculate from executable path to avoid calling app.getPath() before ready
+const STATIC_DIR = app.isPackaged
+  ? path.join(path.dirname(path.dirname(app.getPath("exe"))), "Resources", "StaticData")
+  : path.join(ROOT, "StaticData");
   
 const BACKUP_DIR = path.join(DATA_DIR, "backup");
 
@@ -484,6 +492,11 @@ function setupIpc() {
       // Load and run mega-alerts directly in this process
       const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
       const megaAlerts = require(megaAlertsPath);
+      
+      // Set paths first (important for packaged apps)
+      if (megaAlerts.setPaths) {
+        megaAlerts.setPaths(DATA_DIR, STATIC_DIR);
+      }
       
       // Set up callbacks
       if (megaAlerts.setLogCallback) {

@@ -1,18 +1,31 @@
+/* eslint-env node, es6 */
+/* global require, __dirname, console, Buffer, URLSearchParams, module */
 const fs = require("fs");
 const path = require("path");
 const { setTimeout: delay } = require("timers/promises");
 const { fetch } = require("undici");
 
-// Directory paths
-const ROOT = path.resolve(__dirname, "..");
-const DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
-const STATIC_DIR = path.join(ROOT, "StaticData");
+// Directory paths - will be set by setPaths() in packaged apps
+let ROOT = path.resolve(__dirname, "..");
+let DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
+let STATIC_DIR = path.join(ROOT, "StaticData");
 const SADDLEBAG_URL = "http://api.saddlebagexchange.com";
 
 // Stop flag and callbacks for Electron integration
 let STOP_REQUESTED = false;
 let logCallback = null;
 let stopCallback = null;
+
+/**
+ * Set directory paths (used by Electron main process in packaged apps)
+ * @param {string} dataDir - Path to AzerothAuctionAssassinData directory
+ * @param {string} staticDir - Path to StaticData directory
+ */
+function setPaths(dataDir, staticDir) {
+  DATA_DIR = dataDir;
+  STATIC_DIR = staticDir;
+  ROOT = path.dirname(dataDir);
+}
 
 /**
  * Set callback function for logging messages
@@ -1346,6 +1359,7 @@ module.exports = {
   main,
   setLogCallback,
   setStopCallback,
+  setPaths,
   requestStop,
   MegaData,
 };
