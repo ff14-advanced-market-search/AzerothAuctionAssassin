@@ -1,3 +1,5 @@
+/* eslint-env node, es6 */
+/* global require, __dirname, process, console, setTimeout */
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -49,7 +51,6 @@ const REALM_FILES = {
 let alertsProcess = null;
 let mainWindow = null;
 let logFileStream = null;
-let originalConsoleError = null;
 
 function readJson(filePath, fallback) {
   try {
@@ -156,7 +157,7 @@ function ensureDataFiles() {
 
   // Initialize realm list files if they don't exist (empty objects)
   // They will be populated by the reset function using hardcoded data
-  for (const [region, filePath] of Object.entries(REALM_FILES)) {
+  for (const filePath of Object.values(REALM_FILES)) {
     if (!fs.existsSync(filePath)) {
       writeJson(filePath, {});
     }
