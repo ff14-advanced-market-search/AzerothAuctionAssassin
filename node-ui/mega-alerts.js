@@ -157,29 +157,6 @@ async function httpJson(url, opts = {}, retries = 3) {
   throw lastErr;
 }
 
-/**
- * HTTP request helper for binary data with retry logic
- * Retries up to 3 times with 500ms delay between attempts
- */
-async function httpBuffer(url, opts = {}, retries = 3) {
-  let lastErr;
-  for (let i = 0; i < retries; i++) {
-    try {
-      const res = await fetch(url, opts);
-      if (!res.ok) {
-        lastErr = new Error(`${res.status} ${res.statusText}`);
-        await delay(500);
-        continue;
-      }
-      const arr = new Uint8Array(await res.arrayBuffer());
-      return Buffer.from(arr);
-    } catch (err) {
-      lastErr = err;
-      await delay(500);
-    }
-  }
-  throw lastErr;
-}
 
 /**
  * Send a Discord embed message to the webhook
@@ -353,11 +330,13 @@ class MegaData {
     for (const [ilvlStr, groups] of Object.entries(grouped)) {
       const ilvl = Number(ilvlStr);
       const allIds = groups.flat();
+      // Python: get_ilvl_items(ilvl, all_item_ids) - passes ilvl and item_ids
       const { itemNames, itemIds, baseIlvls, baseReq } = this.getIlvlItems(ilvl, allIds);
       addRules(ilvl, list, Array.from(itemIds), itemNames, baseIlvls, baseReq);
     }
 
     if (broad.length) {
+      // Python: get_ilvl_items() - no params, uses default ilvl=201
       const { itemNames, itemIds, baseIlvls, baseReq } = this.getIlvlItems();
       addRules(0, broad, Array.from(itemIds), itemNames, baseIlvls, baseReq);
     }
@@ -745,19 +724,34 @@ class MegaData {
    * Get ilvl items from static data file
    * Filters by ilvl and optional item_ids list
    * Returns item names, IDs, base ilvls, and base required levels
+   * Matches Python behavior: if item_ids is empty, filter by ilvl (default 201)
+   * If item_ids is provided, filter by item_ids and ignore ilvl
    */
   getIlvlItems(ilvl = 201, item_ids = []) {
     const results = readJson(
       path.join(STATIC_DIR, "ilvl_items.json"),
       {}
     );
-    if (item_ids && item_ids.length) {
+    
+    // Python behavior: if no item_ids given, reset ilvl to 201 and filter by ilvl
+    // If item_ids are given, filter by item_ids and ignore ilvl
+    if (!item_ids || item_ids.length === 0) {
+      // Filter by ilvl: keep items with base ilvl >= ilvl
+      for (const key of Object.keys(results)) {
+        const itemIlvl = Number(results[key].ilvl);
+        if (itemIlvl < ilvl) {
+          delete results[key];
+        }
+      }
+    } else {
+      // Filter by item_ids only
       for (const key of Object.keys(results)) {
         if (!item_ids.includes(Number(key))) {
           delete results[key];
         }
       }
     }
+    
     const itemNames = {};
     const baseIlvls = {};
     const baseReq = {};
@@ -1300,7 +1294,9 @@ async function runAlerts(state, progress, runOnce = false) {
         if (extra.includes(current_min)) {
           matching_realms = state.get_upload_time_list().map((r) => r.dataSetID);
         }
-      } catch {}
+      } catch {
+        // Ignore errors when checking extra alert times
+      }
     }
 
     if (matching_realms.length) {
