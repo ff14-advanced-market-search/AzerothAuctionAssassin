@@ -850,7 +850,7 @@ async function fetchItemNames() {
   itemSearchStatus.textContent = "Loading item names…";
   const region = state.megaData?.WOW_REGION || "EU";
   try {
-    const resp = await fetch("http://api.saddlebagexchange.com/api/wow/megaitemnames", {
+    const resp = await fetch("https://api.saddlebagexchange.com/api/wow/megaitemnames", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -991,7 +991,7 @@ async function fetchPetNames() {
   petIlvlSearchStatus.textContent = "Loading pets…";
   const region = state.megaData?.WOW_REGION || "EU";
   try {
-    const resp = await fetch("http://api.saddlebagexchange.com/api/wow/megaitemnames", {
+    const resp = await fetch("https://api.saddlebagexchange.com/api/wow/megaitemnames", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1078,7 +1078,7 @@ async function validateToken(token) {
   }
   
   try {
-    const response = await fetch("http://api.saddlebagexchange.com/api/wow/checkmegatoken", {
+    const response = await fetch("https://api.saddlebagexchange.com/api/wow/checkmegatoken", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -9,7 +9,7 @@ const { fetch } = require("undici");
 let ROOT = path.resolve(__dirname, "..");
 let DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
 let STATIC_DIR = path.join(ROOT, "StaticData");
-const SADDLEBAG_URL = "http://api.saddlebagexchange.com";
+const SADDLEBAG_URL = "https://api.saddlebagexchange.com";
 
 // Stop flag and callbacks for Electron integration
 let STOP_REQUESTED = false;
@@ -831,6 +831,8 @@ async function runPool(tasks, concurrency) {
  * @param {boolean} runOnce - If true, run once and exit (for DEBUG mode)
  */
 async function runAlerts(state, progress, runOnce = false) {
+  // Reset stop flag at the start of each run
+  STOP_REQUESTED = false;
   let running = true;
   const alert_record = [];
   state.upload_timers = await state.getUploadTimers();
@@ -1326,6 +1328,9 @@ async function runAlerts(state, progress, runOnce = false) {
  * Initializes MegaData and starts alert processing
  */
 async function main() {
+  // Reset stop flag at the start of each run to handle module caching
+  STOP_REQUESTED = false;
+  
   const state = new MegaData();
   console.log(
     `Starting mega-alerts-js for region=${state.REGION}, items=${Object.keys(

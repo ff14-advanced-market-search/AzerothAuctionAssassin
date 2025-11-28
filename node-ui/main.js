@@ -1,5 +1,5 @@
 /* eslint-env node, es6 */
-/* global require, __dirname, process, console, setTimeout */
+/* global require, __dirname, process, console, setTimeout, clearTimeout, setInterval, clearInterval */
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -491,6 +491,12 @@ function setupIpc() {
     try {
       // Load and run mega-alerts directly in this process
       const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
+      const resolvedPath = require.resolve(megaAlertsPath);
+      
+      // Clear module cache to ensure fresh state on each run
+      // This prevents STOP_REQUESTED flag from persisting across runs
+      delete require.cache[resolvedPath];
+      
       const megaAlerts = require(megaAlertsPath);
       
       // Set paths first (important for packaged apps)
@@ -528,7 +534,7 @@ function setupIpc() {
     }
   });
 
-  ipcMain.handle("stop-mega", () => {
+  ipcMain.handle("stop-mega", async () => {
     if (alertsProcess) {
       try {
         const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
@@ -536,10 +542,45 @@ function setupIpc() {
         if (megaAlerts.requestStop) {
           megaAlerts.requestStop();
         }
+        
+        // Wait for stop to complete with timeout fallback
+        // The stopCallback (sendExit) will set alertsProcess = null when stop completes
+        // Add a timeout to ensure state is cleared even if callback never fires
+        await new Promise((resolve) => {
+          const timeout = setTimeout(() => {
+            // Timeout fallback: clear state after 1 second even if callback didn't fire
+            if (alertsProcess) {
+              alertsProcess = null;
+            }
+            resolve();
+          }, 1000);
+          
+          // Check if already stopped (callback may have fired synchronously)
+          if (!alertsProcess) {
+            clearTimeout(timeout);
+            resolve();
+            return;
+          }
+          
+          // Give stop callback time to execute (it calls sendExit which sets alertsProcess = null)
+          // Poll briefly to see if state was cleared by callback
+          const checkInterval = setInterval(() => {
+            if (!alertsProcess) {
+              clearTimeout(timeout);
+              clearInterval(checkInterval);
+              resolve();
+            }
+          }, 50); // Check every 50ms
+          
+          // Cleanup interval after timeout
+          setTimeout(() => {
+            clearInterval(checkInterval);
+          }, 1000);
+        });
       } catch (err) {
         console.error("Error stopping alerts:", err);
+        alertsProcess = null;
       }
-      alertsProcess = null;
     }
     return { stopped: true };
   });
@@ -568,15 +609,14 @@ function setupIpc() {
   });
 }
 
-app.whenReady().then(() => {
-  // Create window first for faster startup
+app.whenReady().then(async () => {
+  // Ensure data files exist before setting up IPC handlers
+  // This prevents race conditions where renderer calls IPC before files exist
+  ensureDataFiles();
+  
+  // Create window and set up IPC after files are ready
   createWindow();
   setupIpc();
-  
-  // Initialize data files asynchronously (don't block window creation)
-  setTimeout(() => {
-    ensureDataFiles(); // This creates the log file
-  }, 0);
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
