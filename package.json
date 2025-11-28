@@ -14,7 +14,8 @@
     "build:mac": "electron-builder --mac",
     "build:all": "electron-builder --win --mac",
     "lint": "prettier --check \"node-ui/**/*.{js,html,css,json}\"",
-    "lint:fix": "prettier --write \"node-ui/**/*.{js,html,css,json}\""
+    "lint:fix": "prettier --write \"node-ui/**/*.{js,html,css,json}\"",
+    "prepare": "husky"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -23,10 +24,15 @@
     "@types/node": "^22.9.1",
     "electron": "^29.3.0",
     "electron-builder": "^24.13.3",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.0",
     "prettier": "3.0.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.3.3"
+  },
+  "lint-staged": {
+    "node-ui/**/*.{js,html,css,json}": "prettier --write"
   },
   "dependencies": {
     "undici": "^6.19.8"
@@ -46,18 +52,24 @@
       {
         "from": "StaticData",
         "to": "StaticData",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "icon.ico",
@@ -68,11 +80,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "icon.png",
