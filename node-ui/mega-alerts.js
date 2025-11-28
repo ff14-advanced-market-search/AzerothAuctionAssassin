@@ -68,12 +68,14 @@ console.error = (...args) => {
   originalError(...args);
   if (logCallback) {
     // Format error messages properly, including stack traces for Error objects
-    const errorMsg = args.map(arg => {
-      if (arg instanceof Error) {
-        return `${arg.message}\n${arg.stack || ''}`;
-      }
-      return String(arg);
-    }).join(" ");
+    const errorMsg = args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          return `${arg.message}\n${arg.stack || ""}`;
+        }
+        return String(arg);
+      })
+      .join(" ");
     logCallback(`[ERROR] ${errorMsg}\n`);
   }
 };
@@ -95,7 +97,9 @@ function readJson(p, fallback) {
  * Returns retail, classic, and SoD (Season of Discovery) Russian realm IDs
  */
 function getRussianRealmIds() {
-  const retail = [1602, 1604, 1605, 1614, 1615, 1623, 1923, 1925, 1928, 1929, 1922];
+  const retail = [
+    1602, 1604, 1605, 1614, 1615, 1623, 1923, 1925, 1928, 1929, 1922,
+  ];
   const classic = [4452, 4474];
   const sod = [5280, 5285, 5829, 5830];
   return [...retail, ...classic, ...sod];
@@ -130,7 +134,8 @@ function createEmbed(title, description, fields) {
  */
 function splitList(lst, maxSize) {
   const res = [];
-  for (let i = 0; i < lst.length; i += maxSize) res.push(lst.slice(i, i + maxSize));
+  for (let i = 0; i < lst.length; i += maxSize)
+    res.push(lst.slice(i, i + maxSize));
   return res;
 }
 
@@ -156,7 +161,6 @@ async function httpJson(url, opts = {}, retries = 3) {
   }
   throw lastErr;
 }
-
 
 /**
  * Send a Discord embed message to the webhook
@@ -190,7 +194,7 @@ class MegaData {
     this.cfg = readJson(path.join(DATA_DIR, "mega_data.json"), {});
     this.WEBHOOK_URL = this.cfg.MEGA_WEBHOOK_URL;
     this.REGION = this.cfg.WOW_REGION;
-    
+
     // Set optional configuration variables with defaults
     this.THREADS = this.normalizeInt(this.cfg.MEGA_THREADS, 48); // Default to 48 threads
     this.SCAN_TIME_MIN = this.normalizeInt(this.cfg.SCAN_TIME_MIN, 1); // Minutes before data update to start scans
@@ -202,8 +206,10 @@ class MegaData {
     this.DEBUG = Boolean(this.cfg.DEBUG); // Trigger a scan on all realms once for testing
     this.NO_LINKS = Boolean(this.cfg.NO_LINKS); // Disable all Wowhead, undermine and saddlebag links
     this.TOKEN_PRICE =
-      typeof this.cfg.TOKEN_PRICE === "number" ? this.cfg.TOKEN_PRICE : undefined;
-    
+      typeof this.cfg.TOKEN_PRICE === "number"
+        ? this.cfg.TOKEN_PRICE
+        : undefined;
+
     // Classic regions don't have undermine exchange, so use wowhead links
     // Classic also needs faction selection (all, horde, alliance, booty bay)
     if (String(this.REGION).includes("CLASSIC")) {
@@ -219,25 +225,25 @@ class MegaData {
     this.desiredIlvlList = this.loadDesiredIlvlList();
     this.desiredPetIlvlList = this.loadDesiredPetIlvlList();
     this.validateSnipeLists();
-    
+
     // Load realm names (filtered by NO_RUSSIAN_REALMS if enabled)
     this.WOW_SERVER_NAMES = this.loadRealmNames();
-    
+
     // Get static lists of ALL bonus id values from raidbots
     // This is the index for all ilvl gear (sockets, leech, avoidance, speed, ilvl additions)
     this.setBonusIds();
-    
+
     // Get name dictionaries - only get names of desired items to limit data
     this.ITEM_NAMES = this.loadItemNames();
     // PET_NAMES from saddlebags (or backup)
     this.PET_NAMES = this.loadPetNamesBackup();
-    
+
     // Get item names from desired ilvl entries
     this.buildIlvlNames();
-    
+
     // Get upload times - initially empty, will be populated dynamically from each scan
     this.upload_timers = this.loadUploadTimers();
-    
+
     // OAuth token management
     this.access_token = "";
     this.access_token_creation_unix_time = 0;
@@ -258,10 +264,7 @@ class MegaData {
    * Converts string keys to integer keys and float values
    */
   loadDesiredItems() {
-    const raw = readJson(
-      path.join(DATA_DIR, "desired_items.json"),
-      {}
-    );
+    const raw = readJson(path.join(DATA_DIR, "desired_items.json"), {});
     const out = {};
     Object.entries(raw).forEach(([k, v]) => {
       const id = Number(k);
@@ -298,10 +301,11 @@ class MegaData {
       itemIds,
       itemNames,
       baseIlvls,
-      baseReq
+      baseReq,
     ) => {
       for (const entry of entries) {
-        if (entry.ilvl !== ilvl && entry.item_ids && entry.item_ids.length > 0) continue;
+        if (entry.ilvl !== ilvl && entry.item_ids && entry.item_ids.length > 0)
+          continue;
         const rule = {
           ilvl: entry.ilvl,
           max_ilvl: entry.max_ilvl ?? 10000,
@@ -310,7 +314,8 @@ class MegaData {
           speed: Boolean(entry.speed),
           leech: Boolean(entry.leech),
           avoidance: Boolean(entry.avoidance),
-          item_ids: entry.item_ids && entry.item_ids.length ? entry.item_ids : itemIds,
+          item_ids:
+            entry.item_ids && entry.item_ids.length ? entry.item_ids : itemIds,
           required_min_lvl: entry.required_min_lvl ?? 1,
           required_max_lvl: entry.required_max_lvl ?? 1000,
           bonus_lists: entry.bonus_lists ?? [],
@@ -331,7 +336,10 @@ class MegaData {
       const ilvl = Number(ilvlStr);
       const allIds = groups.flat();
       // Python: get_ilvl_items(ilvl, all_item_ids) - passes ilvl and item_ids
-      const { itemNames, itemIds, baseIlvls, baseReq } = this.getIlvlItems(ilvl, allIds);
+      const { itemNames, itemIds, baseIlvls, baseReq } = this.getIlvlItems(
+        ilvl,
+        allIds,
+      );
       addRules(ilvl, list, Array.from(itemIds), itemNames, baseIlvls, baseReq);
     }
 
@@ -371,13 +379,13 @@ class MegaData {
   loadRealmNames() {
     const file = path.join(
       DATA_DIR,
-      `${String(this.REGION).toLowerCase()}-wow-connected-realm-ids.json`
+      `${String(this.REGION).toLowerCase()}-wow-connected-realm-ids.json`,
     );
     let realmNames = readJson(file, {});
     if (this.NO_RUSSIAN_REALMS) {
       const russian = new Set(getRussianRealmIds());
       realmNames = Object.fromEntries(
-        Object.entries(realmNames).filter(([, id]) => !russian.has(id))
+        Object.entries(realmNames).filter(([, id]) => !russian.has(id)),
       );
     }
     return realmNames;
@@ -393,7 +401,9 @@ class MegaData {
       this.desiredIlvlList.length === 0 &&
       this.desiredPetIlvlList.length === 0
     ) {
-      throw new Error("No snipe data found in desired_items, desired_ilvl_list, desired_pet_ilvl_list");
+      throw new Error(
+        "No snipe data found in desired_items, desired_ilvl_list, desired_pet_ilvl_list",
+      );
     }
   }
 
@@ -403,7 +413,10 @@ class MegaData {
    * If over 20 hours, make a new token and reset the creation time
    */
   async fetchAccessToken() {
-    if (this.access_token && Date.now() / 1000 - this.access_token_creation_unix_time < 20 * 60 * 60) {
+    if (
+      this.access_token &&
+      Date.now() / 1000 - this.access_token_creation_unix_time < 20 * 60 * 60
+    ) {
       return this.access_token;
     }
     const res = await fetch("https://oauth.battle.net/token", {
@@ -412,11 +425,15 @@ class MegaData {
       headers: {
         Authorization:
           "Basic " +
-          Buffer.from(`${this.cfg.WOW_CLIENT_ID}:${this.cfg.WOW_CLIENT_SECRET}`).toString("base64"),
+          Buffer.from(
+            `${this.cfg.WOW_CLIENT_ID}:${this.cfg.WOW_CLIENT_SECRET}`,
+          ).toString("base64"),
       },
     });
     if (!res.ok) {
-      throw new Error(`Failed to get access token: ${res.status} ${await res.text()}`);
+      throw new Error(
+        `Failed to get access token: ${res.status} ${await res.text()}`,
+      );
     }
     const json = await res.json();
     if (!json.access_token) {
@@ -490,14 +507,14 @@ class MegaData {
   get_upload_time_list() {
     return Object.values(this.upload_timers);
   }
-  
+
   /**
    * Get set of all upload time minutes (when data updates occur)
    */
   get_upload_time_minutes() {
     return new Set(this.get_upload_time_list().map((r) => r.lastUploadMinute));
   }
-  
+
   /**
    * Get realm names for a given connected realm ID
    */
@@ -513,7 +530,9 @@ class MegaData {
    * Updates local timers with last-modified header if available
    */
   async makeAhRequest(url, connectedRealmId) {
-    const headers = { Authorization: `Bearer ${await this.fetchAccessToken()}` };
+    const headers = {
+      Authorization: `Bearer ${await this.fetchAccessToken()}`,
+    };
     const res = await fetch(url, { headers });
     if (res.status === 429) throw new Error("429");
     if (res.status !== 200) throw new Error(`${res.status}`);
@@ -537,7 +556,9 @@ class MegaData {
         ? "https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
         : "https://eu.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-eu&locale=en_EU";
     const connectedId = region === "NA" ? -1 : -2;
-    const headers = { Authorization: `Bearer ${await this.fetchAccessToken()}` };
+    const headers = {
+      Authorization: `Bearer ${await this.fetchAccessToken()}`,
+    };
     const res = await fetch(endpoint, { headers });
     if (res.status === 429) throw new Error("429");
     if (res.status !== 200) throw new Error(`${res.status}`);
@@ -562,7 +583,9 @@ class MegaData {
       dataSetName = this.get_realm_names(dataSetID);
     }
     const lastUploadMinute = Number(lastUploadTimeRaw.split(":")[1]);
-    const lastUploadUnix = Math.floor(new Date(lastUploadTimeRaw).getTime() / 1000);
+    const lastUploadUnix = Math.floor(
+      new Date(lastUploadTimeRaw).getTime() / 1000,
+    );
     this.upload_timers[dataSetID] = {
       dataSetID,
       dataSetName,
@@ -632,11 +655,15 @@ class MegaData {
   async get_wow_token_price() {
     let url;
     if (this.REGION === "NA") {
-      url = "https://us.api.blizzard.com/data/wow/token/index?namespace=dynamic-us&locale=en_US";
+      url =
+        "https://us.api.blizzard.com/data/wow/token/index?namespace=dynamic-us&locale=en_US";
     } else if (this.REGION === "EU") {
-      url = "https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale=en_EU";
+      url =
+        "https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale=en_EU";
     } else return null;
-    const headers = { Authorization: `Bearer ${await this.fetchAccessToken()}` };
+    const headers = {
+      Authorization: `Bearer ${await this.fetchAccessToken()}`,
+    };
     const res = await fetch(url, { headers });
     if (!res.ok) return null;
     const json = await res.json();
@@ -650,10 +677,7 @@ class MegaData {
    */
   loadItemNames() {
     try {
-      const itemNames = readJson(
-        path.join(STATIC_DIR, "item_names.json"),
-        {}
-      );
+      const itemNames = readJson(path.join(STATIC_DIR, "item_names.json"), {});
       const filtered = {};
       Object.entries(itemNames).forEach(([k, v]) => {
         const id = Number(k);
@@ -671,10 +695,7 @@ class MegaData {
    */
   loadPetNamesBackup() {
     try {
-      const petNames = readJson(
-        path.join(STATIC_DIR, "pet_names.json"),
-        {}
-      );
+      const petNames = readJson(path.join(STATIC_DIR, "pet_names.json"), {});
       const res = {};
       Object.entries(petNames).forEach(([k, v]) => {
         const id = Number(k);
@@ -693,10 +714,7 @@ class MegaData {
    */
   setBonusIds() {
     try {
-      const bonus = readJson(
-        path.join(STATIC_DIR, "bonuses.json"),
-        {}
-      );
+      const bonus = readJson(path.join(STATIC_DIR, "bonuses.json"), {});
       const socket = [];
       const speed = [];
       const leech = [];
@@ -728,11 +746,8 @@ class MegaData {
    * If item_ids is provided, filter by item_ids and ignore ilvl
    */
   getIlvlItems(ilvl = 201, item_ids = []) {
-    const results = readJson(
-      path.join(STATIC_DIR, "ilvl_items.json"),
-      {}
-    );
-    
+    const results = readJson(path.join(STATIC_DIR, "ilvl_items.json"), {});
+
     // Python behavior: if no item_ids given, reset ilvl to 201 and filter by ilvl
     // If item_ids are given, filter by item_ids and ignore ilvl
     if (!item_ids || item_ids.length === 0) {
@@ -751,7 +766,7 @@ class MegaData {
         }
       }
     }
-    
+
     const itemNames = {};
     const baseIlvls = {};
     const baseReq = {};
@@ -761,7 +776,12 @@ class MegaData {
       baseIlvls[id] = v.ilvl;
       baseReq[id] = v.required_level;
     }
-    return { itemNames, itemIds: new Set(Object.keys(itemNames).map(Number)), baseIlvls, baseReq };
+    return {
+      itemNames,
+      itemIds: new Set(Object.keys(itemNames).map(Number)),
+      baseIlvls,
+      baseReq,
+    };
   }
 
   /**
@@ -783,7 +803,10 @@ class MegaData {
  * All caged battle pets use item ID 82800
  */
 function create_oribos_exchange_pet_link(realm_name, pet_id, region) {
-  const fixed_realm_name = realm_name.toLowerCase().replace("'", "").replace(/ /g, "-");
+  const fixed_realm_name = realm_name
+    .toLowerCase()
+    .replace("'", "")
+    .replace(/ /g, "-");
   const url_region = region === "NA" ? "us" : "eu";
   return `https://undermine.exchange/#${url_region}-${fixed_realm_name}/82800-${pet_id}`;
 }
@@ -792,7 +815,10 @@ function create_oribos_exchange_pet_link(realm_name, pet_id, region) {
  * Create Undermine Exchange link for an item
  */
 function create_oribos_exchange_item_link(realm_name, item_id, region) {
-  const fixed_realm_name = realm_name.toLowerCase().replace("'", "").replace(/ /g, "-");
+  const fixed_realm_name = realm_name
+    .toLowerCase()
+    .replace("'", "")
+    .replace(/ /g, "-");
   const url_region = region === "NA" ? "us" : "eu";
   return `https://undermine.exchange/#${url_region}-${fixed_realm_name}/${item_id}`;
 }
@@ -825,7 +851,7 @@ async function runPool(tasks, concurrency) {
  * Runs continuously (unless runOnce=true) checking auction house data
  * Blizzard API data only updates 1 time per hour
  * The updates will come on minute X of each hour
- * 
+ *
  * @param {MegaData} state - MegaData instance with configuration and snipe lists
  * @param {Function} progress - Callback function for progress updates
  * @param {boolean} runOnce - If true, run once and exit (for DEBUG mode)
@@ -844,7 +870,7 @@ async function runAlerts(state, progress, runOnce = false) {
   const pull_single_realm_data = async (connected_id) => {
     const auctions = await state.get_listings_single(connected_id);
     const clean = clean_listing_data(auctions, connected_id);
-    
+
     if (connected_id === -1 || connected_id === -2) {
       await check_token_price();
     }
@@ -854,7 +880,9 @@ async function runAlerts(state, progress, runOnce = false) {
     const suffix =
       clean[0].realmID && russian.has(clean[0].realmID) ? " **(RU)**\n" : "\n";
     const is_russian_realm =
-      clean[0].realmID && russian.has(clean[0].realmID) ? "**(Russian Realm)**" : "";
+      clean[0].realmID && russian.has(clean[0].realmID)
+        ? "**(Russian Realm)**"
+        : "";
 
     const embed_fields = [];
     for (const auction of clean) {
@@ -876,7 +904,10 @@ async function runAlerts(state, progress, runOnce = false) {
             id_msg += "`required_lvl:` " + auction.required_lvl + "\n";
           }
           if ("bonus_ids" in auction) {
-            id_msg += "`bonus_ids:` " + JSON.stringify(Array.from(auction.bonus_ids)) + "\n";
+            id_msg +=
+              "`bonus_ids:` " +
+              JSON.stringify(Array.from(auction.bonus_ids)) +
+              "\n";
           }
         } else if (state.ITEM_NAMES[auction.itemID]) {
           embed_name = state.ITEM_NAMES[auction.itemID];
@@ -892,13 +923,18 @@ async function runAlerts(state, progress, runOnce = false) {
             ? state.PET_NAMES[auction.petID]
             : "Unknown Pet";
         id_msg += "`petID:` " + auction.petID + "\n";
-        if ("pet_level" in auction) id_msg += "`pet_level:` " + auction.pet_level + "\n";
-        if ("quality" in auction) id_msg += "`quality:` " + auction.quality + "\n";
+        if ("pet_level" in auction)
+          id_msg += "`pet_level:` " + auction.pet_level + "\n";
+        if ("quality" in auction)
+          id_msg += "`quality:` " + auction.quality + "\n";
         if ("breed" in auction) id_msg += "`breed:` " + auction.breed + "\n";
       }
 
       let message = id_msg;
-      const link_label = state.WOWHEAD_LINK && "itemID" in auction ? "Wowhead link" : "Undermine link";
+      const link_label =
+        state.WOWHEAD_LINK && "itemID" in auction
+          ? "Wowhead link"
+          : "Undermine link";
       const link_url =
         state.WOWHEAD_LINK && "itemID" in auction
           ? `https://www.wowhead.com/item=${auction.itemID}`
@@ -908,7 +944,8 @@ async function runAlerts(state, progress, runOnce = false) {
         message += `[Saddlebag link](https://saddlebagexchange.com/wow/item-data/${saddlebag_link_id})\n`;
         message += `[Where to Sell](https://saddlebagexchange.com/wow/export-search?itemId=${saddlebag_link_id})\n`;
       }
-      const price_type = "bid_prices" in auction ? "bid_prices" : "buyout_prices";
+      const price_type =
+        "bid_prices" in auction ? "bid_prices" : "buyout_prices";
       message += "`" + price_type + "`: " + auction[price_type] + "\n";
 
       if (!alert_record.includes(auction)) {
@@ -924,7 +961,11 @@ async function runAlerts(state, progress, runOnce = false) {
       desc += `**realmID:** ${clean[0].realmID ?? ""} ${is_russian_realm}\n`;
       desc += `**realmNames:** ${clean[0].realmNames}${suffix}`;
       for (const chunk of splitList(embed_fields, 10)) {
-        const item_embed = createEmbed(`${state.REGION} SNIPE FOUND!`, desc, chunk);
+        const item_embed = createEmbed(
+          `${state.REGION} SNIPE FOUND!`,
+          desc,
+          chunk,
+        );
         await state.send_discord_embed(item_embed);
       }
     }
@@ -940,8 +981,10 @@ async function runAlerts(state, progress, runOnce = false) {
         if (token_price && token_price < state.TOKEN_PRICE) {
           const token_embed = createEmbed(
             `WoW Token Alert - ${state.REGION}`,
-            `**Token Price:** ${token_price.toLocaleString()} gold\n**Threshold:** ${state.TOKEN_PRICE.toLocaleString()} gold\n**Region:** ${state.REGION}`,
-            []
+            `**Token Price:** ${token_price.toLocaleString()} gold\n**Threshold:** ${state.TOKEN_PRICE.toLocaleString()} gold\n**Region:** ${
+              state.REGION
+            }`,
+            [],
           );
           await state.send_discord_embed(token_embed);
         }
@@ -951,7 +994,15 @@ async function runAlerts(state, progress, runOnce = false) {
     }
   }
 
-  function results_dict(auction, itemlink, connected_id, realm_names, id, idType, priceType) {
+  function results_dict(
+    auction,
+    itemlink,
+    connected_id,
+    realm_names,
+    id,
+    idType,
+    priceType,
+  ) {
     const sorted = [...auction].sort((a, b) => a - b);
     const minPrice = sorted[0];
     return {
@@ -965,7 +1016,15 @@ async function runAlerts(state, progress, runOnce = false) {
     };
   }
 
-  function ilvl_results_dict(auction, itemlink, connected_id, realm_names, id, idType, priceType) {
+  function ilvl_results_dict(
+    auction,
+    itemlink,
+    connected_id,
+    realm_names,
+    id,
+    idType,
+    priceType,
+  ) {
     const tertiary_stats = Object.entries(auction.tertiary_stats)
       .filter(([, present]) => present)
       .map(([stat]) => stat);
@@ -984,7 +1043,15 @@ async function runAlerts(state, progress, runOnce = false) {
     };
   }
 
-  function pet_ilvl_results_dict(auction, itemlink, connected_id, realm_names, id, idType, priceType) {
+  function pet_ilvl_results_dict(
+    auction,
+    itemlink,
+    connected_id,
+    realm_names,
+    id,
+    idType,
+    priceType,
+  ) {
     return {
       region: state.REGION,
       realmID: connected_id,
@@ -1002,14 +1069,14 @@ async function runAlerts(state, progress, runOnce = false) {
   /**
    * Check if an auction matches the ilvl rule criteria
    * Validates tertiary stats (sockets, leech, avoidance, speed), ilvl, required level, bonus lists, and price
-   * 
+   *
    * Check for a modifier with type 9 and get its value (modifier 9 value equals required playerLevel)
    * If no modifier["type"] == 9 found, use the base required level for report
    */
   function check_tertiary_stats_generic(auction, rule, min_ilvl) {
     if (!auction.item?.bonus_lists) return false;
     const item_bonus_ids = new Set(auction.item.bonus_lists);
-    
+
     const required_lvl =
       auction.item.modifiers?.find((m) => m.type === 9)?.value ??
       rule.base_required_levels[auction.item.id];
@@ -1026,7 +1093,7 @@ async function runAlerts(state, progress, runOnce = false) {
       avoidance: rule.avoidance,
       speed: rule.speed,
     };
-    
+
     if (Object.values(desired).some(Boolean)) {
       for (const [stat, want] of Object.entries(desired)) {
         if (want && !tertiary_stats[stat]) return false;
@@ -1038,10 +1105,10 @@ async function runAlerts(state, progress, runOnce = false) {
       .map((b) => state.ilvl_addition[b] || 0)
       .reduce((a, b) => a + b, 0);
     const ilvl = base_ilvl + ilvl_addition;
-    
+
     if (ilvl < min_ilvl) return false;
     if (ilvl > rule.max_ilvl) return false;
-    
+
     if (required_lvl < rule.required_min_lvl) return false;
     if (required_lvl > rule.required_max_lvl) return false;
 
@@ -1052,7 +1119,7 @@ async function runAlerts(state, progress, runOnce = false) {
     ) {
       return false;
     }
-    
+
     if (rule.bonus_lists.length === 1 && rule.bonus_lists[0] === -1) {
       const temp = new Set(item_bonus_ids);
       for (const bid of state.socket_ids) temp.delete(bid);
@@ -1068,7 +1135,7 @@ async function runAlerts(state, progress, runOnce = false) {
     if (!auction.buyout) return false;
     const buyout = Math.round((auction.buyout / 10000) * 100) / 100;
     if (buyout > rule.buyout) return false;
-    
+
     return {
       item_id: auction.item.id,
       buyout,
@@ -1081,14 +1148,14 @@ async function runAlerts(state, progress, runOnce = false) {
 
   /**
    * Check if a pet auction meets the desired level and price criteria
-   * 
+   *
    * Args:
    *   item: Auction house item data from Blizzard API
    *   desired_pet_list: List of pet ilvl rules containing desired pet criteria
-   * 
+   *
    * Returns:
    *   Pet info if it matches criteria, null if it doesn't match
-   * 
+   *
    * Breed IDs can be found on warcraftpets.com
    * 4, 14 are the best power
    * 5, 15 are the best speed
@@ -1098,17 +1165,17 @@ async function runAlerts(state, progress, runOnce = false) {
     const pet_species_id = item.item.pet_species_id;
     const desired = desired_pet_list.find((p) => p.petID === pet_species_id);
     if (!desired) return null;
-    
+
     const pet_level = item.item.pet_level;
     if (pet_level == null || pet_level < desired.minLevel) return null;
-    
+
     if (item.item.pet_quality_id < desired.minQuality) return null;
-    
+
     if (desired.excludeBreeds.includes(item.item.pet_breed_id)) return null;
-    
+
     const buyout = item.buyout;
     if (buyout == null || buyout / 10000 > desired.price) return null;
-    
+
     return {
       pet_species_id,
       current_level: pet_level,
@@ -1157,10 +1224,11 @@ async function runAlerts(state, progress, runOnce = false) {
         if ("bid" in item && state.SHOW_BIDPRICES === "true") {
           add_price_to_dict(item.bid, item_id, all_ah_bids);
         }
-        if ("buyout" in item) add_price_to_dict(item.buyout, item_id, all_ah_buyouts);
-        if ("unit_price" in item) add_price_to_dict(item.unit_price, item_id, all_ah_buyouts);
-      } 
-      else if (item_id === 82800) {
+        if ("buyout" in item)
+          add_price_to_dict(item.buyout, item_id, all_ah_buyouts);
+        if ("unit_price" in item)
+          add_price_to_dict(item.unit_price, item_id, all_ah_buyouts);
+      } else if (item_id === 82800) {
         if (state.desiredPetIlvlList.length) {
           const info = check_pet_ilvl_stats(item, state.desiredPetIlvlList);
           if (info) pet_ilvl_ah_buyouts.push(info);
@@ -1169,7 +1237,11 @@ async function runAlerts(state, progress, runOnce = false) {
 
       for (const desired_ilvl_item of state.desiredIlvlList) {
         if (desired_ilvl_item.item_ids.includes(item_id)) {
-          const info = check_tertiary_stats_generic(item, desired_ilvl_item, desired_ilvl_item.ilvl);
+          const info = check_tertiary_stats_generic(
+            item,
+            desired_ilvl_item,
+            desired_ilvl_item.ilvl,
+          );
           if (info) ilvl_ah_buyouts.push(info);
         }
       }
@@ -1185,7 +1257,9 @@ async function runAlerts(state, progress, runOnce = false) {
         pet_ilvl_ah_buyouts.length
       )
     ) {
-      console.log(`no listings found matching desires on ${connected_id} of ${state.REGION}`);
+      console.log(
+        `no listings found matching desires on ${connected_id} of ${state.REGION}`,
+      );
       return;
     }
     console.log(`Found matches on ${connected_id} of ${state.REGION}!!!`);
@@ -1196,7 +1270,7 @@ async function runAlerts(state, progress, runOnce = false) {
       pet_ah_buyouts,
       pet_ah_bids,
       ilvl_ah_buyouts,
-      pet_ilvl_ah_buyouts
+      pet_ilvl_ah_buyouts,
     );
   }
 
@@ -1207,33 +1281,87 @@ async function runAlerts(state, progress, runOnce = false) {
     pet_ah_buyouts,
     pet_ah_bids,
     ilvl_ah_buyouts,
-    pet_ilvl_ah_buyouts
+    pet_ilvl_ah_buyouts,
   ) {
     const results = [];
     const realm_names = state.get_realm_names(connected_id);
     for (const [itemIDStr, auction] of Object.entries(all_ah_buyouts)) {
       const itemID = Number(itemIDStr);
-      const itemlink = create_oribos_exchange_item_link(realm_names[0], itemID, state.REGION);
-      results.push(results_dict(auction, itemlink, connected_id, realm_names, itemID, "itemID", "buyout"));
+      const itemlink = create_oribos_exchange_item_link(
+        realm_names[0],
+        itemID,
+        state.REGION,
+      );
+      results.push(
+        results_dict(
+          auction,
+          itemlink,
+          connected_id,
+          realm_names,
+          itemID,
+          "itemID",
+          "buyout",
+        ),
+      );
     }
     for (const auction of ilvl_ah_buyouts) {
       const itemID = Number(auction.item_id);
-      const itemlink = create_oribos_exchange_item_link(realm_names[0], itemID, state.REGION);
+      const itemlink = create_oribos_exchange_item_link(
+        realm_names[0],
+        itemID,
+        state.REGION,
+      );
       results.push(
-        ilvl_results_dict(auction, itemlink, connected_id, realm_names, itemID, "itemID", "buyout")
+        ilvl_results_dict(
+          auction,
+          itemlink,
+          connected_id,
+          realm_names,
+          itemID,
+          "itemID",
+          "buyout",
+        ),
       );
     }
     if (state.SHOW_BIDPRICES === "true") {
       for (const [itemIDStr, auction] of Object.entries(all_ah_bids)) {
         const itemID = Number(itemIDStr);
-        const itemlink = create_oribos_exchange_item_link(realm_names[0], itemID, state.REGION);
-        results.push(results_dict(auction, itemlink, connected_id, realm_names, itemID, "itemID", "bid"));
+        const itemlink = create_oribos_exchange_item_link(
+          realm_names[0],
+          itemID,
+          state.REGION,
+        );
+        results.push(
+          results_dict(
+            auction,
+            itemlink,
+            connected_id,
+            realm_names,
+            itemID,
+            "itemID",
+            "bid",
+          ),
+        );
       }
     }
     for (const auction of pet_ilvl_ah_buyouts) {
       const petID = auction.pet_species_id;
-      const itemlink = create_oribos_exchange_pet_link(realm_names[0], petID, state.REGION);
-      results.push(pet_ilvl_results_dict(auction, itemlink, connected_id, realm_names, petID, "petID", "buyout"));
+      const itemlink = create_oribos_exchange_pet_link(
+        realm_names[0],
+        petID,
+        state.REGION,
+      );
+      results.push(
+        pet_ilvl_results_dict(
+          auction,
+          itemlink,
+          connected_id,
+          realm_names,
+          petID,
+          "petID",
+          "buyout",
+        ),
+      );
     }
     return results;
   }
@@ -1242,7 +1370,7 @@ async function runAlerts(state, progress, runOnce = false) {
     for (const v of setA) if (setB.has(v)) return true;
     return false;
   }
-  
+
   function setEqual(a, b) {
     if (a.size !== b.size) return false;
     for (const v of a) if (!b.has(v)) return false;
@@ -1252,12 +1380,14 @@ async function runAlerts(state, progress, runOnce = false) {
   // Initial fast run across all realms
   // Run once to get the current data so no one asks about the waiting time
   // After the first run we will trigger once per hour when the new data updates
-  const initialRealms = Array.from(new Set(Object.values(state.WOW_SERVER_NAMES)));
+  const initialRealms = Array.from(
+    new Set(Object.values(state.WOW_SERVER_NAMES)),
+  );
   if (initialRealms.length) {
     progress("Sending alerts!");
     await runPool(
       initialRealms.map((id) => () => pull_single_realm_data(id)),
-      state.THREADS
+      state.THREADS,
     );
   }
 
@@ -1266,17 +1396,17 @@ async function runAlerts(state, progress, runOnce = false) {
   // Main loop - runs continuously checking for new auction house data
   while (running && !STOP_REQUESTED) {
     const current_min = new Date().getMinutes();
-    
+
     // Refresh alerts 1 time per hour (at minute 1)
     if (current_min === 1 && state.REFRESH_ALERTS) {
       alert_record.length = 0;
     }
-    
+
     // Get upload timers if we don't have them yet
     if (!Object.keys(state.upload_timers).length) {
       state.upload_timers = await state.getUploadTimers();
     }
-    
+
     // Find realms that match the scan time window
     // Scan starts at lastUploadMinute + SCAN_TIME_MIN
     // Scan ends at lastUploadMinute + SCAN_TIME_MAX
@@ -1285,16 +1415,18 @@ async function runAlerts(state, progress, runOnce = false) {
       .filter(
         (realm) =>
           realm.lastUploadMinute + state.SCAN_TIME_MIN <= current_min &&
-          current_min <= realm.lastUploadMinute + state.SCAN_TIME_MAX
+          current_min <= realm.lastUploadMinute + state.SCAN_TIME_MAX,
       )
       .map((r) => r.dataSetID);
-    
+
     // Check for extra alerts (JSON array of minutes to trigger on)
     if (state.EXTRA_ALERTS) {
       try {
         const extra = JSON.parse(state.EXTRA_ALERTS);
         if (extra.includes(current_min)) {
-          matching_realms = state.get_upload_time_list().map((r) => r.dataSetID);
+          matching_realms = state
+            .get_upload_time_list()
+            .map((r) => r.dataSetID);
         }
       } catch {
         // Ignore errors when checking extra alert times
@@ -1305,18 +1437,18 @@ async function runAlerts(state, progress, runOnce = false) {
       progress("Sending alerts!");
       await runPool(
         matching_realms.map((id) => () => pull_single_realm_data(id)),
-        state.THREADS
+        state.THREADS,
       );
     } else {
       progress(
-        `The updates will come\non min ${Array.from(state.get_upload_time_minutes()).join(
-          ","
-        )}\nof each hour.`
+        `The updates will come\non min ${Array.from(
+          state.get_upload_time_minutes(),
+        ).join(",")}\nof each hour.`,
       );
       console.log(
         `Blizzard API data only updates 1 time per hour. The updates will come on minute ${Array.from(
-          state.get_upload_time_minutes()
-        )} of each hour. ${new Date().toISOString()} is not the update time.`
+          state.get_upload_time_minutes(),
+        )} of each hour. ${new Date().toISOString()} is not the update time.`,
       );
       await delay(20000); // Wait 20 seconds before checking again
     }
@@ -1330,17 +1462,19 @@ async function runAlerts(state, progress, runOnce = false) {
 async function main() {
   // Reset stop flag at the start of each run to handle module caching
   STOP_REQUESTED = false;
-  
+
   const state = new MegaData();
   console.log(
-    `Starting mega-alerts-js for region=${state.REGION}, items=${Object.keys(
-      state.desiredItems
-    ).length}, ilvl rules=${state.desiredIlvlList.length}, pet ilvl rules=${state.desiredPetIlvlList.length}`
+    `Starting mega-alerts-js for region=${state.REGION}, items=${
+      Object.keys(state.desiredItems).length
+    }, ilvl rules=${state.desiredIlvlList.length}, pet ilvl rules=${
+      state.desiredPetIlvlList.length
+    }`,
   );
   if (state.DEBUG) {
     await sendDiscordMessage(
       state.WEBHOOK_URL,
-      "DEBUG MODE: starting mega alerts to run once and then exit operations"
+      "DEBUG MODE: starting mega alerts to run once and then exit operations",
     );
     await runAlerts(state, () => {}, true);
   } else {
@@ -1348,7 +1482,7 @@ async function main() {
       state.WEBHOOK_URL,
       "🟢Starting mega alerts and scan all AH data instantly.🟢\n" +
         "🟢These first few messages might be old.🟢\n" +
-        "🟢All future messages will release seconds after the new data is available.🟢"
+        "🟢All future messages will release seconds after the new data is available.🟢",
     );
     await delay(1000);
     await runAlerts(state, (msg) => console.log("[progress]", msg));

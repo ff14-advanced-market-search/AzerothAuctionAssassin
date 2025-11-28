@@ -6,10 +6,10 @@ const fs = require("fs");
 
 // In production (packaged app), __dirname is inside app.asar (read-only)
 // In development, __dirname points to the actual node-ui directory
-const ROOT = app.isPackaged 
+const ROOT = app.isPackaged
   ? path.dirname(app.getPath("exe")) // Executable location
   : path.resolve(__dirname, "..");
-  
+
 // For data directory:
 // - In development: use project root (same as before)
 // - In production: place data next to the app
@@ -19,17 +19,25 @@ function getDataDir() {
   if (!app.isPackaged) {
     return path.join(ROOT, "AzerothAuctionAssassinData");
   }
-  
+
   if (process.platform === "darwin") {
     // macOS: exe is at App.app/Contents/MacOS/exe, go up 4 levels to get parent of .app bundle
     // This places data next to the .app bundle, not inside it
-    return path.join(path.dirname(path.dirname(path.dirname(path.dirname(app.getPath("exe"))))), "AzerothAuctionAssassinData");
+    return path.join(
+      path.dirname(
+        path.dirname(path.dirname(path.dirname(app.getPath("exe")))),
+      ),
+      "AzerothAuctionAssassinData",
+    );
   } else {
     // Windows: exe is at AppFolder/exe (or AppFolder/subfolder/exe for NSIS)
     // For NSIS, exe might be in a subfolder, but data should be at installer root
     // For portable, exe is directly in the folder
     // Use path.dirname to get the folder containing the exe
-    return path.join(path.dirname(app.getPath("exe")), "AzerothAuctionAssassinData");
+    return path.join(
+      path.dirname(app.getPath("exe")),
+      "AzerothAuctionAssassinData",
+    );
   }
 }
 
@@ -42,20 +50,22 @@ function getStaticDir() {
   if (!app.isPackaged) {
     return path.join(ROOT, "StaticData");
   }
-  
+
   // Use process.resourcesPath which Electron provides - works on both platforms
   // This points to the resources directory where extraResources are placed
   // Note: process.resourcesPath is available in Electron packaged apps
-  const resourcesPath = process.resourcesPath || (process.platform === "darwin" 
-    ? path.join(path.dirname(path.dirname(app.getPath("exe"))), "Resources")
-    : path.join(path.dirname(app.getPath("exe")), "resources"));
-  
+  const resourcesPath =
+    process.resourcesPath ||
+    (process.platform === "darwin"
+      ? path.join(path.dirname(path.dirname(app.getPath("exe"))), "Resources")
+      : path.join(path.dirname(app.getPath("exe")), "resources"));
+
   return path.join(resourcesPath, "StaticData");
 }
 
 const DATA_DIR = getDataDir();
 const STATIC_DIR = getStaticDir();
-  
+
 const BACKUP_DIR = path.join(DATA_DIR, "backup");
 
 // Log paths for debugging (only in development or if DEBUG env var is set)
@@ -83,8 +93,14 @@ const REALM_FILES = {
   NA: path.join(DATA_DIR, "na-wow-connected-realm-ids.json"),
   EUCLASSIC: path.join(DATA_DIR, "euclassic-wow-connected-realm-ids.json"),
   NACLASSIC: path.join(DATA_DIR, "naclassic-wow-connected-realm-ids.json"),
-  NASODCLASSIC: path.join(DATA_DIR, "nasodclassic-wow-connected-realm-ids.json"),
-  EUSODCLASSIC: path.join(DATA_DIR, "eusodclassic-wow-connected-realm-ids.json"),
+  NASODCLASSIC: path.join(
+    DATA_DIR,
+    "nasodclassic-wow-connected-realm-ids.json",
+  ),
+  EUSODCLASSIC: path.join(
+    DATA_DIR,
+    "eusodclassic-wow-connected-realm-ids.json",
+  ),
 };
 
 let alertsProcess = null;
@@ -138,50 +154,52 @@ function saveBackup(fileType, data) {
 function ensureDataFiles() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.mkdirSync(BACKUP_DIR, { recursive: true });
-  
+
   // Create logs directory
   const LOGS_DIR = path.join(DATA_DIR, "logs");
   fs.mkdirSync(LOGS_DIR, { recursive: true });
-  
+
   // Create timestamped log file
   if (!logFileStream) {
     const now = new Date();
-    const timestamp = now.getFullYear().toString() +
-      String(now.getMonth() + 1).padStart(2, '0') +
-      String(now.getDate()).padStart(2, '0') + '_' +
-      String(now.getHours()).padStart(2, '0') +
-      String(now.getMinutes()).padStart(2, '0') +
-      String(now.getSeconds()).padStart(2, '0');
+    const timestamp =
+      now.getFullYear().toString() +
+      String(now.getMonth() + 1).padStart(2, "0") +
+      String(now.getDate()).padStart(2, "0") +
+      "_" +
+      String(now.getHours()).padStart(2, "0") +
+      String(now.getMinutes()).padStart(2, "0") +
+      String(now.getSeconds()).padStart(2, "0");
     const logFilePath = path.join(LOGS_DIR, `aaa_log_${timestamp}.txt`);
-    logFileStream = fs.createWriteStream(logFilePath, { flags: 'a', encoding: 'utf8' });
+    logFileStream = fs.createWriteStream(logFilePath, {
+      flags: "a",
+      encoding: "utf8",
+    });
     const startMessage = `=== Log started at ${now.toISOString()} ===\n`;
     logFileStream.write(startMessage);
   }
 
   const defaults = {
-    [FILES.megaData]: readJson(
-      path.join(DATA_DIR, "example_mega_data.json"),
-      {
-        MEGA_WEBHOOK_URL: "",
-        WOW_CLIENT_ID: "",
-        WOW_CLIENT_SECRET: "",
-        AUTHENTICATION_TOKEN: "",
-        WOW_REGION: "EU",
-        EXTRA_ALERTS: "[]",
-        SHOW_BID_PRICES: false,
-        MEGA_THREADS: 10,
-        WOWHEAD_LINK: false,
-        SCAN_TIME_MIN: -1,
-        SCAN_TIME_MAX: 3,
-        NO_LINKS: false,
-        NO_RUSSIAN_REALMS: false,
-        DISCOUNT_PERCENT: 10,
-        TOKEN_PRICE: 0,
-        REFRESH_ALERTS: false,
-        DEBUG: false,
-        FACTION: "all",
-      }
-    ),
+    [FILES.megaData]: readJson(path.join(DATA_DIR, "example_mega_data.json"), {
+      MEGA_WEBHOOK_URL: "",
+      WOW_CLIENT_ID: "",
+      WOW_CLIENT_SECRET: "",
+      AUTHENTICATION_TOKEN: "",
+      WOW_REGION: "EU",
+      EXTRA_ALERTS: "[]",
+      SHOW_BID_PRICES: false,
+      MEGA_THREADS: 10,
+      WOWHEAD_LINK: false,
+      SCAN_TIME_MIN: -1,
+      SCAN_TIME_MAX: 3,
+      NO_LINKS: false,
+      NO_RUSSIAN_REALMS: false,
+      DISCOUNT_PERCENT: 10,
+      TOKEN_PRICE: 0,
+      REFRESH_ALERTS: false,
+      DEBUG: false,
+      FACTION: "all",
+    }),
     [FILES.desiredItems]: {},
     [FILES.desiredPets]: {},
     [FILES.ilvlList]: [],
@@ -259,7 +277,9 @@ function normalizeIlvlRules(list) {
       required_min_lvl: Number(rule.required_min_lvl) || 1,
       required_max_lvl: Number(rule.required_max_lvl) || 1000,
       bonus_lists: Array.isArray(rule.bonus_lists)
-        ? rule.bonus_lists.map((id) => Number(id)).filter((n) => !Number.isNaN(n))
+        ? rule.bonus_lists
+            .map((id) => Number(id))
+            .filter((n) => !Number.isNaN(n))
         : [],
     }))
     .filter((rule) => rule.buyout > 0);
@@ -300,7 +320,7 @@ function createWindow() {
 
   const htmlPath = path.join(__dirname, "index.html");
   console.log("Loading HTML from:", htmlPath);
-  
+
   mainWindow.loadFile(htmlPath).catch((err) => {
     console.error("Failed to load HTML:", err);
     // Show error in window if load fails
@@ -326,9 +346,12 @@ function createWindow() {
   }, 1000);
 
   // Handle page load errors
-  mainWindow.webContents.on("did-fail-load", (event, errorCode, errorDescription) => {
-    console.error("Failed to load page:", errorCode, errorDescription);
-  });
+  mainWindow.webContents.on(
+    "did-fail-load",
+    (event, errorCode, errorDescription) => {
+      console.error("Failed to load page:", errorCode, errorDescription);
+    },
+  );
 
   // Open DevTools in development (uncomment for debugging)
   // mainWindow.webContents.openDevTools();
@@ -405,7 +428,7 @@ function setupIpc() {
         REFRESH_ALERTS: false,
         DEBUG: false,
         FACTION: "all",
-      }
+      },
     );
     const normalized = normalizeMegaData(defaultData);
     writeJson(FILES.megaData, normalized);
@@ -508,13 +531,13 @@ function setupIpc() {
       }
       // Send to renderer for UI display
       BrowserWindow.getAllWindows().forEach((win) =>
-        win.webContents.send("mega-log", line)
+        win.webContents.send("mega-log", line),
       );
     };
 
     const sendExit = (code) => {
       BrowserWindow.getAllWindows().forEach((win) =>
-        win.webContents.send("mega-exit", code)
+        win.webContents.send("mega-exit", code),
       );
       alertsProcess = null;
     };
@@ -523,18 +546,18 @@ function setupIpc() {
       // Load and run mega-alerts directly in this process
       const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
       const resolvedPath = require.resolve(megaAlertsPath);
-      
+
       // Clear module cache to ensure fresh state on each run
       // This prevents STOP_REQUESTED flag from persisting across runs
       delete require.cache[resolvedPath];
-      
+
       const megaAlerts = require(megaAlertsPath);
-      
+
       // Set paths first (important for packaged apps)
       if (megaAlerts.setPaths) {
         megaAlerts.setPaths(DATA_DIR, STATIC_DIR);
       }
-      
+
       // Set up callbacks
       if (megaAlerts.setLogCallback) {
         megaAlerts.setLogCallback(sendLog);
@@ -573,7 +596,7 @@ function setupIpc() {
         if (megaAlerts.requestStop) {
           megaAlerts.requestStop();
         }
-        
+
         // Wait for stop to complete with timeout fallback
         // The stopCallback (sendExit) will set alertsProcess = null when stop completes
         // Add a timeout to ensure state is cleared even if callback never fires
@@ -585,14 +608,14 @@ function setupIpc() {
             }
             resolve();
           }, 1000);
-          
+
           // Check if already stopped (callback may have fired synchronously)
           if (!alertsProcess) {
             clearTimeout(timeout);
             resolve();
             return;
           }
-          
+
           // Give stop callback time to execute (it calls sendExit which sets alertsProcess = null)
           // Poll briefly to see if state was cleared by callback
           const checkInterval = setInterval(() => {
@@ -602,7 +625,7 @@ function setupIpc() {
               resolve();
             }
           }, 50); // Check every 50ms
-          
+
           // Cleanup interval after timeout
           setTimeout(() => {
             clearInterval(checkInterval);
@@ -644,7 +667,7 @@ app.whenReady().then(async () => {
   // Ensure data files exist before setting up IPC handlers
   // This prevents race conditions where renderer calls IPC before files exist
   ensureDataFiles();
-  
+
   // Create window and set up IPC after files are ready
   createWindow();
   setupIpc();

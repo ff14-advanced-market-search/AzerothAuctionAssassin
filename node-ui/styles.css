@@ -18,7 +18,11 @@
 body {
   margin: 0;
   font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
-  background: radial-gradient(circle at 20% 20%, rgba(128, 255, 234, 0.04), transparent 25%),
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(128, 255, 234, 0.04),
+      transparent 25%
+    ),
     radial-gradient(circle at 80% 0%, rgba(78, 167, 255, 0.07), transparent 30%),
     linear-gradient(120deg, #0c1116, #0b161f 45%, #0c1116);
   color: var(--text);
@@ -82,7 +86,10 @@ button {
   border-radius: 10px;
   cursor: pointer;
   color: var(--bg);
-  transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
 button:disabled {
@@ -202,7 +209,9 @@ button.ghost:hover:not(:disabled) {
   border-radius: 10px;
   text-decoration: none;
   color: var(--text);
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
 }
 
 .ghost-link:hover {
@@ -531,7 +540,9 @@ select:focus {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
   border-radius: 10px;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .list li > div {
@@ -647,7 +658,9 @@ select:focus {
   padding: 10px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   align-items: center;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .table-row:nth-child(odd) {
@@ -807,7 +820,11 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: linear-gradient(120deg, rgba(128, 255, 234, 0.05), rgba(78, 167, 255, 0.05));
+  background: linear-gradient(
+    120deg,
+    rgba(128, 255, 234, 0.05),
+    rgba(78, 167, 255, 0.05)
+  );
   display: flex;
   justify-content: space-between;
   align-items: center;
