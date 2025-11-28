@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.5.2"
+AAA_VERSION = "1.6.0"
 
 windowsApp_Path = None
 try:
@@ -97,7 +97,7 @@ class Item_And_Pet_Statistics(QThread):
     def run(self):
         item_statistics = pd.DataFrame(
             data=requests.post(
-                f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
+                f"https://api.saddlebagexchange.com/api/wow/megaitemnames",
                 headers={"Accept": "application/json"},
                 json={"region": self.region, "discount": 1},
             ).json()
@@ -105,7 +105,7 @@ class Item_And_Pet_Statistics(QThread):
 
         pet_statistics = pd.DataFrame(
             data=requests.post(
-                f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
+                f"https://api.saddlebagexchange.com/api/wow/megaitemnames",
                 headers={"Accept": "application/json"},
                 json={"region": self.region, "discount": 1, "pets": True},
             ).json()
@@ -147,7 +147,7 @@ class App(QMainWindow):
             self.setWindowIcon(icon)
 
             self.token_auth_url = (
-                "http://api.saddlebagexchange.com/api/wow/checkmegatoken"
+                "https://api.saddlebagexchange.com/api/wow/checkmegatoken"
             )
 
             self.eu_connected_realms = os.path.join(

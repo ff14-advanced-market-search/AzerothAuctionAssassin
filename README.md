@@ -34,6 +34,22 @@ npm start
 #	rm -rf node_modules/
 ````
 
+**To build exe:**
+
+Mac:
+
+```bash
+npm run build:mac
+open "dist-electron/mac/Azeroth Auction Assassin.app"
+```
+
+Win:
+
+```bash
+npm run build:mac
+...???...
+```
+
 
 # Desktop GUI 
 

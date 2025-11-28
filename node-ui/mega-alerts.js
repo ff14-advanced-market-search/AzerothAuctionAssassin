@@ -1,18 +1,31 @@
+/* eslint-env node, es6 */
+/* global require, __dirname, console, Buffer, URLSearchParams, module */
 const fs = require("fs");
 const path = require("path");
 const { setTimeout: delay } = require("timers/promises");
 const { fetch } = require("undici");
 
-// Directory paths
-const ROOT = path.resolve(__dirname, "..");
-const DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
-const STATIC_DIR = path.join(ROOT, "StaticData");
-const SADDLEBAG_URL = "http://api.saddlebagexchange.com";
+// Directory paths - will be set by setPaths() in packaged apps
+let ROOT = path.resolve(__dirname, "..");
+let DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
+let STATIC_DIR = path.join(ROOT, "StaticData");
+const SADDLEBAG_URL = "https://api.saddlebagexchange.com";
 
 // Stop flag and callbacks for Electron integration
 let STOP_REQUESTED = false;
 let logCallback = null;
 let stopCallback = null;
+
+/**
+ * Set directory paths (used by Electron main process in packaged apps)
+ * @param {string} dataDir - Path to AzerothAuctionAssassinData directory
+ * @param {string} staticDir - Path to StaticData directory
+ */
+function setPaths(dataDir, staticDir) {
+  DATA_DIR = dataDir;
+  STATIC_DIR = staticDir;
+  ROOT = path.dirname(dataDir);
+}
 
 /**
  * Set callback function for logging messages
@@ -144,29 +157,6 @@ async function httpJson(url, opts = {}, retries = 3) {
   throw lastErr;
 }
 
-/**
- * HTTP request helper for binary data with retry logic
- * Retries up to 3 times with 500ms delay between attempts
- */
-async function httpBuffer(url, opts = {}, retries = 3) {
-  let lastErr;
-  for (let i = 0; i < retries; i++) {
-    try {
-      const res = await fetch(url, opts);
-      if (!res.ok) {
-        lastErr = new Error(`${res.status} ${res.statusText}`);
-        await delay(500);
-        continue;
-      }
-      const arr = new Uint8Array(await res.arrayBuffer());
-      return Buffer.from(arr);
-    } catch (err) {
-      lastErr = err;
-      await delay(500);
-    }
-  }
-  throw lastErr;
-}
 
 /**
  * Send a Discord embed message to the webhook
@@ -340,11 +330,13 @@ class MegaData {
     for (const [ilvlStr, groups] of Object.entries(grouped)) {
       const ilvl = Number(ilvlStr);
       const allIds = groups.flat();
+      // Python: get_ilvl_items(ilvl, all_item_ids) - passes ilvl and item_ids
       const { itemNames, itemIds, baseIlvls, baseReq } = this.getIlvlItems(ilvl, allIds);
       addRules(ilvl, list, Array.from(itemIds), itemNames, baseIlvls, baseReq);
     }
 
     if (broad.length) {
+      // Python: get_ilvl_items() - no params, uses default ilvl=201
       const { itemNames, itemIds, baseIlvls, baseReq } = this.getIlvlItems();
       addRules(0, broad, Array.from(itemIds), itemNames, baseIlvls, baseReq);
     }
@@ -732,19 +724,34 @@ class MegaData {
    * Get ilvl items from static data file
    * Filters by ilvl and optional item_ids list
    * Returns item names, IDs, base ilvls, and base required levels
+   * Matches Python behavior: if item_ids is empty, filter by ilvl (default 201)
+   * If item_ids is provided, filter by item_ids and ignore ilvl
    */
   getIlvlItems(ilvl = 201, item_ids = []) {
     const results = readJson(
       path.join(STATIC_DIR, "ilvl_items.json"),
       {}
     );
-    if (item_ids && item_ids.length) {
+    
+    // Python behavior: if no item_ids given, reset ilvl to 201 and filter by ilvl
+    // If item_ids are given, filter by item_ids and ignore ilvl
+    if (!item_ids || item_ids.length === 0) {
+      // Filter by ilvl: keep items with base ilvl >= ilvl
+      for (const key of Object.keys(results)) {
+        const itemIlvl = Number(results[key].ilvl);
+        if (itemIlvl < ilvl) {
+          delete results[key];
+        }
+      }
+    } else {
+      // Filter by item_ids only
       for (const key of Object.keys(results)) {
         if (!item_ids.includes(Number(key))) {
           delete results[key];
         }
       }
     }
+    
     const itemNames = {};
     const baseIlvls = {};
     const baseReq = {};
@@ -824,6 +831,8 @@ async function runPool(tasks, concurrency) {
  * @param {boolean} runOnce - If true, run once and exit (for DEBUG mode)
  */
 async function runAlerts(state, progress, runOnce = false) {
+  // Reset stop flag at the start of each run
+  STOP_REQUESTED = false;
   let running = true;
   const alert_record = [];
   state.upload_timers = await state.getUploadTimers();
@@ -1287,7 +1296,9 @@ async function runAlerts(state, progress, runOnce = false) {
         if (extra.includes(current_min)) {
           matching_realms = state.get_upload_time_list().map((r) => r.dataSetID);
         }
-      } catch {}
+      } catch {
+        // Ignore errors when checking extra alert times
+      }
     }
 
     if (matching_realms.length) {
@@ -1317,6 +1328,9 @@ async function runAlerts(state, progress, runOnce = false) {
  * Initializes MegaData and starts alert processing
  */
 async function main() {
+  // Reset stop flag at the start of each run to handle module caching
+  STOP_REQUESTED = false;
+  
   const state = new MegaData();
   console.log(
     `Starting mega-alerts-js for region=${state.REGION}, items=${Object.keys(
@@ -1346,6 +1360,7 @@ module.exports = {
   main,
   setLogCallback,
   setStopCallback,
+  setPaths,
   requestStop,
   MegaData,
 };

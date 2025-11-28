@@ -9,7 +9,7 @@ from utils.api_requests import (
 
 # get the upload timers
 upload_timers = requests.post(
-    "http://api.saddlebagexchange.com/api/wow/uploadtimers",
+    "https://api.saddlebagexchange.com/api/wow/uploadtimers",
     json={},
 ).json()
 # write to StaticData/upload_timers.json
@@ -44,7 +44,7 @@ json_data = {
     "item_ids": [],
 }
 ilvl_items = requests.post(
-    "http://api.saddlebagexchange.com/api/wow/itemdata",
+    "https://api.saddlebagexchange.com/api/wow/itemdata",
     json=json_data,
 ).json()
 # write to StaticData/ilvl_items.json

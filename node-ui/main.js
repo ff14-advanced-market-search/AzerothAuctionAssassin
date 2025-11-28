@@ -1,10 +1,43 @@
+/* eslint-env node, es6 */
+/* global require, __dirname, process, console, setTimeout, clearTimeout, setInterval, clearInterval */
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
-const ROOT = path.resolve(__dirname, "..");
-const DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData");
+// In production (packaged app), __dirname is inside app.asar (read-only)
+// In development, __dirname points to the actual node-ui directory
+const ROOT = app.isPackaged 
+  ? path.dirname(app.getPath("exe")) // Executable location (MacOS folder)
+  : path.resolve(__dirname, "..");
+  
+// For data directory:
+// - In development: use project root (same as before)
+// - In production: use the directory containing the .app bundle (so data is next to the app)
+const DATA_DIR = app.isPackaged
+  ? path.join(path.dirname(path.dirname(path.dirname(app.getPath("exe")))), "AzerothAuctionAssassinData")
+  : path.join(ROOT, "AzerothAuctionAssassinData");
+
+// For static data directory:
+// - In development: use project root
+// - In production: use Resources folder (where extraResources are placed)
+// Calculate from executable path to avoid calling app.getPath() before ready
+const STATIC_DIR = app.isPackaged
+  ? path.join(path.dirname(path.dirname(app.getPath("exe"))), "Resources", "StaticData")
+  : path.join(ROOT, "StaticData");
+  
 const BACKUP_DIR = path.join(DATA_DIR, "backup");
+
+// Log paths for debugging (only in development or if DEBUG env var is set)
+if (!app.isPackaged || process.env.DEBUG) {
+  console.log("App paths:", {
+    isPackaged: app.isPackaged,
+    exePath: app.getPath("exe"),
+    userData: app.getPath("userData"),
+    __dirname: __dirname,
+    ROOT: ROOT,
+    DATA_DIR: DATA_DIR,
+  });
+}
 
 const FILES = {
   megaData: path.join(DATA_DIR, "mega_data.json"),
@@ -26,7 +59,6 @@ const REALM_FILES = {
 let alertsProcess = null;
 let mainWindow = null;
 let logFileStream = null;
-let originalConsoleError = null;
 
 function readJson(filePath, fallback) {
   try {
@@ -133,7 +165,7 @@ function ensureDataFiles() {
 
   // Initialize realm list files if they don't exist (empty objects)
   // They will be populated by the reset function using hardcoded data
-  for (const [region, filePath] of Object.entries(REALM_FILES)) {
+  for (const filePath of Object.values(REALM_FILES)) {
     if (!fs.existsSync(filePath)) {
       writeJson(filePath, {});
     }
@@ -227,12 +259,48 @@ function createWindow() {
     minWidth: 1000,
     minHeight: 720,
     backgroundColor: "#0c1116",
+    show: true, // Show immediately
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, "index.html"));
+  const htmlPath = path.join(__dirname, "index.html");
+  console.log("Loading HTML from:", htmlPath);
+  
+  mainWindow.loadFile(htmlPath).catch((err) => {
+    console.error("Failed to load HTML:", err);
+    // Show error in window if load fails
+    mainWindow.webContents.send("error", err.message);
+  });
+
+  // Ensure window is visible and focused when ready
+  mainWindow.once("ready-to-show", () => {
+    console.log("Window ready to show");
+    if (!mainWindow.isVisible()) {
+      mainWindow.show();
+    }
+    mainWindow.focus();
+  });
+
+  // Fallback: show window after a short delay if ready-to-show doesn't fire
+  setTimeout(() => {
+    if (mainWindow && !mainWindow.isVisible()) {
+      console.log("Fallback: showing window");
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  }, 1000);
+
+  // Handle page load errors
+  mainWindow.webContents.on("did-fail-load", (event, errorCode, errorDescription) => {
+    console.error("Failed to load page:", errorCode, errorDescription);
+  });
+
+  // Open DevTools in development (uncomment for debugging)
+  // mainWindow.webContents.openDevTools();
 }
 
 function setupIpc() {
@@ -423,7 +491,18 @@ function setupIpc() {
     try {
       // Load and run mega-alerts directly in this process
       const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
+      const resolvedPath = require.resolve(megaAlertsPath);
+      
+      // Clear module cache to ensure fresh state on each run
+      // This prevents STOP_REQUESTED flag from persisting across runs
+      delete require.cache[resolvedPath];
+      
       const megaAlerts = require(megaAlertsPath);
+      
+      // Set paths first (important for packaged apps)
+      if (megaAlerts.setPaths) {
+        megaAlerts.setPaths(DATA_DIR, STATIC_DIR);
+      }
       
       // Set up callbacks
       if (megaAlerts.setLogCallback) {
@@ -455,7 +534,7 @@ function setupIpc() {
     }
   });
 
-  ipcMain.handle("stop-mega", () => {
+  ipcMain.handle("stop-mega", async () => {
     if (alertsProcess) {
       try {
         const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
@@ -463,10 +542,45 @@ function setupIpc() {
         if (megaAlerts.requestStop) {
           megaAlerts.requestStop();
         }
+        
+        // Wait for stop to complete with timeout fallback
+        // The stopCallback (sendExit) will set alertsProcess = null when stop completes
+        // Add a timeout to ensure state is cleared even if callback never fires
+        await new Promise((resolve) => {
+          const timeout = setTimeout(() => {
+            // Timeout fallback: clear state after 1 second even if callback didn't fire
+            if (alertsProcess) {
+              alertsProcess = null;
+            }
+            resolve();
+          }, 1000);
+          
+          // Check if already stopped (callback may have fired synchronously)
+          if (!alertsProcess) {
+            clearTimeout(timeout);
+            resolve();
+            return;
+          }
+          
+          // Give stop callback time to execute (it calls sendExit which sets alertsProcess = null)
+          // Poll briefly to see if state was cleared by callback
+          const checkInterval = setInterval(() => {
+            if (!alertsProcess) {
+              clearTimeout(timeout);
+              clearInterval(checkInterval);
+              resolve();
+            }
+          }, 50); // Check every 50ms
+          
+          // Cleanup interval after timeout
+          setTimeout(() => {
+            clearInterval(checkInterval);
+          }, 1000);
+        });
       } catch (err) {
         console.error("Error stopping alerts:", err);
+        alertsProcess = null;
       }
-      alertsProcess = null;
     }
     return { stopped: true };
   });
@@ -495,8 +609,12 @@ function setupIpc() {
   });
 }
 
-app.whenReady().then(() => {
-  ensureDataFiles(); // This creates the log file
+app.whenReady().then(async () => {
+  // Ensure data files exist before setting up IPC handlers
+  // This prevents race conditions where renderer calls IPC before files exist
+  ensureDataFiles();
+  
+  // Create window and set up IPC after files are ready
   createWindow();
   setupIpc();
 
@@ -508,9 +626,8 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+  // Quit the app when all windows are closed (including on macOS)
+  app.quit();
 });
 
 app.on("before-quit", () => {

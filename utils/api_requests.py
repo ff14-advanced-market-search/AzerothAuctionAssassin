@@ -122,7 +122,7 @@ def get_petnames(access_token):
 
 # main static backups url
 RAW_GITHUB_BACKUP_PATH = "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData"
-SADDLEBAG_URL = "http://api.saddlebagexchange.com"
+SADDLEBAG_URL = "https://api.saddlebagexchange.com"
 
 
 def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):

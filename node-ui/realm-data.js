@@ -269,6 +269,7 @@ const EU_CONNECTED_REALMS_IDS = {
   "Alexstrasza": 3696,
   "Madmortem": 3696,
   "Proudmoore": 3696,
+  "EU Commodities": -2,
 };
 
 const NA_CONNECTED_REALMS_IDS = {
@@ -518,6 +519,7 @@ const NA_CONNECTED_REALMS_IDS = {
   "Khaz'goroth": 3726,
   "Aman'Thul": 3726,
   "Dath'Remar": 3726,
+  "NA Commodities": -1,
 };
 
 const EUCLASSIC_CONNECTED_REALMS_IDS = {
