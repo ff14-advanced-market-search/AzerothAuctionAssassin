@@ -270,7 +270,7 @@ const EU_CONNECTED_REALMS_IDS = {
   Madmortem: 3696,
   Proudmoore: 3696,
   "EU Commodities": -2,
-};
+}
 
 const NA_CONNECTED_REALMS_IDS = {
   "Azjol-Nerub": 121,
@@ -520,7 +520,7 @@ const NA_CONNECTED_REALMS_IDS = {
   "Aman'Thul": 3726,
   "Dath'Remar": 3726,
   "NA Commodities": -1,
-};
+}
 
 const EUCLASSIC_CONNECTED_REALMS_IDS = {
   Everlook: 4440,
@@ -548,7 +548,7 @@ const EUCLASSIC_CONNECTED_REALMS_IDS = {
   Mandokir: 4813,
   Thekal: 4815,
   "Jin'do": 4816,
-};
+}
 
 const NACLASSIC_CONNECTED_REALMS_IDS = {
   Atiesh: 4372,
@@ -574,7 +574,7 @@ const NACLASSIC_CONNECTED_REALMS_IDS = {
   Maladath: 4738,
   Angerforge: 4795,
   Eranikus: 4800,
-};
+}
 
 const NASODCLASSIC_CONNECTED_REALMS_IDS = {
   "Crusader Strike": 5816,
@@ -585,7 +585,7 @@ const NASODCLASSIC_CONNECTED_REALMS_IDS = {
   "Wild Growth": 5813,
   "Penance (AU)": 5817,
   "Shadowstrike (AU)": 5818,
-};
+}
 
 const EUSODCLASSIC_CONNECTED_REALMS_IDS = {
   "Crusader Strike": 5828,
@@ -596,25 +596,25 @@ const EUSODCLASSIC_CONNECTED_REALMS_IDS = {
   "Wild Growth": 5825,
   "Penance (RU)": 5829,
   "Shadowstrike (RU)": 5830,
-};
+}
 
 // Helper function to get realm list by region
 function getRealmListByRegion(region) {
   switch (region) {
     case "EU":
-      return EU_CONNECTED_REALMS_IDS;
+      return EU_CONNECTED_REALMS_IDS
     case "NA":
-      return NA_CONNECTED_REALMS_IDS;
+      return NA_CONNECTED_REALMS_IDS
     case "EUCLASSIC":
-      return EUCLASSIC_CONNECTED_REALMS_IDS;
+      return EUCLASSIC_CONNECTED_REALMS_IDS
     case "NACLASSIC":
-      return NACLASSIC_CONNECTED_REALMS_IDS;
+      return NACLASSIC_CONNECTED_REALMS_IDS
     case "NASODCLASSIC":
-      return NASODCLASSIC_CONNECTED_REALMS_IDS;
+      return NASODCLASSIC_CONNECTED_REALMS_IDS
     case "EUSODCLASSIC":
-      return EUSODCLASSIC_CONNECTED_REALMS_IDS;
+      return EUSODCLASSIC_CONNECTED_REALMS_IDS
     default:
-      return {};
+      return {}
   }
 }
 
@@ -627,4 +627,4 @@ window.REALM_DATA = {
   NASODCLASSIC_CONNECTED_REALMS_IDS,
   EUSODCLASSIC_CONNECTED_REALMS_IDS,
   getRealmListByRegion,
-};
+}

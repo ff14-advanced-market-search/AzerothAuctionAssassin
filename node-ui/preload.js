@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron")
 
 contextBridge.exposeInMainWorld("aaa", {
   loadState: () => ipcRenderer.invoke("load-state"),
@@ -27,4 +27,4 @@ contextBridge.exposeInMainWorld("aaa", {
   goBack: () => ipcRenderer.invoke("go-back"),
   goForward: () => ipcRenderer.invoke("go-forward"),
   writeLog: (line) => ipcRenderer.invoke("write-log", line),
-});
+})

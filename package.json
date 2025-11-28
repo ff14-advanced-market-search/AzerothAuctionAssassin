@@ -12,7 +12,9 @@
     "build": "electron-builder",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
-    "build:all": "electron-builder --win --mac"
+    "build:all": "electron-builder --win --mac",
+    "lint": "prettier --check \"node-ui/**/*.{js,html,css,json}\"",
+    "lint:fix": "prettier --write \"node-ui/**/*.{js,html,css,json}\""
   },
   "engines": {
     "node": ">=18.0.0"
@@ -21,6 +23,7 @@
     "@types/node": "^22.9.1",
     "electron": "^29.3.0",
     "electron-builder": "^24.13.3",
+    "prettier": "3.0.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.3.3"

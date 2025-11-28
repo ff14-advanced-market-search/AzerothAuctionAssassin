@@ -1,14 +1,14 @@
 /* eslint-env node, es6 */
 /* global require, __dirname, process, console, setTimeout, clearTimeout, setInterval, clearInterval */
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
-const path = require("path");
-const fs = require("fs");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron")
+const path = require("path")
+const fs = require("fs")
 
 // In production (packaged app), __dirname is inside app.asar (read-only)
 // In development, __dirname points to the actual node-ui directory
 const ROOT = app.isPackaged
   ? path.dirname(app.getPath("exe")) // Executable location
-  : path.resolve(__dirname, "..");
+  : path.resolve(__dirname, "..")
 
 // For data directory:
 // - In development: use project root (same as before)
@@ -17,7 +17,7 @@ const ROOT = app.isPackaged
 //   Windows: Next to exe folder (same level as exe)
 function getDataDir() {
   if (!app.isPackaged) {
-    return path.join(ROOT, "AzerothAuctionAssassinData");
+    return path.join(ROOT, "AzerothAuctionAssassinData")
   }
 
   if (process.platform === "darwin") {
@@ -25,10 +25,10 @@ function getDataDir() {
     // This places data next to the .app bundle, not inside it
     return path.join(
       path.dirname(
-        path.dirname(path.dirname(path.dirname(app.getPath("exe")))),
+        path.dirname(path.dirname(path.dirname(app.getPath("exe"))))
       ),
-      "AzerothAuctionAssassinData",
-    );
+      "AzerothAuctionAssassinData"
+    )
   } else {
     // Windows: exe is at AppFolder/exe (or AppFolder/subfolder/exe for NSIS)
     // For NSIS, exe might be in a subfolder, but data should be at installer root
@@ -36,8 +36,8 @@ function getDataDir() {
     // Use path.dirname to get the folder containing the exe
     return path.join(
       path.dirname(app.getPath("exe")),
-      "AzerothAuctionAssassinData",
-    );
+      "AzerothAuctionAssassinData"
+    )
   }
 }
 
@@ -48,7 +48,7 @@ function getDataDir() {
 //   Windows: resources/StaticData (next to exe) or StaticData (for portable)
 function getStaticDir() {
   if (!app.isPackaged) {
-    return path.join(ROOT, "StaticData");
+    return path.join(ROOT, "StaticData")
   }
 
   // Use process.resourcesPath which Electron provides - works on both platforms
@@ -58,15 +58,15 @@ function getStaticDir() {
     process.resourcesPath ||
     (process.platform === "darwin"
       ? path.join(path.dirname(path.dirname(app.getPath("exe"))), "Resources")
-      : path.join(path.dirname(app.getPath("exe")), "resources"));
+      : path.join(path.dirname(app.getPath("exe")), "resources"))
 
-  return path.join(resourcesPath, "StaticData");
+  return path.join(resourcesPath, "StaticData")
 }
 
-const DATA_DIR = getDataDir();
-const STATIC_DIR = getStaticDir();
+const DATA_DIR = getDataDir()
+const STATIC_DIR = getStaticDir()
 
-const BACKUP_DIR = path.join(DATA_DIR, "backup");
+const BACKUP_DIR = path.join(DATA_DIR, "backup")
 
 // Log paths for debugging (only in development or if DEBUG env var is set)
 if (!app.isPackaged || process.env.DEBUG) {
@@ -77,7 +77,7 @@ if (!app.isPackaged || process.env.DEBUG) {
     __dirname: __dirname,
     ROOT: ROOT,
     DATA_DIR: DATA_DIR,
-  });
+  })
 }
 
 const FILES = {
@@ -86,7 +86,7 @@ const FILES = {
   desiredPets: path.join(DATA_DIR, "desired_pets.json"),
   ilvlList: path.join(DATA_DIR, "desired_ilvl_list.json"),
   petIlvlList: path.join(DATA_DIR, "desired_pet_ilvl_list.json"),
-};
+}
 
 const REALM_FILES = {
   EU: path.join(DATA_DIR, "eu-wow-connected-realm-ids.json"),
@@ -95,73 +95,73 @@ const REALM_FILES = {
   NACLASSIC: path.join(DATA_DIR, "naclassic-wow-connected-realm-ids.json"),
   NASODCLASSIC: path.join(
     DATA_DIR,
-    "nasodclassic-wow-connected-realm-ids.json",
+    "nasodclassic-wow-connected-realm-ids.json"
   ),
   EUSODCLASSIC: path.join(
     DATA_DIR,
-    "eusodclassic-wow-connected-realm-ids.json",
+    "eusodclassic-wow-connected-realm-ids.json"
   ),
-};
+}
 
-let alertsProcess = null;
-let mainWindow = null;
-let logFileStream = null;
+let alertsProcess = null
+let mainWindow = null
+let logFileStream = null
 
 function readJson(filePath, fallback) {
   try {
-    const raw = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(raw);
+    const raw = fs.readFileSync(filePath, "utf8")
+    return JSON.parse(raw)
   } catch (err) {
-    return fallback;
+    return fallback
   }
 }
 
 function writeJson(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
 }
 
 function getTimestampInt() {
-  const now = new Date();
+  const now = new Date()
   return (
     now.getFullYear() * 1_000_000 +
     (now.getMonth() + 1) * 10_000 +
     now.getDate() * 100 +
     now.getHours()
-  );
+  )
 }
 
 function saveBackup(fileType, data) {
   try {
-    fs.mkdirSync(BACKUP_DIR, { recursive: true });
-    const timestamp = getTimestampInt();
+    fs.mkdirSync(BACKUP_DIR, { recursive: true })
+    const timestamp = getTimestampInt()
     const backupFilenames = {
       megaData: `${timestamp}_mega_data.json`,
       desiredItems: `${timestamp}_desired_items.json`,
       desiredPets: `${timestamp}_desired_pets.json`,
       ilvlList: `${timestamp}_desired_ilvl_list.json`,
       petIlvlList: `${timestamp}_desired_pet_ilvl_list.json`,
-    };
-    const backupFilename = backupFilenames[fileType];
+    }
+    const backupFilename = backupFilenames[fileType]
     if (backupFilename) {
-      const backupPath = path.join(BACKUP_DIR, backupFilename);
-      writeJson(backupPath, data);
+      const backupPath = path.join(BACKUP_DIR, backupFilename)
+      writeJson(backupPath, data)
     }
   } catch (err) {
-    console.error("Failed to create backup:", err);
+    console.error("Failed to create backup:", err)
   }
 }
 
 function ensureDataFiles() {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.mkdirSync(BACKUP_DIR, { recursive: true });
+  fs.mkdirSync(DATA_DIR, { recursive: true })
+  fs.mkdirSync(BACKUP_DIR, { recursive: true })
 
   // Create logs directory
-  const LOGS_DIR = path.join(DATA_DIR, "logs");
-  fs.mkdirSync(LOGS_DIR, { recursive: true });
+  const LOGS_DIR = path.join(DATA_DIR, "logs")
+  fs.mkdirSync(LOGS_DIR, { recursive: true })
 
   // Create timestamped log file
   if (!logFileStream) {
-    const now = new Date();
+    const now = new Date()
     const timestamp =
       now.getFullYear().toString() +
       String(now.getMonth() + 1).padStart(2, "0") +
@@ -169,14 +169,14 @@ function ensureDataFiles() {
       "_" +
       String(now.getHours()).padStart(2, "0") +
       String(now.getMinutes()).padStart(2, "0") +
-      String(now.getSeconds()).padStart(2, "0");
-    const logFilePath = path.join(LOGS_DIR, `aaa_log_${timestamp}.txt`);
+      String(now.getSeconds()).padStart(2, "0")
+    const logFilePath = path.join(LOGS_DIR, `aaa_log_${timestamp}.txt`)
     logFileStream = fs.createWriteStream(logFilePath, {
       flags: "a",
       encoding: "utf8",
-    });
-    const startMessage = `=== Log started at ${now.toISOString()} ===\n`;
-    logFileStream.write(startMessage);
+    })
+    const startMessage = `=== Log started at ${now.toISOString()} ===\n`
+    logFileStream.write(startMessage)
   }
 
   const defaults = {
@@ -204,11 +204,11 @@ function ensureDataFiles() {
     [FILES.desiredPets]: {},
     [FILES.ilvlList]: [],
     [FILES.petIlvlList]: [],
-  };
+  }
 
   for (const [filePath, fallback] of Object.entries(defaults)) {
     if (!fs.existsSync(filePath)) {
-      writeJson(filePath, fallback);
+      writeJson(filePath, fallback)
     }
   }
 
@@ -216,7 +216,7 @@ function ensureDataFiles() {
   // They will be populated by the reset function using hardcoded data
   for (const filePath of Object.values(REALM_FILES)) {
     if (!fs.existsSync(filePath)) {
-      writeJson(filePath, {});
+      writeJson(filePath, {})
     }
   }
 }
@@ -229,39 +229,39 @@ function normalizeMegaData(input) {
     "NO_RUSSIAN_REALMS",
     "REFRESH_ALERTS",
     "DEBUG",
-  ]);
+  ])
   const intKeys = new Set([
     "MEGA_THREADS",
     "SCAN_TIME_MIN",
     "SCAN_TIME_MAX",
     "TOKEN_PRICE",
-  ]);
+  ])
 
-  const output = { ...input };
+  const output = { ...input }
   for (const key of Object.keys(output)) {
     if (boolKeys.has(key)) {
-      output[key] = Boolean(output[key]);
+      output[key] = Boolean(output[key])
     } else if (intKeys.has(key)) {
-      const num = Number(output[key]);
-      output[key] = Number.isFinite(num) ? num : 0;
+      const num = Number(output[key])
+      output[key] = Number.isFinite(num) ? num : 0
     }
   }
-  return output;
+  return output
 }
 
 function normalizeKV(input) {
-  const out = {};
+  const out = {}
   Object.entries(input || {}).forEach(([k, v]) => {
-    const num = Number(v);
+    const num = Number(v)
     if (!Number.isNaN(num)) {
-      out[String(k)] = num;
+      out[String(k)] = num
     }
-  });
-  return out;
+  })
+  return out
 }
 
 function normalizeIlvlRules(list) {
-  if (!Array.isArray(list)) return [];
+  if (!Array.isArray(list)) return []
   return list
     .map((rule) => ({
       ilvl: Number(rule.ilvl) || 0,
@@ -282,11 +282,11 @@ function normalizeIlvlRules(list) {
             .filter((n) => !Number.isNaN(n))
         : [],
     }))
-    .filter((rule) => rule.buyout > 0);
+    .filter((rule) => rule.buyout > 0)
 }
 
 function normalizePetIlvlRules(list) {
-  if (!Array.isArray(list)) return [];
+  if (!Array.isArray(list)) return []
   return list
     .map((rule) => ({
       petID: Number(rule.petID) || 0,
@@ -300,7 +300,7 @@ function normalizePetIlvlRules(list) {
             .filter((n) => !Number.isNaN(n))
         : [],
     }))
-    .filter((rule) => rule.petID && rule.price > 0);
+    .filter((rule) => rule.petID && rule.price > 0)
 }
 
 function createWindow() {
@@ -316,42 +316,42 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
-  });
+  })
 
-  const htmlPath = path.join(__dirname, "index.html");
-  console.log("Loading HTML from:", htmlPath);
+  const htmlPath = path.join(__dirname, "index.html")
+  console.log("Loading HTML from:", htmlPath)
 
   mainWindow.loadFile(htmlPath).catch((err) => {
-    console.error("Failed to load HTML:", err);
+    console.error("Failed to load HTML:", err)
     // Show error in window if load fails
-    mainWindow.webContents.send("error", err.message);
-  });
+    mainWindow.webContents.send("error", err.message)
+  })
 
   // Ensure window is visible and focused when ready
   mainWindow.once("ready-to-show", () => {
-    console.log("Window ready to show");
+    console.log("Window ready to show")
     if (!mainWindow.isVisible()) {
-      mainWindow.show();
+      mainWindow.show()
     }
-    mainWindow.focus();
-  });
+    mainWindow.focus()
+  })
 
   // Fallback: show window after a short delay if ready-to-show doesn't fire
   setTimeout(() => {
     if (mainWindow && !mainWindow.isVisible()) {
-      console.log("Fallback: showing window");
-      mainWindow.show();
-      mainWindow.focus();
+      console.log("Fallback: showing window")
+      mainWindow.show()
+      mainWindow.focus()
     }
-  }, 1000);
+  }, 1000)
 
   // Handle page load errors
   mainWindow.webContents.on(
     "did-fail-load",
     (event, errorCode, errorDescription) => {
-      console.error("Failed to load page:", errorCode, errorDescription);
-    },
-  );
+      console.error("Failed to load page:", errorCode, errorDescription)
+    }
+  )
 
   // Open DevTools in development (uncomment for debugging)
   // mainWindow.webContents.openDevTools();
@@ -359,7 +359,7 @@ function createWindow() {
 
 function setupIpc() {
   ipcMain.handle("load-state", () => {
-    ensureDataFiles();
+    ensureDataFiles()
     return {
       megaData: readJson(FILES.megaData, {}),
       desiredItems: readJson(FILES.desiredItems, {}),
@@ -367,43 +367,43 @@ function setupIpc() {
       ilvlList: readJson(FILES.ilvlList, []),
       petIlvlList: readJson(FILES.petIlvlList, []),
       processRunning: Boolean(alertsProcess),
-    };
-  });
+    }
+  })
 
   ipcMain.handle("save-mega-data", (_event, payload) => {
-    const normalized = normalizeMegaData(payload || {});
-    writeJson(FILES.megaData, normalized);
-    saveBackup("megaData", normalized);
-    return normalized;
-  });
+    const normalized = normalizeMegaData(payload || {})
+    writeJson(FILES.megaData, normalized)
+    saveBackup("megaData", normalized)
+    return normalized
+  })
 
   ipcMain.handle("save-items", (_event, payload) => {
-    const normalized = normalizeKV(payload || {});
-    writeJson(FILES.desiredItems, normalized);
-    saveBackup("desiredItems", normalized);
-    return normalized;
-  });
+    const normalized = normalizeKV(payload || {})
+    writeJson(FILES.desiredItems, normalized)
+    saveBackup("desiredItems", normalized)
+    return normalized
+  })
 
   ipcMain.handle("save-pets", (_event, payload) => {
-    const normalized = normalizeKV(payload || {});
-    writeJson(FILES.desiredPets, normalized);
-    saveBackup("desiredPets", normalized);
-    return normalized;
-  });
+    const normalized = normalizeKV(payload || {})
+    writeJson(FILES.desiredPets, normalized)
+    saveBackup("desiredPets", normalized)
+    return normalized
+  })
 
   ipcMain.handle("save-ilvl", (_event, payload) => {
-    const normalized = normalizeIlvlRules(payload || []);
-    writeJson(FILES.ilvlList, normalized);
-    saveBackup("ilvlList", normalized);
-    return normalized;
-  });
+    const normalized = normalizeIlvlRules(payload || [])
+    writeJson(FILES.ilvlList, normalized)
+    saveBackup("ilvlList", normalized)
+    return normalized
+  })
 
   ipcMain.handle("save-pet-ilvl", (_event, payload) => {
-    const normalized = normalizePetIlvlRules(payload || []);
-    writeJson(FILES.petIlvlList, normalized);
-    saveBackup("petIlvlList", normalized);
-    return normalized;
-  });
+    const normalized = normalizePetIlvlRules(payload || [])
+    writeJson(FILES.petIlvlList, normalized)
+    saveBackup("petIlvlList", normalized)
+    return normalized
+  })
 
   // Reset handlers - clear data for each page
   ipcMain.handle("reset-mega-data", () => {
@@ -428,173 +428,173 @@ function setupIpc() {
         REFRESH_ALERTS: false,
         DEBUG: false,
         FACTION: "all",
-      },
-    );
-    const normalized = normalizeMegaData(defaultData);
-    writeJson(FILES.megaData, normalized);
-    saveBackup("megaData", normalized);
-    return normalized;
-  });
+      }
+    )
+    const normalized = normalizeMegaData(defaultData)
+    writeJson(FILES.megaData, normalized)
+    saveBackup("megaData", normalized)
+    return normalized
+  })
 
   ipcMain.handle("reset-items", () => {
-    const normalized = normalizeKV({});
-    writeJson(FILES.desiredItems, normalized);
-    saveBackup("desiredItems", normalized);
-    return normalized;
-  });
+    const normalized = normalizeKV({})
+    writeJson(FILES.desiredItems, normalized)
+    saveBackup("desiredItems", normalized)
+    return normalized
+  })
 
   ipcMain.handle("reset-ilvl", () => {
-    const normalized = normalizeIlvlRules([]);
-    writeJson(FILES.ilvlList, normalized);
-    saveBackup("ilvlList", normalized);
-    return normalized;
-  });
+    const normalized = normalizeIlvlRules([])
+    writeJson(FILES.ilvlList, normalized)
+    saveBackup("ilvlList", normalized)
+    return normalized
+  })
 
   ipcMain.handle("reset-pet-ilvl", () => {
-    const normalized = normalizePetIlvlRules([]);
-    writeJson(FILES.petIlvlList, normalized);
-    saveBackup("petIlvlList", normalized);
-    return normalized;
-  });
+    const normalized = normalizePetIlvlRules([])
+    writeJson(FILES.petIlvlList, normalized)
+    saveBackup("petIlvlList", normalized)
+    return normalized
+  })
 
   // Navigation handlers
   ipcMain.handle("can-go-back", () => {
-    return mainWindow?.webContents.canGoBack() || false;
-  });
+    return mainWindow?.webContents.canGoBack() || false
+  })
 
   ipcMain.handle("can-go-forward", () => {
-    return mainWindow?.webContents.canGoForward() || false;
-  });
+    return mainWindow?.webContents.canGoForward() || false
+  })
 
   ipcMain.handle("go-back", () => {
     if (mainWindow?.webContents.canGoBack()) {
-      mainWindow.webContents.goBack();
+      mainWindow.webContents.goBack()
     }
-    return mainWindow?.webContents.canGoBack() || false;
-  });
+    return mainWindow?.webContents.canGoBack() || false
+  })
 
   ipcMain.handle("go-forward", () => {
     if (mainWindow?.webContents.canGoForward()) {
-      mainWindow.webContents.goForward();
+      mainWindow.webContents.goForward()
     }
-    return mainWindow?.webContents.canGoForward() || false;
-  });
+    return mainWindow?.webContents.canGoForward() || false
+  })
 
   // Write log to file (for renderer logs)
   ipcMain.handle("write-log", (_event, line) => {
     if (logFileStream) {
-      logFileStream.write(line);
+      logFileStream.write(line)
     }
-    return { success: true };
-  });
+    return { success: true }
+  })
 
   ipcMain.handle("import-json", async (_event, { target }) => {
-    const targetPath = FILES[target];
-    if (!targetPath) return { error: "Unknown target" };
+    const targetPath = FILES[target]
+    if (!targetPath) return { error: "Unknown target" }
     const res = await dialog.showOpenDialog({
       properties: ["openFile"],
       filters: [{ name: "JSON", extensions: ["json"] }],
-    });
-    if (res.canceled || !res.filePaths.length) return { canceled: true };
-    const src = res.filePaths[0];
-    const data = readJson(src, null);
-    if (data === null) return { error: "Failed to read JSON" };
-    writeJson(targetPath, data);
-    saveBackup(target, data);
-    return { data };
-  });
+    })
+    if (res.canceled || !res.filePaths.length) return { canceled: true }
+    const src = res.filePaths[0]
+    const data = readJson(src, null)
+    if (data === null) return { error: "Failed to read JSON" }
+    writeJson(targetPath, data)
+    saveBackup(target, data)
+    return { data }
+  })
 
   ipcMain.handle("export-json", async (_event, { target }) => {
-    const targetPath = FILES[target];
-    if (!targetPath) return { error: "Unknown target" };
+    const targetPath = FILES[target]
+    if (!targetPath) return { error: "Unknown target" }
     const res = await dialog.showSaveDialog({
       defaultPath: path.basename(targetPath),
       filters: [{ name: "JSON", extensions: ["json"] }],
-    });
-    if (res.canceled || !res.filePath) return { canceled: true };
-    const data = readJson(targetPath, null);
-    if (data === null) return { error: "Failed to read source JSON" };
-    writeJson(res.filePath, data);
-    return { exported: res.filePath };
-  });
+    })
+    if (res.canceled || !res.filePath) return { canceled: true }
+    const data = readJson(targetPath, null)
+    if (data === null) return { error: "Failed to read source JSON" }
+    writeJson(res.filePath, data)
+    return { exported: res.filePath }
+  })
 
   ipcMain.handle("run-mega", () => {
     if (alertsProcess) {
-      return { alreadyRunning: true };
+      return { alreadyRunning: true }
     }
 
     // Set up log callback to send to renderer and write to file
     const sendLog = (line) => {
       // Write to log file
       if (logFileStream) {
-        logFileStream.write(line);
+        logFileStream.write(line)
       }
       // Send to renderer for UI display
       BrowserWindow.getAllWindows().forEach((win) =>
-        win.webContents.send("mega-log", line),
-      );
-    };
+        win.webContents.send("mega-log", line)
+      )
+    }
 
     const sendExit = (code) => {
       BrowserWindow.getAllWindows().forEach((win) =>
-        win.webContents.send("mega-exit", code),
-      );
-      alertsProcess = null;
-    };
+        win.webContents.send("mega-exit", code)
+      )
+      alertsProcess = null
+    }
 
     try {
       // Load and run mega-alerts directly in this process
-      const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
-      const resolvedPath = require.resolve(megaAlertsPath);
+      const megaAlertsPath = path.join(__dirname, "mega-alerts.js")
+      const resolvedPath = require.resolve(megaAlertsPath)
 
       // Clear module cache to ensure fresh state on each run
       // This prevents STOP_REQUESTED flag from persisting across runs
-      delete require.cache[resolvedPath];
+      delete require.cache[resolvedPath]
 
-      const megaAlerts = require(megaAlertsPath);
+      const megaAlerts = require(megaAlertsPath)
 
       // Set paths first (important for packaged apps)
       if (megaAlerts.setPaths) {
-        megaAlerts.setPaths(DATA_DIR, STATIC_DIR);
+        megaAlerts.setPaths(DATA_DIR, STATIC_DIR)
       }
 
       // Set up callbacks
       if (megaAlerts.setLogCallback) {
-        megaAlerts.setLogCallback(sendLog);
+        megaAlerts.setLogCallback(sendLog)
       }
       if (megaAlerts.setStopCallback) {
-        megaAlerts.setStopCallback(() => sendExit(0));
+        megaAlerts.setStopCallback(() => sendExit(0))
       }
 
       // Run in background (don't await - it runs continuously)
       megaAlerts.main().catch((err) => {
-        sendLog(`Error in mega alerts: ${err.message || err}`);
+        sendLog(`Error in mega alerts: ${err.message || err}`)
         if (err.stack) {
-          sendLog(err.stack);
+          sendLog(err.stack)
         }
-        sendExit(1);
-      });
+        sendExit(1)
+      })
 
-      alertsProcess = true; // Mark as running
-      return { started: true };
+      alertsProcess = true // Mark as running
+      return { started: true }
     } catch (err) {
-      alertsProcess = null;
-      sendLog(`Error launching alerts: ${err.message || err}`);
+      alertsProcess = null
+      sendLog(`Error launching alerts: ${err.message || err}`)
       if (err.stack) {
-        sendLog(err.stack);
+        sendLog(err.stack)
       }
-      sendExit(1);
-      return { error: err.message || String(err) };
+      sendExit(1)
+      return { error: err.message || String(err) }
     }
-  });
+  })
 
   ipcMain.handle("stop-mega", async () => {
     if (alertsProcess) {
       try {
-        const megaAlertsPath = path.join(__dirname, "mega-alerts.js");
-        const megaAlerts = require(megaAlertsPath);
+        const megaAlertsPath = path.join(__dirname, "mega-alerts.js")
+        const megaAlerts = require(megaAlertsPath)
         if (megaAlerts.requestStop) {
-          megaAlerts.requestStop();
+          megaAlerts.requestStop()
         }
 
         // Wait for stop to complete with timeout fallback
@@ -604,92 +604,92 @@ function setupIpc() {
           const timeout = setTimeout(() => {
             // Timeout fallback: clear state after 1 second even if callback didn't fire
             if (alertsProcess) {
-              alertsProcess = null;
+              alertsProcess = null
             }
-            resolve();
-          }, 1000);
+            resolve()
+          }, 1000)
 
           // Check if already stopped (callback may have fired synchronously)
           if (!alertsProcess) {
-            clearTimeout(timeout);
-            resolve();
-            return;
+            clearTimeout(timeout)
+            resolve()
+            return
           }
 
           // Give stop callback time to execute (it calls sendExit which sets alertsProcess = null)
           // Poll briefly to see if state was cleared by callback
           const checkInterval = setInterval(() => {
             if (!alertsProcess) {
-              clearTimeout(timeout);
-              clearInterval(checkInterval);
-              resolve();
+              clearTimeout(timeout)
+              clearInterval(checkInterval)
+              resolve()
             }
-          }, 50); // Check every 50ms
+          }, 50) // Check every 50ms
 
           // Cleanup interval after timeout
           setTimeout(() => {
-            clearInterval(checkInterval);
-          }, 1000);
-        });
+            clearInterval(checkInterval)
+          }, 1000)
+        })
       } catch (err) {
-        console.error("Error stopping alerts:", err);
-        alertsProcess = null;
+        console.error("Error stopping alerts:", err)
+        alertsProcess = null
       }
     }
-    return { stopped: true };
-  });
+    return { stopped: true }
+  })
 
   // Realm list handlers
   ipcMain.handle("load-realm-lists", () => {
-    const lists = {};
+    const lists = {}
     for (const [region, filePath] of Object.entries(REALM_FILES)) {
-      lists[region] = readJson(filePath, {});
+      lists[region] = readJson(filePath, {})
     }
-    return lists;
-  });
+    return lists
+  })
 
   ipcMain.handle("save-realm-list", (_event, region, realms) => {
-    const filePath = REALM_FILES[region];
-    if (!filePath) return { error: "Unknown region" };
-    const normalized = {};
+    const filePath = REALM_FILES[region]
+    if (!filePath) return { error: "Unknown region" }
+    const normalized = {}
     Object.entries(realms || {}).forEach(([k, v]) => {
-      const id = Number(v);
+      const id = Number(v)
       if (!Number.isNaN(id)) {
-        normalized[String(k)] = id;
+        normalized[String(k)] = id
       }
-    });
-    writeJson(filePath, normalized);
-    return normalized;
-  });
+    })
+    writeJson(filePath, normalized)
+    return normalized
+  })
 }
 
 app.whenReady().then(async () => {
   // Ensure data files exist before setting up IPC handlers
   // This prevents race conditions where renderer calls IPC before files exist
-  ensureDataFiles();
+  ensureDataFiles()
 
   // Create window and set up IPC after files are ready
-  createWindow();
-  setupIpc();
+  createWindow()
+  setupIpc()
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      createWindow()
     }
-  });
-});
+  })
+})
 
 app.on("window-all-closed", () => {
   // Quit the app when all windows are closed (including on macOS)
-  app.quit();
-});
+  app.quit()
+})
 
 app.on("before-quit", () => {
   // Close log file stream on app quit
   if (logFileStream) {
-    const endMessage = `=== Log ended at ${new Date().toISOString()} ===\n`;
-    logFileStream.write(endMessage);
-    logFileStream.end();
-    logFileStream = null;
+    const endMessage = `=== Log ended at ${new Date().toISOString()} ===\n`
+    logFileStream.write(endMessage)
+    logFileStream.end()
+    logFileStream = null
   }
-});
+})
