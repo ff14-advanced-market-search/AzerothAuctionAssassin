@@ -78,7 +78,11 @@ jobs:
     - name: Encode and Save Upload URL as Base64
       id: b64encode_upload_url
       run: |
-        echo "upload_url_base64=$(echo -n '${{ steps.create_release.outputs.upload_url }}' | base64 --wrap=0)" >> $GITHUB_OUTPUT
+        $uploadUrl = '${{ steps.create_release.outputs.upload_url }}'
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($uploadUrl)
+        $base64 = [Convert]::ToBase64String($bytes)
+        echo "upload_url_base64=$base64" >> $env:GITHUB_OUTPUT
+      shell: pwsh
 
     - name: Upload Windows Installer to Release
       uses: actions/upload-release-asset@v1
