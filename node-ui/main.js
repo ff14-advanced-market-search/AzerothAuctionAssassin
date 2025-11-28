@@ -7,23 +7,54 @@ const fs = require("fs");
 // In production (packaged app), __dirname is inside app.asar (read-only)
 // In development, __dirname points to the actual node-ui directory
 const ROOT = app.isPackaged 
-  ? path.dirname(app.getPath("exe")) // Executable location (MacOS folder)
+  ? path.dirname(app.getPath("exe")) // Executable location
   : path.resolve(__dirname, "..");
   
 // For data directory:
 // - In development: use project root (same as before)
-// - In production: use the directory containing the .app bundle (so data is next to the app)
-const DATA_DIR = app.isPackaged
-  ? path.join(path.dirname(path.dirname(path.dirname(app.getPath("exe")))), "AzerothAuctionAssassinData")
-  : path.join(ROOT, "AzerothAuctionAssassinData");
+// - In production: place data next to the app
+//   macOS: Next to .app bundle (go up from MacOS to Contents to .app parent)
+//   Windows: Next to exe folder (same level as exe)
+function getDataDir() {
+  if (!app.isPackaged) {
+    return path.join(ROOT, "AzerothAuctionAssassinData");
+  }
+  
+  if (process.platform === "darwin") {
+    // macOS: exe is at App.app/Contents/MacOS/exe, go up 4 levels to get parent of .app bundle
+    // This places data next to the .app bundle, not inside it
+    return path.join(path.dirname(path.dirname(path.dirname(path.dirname(app.getPath("exe"))))), "AzerothAuctionAssassinData");
+  } else {
+    // Windows: exe is at AppFolder/exe (or AppFolder/subfolder/exe for NSIS)
+    // For NSIS, exe might be in a subfolder, but data should be at installer root
+    // For portable, exe is directly in the folder
+    // Use path.dirname to get the folder containing the exe
+    return path.join(path.dirname(app.getPath("exe")), "AzerothAuctionAssassinData");
+  }
+}
 
 // For static data directory:
 // - In development: use project root
-// - In production: use Resources folder (where extraResources are placed)
-// Calculate from executable path to avoid calling app.getPath() before ready
-const STATIC_DIR = app.isPackaged
-  ? path.join(path.dirname(path.dirname(app.getPath("exe"))), "Resources", "StaticData")
-  : path.join(ROOT, "StaticData");
+// - In production: use resources folder (where extraResources are placed)
+//   macOS: App.app/Contents/Resources/StaticData
+//   Windows: resources/StaticData (next to exe) or StaticData (for portable)
+function getStaticDir() {
+  if (!app.isPackaged) {
+    return path.join(ROOT, "StaticData");
+  }
+  
+  // Use process.resourcesPath which Electron provides - works on both platforms
+  // This points to the resources directory where extraResources are placed
+  // Note: process.resourcesPath is available in Electron packaged apps
+  const resourcesPath = process.resourcesPath || (process.platform === "darwin" 
+    ? path.join(path.dirname(path.dirname(app.getPath("exe"))), "Resources")
+    : path.join(path.dirname(app.getPath("exe")), "resources"));
+  
+  return path.join(resourcesPath, "StaticData");
+}
+
+const DATA_DIR = getDataDir();
+const STATIC_DIR = getStaticDir();
   
 const BACKUP_DIR = path.join(DATA_DIR, "backup");
 
