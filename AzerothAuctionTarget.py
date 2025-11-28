@@ -162,7 +162,7 @@ class RecommendationsRequest(QThread):
             return
 
         marketshare_recommendations = requests.post(
-            f"http://api.saddlebagexchange.com/api/wow/itemstats",
+            f"https://api.saddlebagexchange.com/api/wow/itemstats",
             headers={"Accept": "application/json"},
             json=self.request_data,
         ).json()
@@ -210,7 +210,7 @@ class Item_Statistics(QThread):
             - Emits the DataFrame through a completed signal."""
         item_statistics = pd.DataFrame(
             data=requests.post(
-                f"http://api.saddlebagexchange.com/api/wow/megaitemnames",
+                f"https://api.saddlebagexchange.com/api/wow/megaitemnames",
                 headers={"Accept": "application/json"},
                 json={"region": "EU", "discount": 1},
             ).json()
@@ -1093,7 +1093,7 @@ class App(QMainWindow):
         icon = QIcon(icon_path)
         self.setWindowIcon(icon)
 
-        self.token_auth_url = "http://api.saddlebagexchange.com/api/wow/checkmegatoken"
+        self.token_auth_url = "https://api.saddlebagexchange.com/api/wow/checkmegatoken"
 
         # default to 10% discount, just use EU for now for less data
         self.api_data_thread = Item_Statistics()
