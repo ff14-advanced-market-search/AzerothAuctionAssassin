@@ -679,7 +679,7 @@ class MegaData {
       if (res.status === 429) {
         if (retryCount < maxRetries) {
           log(
-            `Rate limited (429), waiting 2 seconds before retry ${
+            `Rate limited (429) on ${url}, waiting 2 seconds before retry ${
               retryCount + 1
             }/${maxRetries}...`
           )
@@ -709,7 +709,7 @@ class MegaData {
       // Retry on 429 errors if we haven't exceeded max retries
       if (error.message === "429" && retryCount < maxRetries) {
         log(
-          `Rate limited (429), waiting 2 seconds before retry ${
+          `Rate limited (429) on ${url}, waiting 2 seconds before retry ${
             retryCount + 1
           }/${maxRetries}...`
         )
@@ -752,7 +752,9 @@ class MegaData {
       if (res.status === 429) {
         if (retryCount < maxRetries) {
           log(
-            `Rate limited (429), waiting 2 seconds before retry ${
+            `Rate limited (429) on (${
+              this.REGION
+            }) commodities, waiting 2 seconds before retry ${
               retryCount + 1
             }/${maxRetries}...`
           )
@@ -774,7 +776,9 @@ class MegaData {
       // Retry on 429 errors if we haven't exceeded max retries
       if (error.message === "429" && retryCount < maxRetries) {
         log(
-          `Rate limited (429), waiting 2 seconds before retry ${
+          `Rate limited (429) on ${
+            this.REGION
+          } commodities, waiting 2 seconds before retry ${
             retryCount + 1
           }/${maxRetries}...`
         )

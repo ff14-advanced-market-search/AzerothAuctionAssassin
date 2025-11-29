@@ -169,7 +169,7 @@ function clearPetIlvlForm() {
   const form = document.getElementById("pet-ilvl-form")
   if (form) {
     form.reset()
-    form.minLevel.value = 25
+    form.minLevel.value = 1
     form.minQuality.value = "-1" // Set dropdown to "All"
     const submitBtn = form.querySelector('button[type="submit"]')
     if (submitBtn) submitBtn.textContent = "Add pet rule"
@@ -1194,7 +1194,7 @@ function renderPetIlvlRules() {
         editingPetIlvlIndex = idx
         form.petID.value = rule.petID || ""
         form.price.value = rule.price || ""
-        form.minLevel.value = rule.minLevel || 25
+        form.minLevel.value = rule.minLevel || 1
         form.minQuality.value =
           rule.minQuality !== undefined ? String(rule.minQuality) : "-1"
         form.excludeBreeds.value = (rule.excludeBreeds || []).join(", ")
