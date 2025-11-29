@@ -219,6 +219,65 @@ button.ghost:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
+.update-notification {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.update-notification.update-available {
+  background: linear-gradient(
+    135deg,
+    rgba(128, 255, 234, 0.1),
+    rgba(78, 167, 255, 0.1)
+  );
+  border: 1px solid var(--accent);
+}
+
+.update-notification.update-current {
+  background: rgba(74, 210, 149, 0.1);
+  border: 1px solid var(--success);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.update-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--accent);
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.update-link:hover {
+  opacity: 0.8;
+}
+
+.update-icon {
+  font-size: 18px;
+}
+
+.update-text {
+  flex: 1;
+}
+
+#update-version {
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
 .card {
   background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
   border: 1px solid var(--border);

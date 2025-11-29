@@ -2642,4 +2642,73 @@ window.addEventListener("DOMContentLoaded", async () => {
   await loadState()
   showView("home")
   updateNavigationButtons()
+  checkForUpdates()
 })
+
+/**
+ * Check for app updates and display notification
+ */
+async function checkForUpdates() {
+  try {
+    const result = await window.aaa.checkForUpdates()
+    const updateNotification = document.getElementById("update-notification")
+    const updateContent = document.getElementById("update-content")
+
+    if (!updateNotification || !updateContent) return
+
+    // Clear existing content
+    updateContent.textContent = ""
+
+    if (result.hasUpdate && result.latestVersion) {
+      // Show new version available message
+      const link = document.createElement("a")
+      link.href =
+        "https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/releases/latest"
+      link.target = "_blank"
+      link.rel = "noopener noreferrer"
+      link.className = "update-link"
+
+      const icon = document.createElement("span")
+      icon.className = "update-icon"
+      icon.textContent = "🆕"
+
+      const text = document.createElement("span")
+      text.className = "update-text"
+      text.textContent = "New version available: "
+
+      const version = document.createElement("span")
+      version.className = "update-version"
+      version.textContent = result.latestVersion
+
+      text.appendChild(version)
+      link.appendChild(icon)
+      link.appendChild(text)
+      updateContent.appendChild(link)
+
+      updateNotification.style.display = "block"
+      updateNotification.className = "update-notification update-available"
+    } else if (!result.error) {
+      // Show up to date message
+      const div = document.createElement("div")
+      div.className = "update-link"
+
+      const icon = document.createElement("span")
+      icon.className = "update-icon"
+      icon.textContent = "✓"
+
+      const text = document.createElement("span")
+      text.className = "update-text"
+      text.textContent = `You are up to date (version ${result.currentVersion})`
+
+      div.appendChild(icon)
+      div.appendChild(text)
+      updateContent.appendChild(div)
+
+      updateNotification.style.display = "block"
+      updateNotification.className = "update-notification update-current"
+    }
+  } catch (err) {
+    // Silently fail - don't show errors for update checks
+    console.error("Failed to check for updates:", err)
+  }
+}

@@ -48,4 +48,6 @@ contextBridge.exposeInMainWorld("aaa", {
   listBackups: (target) => ipcRenderer.invoke("list-backups", { target }),
   restoreBackup: (target, filename) =>
     ipcRenderer.invoke("restore-backup", { target, filename }),
+  checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
+  getAppVersion: () => ipcRenderer.invoke("get-app-version"),
 })

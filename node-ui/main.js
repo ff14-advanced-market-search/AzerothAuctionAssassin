@@ -3,6 +3,10 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron")
 const path = require("path")
 const fs = require("fs")
+const https = require("https")
+
+// Get current app version
+const CURRENT_VERSION = require("../package.json").version
 
 // In production (packaged app), __dirname is inside app.asar (read-only)
 // In development, __dirname points to the actual node-ui directory
@@ -1056,6 +1060,110 @@ function setupIpc() {
     } catch (err) {
       return { success: false, error: err.message }
     }
+  })
+
+  // Version check handler
+  ipcMain.handle("check-for-updates", async () => {
+    try {
+      const latestVersion = await getLatestReleaseVersion()
+      if (!latestVersion) {
+        return { hasUpdate: false, error: "Failed to fetch version" }
+      }
+
+      const hasUpdate = compareVersions(latestVersion, CURRENT_VERSION) > 0
+      return {
+        hasUpdate,
+        currentVersion: CURRENT_VERSION,
+        latestVersion: hasUpdate ? latestVersion : null,
+      }
+    } catch (err) {
+      console.error("Error checking for updates:", err)
+      return { hasUpdate: false, error: err.message }
+    }
+  })
+
+  // Get app version
+  ipcMain.handle("get-app-version", () => {
+    return CURRENT_VERSION
+  })
+}
+
+/**
+ * Compare two semantic versions
+ * @param {string} v1 - Version 1
+ * @param {string} v2 - Version 2
+ * @returns {number} 1 if v1 > v2, -1 if v1 < v2, 0 if equal
+ */
+function compareVersions(v1, v2) {
+  const parts1 = v1.split(".").map(Number)
+  const parts2 = v2.split(".").map(Number)
+  const maxLength = Math.max(parts1.length, parts2.length)
+
+  for (let i = 0; i < maxLength; i++) {
+    const part1 = parts1[i] || 0
+    const part2 = parts2[i] || 0
+    if (part1 > part2) return 1
+    if (part1 < part2) return -1
+  }
+  return 0
+}
+
+/**
+ * Fetch the latest release version from GitHub
+ * @returns {Promise<string|null>} Latest version tag (without 'v' prefix) or null on error
+ */
+function getLatestReleaseVersion() {
+  return new Promise((resolve) => {
+    const options = {
+      hostname: "api.github.com",
+      path: "/repos/ff14-advanced-market-search/AzerothAuctionAssassin/releases/latest",
+      method: "GET",
+      headers: {
+        "User-Agent": "AzerothAuctionAssassin",
+        Accept: "application/vnd.github.v3+json",
+      },
+    }
+
+    const req = https.request(options, (res) => {
+      let data = ""
+
+      res.on("data", (chunk) => {
+        data += chunk
+      })
+
+      res.on("end", () => {
+        if (res.statusCode === 200) {
+          try {
+            const release = JSON.parse(data)
+            // Extract version from tag (e.g., "v2.0.0" -> "2.0.0")
+            const tag = release.tag_name || ""
+            const version = tag.startsWith("v") ? tag.substring(1) : tag
+            resolve(version)
+          } catch (err) {
+            console.error("Error parsing release data:", err)
+            resolve(null)
+          }
+        } else {
+          console.error(
+            `GitHub API error: ${res.statusCode} ${res.statusMessage}`
+          )
+          resolve(null)
+        }
+      })
+    })
+
+    req.on("error", (err) => {
+      console.error("Error fetching latest release:", err)
+      resolve(null)
+    })
+
+    req.setTimeout(5000, () => {
+      req.destroy()
+      console.error("Timeout fetching latest release")
+      resolve(null)
+    })
+
+    req.end()
   })
 }
 
