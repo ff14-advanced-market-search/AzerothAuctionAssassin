@@ -898,6 +898,7 @@ async function loadState() {
   renderPetIlvlRules()
   await loadRealmLists()
   await loadDataDir()
+  await loadZoomLevel()
 
   // attempt to hydrate name maps so existing lists show names once fetched
   fetchItemNames().then(() => {
@@ -914,6 +915,27 @@ async function loadDataDir() {
   if (dataDirInput) {
     const currentDir = await window.aaa.getDataDir()
     dataDirInput.value = currentDir
+  }
+}
+
+function updateZoomDisplay(zoomFactor) {
+  const zoomDisplay = document.getElementById("zoom-level-display")
+  if (zoomDisplay) {
+    const zoomPercent = Math.round((zoomFactor || 1.0) * 100)
+    zoomDisplay.textContent = `${zoomPercent}%`
+  }
+}
+
+async function loadZoomLevel() {
+  try {
+    const result = await window.aaa.getZoomLevel()
+    updateZoomDisplay(result.zoom || 1.0)
+  } catch (err) {
+    console.error("Failed to load zoom level:", err)
+    const zoomDisplay = document.getElementById("zoom-level-display")
+    if (zoomDisplay) {
+      zoomDisplay.textContent = "Unknown"
+    }
   }
 }
 
@@ -2031,6 +2053,39 @@ window.aaa.onMegaLog((line) => appendLog(line))
 window.aaa.onMegaExit((code) => {
   appendLog(`\nProcess exited with code ${code}\n`)
   setRunning(false)
+})
+
+// Listen for zoom changes
+window.aaa.onZoomChanged((zoomFactor) => {
+  updateZoomDisplay(zoomFactor)
+})
+
+// Zoom button handlers
+const zoomInBtn = document.getElementById("zoom-in-btn")
+const zoomOutBtn = document.getElementById("zoom-out-btn")
+
+zoomInBtn?.addEventListener("click", async () => {
+  try {
+    const result = await window.aaa.getZoomLevel()
+    const currentZoom = result.zoom || 1.0
+    const newZoom = Math.min(currentZoom + 0.1, 3.0) // Max 300%
+    await window.aaa.setZoomLevel(newZoom)
+    updateZoomDisplay(newZoom)
+  } catch (err) {
+    console.error("Failed to zoom in:", err)
+  }
+})
+
+zoomOutBtn?.addEventListener("click", async () => {
+  try {
+    const result = await window.aaa.getZoomLevel()
+    const currentZoom = result.zoom || 1.0
+    const newZoom = Math.max(currentZoom - 0.1, 0.25) // Min 25%
+    await window.aaa.setZoomLevel(newZoom)
+    updateZoomDisplay(newZoom)
+  } catch (err) {
+    console.error("Failed to zoom out:", err)
+  }
 })
 
 navButtons.forEach((btn) => {

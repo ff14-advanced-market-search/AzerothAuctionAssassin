@@ -360,6 +360,15 @@ function createWindow() {
     mainWindow.webContents.send("error", err.message)
   })
 
+  // Set default zoom to 80%
+  mainWindow.webContents.setZoomFactor(0.8)
+
+  // Listen for zoom changes and notify renderer
+  mainWindow.webContents.on("zoom-changed", () => {
+    const zoomFactor = mainWindow.webContents.getZoomFactor()
+    mainWindow.webContents.send("zoom-changed", zoomFactor)
+  })
+
   // Ensure window is visible and focused when ready
   mainWindow.once("ready-to-show", () => {
     console.log("Window ready to show")
@@ -367,6 +376,9 @@ function createWindow() {
       mainWindow.show()
     }
     mainWindow.focus()
+    // Send initial zoom level
+    const zoomFactor = mainWindow.webContents.getZoomFactor()
+    mainWindow.webContents.send("zoom-changed", zoomFactor)
   })
 
   // Fallback: show window after a short delay if ready-to-show doesn't fire
@@ -822,6 +834,23 @@ function setupIpc() {
       const errorMsg = `[CONFIG] Failed to set data directory: ${err.message}\n`
       console.error(errorMsg.trim())
       sendToLogPanel(errorMsg)
+      return { success: false, error: err.message }
+    }
+  })
+
+  // Zoom level handlers
+  ipcMain.handle("get-zoom-level", () => {
+    if (!mainWindow) return { zoom: 1.0 }
+    const zoomFactor = mainWindow.webContents.getZoomFactor()
+    return { zoom: zoomFactor }
+  })
+
+  ipcMain.handle("set-zoom-level", (_event, zoomFactor) => {
+    if (!mainWindow) return { success: false }
+    try {
+      mainWindow.webContents.setZoomFactor(zoomFactor)
+      return { success: true, zoom: zoomFactor }
+    } catch (err) {
       return { success: false, error: err.message }
     }
   })

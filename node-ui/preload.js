@@ -32,4 +32,11 @@ contextBridge.exposeInMainWorld("aaa", {
   selectDataDir: () => ipcRenderer.invoke("select-data-dir"),
   setCustomDataDir: (dirPath) =>
     ipcRenderer.invoke("set-custom-data-dir", dirPath),
+  getZoomLevel: () => ipcRenderer.invoke("get-zoom-level"),
+  setZoomLevel: (zoomFactor) =>
+    ipcRenderer.invoke("set-zoom-level", zoomFactor),
+  onZoomChanged: (callback) =>
+    ipcRenderer.on("zoom-changed", (_event, zoomFactor) =>
+      callback(zoomFactor)
+    ),
 })

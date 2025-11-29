@@ -151,6 +151,42 @@
                 </button>
               </div>
             </label>
+            <label title="Current UI zoom level">
+              UI Zoom Level
+              <div style="display: flex; gap: 8px; align-items: center">
+                <div
+                  id="zoom-level-display"
+                  style="
+                    padding: 8px 12px;
+                    background: rgba(128, 255, 234, 0.1);
+                    border-radius: 4px;
+                    color: #80ffea;
+                    font-weight: 500;
+                    flex: 1;
+                  "
+                >
+                  Loading...
+                </div>
+                <button
+                  type="button"
+                  id="zoom-out-btn"
+                  class="ghost"
+                  title="Zoom out (Command -)"
+                  style="white-space: nowrap"
+                >
+                  Zoom Out
+                </button>
+                <button
+                  type="button"
+                  id="zoom-in-btn"
+                  class="ghost"
+                  title="Zoom in (Command +)"
+                  style="white-space: nowrap"
+                >
+                  Zoom In
+                </button>
+              </div>
+            </label>
             <label
               title="Setup a discord channel with a webhook url for sending the alert messages."
             >
