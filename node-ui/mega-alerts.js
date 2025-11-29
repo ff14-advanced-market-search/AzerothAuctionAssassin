@@ -159,7 +159,7 @@ function formatTargetPrice(auction) {
   let actual = null
   if (auction.buyout_prices !== undefined) {
     if (typeof auction.buyout_prices === "number") {
-      // For ilvl and pet alerts, buyout_prices is a single number
+      // For ilvl and pet alerts, buyout_prices is a single number (already in gold)
       actual = auction.buyout_prices
     } else if (typeof auction.buyout_prices === "string") {
       // For regular items, it's a JSON stringified array
@@ -1214,12 +1214,7 @@ async function runAlerts(state, progress, runOnce = false) {
       }
       const price_type =
         "bid_prices" in auction ? "bid_prices" : "buyout_prices"
-      let priceDisplay = auction[price_type]
-      // Convert ilvl prices from copper to gold (ilvl items store price as number in copper)
-      if ("ilvl" in auction && typeof priceDisplay === "number") {
-        priceDisplay = priceDisplay / 10000
-      }
-      message += "`" + price_type + "`: " + priceDisplay + "\n"
+      message += "`" + price_type + "`: " + auction[price_type] + "\n"
 
       const auctionKey = getAuctionKey(auction, connected_id)
       if (!alert_record.has(auctionKey)) {
@@ -1306,15 +1301,17 @@ async function runAlerts(state, progress, runOnce = false) {
     const tertiary_stats = Object.entries(auction.tertiary_stats)
       .filter(([, present]) => present)
       .map(([stat]) => stat)
+    // Convert price from copper to gold for consistency with other item types
+    const priceInGold = auction[priceType] / 10000
     return {
       region: state.REGION,
       realmID: connected_id,
       realmNames: realm_names,
       [idType]: id,
       itemlink,
-      minPrice: auction[priceType],
+      minPrice: priceInGold,
       targetPrice,
-      [`${priceType}_prices`]: auction[priceType],
+      [`${priceType}_prices`]: priceInGold,
       tertiary_stats,
       bonus_ids: auction.bonus_ids,
       ilvl: auction.ilvl,
