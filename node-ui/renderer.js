@@ -897,6 +897,7 @@ async function loadState() {
   renderIlvlRules()
   renderPetIlvlRules()
   await loadRealmLists()
+  await loadDataDir()
 
   // attempt to hydrate name maps so existing lists show names once fetched
   fetchItemNames().then(() => {
@@ -906,6 +907,14 @@ async function loadState() {
   fetchPetNames().then(() => {
     renderPetIlvlRules()
   })
+}
+
+async function loadDataDir() {
+  const dataDirInput = document.getElementById("data-dir-input")
+  if (dataDirInput) {
+    const currentDir = await window.aaa.getDataDir()
+    dataDirInput.value = currentDir
+  }
 }
 
 async function fetchItemNames() {
@@ -1967,6 +1976,47 @@ exportPetIlvlBtn?.addEventListener("click", () =>
 pastePetIlvlBtn?.addEventListener("click", () =>
   handlePasteAAA("petIlvlList", pastePetIlvlBtn)
 )
+const selectDataDirBtn = document.getElementById("select-data-dir-btn")
+const resetDataDirBtn = document.getElementById("reset-data-dir-btn")
+
+selectDataDirBtn?.addEventListener("click", async () => {
+  try {
+    const result = await window.aaa.selectDataDir()
+    if (result.canceled) return
+
+    if (result.success) {
+      await loadDataDir()
+      showToast(
+        `Data directory set to: ${result.dataDir}\nPlease restart the app for changes to take effect.`,
+        "success",
+        5000
+      )
+    } else {
+      showToast(`Failed to set data directory: ${result.error}`, "error")
+    }
+  } catch (err) {
+    showToast(`Error: ${err.message}`, "error")
+  }
+})
+
+resetDataDirBtn?.addEventListener("click", async () => {
+  try {
+    const result = await window.aaa.setCustomDataDir(null)
+    if (result.success) {
+      await loadDataDir()
+      showToast(
+        `Data directory reset to default.\nPlease restart the app for changes to take effect.`,
+        "success",
+        5000
+      )
+    } else {
+      showToast(`Failed to reset data directory: ${result.error}`, "error")
+    }
+  } catch (err) {
+    showToast(`Error: ${err.message}`, "error")
+  }
+})
+
 copyPetIlvlBtn?.addEventListener("click", () =>
   handleCopyAAA("petIlvlList", copyPetIlvlBtn)
 )

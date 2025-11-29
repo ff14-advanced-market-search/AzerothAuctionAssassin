@@ -121,6 +121,37 @@
           </div>
           <form id="mega-form" class="form-grid">
             <label
+              title="Select where to store your data files (JSON configs, backups, logs). Default is next to the application executable."
+            >
+              Data Directory
+              <div style="display: flex; gap: 8px; align-items: center">
+                <input
+                  type="text"
+                  id="data-dir-input"
+                  readonly
+                  style="flex: 1"
+                  placeholder="Default data directory location"
+                />
+                <button
+                  type="button"
+                  id="select-data-dir-btn"
+                  class="ghost"
+                  style="white-space: nowrap"
+                >
+                  Browse
+                </button>
+                <button
+                  type="button"
+                  id="reset-data-dir-btn"
+                  class="ghost"
+                  style="white-space: nowrap"
+                  title="Reset to default location"
+                >
+                  Reset
+                </button>
+              </div>
+            </label>
+            <label
               title="Setup a discord channel with a webhook url for sending the alert messages."
             >
               Discord Webhook URL

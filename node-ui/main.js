@@ -10,12 +10,30 @@ const ROOT = app.isPackaged
   ? path.dirname(app.getPath("exe")) // Executable location
   : path.resolve(__dirname, "..")
 
+// Config file to store custom data directory path (stored in userData so it persists)
+const CONFIG_FILE = path.join(app.getPath("userData"), "app-config.json")
+
+function loadConfig() {
+  return readJson(CONFIG_FILE, { customDataDir: null })
+}
+
+function saveConfig(config) {
+  writeJson(CONFIG_FILE, config)
+}
+
 // For data directory:
+// - Check for custom data directory setting first
 // - In development: use project root (same as before)
 // - In production: place data next to the app
 //   macOS: Next to .app bundle (go up from MacOS to Contents to .app parent)
 //   Windows: Next to exe folder (same level as exe)
 function getDataDir() {
+  // Check for custom data directory setting first
+  const config = loadConfig()
+  if (config.customDataDir && fs.existsSync(config.customDataDir)) {
+    return config.customDataDir
+  }
+
   if (!app.isPackaged) {
     return path.join(ROOT, "AzerothAuctionAssassinData")
   }
@@ -721,6 +739,91 @@ function setupIpc() {
     console.log(successMsg.trim())
     sendToLogPanel(successMsg)
     return normalized
+  })
+
+  // Data directory selection handlers
+  ipcMain.handle("get-data-dir", () => {
+    return DATA_DIR
+  })
+
+  ipcMain.handle("get-custom-data-dir", () => {
+    const config = loadConfig()
+    return config.customDataDir || null
+  })
+
+  ipcMain.handle("set-custom-data-dir", async (_event, dirPath) => {
+    if (!dirPath) {
+      // Clear custom directory - use default
+      const config = loadConfig()
+      config.customDataDir = null
+      saveConfig(config)
+      return { success: true, dataDir: getDataDir() }
+    }
+
+    // Validate directory exists and is writable
+    try {
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true })
+      }
+      // Test write permissions
+      const testFile = path.join(dirPath, ".test-write")
+      fs.writeFileSync(testFile, "test")
+      fs.unlinkSync(testFile)
+
+      const config = loadConfig()
+      config.customDataDir = dirPath
+      saveConfig(config)
+
+      const logMsg = `[CONFIG] Custom data directory set to: ${dirPath}\n`
+      console.log(logMsg.trim())
+      sendToLogPanel(logMsg)
+
+      return { success: true, dataDir: dirPath }
+    } catch (err) {
+      const errorMsg = `[CONFIG] Failed to set data directory: ${err.message}\n`
+      console.error(errorMsg.trim())
+      sendToLogPanel(errorMsg)
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle("select-data-dir", async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ["openDirectory", "createDirectory"],
+      title: "Select Data Directory",
+    })
+
+    if (result.canceled || !result.filePaths.length) {
+      return { canceled: true }
+    }
+
+    const selectedDir = result.filePaths[0]
+
+    // Validate directory exists and is writable
+    try {
+      if (!fs.existsSync(selectedDir)) {
+        fs.mkdirSync(selectedDir, { recursive: true })
+      }
+      // Test write permissions
+      const testFile = path.join(selectedDir, ".test-write")
+      fs.writeFileSync(testFile, "test")
+      fs.unlinkSync(testFile)
+
+      const config = loadConfig()
+      config.customDataDir = selectedDir
+      saveConfig(config)
+
+      const logMsg = `[CONFIG] Custom data directory set to: ${selectedDir}\n`
+      console.log(logMsg.trim())
+      sendToLogPanel(logMsg)
+
+      return { success: true, dataDir: selectedDir }
+    } catch (err) {
+      const errorMsg = `[CONFIG] Failed to set data directory: ${err.message}\n`
+      console.error(errorMsg.trim())
+      sendToLogPanel(errorMsg)
+      return { success: false, error: err.message }
+    }
   })
 }
 

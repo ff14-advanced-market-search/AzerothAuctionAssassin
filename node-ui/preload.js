@@ -27,4 +27,9 @@ contextBridge.exposeInMainWorld("aaa", {
   goBack: () => ipcRenderer.invoke("go-back"),
   goForward: () => ipcRenderer.invoke("go-forward"),
   writeLog: (line) => ipcRenderer.invoke("write-log", line),
+  getDataDir: () => ipcRenderer.invoke("get-data-dir"),
+  getCustomDataDir: () => ipcRenderer.invoke("get-custom-data-dir"),
+  selectDataDir: () => ipcRenderer.invoke("select-data-dir"),
+  setCustomDataDir: (dirPath) =>
+    ipcRenderer.invoke("set-custom-data-dir", dirPath),
 })
