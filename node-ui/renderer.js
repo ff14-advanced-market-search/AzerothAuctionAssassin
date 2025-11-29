@@ -852,6 +852,8 @@ function renderMegaForm(data) {
       el.value = data[key] ?? ""
     }
   }
+  // Handle extra alerts checkboxes separately
+  renderExtraAlerts(data.EXTRA_ALERTS || "")
 }
 
 function readMegaForm() {
@@ -868,7 +870,117 @@ function readMegaForm() {
       out[key] = value
     }
   }
+  // Handle extra alerts checkboxes separately
+  out.EXTRA_ALERTS = readExtraAlerts()
   return out
+}
+
+/**
+ * Render extra alerts checkboxes (1-59) in dropdown
+ */
+function renderExtraAlerts(extraAlertsJson) {
+  const list = document.getElementById("extra-alerts-list")
+  const display = document.getElementById("extra-alerts-display")
+  if (!list || !display) return
+
+  // Parse the JSON array, default to empty array if invalid
+  let selectedMinutes = []
+  if (extraAlertsJson) {
+    try {
+      selectedMinutes = JSON.parse(extraAlertsJson)
+      if (!Array.isArray(selectedMinutes)) {
+        selectedMinutes = []
+      }
+    } catch {
+      selectedMinutes = []
+    }
+  }
+
+  // Update display text
+  if (selectedMinutes.length === 0) {
+    display.textContent = "Select minutes..."
+  } else {
+    const sorted = [...selectedMinutes].sort((a, b) => a - b)
+    if (sorted.length <= 5) {
+      display.textContent = sorted.join(", ")
+    } else {
+      display.textContent = `${sorted.length} minutes selected`
+    }
+  }
+
+  // Clear list
+  list.innerHTML = ""
+
+  // Create checkboxes for minutes 1-59
+  for (let i = 1; i <= 59; i++) {
+    const label = document.createElement("label")
+    label.className = "extra-alert-checkbox"
+
+    const checkbox = document.createElement("input")
+    checkbox.type = "checkbox"
+    checkbox.value = i
+    checkbox.name = `extra_alert_${i}`
+    checkbox.checked = selectedMinutes.includes(i)
+    checkbox.addEventListener("change", () => {
+      updateExtraAlertsDisplay()
+    })
+
+    const span = document.createElement("span")
+    span.textContent = i
+
+    label.appendChild(checkbox)
+    label.appendChild(span)
+    list.appendChild(label)
+  }
+}
+
+/**
+ * Update the display text for extra alerts dropdown
+ */
+function updateExtraAlertsDisplay() {
+  const display = document.getElementById("extra-alerts-display")
+  if (!display) return
+
+  const selectedMinutes = readExtraAlertsArray()
+  if (selectedMinutes.length === 0) {
+    display.textContent = "Select minutes..."
+  } else {
+    const sorted = [...selectedMinutes].sort((a, b) => a - b)
+    if (sorted.length <= 5) {
+      display.textContent = sorted.join(", ")
+    } else {
+      display.textContent = `${sorted.length} minutes selected`
+    }
+  }
+}
+
+/**
+ * Read extra alerts checkboxes and return as array of numbers
+ */
+function readExtraAlertsArray() {
+  const list = document.getElementById("extra-alerts-list")
+  if (!list) return []
+
+  const selectedMinutes = []
+  const checkboxes = list.querySelectorAll('input[type="checkbox"]:checked')
+  for (const checkbox of checkboxes) {
+    const value = Number(checkbox.value)
+    if (!isNaN(value) && value >= 1 && value <= 59) {
+      selectedMinutes.push(value)
+    }
+  }
+
+  return selectedMinutes
+}
+
+/**
+ * Read extra alerts checkboxes and return as JSON array string
+ */
+function readExtraAlerts() {
+  const selectedMinutes = readExtraAlertsArray()
+  // Sort the array for consistency
+  selectedMinutes.sort((a, b) => a - b)
+  return JSON.stringify(selectedMinutes)
 }
 
 /**
@@ -1233,6 +1345,12 @@ async function loadState() {
   await loadRealmLists()
   await loadDataDir()
   await loadZoomLevel()
+
+  // Initialize extra alerts grid if not already rendered
+  const container = document.getElementById("extra-alerts-container")
+  if (container && container.children.length === 0) {
+    renderExtraAlerts(state.megaData.EXTRA_ALERTS || "")
+  }
 
   // attempt to hydrate name maps so existing lists show names once fetched
   fetchItemNames().then(() => {
@@ -2644,7 +2762,31 @@ window.addEventListener("DOMContentLoaded", async () => {
   updateNavigationButtons()
   checkForUpdates()
   setupSensitiveFieldToggles()
+  setupExtraAlertsDropdown()
 })
+
+/**
+ * Setup click handlers for extra alerts dropdown
+ */
+function setupExtraAlertsDropdown() {
+  const trigger = document.getElementById("extra-alerts-trigger")
+  const dropdown = document.getElementById("extra-alerts-dropdown")
+  if (!trigger || !dropdown) return
+
+  // Toggle dropdown on button click
+  trigger.addEventListener("click", (e) => {
+    e.stopPropagation()
+    const isOpen = dropdown.style.display !== "none"
+    dropdown.style.display = isOpen ? "none" : "block"
+  })
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.style.display = "none"
+    }
+  })
+}
 
 /**
  * Setup show/hide toggles for sensitive input fields
