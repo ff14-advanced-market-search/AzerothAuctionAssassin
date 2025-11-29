@@ -32,7 +32,24 @@ function getDataDir() {
   } else {
     // Windows: For portable builds, exe is directly in the folder
     // Data directory should be next to the exe (same directory)
-    const exeDir = path.dirname(app.getPath("exe"))
+    let exePath = app.getPath("exe")
+    let exeDir = path.dirname(exePath)
+
+    // Check if we're in a temp directory (portable exe extracts to temp when run)
+    const tempPath = process.env.TEMP || process.env.TMP || ""
+    const isInTemp =
+      tempPath &&
+      exeDir.toLowerCase().includes(tempPath.toLowerCase().replace(/\\/g, "\\"))
+
+    if (isInTemp) {
+      // Portable exe extracts to temp - use current working directory instead
+      // This is where the user launched the exe from (where the actual exe file is)
+      const cwd = process.cwd()
+      if (cwd && !cwd.toLowerCase().includes("temp")) {
+        exeDir = cwd
+      }
+    }
+
     return path.join(exeDir, "AzerothAuctionAssassinData")
   }
 }
@@ -69,6 +86,8 @@ console.log("App paths:", {
   isPackaged: app.isPackaged,
   exePath: app.getPath("exe"),
   exeDir: path.dirname(app.getPath("exe")),
+  processCwd: process.cwd(),
+  processExecPath: process.execPath,
   userData: app.getPath("userData"),
   __dirname: __dirname,
   ROOT: ROOT,
