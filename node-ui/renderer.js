@@ -2797,12 +2797,15 @@ function setupExtraAlertsDropdown() {
 }
 
 /**
- * Render exclude breeds checkboxes (1-30, covering common breed IDs)
+ * Render exclude breeds checkboxes (only the recommended breed IDs)
  */
 function renderExcludeBreeds(excludeBreedsValue) {
   const list = document.getElementById("exclude-breeds-list")
   const display = document.getElementById("exclude-breeds-display")
   if (!list || !display) return
+
+  // Only these breed IDs are available (from tooltip recommendation)
+  const availableBreedIds = [2, 3, 7, 8, 9, 10, 11, 13, 17, 18, 19, 20, 21, 22]
 
   // Parse the comma-separated string, default to empty array if invalid
   let selectedBreeds = []
@@ -2811,7 +2814,7 @@ function renderExcludeBreeds(excludeBreedsValue) {
       selectedBreeds = excludeBreedsValue
         .split(",")
         .map((s) => Number(s.trim()))
-        .filter((n) => !isNaN(n) && n > 0 && n <= 30)
+        .filter((n) => !isNaN(n) && availableBreedIds.includes(n))
     } catch {
       selectedBreeds = []
     }
@@ -2832,22 +2835,22 @@ function renderExcludeBreeds(excludeBreedsValue) {
   // Clear list
   list.innerHTML = ""
 
-  // Create checkboxes for breed IDs 1-30 (covers common breed IDs)
-  for (let i = 1; i <= 30; i++) {
+  // Create checkboxes only for available breed IDs
+  for (const breedId of availableBreedIds) {
     const label = document.createElement("label")
     label.className = "exclude-breed-checkbox"
 
     const checkbox = document.createElement("input")
     checkbox.type = "checkbox"
-    checkbox.value = i
-    checkbox.name = `exclude_breed_${i}`
-    checkbox.checked = selectedBreeds.includes(i)
+    checkbox.value = breedId
+    checkbox.name = `exclude_breed_${breedId}`
+    checkbox.checked = selectedBreeds.includes(breedId)
     checkbox.addEventListener("change", () => {
       updateExcludeBreedsDisplay()
     })
 
     const span = document.createElement("span")
-    span.textContent = i
+    span.textContent = breedId
 
     label.appendChild(checkbox)
     label.appendChild(span)
@@ -2882,11 +2885,14 @@ function readExcludeBreedsArray() {
   const list = document.getElementById("exclude-breeds-list")
   if (!list) return []
 
+  // Only these breed IDs are available (from tooltip recommendation)
+  const availableBreedIds = [2, 3, 7, 8, 9, 10, 11, 13, 17, 18, 19, 20, 21, 22]
+
   const selectedBreeds = []
   const checkboxes = list.querySelectorAll('input[type="checkbox"]:checked')
   for (const checkbox of checkboxes) {
     const value = Number(checkbox.value)
-    if (!isNaN(value) && value >= 1 && value <= 30) {
+    if (!isNaN(value) && availableBreedIds.includes(value)) {
       selectedBreeds.push(value)
     }
   }
