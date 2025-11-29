@@ -141,6 +141,66 @@ function splitList(lst, maxSize) {
 }
 
 /**
+ * Format target price information for Discord message
+ * @param {Object} auction - Auction object with targetPrice and buyout_prices
+ * @returns {string} Formatted target price string, or empty string if no target price
+ */
+function formatTargetPrice(auction) {
+  if (auction.targetPrice === null || auction.targetPrice === undefined) {
+    return ""
+  }
+
+  const target = Number(auction.targetPrice)
+  if (isNaN(target) || target <= 0) {
+    return `\`target_price\`: ${auction.targetPrice}\n`
+  }
+
+  // Parse buyout_prices - it can be a JSON string or already an array
+  let buyoutPrices = []
+  if (auction.buyout_prices !== undefined) {
+    if (typeof auction.buyout_prices === "string") {
+      try {
+        buyoutPrices = JSON.parse(auction.buyout_prices)
+      } catch {
+        // If parsing fails, try to extract numbers from the string
+        const match = auction.buyout_prices.match(/\[(.*?)\]/)
+        if (match) {
+          buyoutPrices = match[1]
+            .split(",")
+            .map((s) => Number(s.trim()))
+            .filter((n) => !isNaN(n))
+        }
+      }
+    } else if (Array.isArray(auction.buyout_prices)) {
+      buyoutPrices = auction.buyout_prices
+    }
+  }
+
+  // Get the minimum price from the array (best deal)
+  if (buyoutPrices.length === 0) {
+    return `\`target_price\`: ${auction.targetPrice}\n`
+  }
+
+  const actual = Math.min(
+    ...buyoutPrices.map((p) => Number(p)).filter((n) => !isNaN(n) && n > 0)
+  )
+  if (isNaN(actual) || actual <= 0) {
+    return `\`target_price\`: ${auction.targetPrice}\n`
+  }
+
+  // Only show savings if actual price is below target
+  if (actual >= target) {
+    return `\`target_price\`: ${auction.targetPrice}\n`
+  }
+
+  const percentBelow = Math.round(((target - actual) / target) * 100)
+  const goldBelow = Math.round(target - actual)
+  return `\`target_price\`: ${
+    auction.targetPrice
+  }\n⚡ Below ${percentBelow}% / ${goldBelow.toLocaleString()}g ⚡\n`
+}
+
+/**
  * HTTP request helper with retry logic
  * Retries up to 3 times with 500ms delay between attempts
  */
@@ -1067,8 +1127,9 @@ async function runAlerts(state, progress, runOnce = false) {
         message += `[Where to Sell](https://saddlebagexchange.com/wow/export-search?itemId=${saddlebag_link_id})\n`
       }
       // Show target price if available (for regular items)
-      if (auction.targetPrice !== null && auction.targetPrice !== undefined) {
-        message += "`target_price`: " + auction.targetPrice + "\n"
+      const targetPriceText = formatTargetPrice(auction)
+      if (targetPriceText) {
+        message += targetPriceText
       }
       const price_type =
         "bid_prices" in auction ? "bid_prices" : "buyout_prices"
