@@ -5,6 +5,29 @@ function escapeHtml(text) {
   return div.innerHTML
 }
 
+// Helper function for fetch with timeout
+async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => {
+    controller.abort()
+  }, timeoutMs)
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+    return response
+  } catch (error) {
+    clearTimeout(timeoutId)
+    if (error.name === "AbortError") {
+      throw new Error(`Request timeout after ${timeoutMs}ms`)
+    }
+    throw error
+  }
+}
+
 const state = {
   megaData: {},
   desiredItems: {},
@@ -921,9 +944,11 @@ function renderItemList() {
     filteredData,
     removeItem,
     (itemId, p) => {
-      const name = getItemName(itemId)
+      const name = escapeHtml(getItemName(itemId))
       const itemLink = `https://www.wowhead.com/item=${itemId}`
-      return `<strong><a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${itemId}">${itemId}</a> • ${name}</strong> → ${p}`
+      return `<strong><a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${itemId}">${itemId}</a> • ${name}</strong> → ${escapeHtml(
+        String(p)
+      )}`
     },
     handleItemClick
   )
@@ -1246,7 +1271,7 @@ async function fetchItemNames() {
   itemSearchStatus.textContent = "Loading item names…"
   const region = state.megaData?.WOW_REGION || "EU"
   try {
-    const resp = await fetch(
+    const resp = await fetchWithTimeout(
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
@@ -1255,7 +1280,8 @@ async function fetchItemNames() {
           Accept: "application/json",
         },
         body: JSON.stringify({ region, discount: 1 }),
-      }
+      },
+      30000
     )
     const data = await resp.json()
     itemSearchCache = Array.isArray(data) ? data : []
@@ -1406,7 +1432,7 @@ async function fetchPetNames() {
   petIlvlSearchStatus.textContent = "Loading pets…"
   const region = state.megaData?.WOW_REGION || "EU"
   try {
-    const resp = await fetch(
+    const resp = await fetchWithTimeout(
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
@@ -1415,7 +1441,8 @@ async function fetchPetNames() {
           Accept: "application/json",
         },
         body: JSON.stringify({ region, discount: 1, pets: true }),
-      }
+      },
+      30000
     )
     const data = await resp.json()
     petSearchCache = Array.isArray(data) ? data : []
@@ -1507,7 +1534,7 @@ async function validateToken(token) {
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       "https://api.saddlebagexchange.com/api/wow/checkmegatoken",
       {
         method: "POST",
@@ -1516,7 +1543,8 @@ async function validateToken(token) {
           Accept: "application/json",
         },
         body: JSON.stringify({ token: token.trim() }),
-      }
+      },
+      30000
     )
 
     if (!response.ok) {
@@ -2252,8 +2280,10 @@ forwardBtn?.addEventListener("click", async () => {
   updateNavigationButtons()
 })
 
-// Update navigation buttons periodically to reflect navigation state
-setInterval(updateNavigationButtons, 500)
+// Update navigation buttons on navigation events
+window.addEventListener("popstate", updateNavigationButtons)
+// Initialize navigation buttons on startup
+updateNavigationButtons()
 
 startBtn.addEventListener("click", async () => {
   // Validate and save before starting

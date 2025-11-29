@@ -217,7 +217,7 @@ async function sendDiscordMessage(webhook, message) {
       )
     }
   } catch (error) {
-    console.error("Failed to send Discord message:", error.message)
+    logError("Failed to send Discord message:", error)
   }
 }
 
@@ -237,7 +237,7 @@ class MegaData {
     this.SCAN_TIME_MIN = this.normalizeInt(this.cfg.SCAN_TIME_MIN, 1) // Minutes before data update to start scans
     this.SCAN_TIME_MAX = this.normalizeInt(this.cfg.SCAN_TIME_MAX, 3) // Minutes after data update to stop scans
     this.REFRESH_ALERTS = Boolean(this.cfg.REFRESH_ALERTS) // Refresh alerts every 1 hour
-    this.SHOW_BIDPRICES = String(this.cfg.SHOW_BID_PRICES ?? false) // Show items with bid prices
+    this.SHOW_BIDPRICES = Boolean(this.cfg.SHOW_BID_PRICES ?? false) // Show items with bid prices
     this.EXTRA_ALERTS = this.cfg.EXTRA_ALERTS // JSON array of extra alert minutes
     this.NO_RUSSIAN_REALMS = Boolean(this.cfg.NO_RUSSIAN_REALMS) // Removes alerts from Russian Realms
     this.DEBUG = Boolean(this.cfg.DEBUG) // Trigger a scan on all realms once for testing
@@ -600,23 +600,37 @@ class MegaData {
    * Make commodity auction house API request
    * Commodities use connected realm IDs -1 (NA) or -2 (EU)
    */
-  async makeCommodityRequest() {
-    const region = this.REGION
-    const endpoint =
-      region === "NA"
-        ? "https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
-        : "https://eu.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-eu&locale=en_EU"
-    const connectedId = region === "NA" ? -1 : -2
-    const headers = {
-      Authorization: `Bearer ${await this.fetchAccessToken()}`,
+  async makeCommodityRequest(timeoutMs = 30000) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
+
+    try {
+      const region = this.REGION
+      const endpoint =
+        region === "NA"
+          ? "https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
+          : "https://eu.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-eu&locale=en_EU"
+      const connectedId = region === "NA" ? -1 : -2
+      const headers = {
+        Authorization: `Bearer ${await this.fetchAccessToken()}`,
+      }
+      const res = await fetch(endpoint, { headers, signal: controller.signal })
+      clearTimeout(timeoutId)
+      if (res.status === 429) throw new Error("429")
+      if (res.status !== 200) throw new Error(`${res.status}`)
+      const data = await res.json()
+      const lastMod = res.headers.get("last-modified")
+      if (lastMod) this.update_local_timers(connectedId, lastMod)
+      return data
+    } catch (error) {
+      clearTimeout(timeoutId)
+      if (error.name === "AbortError") {
+        throw new Error(`Request timeout after ${timeoutMs}ms`)
+      }
+      throw error
     }
-    const res = await fetch(endpoint, { headers })
-    if (res.status === 429) throw new Error("429")
-    if (res.status !== 200) throw new Error(`${res.status}`)
-    const data = await res.json()
-    const lastMod = res.headers.get("last-modified")
-    if (lastMod) this.update_local_timers(connectedId, lastMod)
-    return data
   }
 
   /**
@@ -910,7 +924,6 @@ async function runPool(tasks, concurrency) {
 async function runAlerts(state, progress, runOnce = false) {
   // Reset stop flag at the start of each run
   STOP_REQUESTED = false
-  let running = true
   const alert_record = new Set() // Use Set for O(1) lookup
   state.upload_timers = await state.getUploadTimers()
 
@@ -959,7 +972,7 @@ async function runAlerts(state, progress, runOnce = false) {
 
     const embed_fields = []
     for (const auction of clean) {
-      if (!running) break
+      if (STOP_REQUESTED) break
       let id_msg = ""
       let embed_name = ""
       let saddlebag_link_id
@@ -1295,7 +1308,7 @@ async function runAlerts(state, progress, runOnce = false) {
       if (!item_id) continue
 
       if (item_id in state.desiredItems && item_id !== 82800) {
-        if ("bid" in item && state.SHOW_BIDPRICES === "true") {
+        if ("bid" in item && state.SHOW_BIDPRICES) {
           add_price_to_dict(item.bid, item_id, all_ah_bids)
         }
         if ("buyout" in item)
@@ -1378,13 +1391,13 @@ async function runAlerts(state, progress, runOnce = false) {
         )
       )
     }
+    const defaultRealm =
+      realm_names && realm_names.length > 0 ? realm_names[0] : null
     for (const auction of ilvl_ah_buyouts) {
       const itemID = Number(auction.item_id)
-      const itemlink = create_oribos_exchange_item_link(
-        realm_names[0],
-        itemID,
-        state.REGION
-      )
+      const itemlink = defaultRealm
+        ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
+        : null
       results.push(
         ilvl_results_dict(
           auction,
@@ -1397,14 +1410,14 @@ async function runAlerts(state, progress, runOnce = false) {
         )
       )
     }
-    if (state.SHOW_BIDPRICES === "true") {
+    if (state.SHOW_BIDPRICES) {
+      const defaultRealm =
+        realm_names && realm_names.length > 0 ? realm_names[0] : null
       for (const [itemIDStr, auction] of Object.entries(all_ah_bids)) {
         const itemID = Number(itemIDStr)
-        const itemlink = create_oribos_exchange_item_link(
-          realm_names[0],
-          itemID,
-          state.REGION
-        )
+        const itemlink = defaultRealm
+          ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
+          : null
         results.push(
           results_dict(
             auction,
@@ -1418,13 +1431,13 @@ async function runAlerts(state, progress, runOnce = false) {
         )
       }
     }
+    const defaultRealm =
+      realm_names && realm_names.length > 0 ? realm_names[0] : null
     for (const auction of pet_ilvl_ah_buyouts) {
       const petID = auction.pet_species_id
-      const itemlink = create_oribos_exchange_pet_link(
-        realm_names[0],
-        petID,
-        state.REGION
-      )
+      const itemlink = defaultRealm
+        ? create_oribos_exchange_pet_link(defaultRealm, petID, state.REGION)
+        : null
       results.push(
         pet_ilvl_results_dict(
           auction,

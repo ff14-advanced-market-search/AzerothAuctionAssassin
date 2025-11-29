@@ -149,7 +149,18 @@ function readJson(filePath, fallback) {
 }
 
 function writeJson(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+  try {
+    // Ensure directory exists
+    const dir = path.dirname(filePath)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+    return { success: true }
+  } catch (error) {
+    console.error(`Failed to write JSON file: ${filePath}`, error)
+    return { success: false, error: error.message }
+  }
 }
 
 function getTimestampInt() {
@@ -353,8 +364,11 @@ function createWindow() {
 
   mainWindow.loadFile(htmlPath).catch((err) => {
     console.error("Failed to load HTML:", err)
-    // Show error in window if load fails
-    mainWindow.webContents.send("error", err.message)
+    // Show native error dialog since renderer may not be ready
+    dialog.showErrorBox(
+      "Failed to Load Application",
+      `Failed to load the application window: ${err.message}`
+    )
   })
 
   // Set default zoom to 80%
