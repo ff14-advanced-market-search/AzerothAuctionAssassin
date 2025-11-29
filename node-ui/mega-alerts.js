@@ -54,17 +54,18 @@ function requestStop() {
   }
 }
 
-// Override console.log to use callback if set (for Electron integration)
+// Local logging functions that use callback if set (for Electron integration)
 const originalLog = console.log
 const originalError = console.error
-console.log = (...args) => {
+
+function log(...args) {
   originalLog(...args)
   if (logCallback) {
     logCallback(args.join(" ") + "\n")
   }
 }
-// Override console.error to also use callback
-console.error = (...args) => {
+
+function logError(...args) {
   originalError(...args)
   if (logCallback) {
     // Format error messages properly, including stack traces for Error objects
@@ -143,11 +144,20 @@ function splitList(lst, maxSize) {
  * HTTP request helper with retry logic
  * Retries up to 3 times with 500ms delay between attempts
  */
-async function httpJson(url, opts = {}, retries = 3) {
+async function httpJson(url, opts = {}, retries = 3, timeoutMs = 5000) {
   let lastErr
   for (let i = 0; i < retries; i++) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
+
     try {
-      const res = await fetch(url, opts)
+      const res = await fetch(url, {
+        ...opts,
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
       if (!res.ok) {
         lastErr = new Error(`${res.status} ${res.statusText}`)
         await delay(500)
@@ -155,7 +165,12 @@ async function httpJson(url, opts = {}, retries = 3) {
       }
       return await res.json()
     } catch (err) {
-      lastErr = err
+      clearTimeout(timeoutId)
+      if (err.name === "AbortError") {
+        lastErr = new Error(`Request timeout after ${timeoutMs}ms`)
+      } else {
+        lastErr = err
+      }
       await delay(500)
     }
   }
@@ -174,7 +189,7 @@ async function sendDiscordEmbed(webhook, embed) {
     })
     if (!response.ok) {
       const errorText = await response.text().catch(() => "Unknown error")
-      console.error(
+      logError(
         `Discord webhook failed: ${response.status} ${response.statusText}`,
         errorText
       )
@@ -196,7 +211,7 @@ async function sendDiscordMessage(webhook, message) {
     })
     if (!response.ok) {
       const errorText = await response.text().catch(() => "Unknown error")
-      console.error(
+      logError(
         `Discord webhook failed: ${response.status} ${response.statusText}`,
         errorText
       )
@@ -496,7 +511,7 @@ class MegaData {
       }
       return timers
     } catch (err) {
-      console.error("Failed to load upload timers", err)
+      logError("Failed to load upload timers", err)
       return {}
     }
   }
@@ -551,20 +566,34 @@ class MegaData {
    * Make auction house API request for a specific connected realm
    * Updates local timers with last-modified header if available
    */
-  async makeAhRequest(url, connectedRealmId) {
-    const headers = {
-      Authorization: `Bearer ${await this.fetchAccessToken()}`,
-    }
-    const res = await fetch(url, { headers })
-    if (res.status === 429) throw new Error("429")
-    if (res.status !== 200) throw new Error(`${res.status}`)
-    const data = await res.json()
+  async makeAhRequest(url, connectedRealmId, timeoutMs = 30000) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
 
-    const lastMod = res.headers.get("last-modified")
-    if (lastMod) {
-      this.update_local_timers(connectedRealmId, lastMod)
+    try {
+      const headers = {
+        Authorization: `Bearer ${await this.fetchAccessToken()}`,
+      }
+      const res = await fetch(url, { headers, signal: controller.signal })
+      clearTimeout(timeoutId)
+      if (res.status === 429) throw new Error("429")
+      if (res.status !== 200) throw new Error(`${res.status}`)
+      const data = await res.json()
+
+      const lastMod = res.headers.get("last-modified")
+      if (lastMod) {
+        this.update_local_timers(connectedRealmId, lastMod)
+      }
+      return data
+    } catch (error) {
+      clearTimeout(timeoutId)
+      if (error.name === "AbortError") {
+        throw new Error(`Request timeout after ${timeoutMs}ms`)
+      }
+      throw error
     }
-    return data
   }
 
   /**
@@ -663,7 +692,7 @@ class MegaData {
         const data = await this.makeAhRequest(url, connectedRealmId)
         if (data?.auctions) all.push(...data.auctions)
       } catch (err) {
-        console.error("AH request failed", err)
+        logError("AH request failed", err)
       }
     }
     return all
@@ -756,7 +785,7 @@ class MegaData {
       this.avoidance_ids = new Set(avoidance)
       this.ilvl_addition = ilvlAdd
     } catch (err) {
-      console.error("Failed to load bonus ids", err)
+      logError("Failed to load bonus ids", err)
     }
   }
 
@@ -997,7 +1026,7 @@ async function runAlerts(state, progress, runOnce = false) {
         embed_fields.push({ name: embed_name, value: message, inline: true })
         alert_record.add(auctionKey)
       } else {
-        console.log("Already sent this alert", auction)
+        log("Already sent this alert", auction)
       }
     }
 
@@ -1035,7 +1064,7 @@ async function runAlerts(state, progress, runOnce = false) {
         }
       }
     } catch (err) {
-      console.error("Error checking token price", err)
+      logError("Error checking token price", err)
     }
   }
 
@@ -1244,7 +1273,7 @@ async function runAlerts(state, progress, runOnce = false) {
     const pet_ilvl_ah_buyouts = []
 
     if (!auctions || auctions.length === 0) {
-      console.log(`no listings found on ${connected_id} of ${state.REGION}`)
+      log(`no listings found on ${connected_id} of ${state.REGION}`)
       return
     }
 
@@ -1302,12 +1331,12 @@ async function runAlerts(state, progress, runOnce = false) {
         pet_ilvl_ah_buyouts.length
       )
     ) {
-      console.log(
+      log(
         `no listings found matching desires on ${connected_id} of ${state.REGION}`
       )
       return
     }
-    console.log(`Found matches on ${connected_id} of ${state.REGION}!!!`)
+    log(`Found matches on ${connected_id} of ${state.REGION}!!!`)
     return format_alert_messages(
       all_ah_buyouts,
       all_ah_bids,
@@ -1488,7 +1517,7 @@ async function runAlerts(state, progress, runOnce = false) {
           state.get_upload_time_minutes()
         ).join(",")}\nof each hour.`
       )
-      console.log(
+      log(
         `Blizzard API data only updates 1 time per hour. The updates will come on minute ${Array.from(
           state.get_upload_time_minutes()
         )} of each hour. ${new Date().toISOString()} is not the update time.`
@@ -1528,7 +1557,7 @@ async function main() {
         "🟢All future messages will release seconds after the new data is available.🟢"
     )
     await delay(1000)
-    await runAlerts(state, (msg) => console.log("[progress]", msg))
+    await runAlerts(state, (msg) => log("[progress]", msg))
   }
 }
 

@@ -1519,7 +1519,7 @@ async function validateToken(token) {
       }
     )
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       return {
         valid: false,
         error: `Could not reach server, status code: ${response.status}`,

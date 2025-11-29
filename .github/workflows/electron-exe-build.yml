@@ -46,20 +46,21 @@ jobs:
         WIN_CERT_PASSWORD: ${{ env.WIN_CERT_PASSWORD }}
 
     - name: Sign Windows Executable (if certificate available)
+      env:
+        CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
       run: |
         if (Test-Path "certificate.pfx") {
           $cert_path = "certificate.pfx"
-          $password = "${{ secrets.CERT_PASSWORD }}"
           $timestamp_url = "http://timestamp.digicert.com"
           $executable_path = ".\dist-electron\Azeroth Auction Assassin Setup ${{ env.AAA_VERSION }}.exe"
           if (Test-Path $executable_path) {
             $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
-            & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
+            & $signtoolPath sign /f $cert_path /p $env:CERT_PASSWORD /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
           }
           # Also sign portable if it exists
           $portable_path = ".\dist-electron\Azeroth Auction Assassin-${{ env.AAA_VERSION }}-portable.exe"
           if (Test-Path $portable_path) {
-            & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $portable_path
+            & $signtoolPath sign /f $cert_path /p $env:CERT_PASSWORD /tr $timestamp_url /td sha256 /fd sha256 /v $portable_path
           }
         }
       shell: pwsh

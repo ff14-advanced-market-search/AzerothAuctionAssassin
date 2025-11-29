@@ -32,7 +32,7 @@ npm install
 npm start
 # if it doesnt start 
 #	rm -rf node_modules/
-````
+```
 
 **To build exe:**
 

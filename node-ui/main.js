@@ -55,9 +55,9 @@ function getDataDir() {
 
     // Check if we're in a temp directory (portable exe extracts to temp when run)
     const tempPath = process.env.TEMP || process.env.TMP || ""
-    const isInTemp =
-      tempPath &&
-      exeDir.toLowerCase().includes(tempPath.toLowerCase().replace(/\\/g, "\\"))
+    const normalizedTempPath = tempPath.toLowerCase().replace(/\\/g, "/")
+    const normalizedExeDir = exeDir.toLowerCase().replace(/\\/g, "/")
+    const isInTemp = tempPath && normalizedExeDir.includes(normalizedTempPath)
 
     if (isInTemp) {
       // Portable exe extracts to temp - use current working directory instead
