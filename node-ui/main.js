@@ -30,29 +30,9 @@ function getDataDir() {
       "AzerothAuctionAssassinData"
     )
   } else {
-    // Windows: exe is at AppFolder/exe (or AppFolder/subfolder/exe for NSIS)
-    // For NSIS, exe might be in a subfolder, but data should be at installer root
-    // For portable, exe is directly in the folder
-    // Get the directory containing the exe
-    let exeDir = path.dirname(app.getPath("exe"))
-
-    // For NSIS installers, the exe is typically at the installation root
-    // But if it's in a subfolder, we need to go up to find the installation root
-    // Check if there's a resources folder (indicates we're in installation root)
-    // or if we're in a subfolder and need to go up
-    const resourcesPath = path.join(exeDir, "resources")
-    const parentDir = path.dirname(exeDir)
-
-    // If resources folder exists in exeDir, we're at the installation root
-    // If resources exists in parent, we're in a subfolder and should use parent
-    // Otherwise, use exeDir (for portable builds)
-    if (
-      !fs.existsSync(resourcesPath) &&
-      fs.existsSync(path.join(parentDir, "resources"))
-    ) {
-      exeDir = parentDir
-    }
-
+    // Windows: For portable builds, exe is directly in the folder
+    // Data directory should be next to the exe (same directory)
+    const exeDir = path.dirname(app.getPath("exe"))
     return path.join(exeDir, "AzerothAuctionAssassinData")
   }
 }
@@ -84,17 +64,17 @@ const STATIC_DIR = getStaticDir()
 
 const BACKUP_DIR = path.join(DATA_DIR, "backup")
 
-// Log paths for debugging (only in development or if DEBUG env var is set)
-if (!app.isPackaged || process.env.DEBUG) {
-  console.log("App paths:", {
-    isPackaged: app.isPackaged,
-    exePath: app.getPath("exe"),
-    userData: app.getPath("userData"),
-    __dirname: __dirname,
-    ROOT: ROOT,
-    DATA_DIR: DATA_DIR,
-  })
-}
+// Log paths for debugging - always log in packaged mode to help debug data directory location
+console.log("App paths:", {
+  isPackaged: app.isPackaged,
+  exePath: app.getPath("exe"),
+  exeDir: path.dirname(app.getPath("exe")),
+  userData: app.getPath("userData"),
+  __dirname: __dirname,
+  ROOT: ROOT,
+  DATA_DIR: DATA_DIR,
+  STATIC_DIR: STATIC_DIR,
+})
 
 const FILES = {
   megaData: path.join(DATA_DIR, "mega_data.json"),
