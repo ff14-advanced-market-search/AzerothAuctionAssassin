@@ -5,7 +5,7 @@ env:
 
 on:
   workflow_dispatch:
-  push:
+  # push:
 
 jobs:
   build-windows:
@@ -120,6 +120,14 @@ jobs:
         node-version: '18'
         cache: 'npm'
 
+    - name: Decode Upload URL
+      run: |
+        if [ -z "${{ needs.build-windows.outputs.upload_url_base64 }}" ]; then
+          echo "Error: upload_url_base64 is empty"
+          exit 1
+        fi
+        echo "decoded_upload_url=$(echo '${{ needs.build-windows.outputs.upload_url_base64 }}' | base64 --decode)" >> $GITHUB_ENV
+
     - name: Install dependencies
       run: |
         npm ci || npm install
@@ -156,13 +164,7 @@ jobs:
           fi
         fi
 
-    - name: Decode Upload URL
-      run: |
-        if [ -z "${{ needs.build-windows.outputs.upload_url_base64 }}" ]; then
-          echo "Error: upload_url_base64 is empty"
-          exit 1
-        fi
-        echo "decoded_upload_url=$(echo '${{ needs.build-windows.outputs.upload_url_base64 }}' | base64 --decode)" >> $GITHUB_ENV
+    # put Decode Upload URL back here if it doesn't work up at the top
 
     - name: Upload macOS DMG to Release
       uses: actions/upload-release-asset@v1
