@@ -31,7 +31,7 @@ Prefer to avoid the PyQt desktop UI? A lightweight Node/Electron GUI manages the
 npm install
 npm start
 # if it doesn't start 
-#	rm -rf node_modules/
+#  rm -rf node_modules/
 ```
 
 **To build exe:**

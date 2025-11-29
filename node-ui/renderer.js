@@ -1035,7 +1035,7 @@ function renderIlvlRules() {
         }
         const nm = getItemName(id)
         const itemNameSpan = document.createElement("span")
-        itemNameSpan.textContent = escapeHtml(nm)
+        itemNameSpan.textContent = nm
         detailsDiv.appendChild(itemNameSpan)
         detailsDiv.appendChild(document.createTextNode(" ("))
         const itemLink = document.createElement("a")
@@ -1167,7 +1167,7 @@ function renderPetIlvlRules() {
 
     const detailsDiv = document.createElement("div")
     const nameSpan = document.createElement("span")
-    nameSpan.textContent = escapeHtml(name)
+    nameSpan.textContent = name
     detailsDiv.appendChild(nameSpan)
 
     const bonusesDiv = document.createElement("div")
@@ -1333,7 +1333,7 @@ function renderItemSearchResults(results) {
     const innerDiv = document.createElement("div")
     const nameDiv = document.createElement("div")
     const strong = document.createElement("strong")
-    strong.textContent = escapeHtml(row.itemName)
+    strong.textContent = row.itemName
     nameDiv.appendChild(strong)
     innerDiv.appendChild(nameDiv)
 
@@ -1390,7 +1390,7 @@ function renderIlvlSearchResults(results) {
     const innerDiv = document.createElement("div")
     const nameDiv = document.createElement("div")
     const strong = document.createElement("strong")
-    strong.textContent = escapeHtml(row.itemName)
+    strong.textContent = row.itemName
     nameDiv.appendChild(strong)
     innerDiv.appendChild(nameDiv)
 
@@ -1492,7 +1492,7 @@ function renderPetSearchResults(results) {
     const innerDiv = document.createElement("div")
     const nameDiv = document.createElement("div")
     const strong = document.createElement("strong")
-    strong.textContent = escapeHtml(row.itemName)
+    strong.textContent = row.itemName
     nameDiv.appendChild(strong)
     innerDiv.appendChild(nameDiv)
 

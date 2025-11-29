@@ -966,7 +966,11 @@ async function runAlerts(state, progress, runOnce = false) {
       parts.push(`item:${auction.itemID}`)
       if ("ilvl" in auction) parts.push(`ilvl:${auction.ilvl}`)
       if ("bonus_ids" in auction && auction.bonus_ids) {
-        parts.push(`bonus:${Array.from(auction.bonus_ids).sort().join(",")}`)
+        parts.push(
+          `bonus:${Array.from(auction.bonus_ids)
+            .sort((a, b) => a - b)
+            .join(",")}`
+        )
       }
     } else if ("petID" in auction) {
       parts.push(`pet:${auction.petID}`)
