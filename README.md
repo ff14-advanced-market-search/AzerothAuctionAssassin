@@ -30,9 +30,9 @@ Prefer to avoid the PyQt desktop UI? A lightweight Node/Electron GUI manages the
 ```
 npm install
 npm start
-# if it doesnt start 
-#	rm -rf node_modules/
-````
+# if it doesn't start 
+#  rm -rf node_modules/
+```
 
 **To build exe:**
 
@@ -45,9 +45,9 @@ open "dist-electron/mac/Azeroth Auction Assassin.app"
 
 Win:
 
-```bash
+```powershell
 npm run build:win
-...???...
+.\dist-electron\"Azeroth Auction Assassin Setup 2.0.0.exe"
 ```
 
 

@@ -10,10 +10,16 @@ contextBridge.exposeInMainWorld("aaa", {
   exportJson: (target) => ipcRenderer.invoke("export-json", { target }),
   runMega: () => ipcRenderer.invoke("run-mega"),
   stopMega: () => ipcRenderer.invoke("stop-mega"),
-  onMegaLog: (callback) =>
-    ipcRenderer.on("mega-log", (_event, line) => callback(line)),
-  onMegaExit: (callback) =>
-    ipcRenderer.on("mega-exit", (_event, code) => callback(code)),
+  onMegaLog: (callback) => {
+    const handler = (_event, line) => callback(line)
+    ipcRenderer.on("mega-log", handler)
+    return () => ipcRenderer.removeListener("mega-log", handler)
+  },
+  onMegaExit: (callback) => {
+    const handler = (_event, code) => callback(code)
+    ipcRenderer.on("mega-exit", handler)
+    return () => ipcRenderer.removeListener("mega-exit", handler)
+  },
   loadRealmLists: () => ipcRenderer.invoke("load-realm-lists"),
   saveRealmList: (region, realms) =>
     ipcRenderer.invoke("save-realm-list", region, realms),
@@ -34,10 +40,11 @@ contextBridge.exposeInMainWorld("aaa", {
   getZoomLevel: () => ipcRenderer.invoke("get-zoom-level"),
   setZoomLevel: (zoomFactor) =>
     ipcRenderer.invoke("set-zoom-level", zoomFactor),
-  onZoomChanged: (callback) =>
-    ipcRenderer.on("zoom-changed", (_event, zoomFactor) =>
-      callback(zoomFactor)
-    ),
+  onZoomChanged: (callback) => {
+    const handler = (_event, zoomFactor) => callback(zoomFactor)
+    ipcRenderer.on("zoom-changed", handler)
+    return () => ipcRenderer.removeListener("zoom-changed", handler)
+  },
   listBackups: (target) => ipcRenderer.invoke("list-backups", { target }),
   restoreBackup: (target, filename) =>
     ipcRenderer.invoke("restore-backup", { target, filename }),

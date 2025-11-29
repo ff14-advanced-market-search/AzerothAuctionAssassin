@@ -17,6 +17,13 @@
         var script = document.createElement("script")
         script.src = "https://wow.zamimg.com/widgets/power.js"
         script.async = true
+        script.onload = function () {
+          console.log("Wowhead tooltip script loaded successfully")
+        }
+        script.onerror = function () {
+          console.error("Failed to load Wowhead tooltip script")
+          // Tooltips will be disabled gracefully
+        }
         document.head.appendChild(script)
       })()
     </script>
@@ -82,24 +89,28 @@
                   class="ghost-link"
                   href="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki"
                   target="_blank"
+                  rel="noopener noreferrer"
                   >Guides</a
                 >
                 <a
                   class="ghost-link"
                   href="https://www.patreon.com/indopan"
                   target="_blank"
+                  rel="noopener noreferrer"
                   >Patreon</a
                 >
                 <a
                   class="ghost-link"
                   href="https://discord.gg/9dHx2rEq9F"
                   target="_blank"
+                  rel="noopener noreferrer"
                   >Discord</a
                 >
                 <a
                   class="ghost-link"
                   href="https://saddlebagexchange.com/wow"
                   target="_blank"
+                  rel="noopener noreferrer"
                   >Website</a
                 >
               </div>
@@ -224,7 +235,11 @@
               title="Setup a discord channel with a webhook url for sending the alert messages."
             >
               Discord Webhook URL
-              <input name="MEGA_WEBHOOK_URL" type="text" autocomplete="off" />
+              <input
+                name="MEGA_WEBHOOK_URL"
+                type="password"
+                autocomplete="off"
+              />
             </label>
             <label
               title="Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids."

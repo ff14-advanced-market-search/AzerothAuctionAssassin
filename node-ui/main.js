@@ -55,9 +55,9 @@ function getDataDir() {
 
     // Check if we're in a temp directory (portable exe extracts to temp when run)
     const tempPath = process.env.TEMP || process.env.TMP || ""
-    const isInTemp =
-      tempPath &&
-      exeDir.toLowerCase().includes(tempPath.toLowerCase().replace(/\\/g, "\\"))
+    const normalizedTempPath = tempPath.toLowerCase().replace(/\\/g, "/")
+    const normalizedExeDir = exeDir.toLowerCase().replace(/\\/g, "/")
+    const isInTemp = tempPath && normalizedExeDir.includes(normalizedTempPath)
 
     if (isInTemp) {
       // Portable exe extracts to temp - use current working directory instead
@@ -149,7 +149,18 @@ function readJson(filePath, fallback) {
 }
 
 function writeJson(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+  try {
+    // Ensure directory exists
+    const dir = path.dirname(filePath)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+    return { success: true }
+  } catch (error) {
+    console.error(`Failed to write JSON file: ${filePath}`, error)
+    return { success: false, error: error.message }
+  }
 }
 
 function getTimestampInt() {
@@ -211,7 +222,7 @@ function ensureDataFiles() {
   }
 
   const defaults = {
-    [FILES.megaData]: readJson(path.join(DATA_DIR, "example_mega_data.json"), {
+    [FILES.megaData]: {
       MEGA_WEBHOOK_URL: "",
       WOW_CLIENT_ID: "",
       WOW_CLIENT_SECRET: "",
@@ -230,7 +241,7 @@ function ensureDataFiles() {
       REFRESH_ALERTS: false,
       DEBUG: false,
       FACTION: "all",
-    }),
+    },
     [FILES.desiredItems]: {},
     [FILES.ilvlList]: [],
     [FILES.petIlvlList]: [],
@@ -353,8 +364,11 @@ function createWindow() {
 
   mainWindow.loadFile(htmlPath).catch((err) => {
     console.error("Failed to load HTML:", err)
-    // Show error in window if load fails
-    mainWindow.webContents.send("error", err.message)
+    // Show native error dialog since renderer may not be ready
+    dialog.showErrorBox(
+      "Failed to Load Application",
+      `Failed to load the application window: ${err.message}`
+    )
   })
 
   // Set default zoom to 80%
@@ -487,7 +501,7 @@ function setupIpc() {
         SHOW_BID_PRICES: false,
         MEGA_THREADS: 10,
         WOWHEAD_LINK: false,
-        SCAN_TIME_MIN: 1,
+        SCAN_TIME_MIN: -1,
         SCAN_TIME_MAX: 3,
         NO_LINKS: false,
         NO_RUSSIAN_REALMS: false,
@@ -761,7 +775,24 @@ function setupIpc() {
 
   ipcMain.handle("restore-backup", (_event, { target, filename }) => {
     try {
-      const backupPath = path.join(BACKUP_DIR, filename)
+      // Sanitize filename to prevent path traversal
+      if (
+        !filename ||
+        filename.includes("..") ||
+        filename.includes("/") ||
+        filename.includes("\\") ||
+        filename.includes("\0")
+      ) {
+        return { error: "Invalid filename" }
+      }
+      // Normalize and validate path
+      const normalizedFilename = path.basename(filename)
+      const backupPath = path.join(BACKUP_DIR, normalizedFilename)
+      const resolvedPath = path.resolve(backupPath)
+      const resolvedBackupDir = path.resolve(BACKUP_DIR)
+      if (!resolvedPath.startsWith(resolvedBackupDir)) {
+        return { error: "Invalid backup path" }
+      }
       if (!fs.existsSync(backupPath)) {
         return { error: "Backup file not found" }
       }
@@ -867,36 +898,36 @@ function setupIpc() {
 
         // Wait for stop to complete with timeout fallback
         // The stopCallback (sendExit) will set alertsProcess = null when stop completes
-        // Add a timeout to ensure state is cleared even if callback never fires
         await new Promise((resolve) => {
-          const timeout = setTimeout(() => {
-            // Timeout fallback: clear state after 1 second even if callback didn't fire
-            if (alertsProcess) {
-              alertsProcess = null
-            }
-            resolve()
-          }, 1000)
-
           // Check if already stopped (callback may have fired synchronously)
           if (!alertsProcess) {
-            clearTimeout(timeout)
             resolve()
             return
           }
 
-          // Give stop callback time to execute (it calls sendExit which sets alertsProcess = null)
-          // Poll briefly to see if state was cleared by callback
-          const checkInterval = setInterval(() => {
+          let intervalId
+          let timeoutId
+
+          const cleanup = () => {
+            if (intervalId) clearInterval(intervalId)
+            if (timeoutId) clearTimeout(timeoutId)
+          }
+
+          // Poll to see if state was cleared by callback
+          intervalId = setInterval(() => {
             if (!alertsProcess) {
-              clearTimeout(timeout)
-              clearInterval(checkInterval)
+              cleanup()
               resolve()
             }
           }, 50) // Check every 50ms
 
-          // Cleanup interval after timeout
-          setTimeout(() => {
-            clearInterval(checkInterval)
+          // Timeout fallback: clear state after 1 second even if callback didn't fire
+          timeoutId = setTimeout(() => {
+            cleanup()
+            if (alertsProcess) {
+              alertsProcess = null
+            }
+            resolve()
           }, 1000)
         })
       } catch (err) {

@@ -15,6 +15,7 @@
     "clearInterval": "readonly",
     "fetch": "readonly",
     "FormData": "readonly",
+    "AbortController": "readonly",
     "confirm": "readonly",
     "alert": "readonly",
     "require": "readonly",
@@ -23,7 +24,7 @@
     "__dirname": "readonly"
   },
   "rules": {
-    "no-undef": "off"
+    "no-undef": "error"
   }
 }
 

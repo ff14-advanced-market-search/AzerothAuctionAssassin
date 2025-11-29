@@ -1,5 +1,5 @@
 /* eslint-env node, es6 */
-/* global require, __dirname, console, Buffer, URLSearchParams, module */
+/* global require, __dirname, console, Buffer, URLSearchParams, module, AbortController, setTimeout, clearTimeout */
 const fs = require("fs")
 const path = require("path")
 const { setTimeout: delay } = require("timers/promises")
@@ -54,17 +54,18 @@ function requestStop() {
   }
 }
 
-// Override console.log to use callback if set (for Electron integration)
+// Local logging functions that use callback if set (for Electron integration)
 const originalLog = console.log
 const originalError = console.error
-console.log = (...args) => {
+
+function log(...args) {
   originalLog(...args)
   if (logCallback) {
     logCallback(args.join(" ") + "\n")
   }
 }
-// Override console.error to also use callback
-console.error = (...args) => {
+
+function logError(...args) {
   originalError(...args)
   if (logCallback) {
     // Format error messages properly, including stack traces for Error objects
@@ -143,11 +144,20 @@ function splitList(lst, maxSize) {
  * HTTP request helper with retry logic
  * Retries up to 3 times with 500ms delay between attempts
  */
-async function httpJson(url, opts = {}, retries = 3) {
+async function httpJson(url, opts = {}, retries = 3, timeoutMs = 5000) {
   let lastErr
   for (let i = 0; i < retries; i++) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
+
     try {
-      const res = await fetch(url, opts)
+      const res = await fetch(url, {
+        ...opts,
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
       if (!res.ok) {
         lastErr = new Error(`${res.status} ${res.statusText}`)
         await delay(500)
@@ -155,7 +165,12 @@ async function httpJson(url, opts = {}, retries = 3) {
       }
       return await res.json()
     } catch (err) {
-      lastErr = err
+      clearTimeout(timeoutId)
+      if (err.name === "AbortError") {
+        lastErr = new Error(`Request timeout after ${timeoutMs}ms`)
+      } else {
+        lastErr = err
+      }
       await delay(500)
     }
   }
@@ -166,22 +181,44 @@ async function httpJson(url, opts = {}, retries = 3) {
  * Send a Discord embed message to the webhook
  */
 async function sendDiscordEmbed(webhook, embed) {
-  await fetch(webhook, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ embeds: [embed] }),
-  })
+  try {
+    const response = await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ embeds: [embed] }),
+    })
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error")
+      logError(
+        `Discord webhook failed: ${response.status} ${response.statusText}`,
+        errorText
+      )
+    }
+  } catch (error) {
+    logError("Failed to send Discord embed:", error)
+  }
 }
 
 /**
  * Send a plain text Discord message to the webhook
  */
 async function sendDiscordMessage(webhook, message) {
-  await fetch(webhook, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: message }),
-  })
+  try {
+    const response = await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: message }),
+    })
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error")
+      logError(
+        `Discord webhook failed: ${response.status} ${response.statusText}`,
+        errorText
+      )
+    }
+  } catch (error) {
+    logError("Failed to send Discord message:", error)
+  }
 }
 
 /**
@@ -200,7 +237,7 @@ class MegaData {
     this.SCAN_TIME_MIN = this.normalizeInt(this.cfg.SCAN_TIME_MIN, 1) // Minutes before data update to start scans
     this.SCAN_TIME_MAX = this.normalizeInt(this.cfg.SCAN_TIME_MAX, 3) // Minutes after data update to stop scans
     this.REFRESH_ALERTS = Boolean(this.cfg.REFRESH_ALERTS) // Refresh alerts every 1 hour
-    this.SHOW_BIDPRICES = String(this.cfg.SHOW_BID_PRICES ?? false) // Show items with bid prices
+    this.SHOW_BIDPRICES = Boolean(this.cfg.SHOW_BID_PRICES ?? false) // Show items with bid prices
     this.EXTRA_ALERTS = this.cfg.EXTRA_ALERTS // JSON array of extra alert minutes
     this.NO_RUSSIAN_REALMS = Boolean(this.cfg.NO_RUSSIAN_REALMS) // Removes alerts from Russian Realms
     this.DEBUG = Boolean(this.cfg.DEBUG) // Trigger a scan on all realms once for testing
@@ -412,36 +449,51 @@ class MegaData {
    * Tokens are valid for 24 hours, but we refresh after 20 hours to be safe
    * If over 20 hours, make a new token and reset the creation time
    */
-  async fetchAccessToken() {
+  async fetchAccessToken(timeoutMs = 30000) {
     if (
       this.access_token &&
       Date.now() / 1000 - this.access_token_creation_unix_time < 20 * 60 * 60
     ) {
       return this.access_token
     }
-    const res = await fetch("https://oauth.battle.net/token", {
-      method: "POST",
-      body: new URLSearchParams({ grant_type: "client_credentials" }),
-      headers: {
-        Authorization:
-          "Basic " +
-          Buffer.from(
-            `${this.cfg.WOW_CLIENT_ID}:${this.cfg.WOW_CLIENT_SECRET}`
-          ).toString("base64"),
-      },
-    })
-    if (!res.ok) {
-      throw new Error(
-        `Failed to get access token: ${res.status} ${await res.text()}`
-      )
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
+
+    try {
+      const res = await fetch("https://oauth.battle.net/token", {
+        method: "POST",
+        body: new URLSearchParams({ grant_type: "client_credentials" }),
+        headers: {
+          Authorization:
+            "Basic " +
+            Buffer.from(
+              `${this.cfg.WOW_CLIENT_ID}:${this.cfg.WOW_CLIENT_SECRET}`
+            ).toString("base64"),
+        },
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+      if (!res.ok) {
+        throw new Error(
+          `Failed to get access token: ${res.status} ${await res.text()}`
+        )
+      }
+      const json = await res.json()
+      if (!json.access_token) {
+        throw new Error(`No access_token in response: ${JSON.stringify(json)}`)
+      }
+      this.access_token = json.access_token
+      this.access_token_creation_unix_time = Math.floor(Date.now() / 1000)
+      return this.access_token
+    } catch (error) {
+      clearTimeout(timeoutId)
+      if (error.name === "AbortError") {
+        throw new Error(`Access token request timeout after ${timeoutMs}ms`)
+      }
+      throw error
     }
-    const json = await res.json()
-    if (!json.access_token) {
-      throw new Error(`No access_token in response: ${JSON.stringify(json)}`)
-    }
-    this.access_token = json.access_token
-    this.access_token_creation_unix_time = Math.floor(Date.now() / 1000)
-    return this.access_token
   }
 
   /**
@@ -474,7 +526,7 @@ class MegaData {
       }
       return timers
     } catch (err) {
-      console.error("Failed to load upload timers", err)
+      logError("Failed to load upload timers", err)
       return {}
     }
   }
@@ -529,43 +581,71 @@ class MegaData {
    * Make auction house API request for a specific connected realm
    * Updates local timers with last-modified header if available
    */
-  async makeAhRequest(url, connectedRealmId) {
-    const headers = {
-      Authorization: `Bearer ${await this.fetchAccessToken()}`,
-    }
-    const res = await fetch(url, { headers })
-    if (res.status === 429) throw new Error("429")
-    if (res.status !== 200) throw new Error(`${res.status}`)
-    const data = await res.json()
+  async makeAhRequest(url, connectedRealmId, timeoutMs = 30000) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
 
-    const lastMod = res.headers.get("last-modified")
-    if (lastMod) {
-      this.update_local_timers(connectedRealmId, lastMod)
+    try {
+      const headers = {
+        Authorization: `Bearer ${await this.fetchAccessToken()}`,
+      }
+      const res = await fetch(url, { headers, signal: controller.signal })
+      clearTimeout(timeoutId)
+      if (res.status === 429) throw new Error("429")
+      if (res.status !== 200) throw new Error(`${res.status}`)
+      const data = await res.json()
+
+      const lastMod = res.headers.get("last-modified")
+      if (lastMod) {
+        this.update_local_timers(connectedRealmId, lastMod)
+      }
+      return data
+    } catch (error) {
+      clearTimeout(timeoutId)
+      if (error.name === "AbortError") {
+        throw new Error(`Request timeout after ${timeoutMs}ms`)
+      }
+      throw error
     }
-    return data
   }
 
   /**
    * Make commodity auction house API request
    * Commodities use connected realm IDs -1 (NA) or -2 (EU)
    */
-  async makeCommodityRequest() {
-    const region = this.REGION
-    const endpoint =
-      region === "NA"
-        ? "https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
-        : "https://eu.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-eu&locale=en_EU"
-    const connectedId = region === "NA" ? -1 : -2
-    const headers = {
-      Authorization: `Bearer ${await this.fetchAccessToken()}`,
+  async makeCommodityRequest(timeoutMs = 30000) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
+
+    try {
+      const region = this.REGION
+      const endpoint =
+        region === "NA"
+          ? "https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-us&locale=en_US"
+          : "https://eu.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-eu&locale=en_EU"
+      const connectedId = region === "NA" ? -1 : -2
+      const headers = {
+        Authorization: `Bearer ${await this.fetchAccessToken()}`,
+      }
+      const res = await fetch(endpoint, { headers, signal: controller.signal })
+      clearTimeout(timeoutId)
+      if (res.status === 429) throw new Error("429")
+      if (res.status !== 200) throw new Error(`${res.status}`)
+      const data = await res.json()
+      const lastMod = res.headers.get("last-modified")
+      if (lastMod) this.update_local_timers(connectedId, lastMod)
+      return data
+    } catch (error) {
+      clearTimeout(timeoutId)
+      if (error.name === "AbortError") {
+        throw new Error(`Request timeout after ${timeoutMs}ms`)
+      }
+      throw error
     }
-    const res = await fetch(endpoint, { headers })
-    if (res.status === 429) throw new Error("429")
-    if (res.status !== 200) throw new Error(`${res.status}`)
-    const data = await res.json()
-    const lastMod = res.headers.get("last-modified")
-    if (lastMod) this.update_local_timers(connectedId, lastMod)
-    return data
   }
 
   /**
@@ -641,7 +721,7 @@ class MegaData {
         const data = await this.makeAhRequest(url, connectedRealmId)
         if (data?.auctions) all.push(...data.auctions)
       } catch (err) {
-        console.error("AH request failed", err)
+        logError("AH request failed", err)
       }
     }
     return all
@@ -661,14 +741,31 @@ class MegaData {
       url =
         "https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale=en_EU"
     } else return null
-    const headers = {
-      Authorization: `Bearer ${await this.fetchAccessToken()}`,
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, 5000)
+
+    try {
+      const headers = {
+        Authorization: `Bearer ${await this.fetchAccessToken()}`,
+      }
+      const res = await fetch(url, { headers, signal: controller.signal })
+      clearTimeout(timeoutId)
+      if (!res.ok) return null
+      const json = await res.json()
+      if (!("price" in json)) return null
+      return json.price / 10000
+    } catch (error) {
+      clearTimeout(timeoutId)
+      if (error.name === "AbortError") {
+        logError("WoW token price request timeout", error)
+      } else {
+        logError("Failed to get WoW token price", error)
+      }
+      return null
     }
-    const res = await fetch(url, { headers })
-    if (!res.ok) return null
-    const json = await res.json()
-    if (!("price" in json)) return null
-    return json.price / 10000
   }
 
   /**
@@ -734,7 +831,7 @@ class MegaData {
       this.avoidance_ids = new Set(avoidance)
       this.ilvl_addition = ilvlAdd
     } catch (err) {
-      console.error("Failed to load bonus ids", err)
+      logError("Failed to load bonus ids", err)
     }
   }
 
@@ -805,7 +902,7 @@ class MegaData {
 function create_oribos_exchange_pet_link(realm_name, pet_id, region) {
   const fixed_realm_name = realm_name
     .toLowerCase()
-    .replace("'", "")
+    .replace(/'/g, "")
     .replace(/ /g, "-")
   const url_region = region === "NA" ? "us" : "eu"
   return `https://undermine.exchange/#${url_region}-${fixed_realm_name}/82800-${pet_id}`
@@ -817,7 +914,7 @@ function create_oribos_exchange_pet_link(realm_name, pet_id, region) {
 function create_oribos_exchange_item_link(realm_name, item_id, region) {
   const fixed_realm_name = realm_name
     .toLowerCase()
-    .replace("'", "")
+    .replace(/'/g, "")
     .replace(/ /g, "-")
   const url_region = region === "NA" ? "us" : "eu"
   return `https://undermine.exchange/#${url_region}-${fixed_realm_name}/${item_id}`
@@ -859,9 +956,34 @@ async function runPool(tasks, concurrency) {
 async function runAlerts(state, progress, runOnce = false) {
   // Reset stop flag at the start of each run
   STOP_REQUESTED = false
-  let running = true
-  const alert_record = []
+  const alert_record = new Set() // Use Set for O(1) lookup
   state.upload_timers = await state.getUploadTimers()
+
+  // Helper to create a stable key for an auction
+  function getAuctionKey(auction, connected_id) {
+    const parts = [connected_id]
+    if ("itemID" in auction) {
+      parts.push(`item:${auction.itemID}`)
+      if ("ilvl" in auction) parts.push(`ilvl:${auction.ilvl}`)
+      if ("bonus_ids" in auction && auction.bonus_ids) {
+        parts.push(
+          `bonus:${Array.from(auction.bonus_ids)
+            .sort((a, b) => a - b)
+            .join(",")}`
+        )
+      }
+    } else if ("petID" in auction) {
+      parts.push(`pet:${auction.petID}`)
+      if ("pet_level" in auction) parts.push(`level:${auction.pet_level}`)
+      if ("quality" in auction) parts.push(`quality:${auction.quality}`)
+      if ("breed" in auction) parts.push(`breed:${auction.breed}`)
+    }
+    const price_type = "bid_prices" in auction ? "bid_prices" : "buyout_prices"
+    if (price_type in auction) {
+      parts.push(`${price_type}:${auction[price_type]}`)
+    }
+    return parts.join("|")
+  }
 
   /**
    * Pull auction data for a single connected realm
@@ -886,7 +1008,7 @@ async function runAlerts(state, progress, runOnce = false) {
 
     const embed_fields = []
     for (const auction of clean) {
-      if (!running) break
+      if (STOP_REQUESTED) break
       let id_msg = ""
       let embed_name = ""
       let saddlebag_link_id
@@ -944,15 +1066,20 @@ async function runAlerts(state, progress, runOnce = false) {
         message += `[Saddlebag link](https://saddlebagexchange.com/wow/item-data/${saddlebag_link_id})\n`
         message += `[Where to Sell](https://saddlebagexchange.com/wow/export-search?itemId=${saddlebag_link_id})\n`
       }
+      // Show target price if available (for regular items)
+      if (auction.targetPrice !== null && auction.targetPrice !== undefined) {
+        message += "`target_price`: " + auction.targetPrice + "\n"
+      }
       const price_type =
         "bid_prices" in auction ? "bid_prices" : "buyout_prices"
       message += "`" + price_type + "`: " + auction[price_type] + "\n"
 
-      if (!alert_record.includes(auction)) {
+      const auctionKey = getAuctionKey(auction, connected_id)
+      if (!alert_record.has(auctionKey)) {
         embed_fields.push({ name: embed_name, value: message, inline: true })
-        alert_record.push(auction)
+        alert_record.add(auctionKey)
       } else {
-        console.log("Already sent this alert", auction)
+        log("Already sent this alert", auction)
       }
     }
 
@@ -990,7 +1117,7 @@ async function runAlerts(state, progress, runOnce = false) {
         }
       }
     } catch (err) {
-      console.error("Error checking token price", err)
+      logError("Error checking token price", err)
     }
   }
 
@@ -1001,7 +1128,8 @@ async function runAlerts(state, progress, runOnce = false) {
     realm_names,
     id,
     idType,
-    priceType
+    priceType,
+    targetPrice = null
   ) {
     const sorted = [...auction].sort((a, b) => a - b)
     const minPrice = sorted[0]
@@ -1012,6 +1140,7 @@ async function runAlerts(state, progress, runOnce = false) {
       [idType]: id,
       itemlink,
       minPrice,
+      targetPrice,
       [`${priceType}_prices`]: JSON.stringify(auction),
     }
   }
@@ -1131,10 +1260,10 @@ async function runAlerts(state, progress, runOnce = false) {
       if (bad_ids.includes(auction.item.id)) return false
     }
 
-    if (!auction.buyout && auction.bid) auction.buyout = auction.bid
-    if (!auction.buyout) return false
-    const buyout = Math.round((auction.buyout / 10000) * 100) / 100
-    if (buyout > rule.buyout) return false
+    const buyout = auction.buyout ?? auction.bid
+    if (!buyout) return false
+    const buyoutValue = Math.round((buyout / 10000) * 100) / 100
+    if (buyoutValue > rule.buyout) return false
 
     return {
       item_id: auction.item.id,
@@ -1199,20 +1328,25 @@ async function runAlerts(state, progress, runOnce = false) {
     const pet_ilvl_ah_buyouts = []
 
     if (!auctions || auctions.length === 0) {
-      console.log(`no listings found on ${connected_id} of ${state.REGION}`)
+      log(`no listings found on ${connected_id} of ${state.REGION}`)
       return
     }
 
     /**
      * Add price to dictionary, converting from copper to gold
      * Only adds unique prices to avoid duplicates
+     * Filters out prices that exceed maxPrice if provided
      */
-    const add_price_to_dict = (price, item_id, price_dict) => {
+    const add_price_to_dict = (price, item_id, price_dict, maxPrice = null) => {
+      const gold = price / 10000
+      // Filter out prices that exceed the maximum desired price
+      if (maxPrice !== null && gold > maxPrice) {
+        return
+      }
       if (price_dict[item_id]) {
-        const gold = price / 10000
         if (!price_dict[item_id].includes(gold)) price_dict[item_id].push(gold)
       } else {
-        price_dict[item_id] = [price / 10000]
+        price_dict[item_id] = [gold]
       }
     }
 
@@ -1221,13 +1355,14 @@ async function runAlerts(state, progress, runOnce = false) {
       if (!item_id) continue
 
       if (item_id in state.desiredItems && item_id !== 82800) {
-        if ("bid" in item && state.SHOW_BIDPRICES === "true") {
-          add_price_to_dict(item.bid, item_id, all_ah_bids)
+        const maxPrice = state.desiredItems[item_id]
+        if ("bid" in item && state.SHOW_BIDPRICES) {
+          add_price_to_dict(item.bid, item_id, all_ah_bids, maxPrice)
         }
         if ("buyout" in item)
-          add_price_to_dict(item.buyout, item_id, all_ah_buyouts)
+          add_price_to_dict(item.buyout, item_id, all_ah_buyouts, maxPrice)
         if ("unit_price" in item)
-          add_price_to_dict(item.unit_price, item_id, all_ah_buyouts)
+          add_price_to_dict(item.unit_price, item_id, all_ah_buyouts, maxPrice)
       } else if (item_id === 82800) {
         if (state.desiredPetIlvlList.length) {
           const info = check_pet_ilvl_stats(item, state.desiredPetIlvlList)
@@ -1257,12 +1392,12 @@ async function runAlerts(state, progress, runOnce = false) {
         pet_ilvl_ah_buyouts.length
       )
     ) {
-      console.log(
+      log(
         `no listings found matching desires on ${connected_id} of ${state.REGION}`
       )
       return
     }
-    console.log(`Found matches on ${connected_id} of ${state.REGION}!!!`)
+    log(`Found matches on ${connected_id} of ${state.REGION}!!!`)
     return format_alert_messages(
       all_ah_buyouts,
       all_ah_bids,
@@ -1285,13 +1420,15 @@ async function runAlerts(state, progress, runOnce = false) {
   ) {
     const results = []
     const realm_names = state.get_realm_names(connected_id)
+    const defaultRealm =
+      realm_names && realm_names.length > 0 ? realm_names[0] : null
     for (const [itemIDStr, auction] of Object.entries(all_ah_buyouts)) {
       const itemID = Number(itemIDStr)
-      const itemlink = create_oribos_exchange_item_link(
-        realm_names[0],
-        itemID,
-        state.REGION
-      )
+      const itemlink = defaultRealm
+        ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
+        : null
+      const targetPrice =
+        itemID in state.desiredItems ? state.desiredItems[itemID] : null
       results.push(
         results_dict(
           auction,
@@ -1300,17 +1437,16 @@ async function runAlerts(state, progress, runOnce = false) {
           realm_names,
           itemID,
           "itemID",
-          "buyout"
+          "buyout",
+          targetPrice
         )
       )
     }
     for (const auction of ilvl_ah_buyouts) {
       const itemID = Number(auction.item_id)
-      const itemlink = create_oribos_exchange_item_link(
-        realm_names[0],
-        itemID,
-        state.REGION
-      )
+      const itemlink = defaultRealm
+        ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
+        : null
       results.push(
         ilvl_results_dict(
           auction,
@@ -1323,14 +1459,14 @@ async function runAlerts(state, progress, runOnce = false) {
         )
       )
     }
-    if (state.SHOW_BIDPRICES === "true") {
+    if (state.SHOW_BIDPRICES) {
       for (const [itemIDStr, auction] of Object.entries(all_ah_bids)) {
         const itemID = Number(itemIDStr)
-        const itemlink = create_oribos_exchange_item_link(
-          realm_names[0],
-          itemID,
-          state.REGION
-        )
+        const itemlink = defaultRealm
+          ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
+          : null
+        const targetPrice =
+          itemID in state.desiredItems ? state.desiredItems[itemID] : null
         results.push(
           results_dict(
             auction,
@@ -1339,18 +1475,17 @@ async function runAlerts(state, progress, runOnce = false) {
             realm_names,
             itemID,
             "itemID",
-            "bid"
+            "bid",
+            targetPrice
           )
         )
       }
     }
     for (const auction of pet_ilvl_ah_buyouts) {
       const petID = auction.pet_species_id
-      const itemlink = create_oribos_exchange_pet_link(
-        realm_names[0],
-        petID,
-        state.REGION
-      )
+      const itemlink = defaultRealm
+        ? create_oribos_exchange_pet_link(defaultRealm, petID, state.REGION)
+        : null
       results.push(
         pet_ilvl_results_dict(
           auction,
@@ -1394,12 +1529,12 @@ async function runAlerts(state, progress, runOnce = false) {
   if (runOnce) return
 
   // Main loop - runs continuously checking for new auction house data
-  while (running && !STOP_REQUESTED) {
+  while (!STOP_REQUESTED) {
     const current_min = new Date().getMinutes()
 
     // Refresh alerts 1 time per hour (at minute 1)
     if (current_min === 1 && state.REFRESH_ALERTS) {
-      alert_record.length = 0
+      alert_record.clear()
     }
 
     // Get upload timers if we don't have them yet
@@ -1443,7 +1578,7 @@ async function runAlerts(state, progress, runOnce = false) {
           state.get_upload_time_minutes()
         ).join(",")}\nof each hour.`
       )
-      console.log(
+      log(
         `Blizzard API data only updates 1 time per hour. The updates will come on minute ${Array.from(
           state.get_upload_time_minutes()
         )} of each hour. ${new Date().toISOString()} is not the update time.`
@@ -1483,7 +1618,7 @@ async function main() {
         "🟢All future messages will release seconds after the new data is available.🟢"
     )
     await delay(1000)
-    await runAlerts(state, (msg) => console.log("[progress]", msg))
+    await runAlerts(state, (msg) => log("[progress]", msg))
   }
 }
 

@@ -1,3 +1,42 @@
+// Helper function to escape HTML to prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement("div")
+  div.textContent = text
+  return div.innerHTML
+}
+
+// Helper function for fetch with timeout
+async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => {
+    controller.abort()
+  }, timeoutMs)
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+    return response
+  } catch (error) {
+    clearTimeout(timeoutId)
+    if (error.name === "AbortError") {
+      throw new Error(`Request timeout after ${timeoutMs}ms`)
+    }
+    throw error
+  }
+}
+
+// Helper function for safe DOM element access
+function getElement(id) {
+  const element = document.getElementById(id)
+  if (!element) {
+    console.warn(`Element with id "${id}" not found`)
+  }
+  return element
+}
+
 const state = {
   megaData: {},
   desiredItems: {},
@@ -7,77 +46,75 @@ const state = {
   processRunning: false,
 }
 
-const megaForm = document.getElementById("mega-form")
-const itemList = document.getElementById("item-list")
-const ilvlTable = document.getElementById("ilvl-table")
-const petIlvlTable = document.getElementById("pet-ilvl-table")
-const logPanel = document.getElementById("log-panel")
-const processState = document.getElementById("process-state")
-const saveSettingsBtn = document.getElementById("save-settings-btn")
-const reloadBtn = document.getElementById("reload-btn")
-const startBtn = document.getElementById("start-btn")
-const stopBtn = document.getElementById("stop-btn")
-const backBtn = document.getElementById("back-btn")
-const forwardBtn = document.getElementById("forward-btn")
+const megaForm = getElement("mega-form")
+const itemList = getElement("item-list")
+const ilvlTable = getElement("ilvl-table")
+const petIlvlTable = getElement("pet-ilvl-table")
+const logPanel = getElement("log-panel")
+const processState = getElement("process-state")
+const saveSettingsBtn = getElement("save-settings-btn")
+const reloadBtn = getElement("reload-btn")
+const startBtn = getElement("start-btn")
+const stopBtn = getElement("stop-btn")
+const backBtn = getElement("back-btn")
+const forwardBtn = getElement("forward-btn")
 const navButtons = Array.from(document.querySelectorAll(".nav-btn"))
-const itemSearchInput = document.getElementById("item-search-input")
-const itemSearchBtn = document.getElementById("item-search-btn")
-const itemSearchResults = document.getElementById("item-search-results")
-const itemSearchStatus = document.getElementById("item-search-status")
-const itemFilterInput = document.getElementById("item-filter-input")
-const ilvlFilterInput = document.getElementById("ilvl-filter-input")
-const petIlvlFilterInput = document.getElementById("pet-ilvl-filter-input")
-const petIlvlSearchInput = document.getElementById("pet-ilvl-search-input")
-const realmList = document.getElementById("realm-list")
-const realmForm = document.getElementById("realm-form")
-const realmRegionSelect = document.getElementById("realm-region-select")
-const realmNameInput = document.getElementById("realm-name-input")
-const realmIdInput = document.getElementById("realm-id-input")
-const realmFilterInput = document.getElementById("realm-filter-input")
-const resetRealmBtn = document.getElementById("reset-realm-btn")
-const removeRealmBtn = document.getElementById("remove-realm-btn")
-const restoreBackupBtn = document.getElementById("restore-backup-btn")
-const restoreBackupItemsBtn = document.getElementById(
-  "restore-backup-items-btn"
-)
-const restoreBackupIlvlBtn = document.getElementById("restore-backup-ilvl-btn")
-const restoreBackupPetsBtn = document.getElementById("restore-backup-pets-btn")
-const resetSettingsBtn = document.getElementById("reset-settings-btn")
-const resetItemsBtn = document.getElementById("reset-items-btn")
-const resetIlvlBtn = document.getElementById("reset-ilvl-btn")
-const resetPetsBtn = document.getElementById("reset-pets-btn")
-const petIlvlSearchBtn = document.getElementById("pet-ilvl-search-btn")
-const petIlvlSearchResults = document.getElementById("pet-ilvl-search-results")
-const petIlvlSearchStatus = document.getElementById("pet-ilvl-search-status")
-const ilvlSearchInput = document.getElementById("ilvl-search-input")
-const ilvlSearchBtn = document.getElementById("ilvl-search-btn")
-const ilvlSearchResults = document.getElementById("ilvl-search-results")
-const ilvlSearchStatus = document.getElementById("ilvl-search-status")
-const itemSearchSuggest = document.getElementById("item-search-suggest")
-const petIlvlSearchSuggest = document.getElementById("pet-ilvl-search-suggest")
-const ilvlSearchSuggest = document.getElementById("ilvl-search-suggest")
-const importConfigBtn = document.getElementById("import-config-btn")
-const exportConfigBtn = document.getElementById("export-config-btn")
-const importItemsBtn = document.getElementById("import-items-btn")
-const exportItemsBtn = document.getElementById("export-items-btn")
-const importIlvlBtn = document.getElementById("import-ilvl-btn")
-const exportIlvlBtn = document.getElementById("export-ilvl-btn")
-const importPetIlvlBtn = document.getElementById("import-pet-ilvl-btn")
-const exportPetIlvlBtn = document.getElementById("export-pet-ilvl-btn")
-const pasteConfigBtn = document.getElementById("paste-config-btn")
-const copyConfigBtn = document.getElementById("copy-config-btn")
-const pasteItemsBtn = document.getElementById("paste-items-btn")
-const copyItemsBtn = document.getElementById("copy-items-btn")
-const pastePBSItemsBtn = document.getElementById("paste-pbs-items-btn")
-const copyPBSItemsBtn = document.getElementById("copy-pbs-items-btn")
-const pasteIlvlBtn = document.getElementById("paste-ilvl-btn")
-const copyIlvlBtn = document.getElementById("copy-ilvl-btn")
-const pastePBSIlvlBtn = document.getElementById("paste-pbs-ilvl-btn")
-const copyPBSIlvlBtn = document.getElementById("copy-pbs-ilvl-btn")
-const pastePetIlvlBtn = document.getElementById("paste-pet-ilvl-btn")
-const copyPetIlvlBtn = document.getElementById("copy-pet-ilvl-btn")
-const pastePBSPetIlvlBtn = document.getElementById("paste-pbs-pet-ilvl-btn")
-const copyPBSPetIlvlBtn = document.getElementById("copy-pbs-pet-ilvl-btn")
+const itemSearchInput = getElement("item-search-input")
+const itemSearchBtn = getElement("item-search-btn")
+const itemSearchResults = getElement("item-search-results")
+const itemSearchStatus = getElement("item-search-status")
+const itemFilterInput = getElement("item-filter-input")
+const ilvlFilterInput = getElement("ilvl-filter-input")
+const petIlvlFilterInput = getElement("pet-ilvl-filter-input")
+const petIlvlSearchInput = getElement("pet-ilvl-search-input")
+const realmList = getElement("realm-list")
+const realmForm = getElement("realm-form")
+const realmRegionSelect = getElement("realm-region-select")
+const realmNameInput = getElement("realm-name-input")
+const realmIdInput = getElement("realm-id-input")
+const realmFilterInput = getElement("realm-filter-input")
+const resetRealmBtn = getElement("reset-realm-btn")
+const removeRealmBtn = getElement("remove-realm-btn")
+const restoreBackupBtn = getElement("restore-backup-btn")
+const restoreBackupItemsBtn = getElement("restore-backup-items-btn")
+const restoreBackupIlvlBtn = getElement("restore-backup-ilvl-btn")
+const restoreBackupPetsBtn = getElement("restore-backup-pets-btn")
+const resetSettingsBtn = getElement("reset-settings-btn")
+const resetItemsBtn = getElement("reset-items-btn")
+const resetIlvlBtn = getElement("reset-ilvl-btn")
+const resetPetsBtn = getElement("reset-pets-btn")
+const petIlvlSearchBtn = getElement("pet-ilvl-search-btn")
+const petIlvlSearchResults = getElement("pet-ilvl-search-results")
+const petIlvlSearchStatus = getElement("pet-ilvl-search-status")
+const ilvlSearchInput = getElement("ilvl-search-input")
+const ilvlSearchBtn = getElement("ilvl-search-btn")
+const ilvlSearchResults = getElement("ilvl-search-results")
+const ilvlSearchStatus = getElement("ilvl-search-status")
+const itemSearchSuggest = getElement("item-search-suggest")
+const petIlvlSearchSuggest = getElement("pet-ilvl-search-suggest")
+const ilvlSearchSuggest = getElement("ilvl-search-suggest")
+const importConfigBtn = getElement("import-config-btn")
+const exportConfigBtn = getElement("export-config-btn")
+const importItemsBtn = getElement("import-items-btn")
+const exportItemsBtn = getElement("export-items-btn")
+const importIlvlBtn = getElement("import-ilvl-btn")
+const exportIlvlBtn = getElement("export-ilvl-btn")
+const importPetIlvlBtn = getElement("import-pet-ilvl-btn")
+const exportPetIlvlBtn = getElement("export-pet-ilvl-btn")
+const pasteConfigBtn = getElement("paste-config-btn")
+const copyConfigBtn = getElement("copy-config-btn")
+const pasteItemsBtn = getElement("paste-items-btn")
+const copyItemsBtn = getElement("copy-items-btn")
+const pastePBSItemsBtn = getElement("paste-pbs-items-btn")
+const copyPBSItemsBtn = getElement("copy-pbs-items-btn")
+const pasteIlvlBtn = getElement("paste-ilvl-btn")
+const copyIlvlBtn = getElement("copy-ilvl-btn")
+const pastePBSIlvlBtn = getElement("paste-pbs-ilvl-btn")
+const copyPBSIlvlBtn = getElement("copy-pbs-ilvl-btn")
+const pastePetIlvlBtn = getElement("paste-pet-ilvl-btn")
+const copyPetIlvlBtn = getElement("copy-pet-ilvl-btn")
+const pastePBSPetIlvlBtn = getElement("paste-pbs-pet-ilvl-btn")
+const copyPBSPetIlvlBtn = getElement("copy-pbs-pet-ilvl-btn")
 let itemNameMap = {}
 let petNameMap = {}
 
@@ -243,7 +280,7 @@ function updateSuggestions(inputEl, suggestEl, cache) {
     .filter((row) => row.itemName && row.itemName.toLowerCase().includes(term))
     .slice(0, 12)
   suggestEl.innerHTML = matches
-    .map((row) => `<option value="${row.itemName}"></option>`)
+    .map((row) => `<option value="${escapeHtml(row.itemName)}"></option>`)
     .join("")
 }
 
@@ -626,7 +663,7 @@ async function handlePastePBSItems(btn) {
       const tempItems = { ...state.desiredItems }
       for (const row of itemSearchCache || []) {
         const lower = row.itemName.toLowerCase()
-        if (pbs_prices.hasOwnProperty(lower)) {
+        if (Object.hasOwn(pbs_prices, lower)) {
           const price = pbs_prices[lower]
           if (price !== null) {
             tempItems[String(row.itemID)] = price
@@ -837,6 +874,14 @@ function readMegaForm() {
   return out
 }
 
+/**
+ * Render a key-value list with optional label function
+ * @param {HTMLElement} target - Target element to render into
+ * @param {Object} data - Key-value data object
+ * @param {Function} onRemove - Callback for remove button
+ * @param {Function} labelFn - Optional function that receives raw (id, price) and returns HTML string. Must escape HTML internally.
+ * @param {Function} onClick - Optional click handler
+ */
 function renderKVList(target, data, onRemove, labelFn, onClick) {
   target.innerHTML = ""
   const entries = Object.entries(data)
@@ -849,11 +894,17 @@ function renderKVList(target, data, onRemove, labelFn, onClick) {
   }
   entries.forEach(([id, price]) => {
     const li = document.createElement("li")
-    const label = labelFn
-      ? labelFn(id, price)
-      : `<strong>${id}</strong> → ${price}`
     const labelDiv = document.createElement("div")
-    labelDiv.innerHTML = label
+    if (labelFn) {
+      // labelFn receives raw id and price, must escape HTML internally
+      labelDiv.innerHTML = labelFn(String(id), String(price))
+    } else {
+      // Default: escape id and price for safety
+      const strong = document.createElement("strong")
+      strong.textContent = String(id)
+      labelDiv.appendChild(strong)
+      labelDiv.appendChild(document.createTextNode(` → ${price}`))
+    }
     if (onClick) {
       labelDiv.style.cursor = "pointer"
       labelDiv.onclick = (e) => {
@@ -905,9 +956,12 @@ function renderItemList() {
     filteredData,
     removeItem,
     (itemId, p) => {
-      const name = getItemName(itemId)
+      // labelFn receives raw values, must escape HTML internally
+      const name = escapeHtml(getItemName(itemId))
+      const escapedId = escapeHtml(String(itemId))
+      const escapedPrice = escapeHtml(String(p))
       const itemLink = `https://www.wowhead.com/item=${itemId}`
-      return `<strong><a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${itemId}">${itemId}</a> • ${name}</strong> → ${p}`
+      return `<strong><a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${itemId}">${escapedId}</a> • ${name}</strong> → ${escapedPrice}`
     },
     handleItemClick
   )
@@ -953,39 +1007,73 @@ function renderIlvlRules() {
 
   filteredRules.forEach((rule, filteredIdx) => {
     const idx = state.ilvlList.indexOf(rule)
-    const names = (rule.item_ids || []).map((id) => {
-      const nm = getItemName(id)
-      const itemLink = `https://www.wowhead.com/item=${id}`
-      return `${nm} (<a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${id}">${id}</a>)`
-    })
     const row = document.createElement("div")
     row.className = "table-row"
     row.style.cursor = "pointer"
-    row.innerHTML = `
-      <div class="pill">#${filteredIdx + 1}</div>
-      <div>ilvl ${rule.ilvl}-${rule.max_ilvl}</div>
-      <div>${rule.buyout} gold</div>
-      <div>
-        ${
-          rule.item_ids?.length
-            ? `Items: ${names.slice(0, 5).join(", ")}${
-                names.length > 5 ? "…" : ""
-              }`
-            : "Any items"
+
+    const pill = document.createElement("div")
+    pill.className = "pill"
+    pill.textContent = `#${filteredIdx + 1}`
+    row.appendChild(pill)
+
+    const ilvlDiv = document.createElement("div")
+    ilvlDiv.textContent = `ilvl ${rule.ilvl}-${rule.max_ilvl}`
+    row.appendChild(ilvlDiv)
+
+    const buyoutDiv = document.createElement("div")
+    buyoutDiv.textContent = `${rule.buyout} gold`
+    row.appendChild(buyoutDiv)
+
+    const detailsDiv = document.createElement("div")
+    if (rule.item_ids?.length) {
+      const itemsLabel = document.createTextNode("Items: ")
+      detailsDiv.appendChild(itemsLabel)
+      const itemIds = rule.item_ids.slice(0, 5)
+      itemIds.forEach((id, i) => {
+        if (i > 0) {
+          detailsDiv.appendChild(document.createTextNode(", "))
         }
-        <div class="bonuses">Bonus IDs: ${
-          rule.bonus_lists?.join(", ") || "Any"
-        }</div>
-        <div class="bonuses">Player lvl: ${rule.required_min_lvl}-${
-          rule.required_max_lvl
-        }</div>
-        <div class="bonuses">Sockets:${rule.sockets ? "Y" : "N"} Speed:${
-          rule.speed ? "Y" : "N"
-        } Leech:${rule.leech ? "Y" : "N"} Avoid:${
-          rule.avoidance ? "Y" : "N"
-        }</div>
-      </div>
-    `
+        const nm = getItemName(id)
+        const itemNameSpan = document.createElement("span")
+        itemNameSpan.textContent = nm
+        detailsDiv.appendChild(itemNameSpan)
+        detailsDiv.appendChild(document.createTextNode(" ("))
+        const itemLink = document.createElement("a")
+        itemLink.href = `https://www.wowhead.com/item=${id}`
+        itemLink.target = "_blank"
+        itemLink.rel = "noopener noreferrer"
+        itemLink.setAttribute("data-wowhead", `item=${id}`)
+        itemLink.textContent = String(id)
+        detailsDiv.appendChild(itemLink)
+        detailsDiv.appendChild(document.createTextNode(")"))
+      })
+      if (rule.item_ids.length > 5) {
+        detailsDiv.appendChild(document.createTextNode("…"))
+      }
+    } else {
+      detailsDiv.textContent = "Any items"
+    }
+
+    const bonusesDiv1 = document.createElement("div")
+    bonusesDiv1.className = "bonuses"
+    bonusesDiv1.textContent = `Bonus IDs: ${
+      rule.bonus_lists?.map(String).map(escapeHtml).join(", ") || "Any"
+    }`
+    detailsDiv.appendChild(bonusesDiv1)
+
+    const bonusesDiv2 = document.createElement("div")
+    bonusesDiv2.className = "bonuses"
+    bonusesDiv2.textContent = `Player lvl: ${rule.required_min_lvl}-${rule.required_max_lvl}`
+    detailsDiv.appendChild(bonusesDiv2)
+
+    const bonusesDiv3 = document.createElement("div")
+    bonusesDiv3.className = "bonuses"
+    bonusesDiv3.textContent = `Sockets:${rule.sockets ? "Y" : "N"} Speed:${
+      rule.speed ? "Y" : "N"
+    } Leech:${rule.leech ? "Y" : "N"} Avoid:${rule.avoidance ? "Y" : "N"}`
+    detailsDiv.appendChild(bonusesDiv3)
+
+    row.appendChild(detailsDiv)
     const button = document.createElement("button")
     button.textContent = "Remove"
     button.className = "ghost"
@@ -1063,19 +1151,35 @@ function renderPetIlvlRules() {
     const row = document.createElement("div")
     row.className = "table-row"
     row.style.cursor = "pointer"
-    row.innerHTML = `
-      <div class="pill">#${filteredIdx + 1}</div>
-      <div>Pet ${rule.petID}</div>
-      <div>${rule.price} gold</div>
-      <div>
-        ${name}
-        <div class="bonuses">Min lvl ${
-          rule.minLevel
-        }, quality ${getQualityLabel(rule.minQuality)}, exclude breeds: ${
-          rule.excludeBreeds?.join(",") || "none"
-        }</div>
-      </div>
-    `
+
+    const pill = document.createElement("div")
+    pill.className = "pill"
+    pill.textContent = `#${filteredIdx + 1}`
+    row.appendChild(pill)
+
+    const petIdDiv = document.createElement("div")
+    petIdDiv.textContent = `Pet ${rule.petID}`
+    row.appendChild(petIdDiv)
+
+    const priceDiv = document.createElement("div")
+    priceDiv.textContent = `${rule.price} gold`
+    row.appendChild(priceDiv)
+
+    const detailsDiv = document.createElement("div")
+    const nameSpan = document.createElement("span")
+    nameSpan.textContent = name
+    detailsDiv.appendChild(nameSpan)
+
+    const bonusesDiv = document.createElement("div")
+    bonusesDiv.className = "bonuses"
+    bonusesDiv.textContent = `Min lvl ${
+      rule.minLevel
+    }, quality ${getQualityLabel(rule.minQuality)}, exclude breeds: ${
+      rule.excludeBreeds?.map(String).map(escapeHtml).join(",") || "none"
+    }`
+    detailsDiv.appendChild(bonusesDiv)
+
+    row.appendChild(detailsDiv)
     const button = document.createElement("button")
     button.textContent = "Remove"
     button.className = "ghost"
@@ -1180,7 +1284,7 @@ async function fetchItemNames() {
   itemSearchStatus.textContent = "Loading item names…"
   const region = state.megaData?.WOW_REGION || "EU"
   try {
-    const resp = await fetch(
+    const resp = await fetchWithTimeout(
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
@@ -1189,7 +1293,8 @@ async function fetchItemNames() {
           Accept: "application/json",
         },
         body: JSON.stringify({ region, discount: 1 }),
-      }
+      },
+      30000
     )
     const data = await resp.json()
     itemSearchCache = Array.isArray(data) ? data : []
@@ -1224,12 +1329,20 @@ function renderItemSearchResults(results) {
   results.forEach((row) => {
     const div = document.createElement("div")
     div.className = "search-result"
-    div.innerHTML = `
-      <div>
-        <div><strong>${row.itemName}</strong></div>
-        <div class="meta">ID: ${row.itemID} • Recommended: ${row.desiredPrice}</div>
-      </div>
-    `
+
+    const innerDiv = document.createElement("div")
+    const nameDiv = document.createElement("div")
+    const strong = document.createElement("strong")
+    strong.textContent = row.itemName
+    nameDiv.appendChild(strong)
+    innerDiv.appendChild(nameDiv)
+
+    const metaDiv = document.createElement("div")
+    metaDiv.className = "meta"
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${row.desiredPrice}`
+    innerDiv.appendChild(metaDiv)
+
+    div.appendChild(innerDiv)
     const btn = document.createElement("button")
     btn.textContent = "Use"
     btn.className = "primary"
@@ -1273,12 +1386,20 @@ function renderIlvlSearchResults(results) {
   results.forEach((row) => {
     const div = document.createElement("div")
     div.className = "search-result"
-    div.innerHTML = `
-      <div>
-        <div><strong>${row.itemName}</strong></div>
-        <div class="meta">ID: ${row.itemID} • Recommended: ${row.desiredPrice}</div>
-      </div>
-    `
+
+    const innerDiv = document.createElement("div")
+    const nameDiv = document.createElement("div")
+    const strong = document.createElement("strong")
+    strong.textContent = row.itemName
+    nameDiv.appendChild(strong)
+    innerDiv.appendChild(nameDiv)
+
+    const metaDiv = document.createElement("div")
+    metaDiv.className = "meta"
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${row.desiredPrice}`
+    innerDiv.appendChild(metaDiv)
+
+    div.appendChild(innerDiv)
     const btn = document.createElement("button")
     btn.textContent = "Use"
     btn.className = "primary"
@@ -1324,7 +1445,7 @@ async function fetchPetNames() {
   petIlvlSearchStatus.textContent = "Loading pets…"
   const region = state.megaData?.WOW_REGION || "EU"
   try {
-    const resp = await fetch(
+    const resp = await fetchWithTimeout(
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
@@ -1333,7 +1454,8 @@ async function fetchPetNames() {
           Accept: "application/json",
         },
         body: JSON.stringify({ region, discount: 1, pets: true }),
-      }
+      },
+      30000
     )
     const data = await resp.json()
     petSearchCache = Array.isArray(data) ? data : []
@@ -1366,12 +1488,20 @@ function renderPetSearchResults(results) {
   results.forEach((row) => {
     const div = document.createElement("div")
     div.className = "search-result"
-    div.innerHTML = `
-      <div>
-        <div><strong>${row.itemName}</strong></div>
-        <div class="meta">ID: ${row.itemID} • Recommended: ${row.desiredPrice}</div>
-      </div>
-    `
+
+    const innerDiv = document.createElement("div")
+    const nameDiv = document.createElement("div")
+    const strong = document.createElement("strong")
+    strong.textContent = row.itemName
+    nameDiv.appendChild(strong)
+    innerDiv.appendChild(nameDiv)
+
+    const metaDiv = document.createElement("div")
+    metaDiv.className = "meta"
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${row.desiredPrice}`
+    innerDiv.appendChild(metaDiv)
+
+    div.appendChild(innerDiv)
     const btn = document.createElement("button")
     btn.textContent = "Use"
     btn.className = "primary"
@@ -1417,7 +1547,7 @@ async function validateToken(token) {
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       "https://api.saddlebagexchange.com/api/wow/checkmegatoken",
       {
         method: "POST",
@@ -1426,10 +1556,11 @@ async function validateToken(token) {
           Accept: "application/json",
         },
         body: JSON.stringify({ token: token.trim() }),
-      }
+      },
+      30000
     )
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       return {
         valid: false,
         error: `Could not reach server, status code: ${response.status}`,
@@ -2162,8 +2293,10 @@ forwardBtn?.addEventListener("click", async () => {
   updateNavigationButtons()
 })
 
-// Update navigation buttons periodically to reflect navigation state
-setInterval(updateNavigationButtons, 500)
+// Update navigation buttons on navigation events
+window.addEventListener("popstate", updateNavigationButtons)
+// Initialize navigation buttons on startup
+updateNavigationButtons()
 
 startBtn.addEventListener("click", async () => {
   // Validate and save before starting
@@ -2244,16 +2377,22 @@ function renderRealmList() {
 
   for (const [name, id] of entries) {
     const li = document.createElement("li")
-    li.innerHTML = `
-      <div>Name: ${name}; ID: ${id};</div>
-      <button class="remove-btn" data-name="${name}" data-id="${id}">Remove</button>
-    `
+    const nameDiv = document.createElement("div")
+    nameDiv.textContent = `Name: ${escapeHtml(name)}; ID: ${id};`
+    li.appendChild(nameDiv)
+
+    const removeBtn = document.createElement("button")
+    removeBtn.className = "remove-btn"
+    removeBtn.setAttribute("data-name", escapeHtml(name))
+    removeBtn.setAttribute("data-id", String(id))
+    removeBtn.textContent = "Remove"
+    li.appendChild(removeBtn)
+
     li.onclick = (e) => {
       if (e.target.classList.contains("remove-btn")) return
       realmNameInput.value = name
       realmIdInput.value = id
     }
-    const removeBtn = li.querySelector(".remove-btn")
     removeBtn.onclick = (e) => {
       e.stopPropagation()
       removeRealm(name, id)
@@ -2408,8 +2547,8 @@ exportPetIlvlBtn?.addEventListener("click", () =>
 pastePetIlvlBtn?.addEventListener("click", () =>
   handlePasteAAA("petIlvlList", pastePetIlvlBtn)
 )
-const selectDataDirBtn = document.getElementById("select-data-dir-btn")
-const resetDataDirBtn = document.getElementById("reset-data-dir-btn")
+const selectDataDirBtn = getElement("select-data-dir-btn")
+const resetDataDirBtn = getElement("reset-data-dir-btn")
 
 selectDataDirBtn?.addEventListener("click", async () => {
   try {
@@ -2471,8 +2610,8 @@ window.aaa.onZoomChanged((zoomFactor) => {
 })
 
 // Zoom button handlers
-const zoomInBtn = document.getElementById("zoom-in-btn")
-const zoomOutBtn = document.getElementById("zoom-out-btn")
+const zoomInBtn = getElement("zoom-in-btn")
+const zoomOutBtn = getElement("zoom-out-btn")
 
 zoomInBtn?.addEventListener("click", async () => {
   try {

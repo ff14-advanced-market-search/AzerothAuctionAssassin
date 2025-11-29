@@ -614,6 +614,7 @@ function getRealmListByRegion(region) {
     case "EUSODCLASSIC":
       return EUSODCLASSIC_CONNECTED_REALMS_IDS
     default:
+      console.warn(`Unknown region: ${region}`)
       return {}
   }
 }
