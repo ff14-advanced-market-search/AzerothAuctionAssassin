@@ -366,38 +366,78 @@ function setupIpc() {
     }
   })
 
+  // Helper function to send log messages to renderer
+  const sendToLogPanel = (message) => {
+    BrowserWindow.getAllWindows().forEach((win) =>
+      win.webContents.send("mega-log", message)
+    )
+    if (logFileStream) {
+      logFileStream.write(message)
+    }
+  }
+
   ipcMain.handle("save-mega-data", (_event, payload) => {
     const normalized = normalizeMegaData(payload || {})
+    const logMsg = `[SAVE] Saving mega_data.json to: ${FILES.megaData}\n`
+    console.log(logMsg.trim())
+    sendToLogPanel(logMsg)
     writeJson(FILES.megaData, normalized)
     saveBackup("megaData", normalized)
+    const successMsg = `[SAVE] Successfully saved mega_data.json\n`
+    console.log(successMsg.trim())
+    sendToLogPanel(successMsg)
     return normalized
   })
 
   ipcMain.handle("save-items", (_event, payload) => {
     const normalized = normalizeKV(payload || {})
+    const logMsg = `[SAVE] Saving desired_items.json to: ${FILES.desiredItems}\n`
+    console.log(logMsg.trim())
+    sendToLogPanel(logMsg)
     writeJson(FILES.desiredItems, normalized)
     saveBackup("desiredItems", normalized)
+    const successMsg = `[SAVE] Successfully saved desired_items.json\n`
+    console.log(successMsg.trim())
+    sendToLogPanel(successMsg)
     return normalized
   })
 
   ipcMain.handle("save-pets", (_event, payload) => {
     const normalized = normalizeKV(payload || {})
+    const logMsg = `[SAVE] Saving desired_pets.json to: ${FILES.desiredPets}\n`
+    console.log(logMsg.trim())
+    sendToLogPanel(logMsg)
     writeJson(FILES.desiredPets, normalized)
     saveBackup("desiredPets", normalized)
+    const successMsg = `[SAVE] Successfully saved desired_pets.json\n`
+    console.log(successMsg.trim())
+    sendToLogPanel(successMsg)
     return normalized
   })
 
   ipcMain.handle("save-ilvl", (_event, payload) => {
     const normalized = normalizeIlvlRules(payload || [])
+    const logMsg = `[SAVE] Saving desired_ilvl_list.json to: ${FILES.ilvlList}\n`
+    console.log(logMsg.trim())
+    sendToLogPanel(logMsg)
     writeJson(FILES.ilvlList, normalized)
     saveBackup("ilvlList", normalized)
+    const successMsg = `[SAVE] Successfully saved desired_ilvl_list.json\n`
+    console.log(successMsg.trim())
+    sendToLogPanel(successMsg)
     return normalized
   })
 
   ipcMain.handle("save-pet-ilvl", (_event, payload) => {
     const normalized = normalizePetIlvlRules(payload || [])
+    const logMsg = `[SAVE] Saving desired_pet_ilvl_list.json to: ${FILES.petIlvlList}\n`
+    console.log(logMsg.trim())
+    sendToLogPanel(logMsg)
     writeJson(FILES.petIlvlList, normalized)
     saveBackup("petIlvlList", normalized)
+    const successMsg = `[SAVE] Successfully saved desired_pet_ilvl_list.json\n`
+    console.log(successMsg.trim())
+    sendToLogPanel(successMsg)
     return normalized
   })
 
@@ -647,6 +687,9 @@ function setupIpc() {
   ipcMain.handle("save-realm-list", (_event, region, realms) => {
     const filePath = REALM_FILES[region]
     if (!filePath) return { error: "Unknown region" }
+    const logMsg = `[SAVE] Saving realm list for ${region} to: ${filePath}\n`
+    console.log(logMsg.trim())
+    sendToLogPanel(logMsg)
     const normalized = {}
     Object.entries(realms || {}).forEach(([k, v]) => {
       const id = Number(v)
@@ -655,14 +698,33 @@ function setupIpc() {
       }
     })
     writeJson(filePath, normalized)
+    const successMsg = `[SAVE] Successfully saved realm list for ${region}\n`
+    console.log(successMsg.trim())
+    sendToLogPanel(successMsg)
     return normalized
   })
 }
 
 app.whenReady().then(async () => {
+  const startupMsg1 = `[STARTUP] Data directory: ${DATA_DIR}\n`
+  const startupMsg2 = `[STARTUP] Static directory: ${STATIC_DIR}\n`
+  console.log(startupMsg1.trim())
+  console.log(startupMsg2.trim())
   // Ensure data files exist before setting up IPC handlers
   // This prevents race conditions where renderer calls IPC before files exist
   ensureDataFiles()
+
+  // Send startup messages to log panel after window is created
+  setTimeout(() => {
+    BrowserWindow.getAllWindows().forEach((win) => {
+      win.webContents.send("mega-log", startupMsg1)
+      win.webContents.send("mega-log", startupMsg2)
+    })
+    if (logFileStream) {
+      logFileStream.write(startupMsg1)
+      logFileStream.write(startupMsg2)
+    }
+  }, 500) // Small delay to ensure window is ready
 
   // Create window and set up IPC after files are ready
   createWindow()
