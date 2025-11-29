@@ -200,9 +200,6 @@ function formatTargetPrice(auction) {
   if (actual === null || isNaN(actual) || actual <= 0) {
     return `\`target_price\`: ${auction.targetPrice}\n`
   }
-  if (isNaN(actual) || actual <= 0) {
-    return `\`target_price\`: ${auction.targetPrice}\n`
-  }
 
   // Only show savings if actual price is below target
   if (actual >= target) {

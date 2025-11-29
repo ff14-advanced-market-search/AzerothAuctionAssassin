@@ -139,7 +139,7 @@ button.ghost:hover:not(:disabled) {
 .status-pill {
   padding: 10px 14px;
   border-radius: 999px;
-  background: rgba(128, 255, 234, 0.1);
+  background: rgba(128, 255, 234, 0.2);
   border: 1px solid rgba(128, 255, 234, 0.4);
   color: var(--text);
   font-weight: 600;
@@ -637,7 +637,7 @@ select:focus {
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(128, 255, 234, 0.1);
+  background: rgba(128, 255, 234, 0.2);
   color: var(--text);
 }
 

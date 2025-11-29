@@ -27,7 +27,7 @@ Prefer to avoid the PyQt desktop UI? A lightweight Node/Electron GUI manages the
 - Edit `mega_data.json`, desired item/pet targets, ilvl rules, and pet ilvl rules with structured forms.
 - Uses the files in `AzerothAuctionAssassinData/` (creates them if missing) and uses `src/mega_alerts.ts` instead of `mega_alerts.py` for scanning.
 
-```
+```bash
 npm install
 npm start
 # if it doesn't start 
