@@ -127,6 +127,25 @@
               Reset
             </button>
           </div>
+          <div class="import-row" style="margin-bottom: 16px">
+            <button
+              type="button"
+              class="ghost"
+              id="import-config-btn"
+              title="Import your mega_data.json config."
+            >
+              Import from AAA file
+            </button>
+            <button type="button" class="ghost" id="export-config-btn">
+              Export to AAA file
+            </button>
+            <button type="button" class="ghost" id="paste-config-btn">
+              Import AAA
+            </button>
+            <button type="button" class="ghost" id="copy-config-btn">
+              Copy AAA to clipboard
+            </button>
+          </div>
           <form id="mega-form" class="form-grid">
             <label
               title="Select where to store your data files (JSON configs, backups, logs). Default is next to the application executable."
@@ -305,25 +324,6 @@
                 title="Trigger a scan on all realms once. Use this to test make sure your data is working."
                 ><input type="checkbox" name="DEBUG" /> Debug mode</label
               >
-            </div>
-            <div class="import-row">
-              <button
-                type="button"
-                class="ghost"
-                id="import-config-btn"
-                title="Import your mega_data.json config."
-              >
-                Import from AAA file
-              </button>
-              <button type="button" class="ghost" id="export-config-btn">
-                Export to AAA file
-              </button>
-              <button type="button" class="ghost" id="paste-config-btn">
-                Import AAA
-              </button>
-              <button type="button" class="ghost" id="copy-config-btn">
-                Copy AAA to clipboard
-              </button>
             </div>
           </form>
         </section>
