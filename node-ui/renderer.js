@@ -948,11 +948,16 @@ function renderPetIlvlRules() {
     row.style.cursor = "pointer"
     row.innerHTML = `
       <div class="pill">#${filteredIdx + 1}</div>
-      <div>Pet ${rule.petID} • ${name}</div>
+      <div>Pet ${rule.petID}</div>
       <div>${rule.price} gold</div>
-      <div class="bonuses">Min lvl ${rule.minLevel}, quality ${getQualityLabel(
-        rule.minQuality
-      )}, exclude breeds: ${rule.excludeBreeds?.join(",") || "none"}</div>
+      <div>
+        ${name}
+        <div class="bonuses">Min lvl ${
+          rule.minLevel
+        }, quality ${getQualityLabel(rule.minQuality)}, exclude breeds: ${
+          rule.excludeBreeds?.join(",") || "none"
+        }</div>
+      </div>
     `
     const button = document.createElement("button")
     button.textContent = "Remove"
