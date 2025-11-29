@@ -166,22 +166,44 @@ async function httpJson(url, opts = {}, retries = 3) {
  * Send a Discord embed message to the webhook
  */
 async function sendDiscordEmbed(webhook, embed) {
-  await fetch(webhook, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ embeds: [embed] }),
-  })
+  try {
+    const response = await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ embeds: [embed] }),
+    })
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error")
+      console.error(
+        `Discord webhook failed: ${response.status} ${response.statusText}`,
+        errorText
+      )
+    }
+  } catch (error) {
+    console.error("Failed to send Discord embed:", error.message)
+  }
 }
 
 /**
  * Send a plain text Discord message to the webhook
  */
 async function sendDiscordMessage(webhook, message) {
-  await fetch(webhook, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: message }),
-  })
+  try {
+    const response = await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: message }),
+    })
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error")
+      console.error(
+        `Discord webhook failed: ${response.status} ${response.statusText}`,
+        errorText
+      )
+    }
+  } catch (error) {
+    console.error("Failed to send Discord message:", error.message)
+  }
 }
 
 /**
@@ -860,8 +882,30 @@ async function runAlerts(state, progress, runOnce = false) {
   // Reset stop flag at the start of each run
   STOP_REQUESTED = false
   let running = true
-  const alert_record = []
+  const alert_record = new Set() // Use Set for O(1) lookup
   state.upload_timers = await state.getUploadTimers()
+
+  // Helper to create a stable key for an auction
+  function getAuctionKey(auction, connected_id) {
+    const parts = [connected_id]
+    if ("itemID" in auction) {
+      parts.push(`item:${auction.itemID}`)
+      if ("ilvl" in auction) parts.push(`ilvl:${auction.ilvl}`)
+      if ("bonus_ids" in auction && auction.bonus_ids) {
+        parts.push(`bonus:${Array.from(auction.bonus_ids).sort().join(",")}`)
+      }
+    } else if ("petID" in auction) {
+      parts.push(`pet:${auction.petID}`)
+      if ("pet_level" in auction) parts.push(`level:${auction.pet_level}`)
+      if ("quality" in auction) parts.push(`quality:${auction.quality}`)
+      if ("breed" in auction) parts.push(`breed:${auction.breed}`)
+    }
+    const price_type = "bid_prices" in auction ? "bid_prices" : "buyout_prices"
+    if (price_type in auction) {
+      parts.push(`${price_type}:${auction[price_type]}`)
+    }
+    return parts.join("|")
+  }
 
   /**
    * Pull auction data for a single connected realm
@@ -948,9 +992,10 @@ async function runAlerts(state, progress, runOnce = false) {
         "bid_prices" in auction ? "bid_prices" : "buyout_prices"
       message += "`" + price_type + "`: " + auction[price_type] + "\n"
 
-      if (!alert_record.includes(auction)) {
+      const auctionKey = getAuctionKey(auction, connected_id)
+      if (!alert_record.has(auctionKey)) {
         embed_fields.push({ name: embed_name, value: message, inline: true })
-        alert_record.push(auction)
+        alert_record.add(auctionKey)
       } else {
         console.log("Already sent this alert", auction)
       }
@@ -1285,13 +1330,13 @@ async function runAlerts(state, progress, runOnce = false) {
   ) {
     const results = []
     const realm_names = state.get_realm_names(connected_id)
+    const defaultRealm =
+      realm_names && realm_names.length > 0 ? realm_names[0] : null
     for (const [itemIDStr, auction] of Object.entries(all_ah_buyouts)) {
       const itemID = Number(itemIDStr)
-      const itemlink = create_oribos_exchange_item_link(
-        realm_names[0],
-        itemID,
-        state.REGION
-      )
+      const itemlink = defaultRealm
+        ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
+        : null
       results.push(
         results_dict(
           auction,
@@ -1399,7 +1444,7 @@ async function runAlerts(state, progress, runOnce = false) {
 
     // Refresh alerts 1 time per hour (at minute 1)
     if (current_min === 1 && state.REFRESH_ALERTS) {
-      alert_record.length = 0
+      alert_record.clear()
     }
 
     // Get upload timers if we don't have them yet

@@ -1,3 +1,10 @@
+// Helper function to escape HTML to prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement("div")
+  div.textContent = text
+  return div.innerHTML
+}
+
 const state = {
   megaData: {},
   desiredItems: {},
@@ -243,7 +250,7 @@ function updateSuggestions(inputEl, suggestEl, cache) {
     .filter((row) => row.itemName && row.itemName.toLowerCase().includes(term))
     .slice(0, 12)
   suggestEl.innerHTML = matches
-    .map((row) => `<option value="${row.itemName}"></option>`)
+    .map((row) => `<option value="${escapeHtml(row.itemName)}"></option>`)
     .join("")
 }
 
@@ -626,7 +633,7 @@ async function handlePastePBSItems(btn) {
       const tempItems = { ...state.desiredItems }
       for (const row of itemSearchCache || []) {
         const lower = row.itemName.toLowerCase()
-        if (pbs_prices.hasOwnProperty(lower)) {
+        if (Object.hasOwn(pbs_prices, lower)) {
           const price = pbs_prices[lower]
           if (price !== null) {
             tempItems[String(row.itemID)] = price
@@ -849,11 +856,20 @@ function renderKVList(target, data, onRemove, labelFn, onClick) {
   }
   entries.forEach(([id, price]) => {
     const li = document.createElement("li")
-    const label = labelFn
-      ? labelFn(id, price)
-      : `<strong>${id}</strong> → ${price}`
     const labelDiv = document.createElement("div")
-    labelDiv.innerHTML = label
+    if (labelFn) {
+      // labelFn returns HTML - trust it but ensure id/price are escaped if used
+      labelDiv.innerHTML = labelFn(
+        escapeHtml(String(id)),
+        escapeHtml(String(price))
+      )
+    } else {
+      // Default: escape id and price for safety
+      const strong = document.createElement("strong")
+      strong.textContent = String(id)
+      labelDiv.appendChild(strong)
+      labelDiv.appendChild(document.createTextNode(` → ${price}`))
+    }
     if (onClick) {
       labelDiv.style.cursor = "pointer"
       labelDiv.onclick = (e) => {
@@ -953,39 +969,73 @@ function renderIlvlRules() {
 
   filteredRules.forEach((rule, filteredIdx) => {
     const idx = state.ilvlList.indexOf(rule)
-    const names = (rule.item_ids || []).map((id) => {
-      const nm = getItemName(id)
-      const itemLink = `https://www.wowhead.com/item=${id}`
-      return `${nm} (<a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${id}">${id}</a>)`
-    })
     const row = document.createElement("div")
     row.className = "table-row"
     row.style.cursor = "pointer"
-    row.innerHTML = `
-      <div class="pill">#${filteredIdx + 1}</div>
-      <div>ilvl ${rule.ilvl}-${rule.max_ilvl}</div>
-      <div>${rule.buyout} gold</div>
-      <div>
-        ${
-          rule.item_ids?.length
-            ? `Items: ${names.slice(0, 5).join(", ")}${
-                names.length > 5 ? "…" : ""
-              }`
-            : "Any items"
+
+    const pill = document.createElement("div")
+    pill.className = "pill"
+    pill.textContent = `#${filteredIdx + 1}`
+    row.appendChild(pill)
+
+    const ilvlDiv = document.createElement("div")
+    ilvlDiv.textContent = `ilvl ${rule.ilvl}-${rule.max_ilvl}`
+    row.appendChild(ilvlDiv)
+
+    const buyoutDiv = document.createElement("div")
+    buyoutDiv.textContent = `${rule.buyout} gold`
+    row.appendChild(buyoutDiv)
+
+    const detailsDiv = document.createElement("div")
+    if (rule.item_ids?.length) {
+      const itemsLabel = document.createTextNode("Items: ")
+      detailsDiv.appendChild(itemsLabel)
+      const itemIds = rule.item_ids.slice(0, 5)
+      itemIds.forEach((id, i) => {
+        if (i > 0) {
+          detailsDiv.appendChild(document.createTextNode(", "))
         }
-        <div class="bonuses">Bonus IDs: ${
-          rule.bonus_lists?.join(", ") || "Any"
-        }</div>
-        <div class="bonuses">Player lvl: ${rule.required_min_lvl}-${
-          rule.required_max_lvl
-        }</div>
-        <div class="bonuses">Sockets:${rule.sockets ? "Y" : "N"} Speed:${
-          rule.speed ? "Y" : "N"
-        } Leech:${rule.leech ? "Y" : "N"} Avoid:${
-          rule.avoidance ? "Y" : "N"
-        }</div>
-      </div>
-    `
+        const nm = getItemName(id)
+        const itemNameSpan = document.createElement("span")
+        itemNameSpan.textContent = escapeHtml(nm)
+        detailsDiv.appendChild(itemNameSpan)
+        detailsDiv.appendChild(document.createTextNode(" ("))
+        const itemLink = document.createElement("a")
+        itemLink.href = `https://www.wowhead.com/item=${id}`
+        itemLink.target = "_blank"
+        itemLink.rel = "noopener noreferrer"
+        itemLink.setAttribute("data-wowhead", `item=${id}`)
+        itemLink.textContent = String(id)
+        detailsDiv.appendChild(itemLink)
+        detailsDiv.appendChild(document.createTextNode(")"))
+      })
+      if (rule.item_ids.length > 5) {
+        detailsDiv.appendChild(document.createTextNode("…"))
+      }
+    } else {
+      detailsDiv.textContent = "Any items"
+    }
+
+    const bonusesDiv1 = document.createElement("div")
+    bonusesDiv1.className = "bonuses"
+    bonusesDiv1.textContent = `Bonus IDs: ${
+      rule.bonus_lists?.map(String).map(escapeHtml).join(", ") || "Any"
+    }`
+    detailsDiv.appendChild(bonusesDiv1)
+
+    const bonusesDiv2 = document.createElement("div")
+    bonusesDiv2.className = "bonuses"
+    bonusesDiv2.textContent = `Player lvl: ${rule.required_min_lvl}-${rule.required_max_lvl}`
+    detailsDiv.appendChild(bonusesDiv2)
+
+    const bonusesDiv3 = document.createElement("div")
+    bonusesDiv3.className = "bonuses"
+    bonusesDiv3.textContent = `Sockets:${rule.sockets ? "Y" : "N"} Speed:${
+      rule.speed ? "Y" : "N"
+    } Leech:${rule.leech ? "Y" : "N"} Avoid:${rule.avoidance ? "Y" : "N"}`
+    detailsDiv.appendChild(bonusesDiv3)
+
+    row.appendChild(detailsDiv)
     const button = document.createElement("button")
     button.textContent = "Remove"
     button.className = "ghost"
@@ -1063,19 +1113,35 @@ function renderPetIlvlRules() {
     const row = document.createElement("div")
     row.className = "table-row"
     row.style.cursor = "pointer"
-    row.innerHTML = `
-      <div class="pill">#${filteredIdx + 1}</div>
-      <div>Pet ${rule.petID}</div>
-      <div>${rule.price} gold</div>
-      <div>
-        ${name}
-        <div class="bonuses">Min lvl ${
-          rule.minLevel
-        }, quality ${getQualityLabel(rule.minQuality)}, exclude breeds: ${
-          rule.excludeBreeds?.join(",") || "none"
-        }</div>
-      </div>
-    `
+
+    const pill = document.createElement("div")
+    pill.className = "pill"
+    pill.textContent = `#${filteredIdx + 1}`
+    row.appendChild(pill)
+
+    const petIdDiv = document.createElement("div")
+    petIdDiv.textContent = `Pet ${rule.petID}`
+    row.appendChild(petIdDiv)
+
+    const priceDiv = document.createElement("div")
+    priceDiv.textContent = `${rule.price} gold`
+    row.appendChild(priceDiv)
+
+    const detailsDiv = document.createElement("div")
+    const nameSpan = document.createElement("span")
+    nameSpan.textContent = escapeHtml(name)
+    detailsDiv.appendChild(nameSpan)
+
+    const bonusesDiv = document.createElement("div")
+    bonusesDiv.className = "bonuses"
+    bonusesDiv.textContent = `Min lvl ${
+      rule.minLevel
+    }, quality ${getQualityLabel(rule.minQuality)}, exclude breeds: ${
+      rule.excludeBreeds?.map(String).map(escapeHtml).join(",") || "none"
+    }`
+    detailsDiv.appendChild(bonusesDiv)
+
+    row.appendChild(detailsDiv)
     const button = document.createElement("button")
     button.textContent = "Remove"
     button.className = "ghost"
@@ -1224,12 +1290,20 @@ function renderItemSearchResults(results) {
   results.forEach((row) => {
     const div = document.createElement("div")
     div.className = "search-result"
-    div.innerHTML = `
-      <div>
-        <div><strong>${row.itemName}</strong></div>
-        <div class="meta">ID: ${row.itemID} • Recommended: ${row.desiredPrice}</div>
-      </div>
-    `
+
+    const innerDiv = document.createElement("div")
+    const nameDiv = document.createElement("div")
+    const strong = document.createElement("strong")
+    strong.textContent = escapeHtml(row.itemName)
+    nameDiv.appendChild(strong)
+    innerDiv.appendChild(nameDiv)
+
+    const metaDiv = document.createElement("div")
+    metaDiv.className = "meta"
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${row.desiredPrice}`
+    innerDiv.appendChild(metaDiv)
+
+    div.appendChild(innerDiv)
     const btn = document.createElement("button")
     btn.textContent = "Use"
     btn.className = "primary"
@@ -1273,12 +1347,20 @@ function renderIlvlSearchResults(results) {
   results.forEach((row) => {
     const div = document.createElement("div")
     div.className = "search-result"
-    div.innerHTML = `
-      <div>
-        <div><strong>${row.itemName}</strong></div>
-        <div class="meta">ID: ${row.itemID} • Recommended: ${row.desiredPrice}</div>
-      </div>
-    `
+
+    const innerDiv = document.createElement("div")
+    const nameDiv = document.createElement("div")
+    const strong = document.createElement("strong")
+    strong.textContent = escapeHtml(row.itemName)
+    nameDiv.appendChild(strong)
+    innerDiv.appendChild(nameDiv)
+
+    const metaDiv = document.createElement("div")
+    metaDiv.className = "meta"
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${row.desiredPrice}`
+    innerDiv.appendChild(metaDiv)
+
+    div.appendChild(innerDiv)
     const btn = document.createElement("button")
     btn.textContent = "Use"
     btn.className = "primary"
@@ -1366,12 +1448,20 @@ function renderPetSearchResults(results) {
   results.forEach((row) => {
     const div = document.createElement("div")
     div.className = "search-result"
-    div.innerHTML = `
-      <div>
-        <div><strong>${row.itemName}</strong></div>
-        <div class="meta">ID: ${row.itemID} • Recommended: ${row.desiredPrice}</div>
-      </div>
-    `
+
+    const innerDiv = document.createElement("div")
+    const nameDiv = document.createElement("div")
+    const strong = document.createElement("strong")
+    strong.textContent = escapeHtml(row.itemName)
+    nameDiv.appendChild(strong)
+    innerDiv.appendChild(nameDiv)
+
+    const metaDiv = document.createElement("div")
+    metaDiv.className = "meta"
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${row.desiredPrice}`
+    innerDiv.appendChild(metaDiv)
+
+    div.appendChild(innerDiv)
     const btn = document.createElement("button")
     btn.textContent = "Use"
     btn.className = "primary"
@@ -2244,16 +2334,22 @@ function renderRealmList() {
 
   for (const [name, id] of entries) {
     const li = document.createElement("li")
-    li.innerHTML = `
-      <div>Name: ${name}; ID: ${id};</div>
-      <button class="remove-btn" data-name="${name}" data-id="${id}">Remove</button>
-    `
+    const nameDiv = document.createElement("div")
+    nameDiv.textContent = `Name: ${escapeHtml(name)}; ID: ${id};`
+    li.appendChild(nameDiv)
+
+    const removeBtn = document.createElement("button")
+    removeBtn.className = "remove-btn"
+    removeBtn.setAttribute("data-name", escapeHtml(name))
+    removeBtn.setAttribute("data-id", String(id))
+    removeBtn.textContent = "Remove"
+    li.appendChild(removeBtn)
+
     li.onclick = (e) => {
       if (e.target.classList.contains("remove-btn")) return
       realmNameInput.value = name
       realmIdInput.value = id
     }
-    const removeBtn = li.querySelector(".remove-btn")
     removeBtn.onclick = (e) => {
       e.stopPropagation()
       removeRealm(name, id)
