@@ -1,5 +1,5 @@
 /* eslint-env node, es6 */
-/* global require, __dirname, console, Buffer, URLSearchParams, module, AbortController */
+/* global require, __dirname, console, Buffer, URLSearchParams, module, AbortController, setTimeout, clearTimeout */
 const fs = require("fs")
 const path = require("path")
 const { setTimeout: delay } = require("timers/promises")
@@ -1062,6 +1062,10 @@ async function runAlerts(state, progress, runOnce = false) {
         message += `[Saddlebag link](https://saddlebagexchange.com/wow/item-data/${saddlebag_link_id})\n`
         message += `[Where to Sell](https://saddlebagexchange.com/wow/export-search?itemId=${saddlebag_link_id})\n`
       }
+      // Show target price if available (for regular items)
+      if (auction.targetPrice !== null && auction.targetPrice !== undefined) {
+        message += "`target_price`: " + auction.targetPrice + "\n"
+      }
       const price_type =
         "bid_prices" in auction ? "bid_prices" : "buyout_prices"
       message += "`" + price_type + "`: " + auction[price_type] + "\n"
@@ -1120,7 +1124,8 @@ async function runAlerts(state, progress, runOnce = false) {
     realm_names,
     id,
     idType,
-    priceType
+    priceType,
+    targetPrice = null
   ) {
     const sorted = [...auction].sort((a, b) => a - b)
     const minPrice = sorted[0]
@@ -1131,6 +1136,7 @@ async function runAlerts(state, progress, runOnce = false) {
       [idType]: id,
       itemlink,
       minPrice,
+      targetPrice,
       [`${priceType}_prices`]: JSON.stringify(auction),
     }
   }
@@ -1325,13 +1331,18 @@ async function runAlerts(state, progress, runOnce = false) {
     /**
      * Add price to dictionary, converting from copper to gold
      * Only adds unique prices to avoid duplicates
+     * Filters out prices that exceed maxPrice if provided
      */
-    const add_price_to_dict = (price, item_id, price_dict) => {
+    const add_price_to_dict = (price, item_id, price_dict, maxPrice = null) => {
+      const gold = price / 10000
+      // Filter out prices that exceed the maximum desired price
+      if (maxPrice !== null && gold > maxPrice) {
+        return
+      }
       if (price_dict[item_id]) {
-        const gold = price / 10000
         if (!price_dict[item_id].includes(gold)) price_dict[item_id].push(gold)
       } else {
-        price_dict[item_id] = [price / 10000]
+        price_dict[item_id] = [gold]
       }
     }
 
@@ -1340,13 +1351,14 @@ async function runAlerts(state, progress, runOnce = false) {
       if (!item_id) continue
 
       if (item_id in state.desiredItems && item_id !== 82800) {
+        const maxPrice = state.desiredItems[item_id]
         if ("bid" in item && state.SHOW_BIDPRICES) {
-          add_price_to_dict(item.bid, item_id, all_ah_bids)
+          add_price_to_dict(item.bid, item_id, all_ah_bids, maxPrice)
         }
         if ("buyout" in item)
-          add_price_to_dict(item.buyout, item_id, all_ah_buyouts)
+          add_price_to_dict(item.buyout, item_id, all_ah_buyouts, maxPrice)
         if ("unit_price" in item)
-          add_price_to_dict(item.unit_price, item_id, all_ah_buyouts)
+          add_price_to_dict(item.unit_price, item_id, all_ah_buyouts, maxPrice)
       } else if (item_id === 82800) {
         if (state.desiredPetIlvlList.length) {
           const info = check_pet_ilvl_stats(item, state.desiredPetIlvlList)
@@ -1411,6 +1423,8 @@ async function runAlerts(state, progress, runOnce = false) {
       const itemlink = defaultRealm
         ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
         : null
+      const targetPrice =
+        itemID in state.desiredItems ? state.desiredItems[itemID] : null
       results.push(
         results_dict(
           auction,
@@ -1419,7 +1433,8 @@ async function runAlerts(state, progress, runOnce = false) {
           realm_names,
           itemID,
           "itemID",
-          "buyout"
+          "buyout",
+          targetPrice
         )
       )
     }
@@ -1446,6 +1461,8 @@ async function runAlerts(state, progress, runOnce = false) {
         const itemlink = defaultRealm
           ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
           : null
+        const targetPrice =
+          itemID in state.desiredItems ? state.desiredItems[itemID] : null
         results.push(
           results_dict(
             auction,
@@ -1454,7 +1471,8 @@ async function runAlerts(state, progress, runOnce = false) {
             realm_names,
             itemID,
             "itemID",
-            "bid"
+            "bid",
+            targetPrice
           )
         )
       }
