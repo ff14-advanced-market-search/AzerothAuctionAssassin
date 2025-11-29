@@ -574,14 +574,16 @@ function setupIpc() {
       if (data && typeof data === "object" && !Array.isArray(data)) {
         const keys = Object.keys(data)
         if (keys.length > 0 && keys.every((k) => !Number.isNaN(Number(k)))) {
-          // Convert legacy format to new format
+          // Convert legacy format to new format with validation
           const converted = keys
             .map((key) => {
               const petID = Number(key)
               const price = Number(data[key])
+              // Validate pet ID range (1-10000)
               if (
                 Number.isNaN(petID) ||
-                petID <= 0 ||
+                petID < 1 ||
+                petID > 10000 ||
                 Number.isNaN(price) ||
                 price <= 0
               ) {
@@ -608,43 +610,88 @@ function setupIpc() {
         }
       }
 
-      // Validate each rule
+      // Validate and filter rules, collecting invalid ones
+      const validRules = []
+      const invalidCount = { count: 0 }
+
       for (let i = 0; i < data.length; i++) {
         const rule = data[i]
         if (!rule || typeof rule !== "object") {
-          return {
-            error: `Invalid rule at index ${i}: must be an object`,
-          }
+          invalidCount.count++
+          continue
         }
 
         // Check required fields
         if (rule.petID === undefined || rule.petID === null) {
-          return {
-            error: `Invalid rule at index ${i}: missing required field "petID"`,
-          }
+          invalidCount.count++
+          continue
         }
 
         if (rule.price === undefined || rule.price === null) {
-          return {
-            error: `Invalid rule at index ${i}: missing required field "price"`,
-          }
+          invalidCount.count++
+          continue
         }
 
-        // Validate types
+        // Validate types and ranges
         const petID = Number(rule.petID)
         const price = Number(rule.price)
+        const minLevel = Number(rule.minLevel ?? 1)
+        const minQuality = Number(rule.minQuality ?? -1)
+        const excludeBreeds = Array.isArray(rule.excludeBreeds)
+          ? rule.excludeBreeds
+              .map((b) => Number(b))
+              .filter((b) => !Number.isNaN(b))
+          : []
 
-        if (Number.isNaN(petID) || petID <= 0) {
-          return {
-            error: `Invalid rule at index ${i}: "petID" must be a positive number, got ${rule.petID}`,
-          }
+        // Validate pet ID range (1-10000)
+        if (Number.isNaN(petID) || petID < 1 || petID > 10000) {
+          invalidCount.count++
+          continue
         }
 
+        // Validate price
         if (Number.isNaN(price) || price <= 0) {
-          return {
-            error: `Invalid rule at index ${i}: "price" must be a positive number, got ${rule.price}`,
-          }
+          invalidCount.count++
+          continue
         }
+
+        // Validate minLevel (1-25)
+        if (Number.isNaN(minLevel) || minLevel < 1 || minLevel > 25) {
+          invalidCount.count++
+          continue
+        }
+
+        // Validate minQuality (-1 to 3)
+        if (Number.isNaN(minQuality) || minQuality < -1 || minQuality > 3) {
+          invalidCount.count++
+          continue
+        }
+
+        // All validations passed, add to valid rules
+        validRules.push({
+          petID,
+          price,
+          minLevel,
+          minQuality,
+          excludeBreeds,
+        })
+      }
+
+      // If no valid rules found, return error
+      if (validRules.length === 0) {
+        return {
+          error: "No valid pet rules found. All rules were invalid.",
+        }
+      }
+
+      // Use filtered valid rules
+      data = validRules
+
+      // Log warning if some rules were filtered
+      if (invalidCount.count > 0) {
+        const logMsg = `[IMPORT] Filtered out ${invalidCount.count} invalid pet rule(s), imported ${validRules.length} valid rule(s)\n`
+        console.log(logMsg.trim())
+        sendToLogPanel(logMsg)
       }
     }
 

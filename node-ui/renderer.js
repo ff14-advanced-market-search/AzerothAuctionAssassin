@@ -344,9 +344,11 @@ function validatePetIlvlFormat(data) {
         .map((key) => {
           const petID = Number(key)
           const price = Number(data[key])
+          // Validate pet ID range (1-10000)
           if (
             Number.isNaN(petID) ||
-            petID <= 0 ||
+            petID < 1 ||
+            petID > 10000 ||
             Number.isNaN(price) ||
             price <= 0
           ) {
@@ -375,51 +377,102 @@ function validatePetIlvlFormat(data) {
     }
   }
 
-  // Validate each rule
+  // Validate and filter rules, collecting invalid ones
+  const validRules = []
+  const invalidRules = []
+
   for (let i = 0; i < data.length; i++) {
     const rule = data[i]
     if (!rule || typeof rule !== "object") {
-      return {
-        valid: false,
-        error: `Invalid rule at index ${i}: must be an object`,
-      }
+      invalidRules.push({ index: i, reason: "must be an object" })
+      continue
     }
 
     // Check required fields
     if (rule.petID === undefined || rule.petID === null) {
-      return {
-        valid: false,
-        error: `Invalid rule at index ${i}: missing required field "petID"`,
-      }
+      invalidRules.push({ index: i, reason: 'missing required field "petID"' })
+      continue
     }
 
     if (rule.price === undefined || rule.price === null) {
-      return {
-        valid: false,
-        error: `Invalid rule at index ${i}: missing required field "price"`,
-      }
+      invalidRules.push({ index: i, reason: 'missing required field "price"' })
+      continue
     }
 
-    // Validate types
+    // Validate types and ranges
     const petID = Number(rule.petID)
     const price = Number(rule.price)
+    const minLevel = Number(rule.minLevel ?? 1)
+    const minQuality = Number(rule.minQuality ?? -1)
+    const excludeBreeds = Array.isArray(rule.excludeBreeds)
+      ? rule.excludeBreeds.map((b) => Number(b)).filter((b) => !Number.isNaN(b))
+      : []
 
-    if (Number.isNaN(petID) || petID <= 0) {
-      return {
-        valid: false,
-        error: `Invalid rule at index ${i}: "petID" must be a positive number, got ${rule.petID}`,
-      }
+    // Validate pet ID range (1-10000)
+    if (Number.isNaN(petID) || petID < 1 || petID > 10000) {
+      invalidRules.push({
+        index: i,
+        reason: `petID must be between 1 and 10000, got ${rule.petID}`,
+      })
+      continue
     }
 
+    // Validate price
     if (Number.isNaN(price) || price <= 0) {
-      return {
-        valid: false,
-        error: `Invalid rule at index ${i}: "price" must be a positive number, got ${rule.price}`,
-      }
+      invalidRules.push({
+        index: i,
+        reason: `price must be greater than 0, got ${rule.price}`,
+      })
+      continue
+    }
+
+    // Validate minLevel (1-25)
+    if (Number.isNaN(minLevel) || minLevel < 1 || minLevel > 25) {
+      invalidRules.push({
+        index: i,
+        reason: `minLevel must be between 1 and 25, got ${
+          rule.minLevel ?? "undefined"
+        }`,
+      })
+      continue
+    }
+
+    // Validate minQuality (-1 to 3)
+    if (Number.isNaN(minQuality) || minQuality < -1 || minQuality > 3) {
+      invalidRules.push({
+        index: i,
+        reason: `minQuality must be between -1 and 3, got ${
+          rule.minQuality ?? "undefined"
+        }`,
+      })
+      continue
+    }
+
+    // All validations passed, add to valid rules
+    validRules.push({
+      petID,
+      price,
+      minLevel,
+      minQuality,
+      excludeBreeds,
+    })
+  }
+
+  // If no valid rules found, return error
+  if (validRules.length === 0) {
+    return {
+      valid: false,
+      error: "No valid pet rules found. All rules were invalid.",
     }
   }
 
-  return { valid: true }
+  // Return valid rules and info about invalid ones
+  return {
+    valid: true,
+    validRules,
+    invalidCount: invalidRules.length,
+    invalidRules: invalidRules.slice(0, 5), // Show first 5 invalid rules for feedback
+  }
 }
 
 async function handlePasteAAA(target, btn) {
