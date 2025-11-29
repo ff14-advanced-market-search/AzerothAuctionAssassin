@@ -1205,7 +1205,12 @@ async function runAlerts(state, progress, runOnce = false) {
       if (!state.NO_LINKS) {
         message += `[${link_label}](${link_url})\n`
         message += `[Saddlebag link](https://saddlebagexchange.com/wow/item-data/${saddlebag_link_id})\n`
-        message += `[Where to Sell](https://saddlebagexchange.com/wow/export-search?itemId=${saddlebag_link_id})\n`
+        // Use ilvl-export-search for ilvl items, regular export-search for others
+        const whereToSellUrl =
+          "ilvl" in auction && auction.ilvl
+            ? `https://saddlebagexchange.com/wow/ilvl-export-search?itemId=${auction.itemID}&ilvl=${auction.ilvl}`
+            : `https://saddlebagexchange.com/wow/export-search?itemId=${saddlebag_link_id}`
+        message += `[Where to Sell](${whereToSellUrl})\n`
       }
       // Show target price if available (for regular items)
       const targetPriceText = formatTargetPrice(auction)
