@@ -1201,7 +1201,8 @@ async function runAlerts(state, progress, runOnce = false) {
         embed_fields.push({ name: embed_name, value: message, inline: true })
         alert_record.add(auctionKey)
       } else {
-        log("Already sent this alert", auction)
+        // JSON to avoid [object Object]
+        log("Already sent this alert", JSON.stringify(auction))
       }
     }
 
