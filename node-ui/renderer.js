@@ -171,6 +171,7 @@ function clearPetIlvlForm() {
     form.reset()
     form.minLevel.value = 1
     form.minQuality.value = "-1" // Set dropdown to "All"
+    renderExcludeBreeds("")
     const submitBtn = form.querySelector('button[type="submit"]')
     if (submitBtn) submitBtn.textContent = "Add pet rule"
     form.petID.focus()
@@ -258,6 +259,22 @@ function showView(view) {
   navButtons.forEach((btn) =>
     btn.classList.toggle("active", btn.dataset.viewTarget === view)
   )
+  // Initialize exclude breeds dropdown when pet-ilvl view is shown
+  if (view === "pet-ilvl") {
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+      const list = document.getElementById("exclude-breeds-list")
+      const display = document.getElementById("exclude-breeds-display")
+      if (list && display) {
+        // Always re-render to ensure checkboxes are created
+        const currentValue =
+          display.textContent === "Select breed IDs..."
+            ? ""
+            : display.textContent
+        renderExcludeBreeds(currentValue)
+      }
+    }, 50)
+  }
 }
 
 function parseNums(text) {
@@ -1309,7 +1326,7 @@ function renderPetIlvlRules() {
         form.minLevel.value = rule.minLevel || 1
         form.minQuality.value =
           rule.minQuality !== undefined ? String(rule.minQuality) : "-1"
-        form.excludeBreeds.value = (rule.excludeBreeds || []).join(", ")
+        renderExcludeBreeds((rule.excludeBreeds || []).join(", "))
         const submitBtn = form.querySelector('button[type="submit"]')
         if (submitBtn) submitBtn.textContent = "Update pet rule"
         form.petID.focus()
@@ -2112,18 +2129,8 @@ document
       return
     }
 
-    // Validate excluded breeds
-    let excludeBreeds = []
-    if (form.excludeBreeds.value.trim()) {
-      try {
-        excludeBreeds = parseNums(form.excludeBreeds.value)
-      } catch (err) {
-        const errorMsg = "Excluded breeds should be comma-separated numbers."
-        showToast(errorMsg, "error")
-        form.excludeBreeds.focus()
-        return
-      }
-    }
+    // Get excluded breeds from checkboxes
+    const excludeBreeds = readExcludeBreedsArray()
 
     const rule = {
       petID: petID,
@@ -2763,6 +2770,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   checkForUpdates()
   setupSensitiveFieldToggles()
   setupExtraAlertsDropdown()
+  setupExcludeBreedsDropdown()
 })
 
 /**
@@ -2771,6 +2779,127 @@ window.addEventListener("DOMContentLoaded", async () => {
 function setupExtraAlertsDropdown() {
   const trigger = document.getElementById("extra-alerts-trigger")
   const dropdown = document.getElementById("extra-alerts-dropdown")
+  if (!trigger || !dropdown) return
+
+  // Toggle dropdown on button click
+  trigger.addEventListener("click", (e) => {
+    e.stopPropagation()
+    const isOpen = dropdown.style.display !== "none"
+    dropdown.style.display = isOpen ? "none" : "block"
+  })
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.style.display = "none"
+    }
+  })
+}
+
+/**
+ * Render exclude breeds checkboxes (1-30, covering common breed IDs)
+ */
+function renderExcludeBreeds(excludeBreedsValue) {
+  const list = document.getElementById("exclude-breeds-list")
+  const display = document.getElementById("exclude-breeds-display")
+  if (!list || !display) return
+
+  // Parse the comma-separated string, default to empty array if invalid
+  let selectedBreeds = []
+  if (excludeBreedsValue && excludeBreedsValue.trim()) {
+    try {
+      selectedBreeds = excludeBreedsValue
+        .split(",")
+        .map((s) => Number(s.trim()))
+        .filter((n) => !isNaN(n) && n > 0 && n <= 30)
+    } catch {
+      selectedBreeds = []
+    }
+  }
+
+  // Update display text
+  if (selectedBreeds.length === 0) {
+    display.textContent = "Select breed IDs..."
+  } else {
+    const sorted = [...selectedBreeds].sort((a, b) => a - b)
+    if (sorted.length <= 5) {
+      display.textContent = sorted.join(", ")
+    } else {
+      display.textContent = `${sorted.length} breeds selected`
+    }
+  }
+
+  // Clear list
+  list.innerHTML = ""
+
+  // Create checkboxes for breed IDs 1-30 (covers common breed IDs)
+  for (let i = 1; i <= 30; i++) {
+    const label = document.createElement("label")
+    label.className = "exclude-breed-checkbox"
+
+    const checkbox = document.createElement("input")
+    checkbox.type = "checkbox"
+    checkbox.value = i
+    checkbox.name = `exclude_breed_${i}`
+    checkbox.checked = selectedBreeds.includes(i)
+    checkbox.addEventListener("change", () => {
+      updateExcludeBreedsDisplay()
+    })
+
+    const span = document.createElement("span")
+    span.textContent = i
+
+    label.appendChild(checkbox)
+    label.appendChild(span)
+    list.appendChild(label)
+  }
+}
+
+/**
+ * Update the display text for exclude breeds dropdown
+ */
+function updateExcludeBreedsDisplay() {
+  const display = document.getElementById("exclude-breeds-display")
+  if (!display) return
+
+  const selectedBreeds = readExcludeBreedsArray()
+  if (selectedBreeds.length === 0) {
+    display.textContent = "Select breed IDs..."
+  } else {
+    const sorted = [...selectedBreeds].sort((a, b) => a - b)
+    if (sorted.length <= 5) {
+      display.textContent = sorted.join(", ")
+    } else {
+      display.textContent = `${sorted.length} breeds selected`
+    }
+  }
+}
+
+/**
+ * Read exclude breeds checkboxes and return as array of numbers
+ */
+function readExcludeBreedsArray() {
+  const list = document.getElementById("exclude-breeds-list")
+  if (!list) return []
+
+  const selectedBreeds = []
+  const checkboxes = list.querySelectorAll('input[type="checkbox"]:checked')
+  for (const checkbox of checkboxes) {
+    const value = Number(checkbox.value)
+    if (!isNaN(value) && value >= 1 && value <= 30) {
+      selectedBreeds.push(value)
+    }
+  }
+
+  return selectedBreeds
+}
+
+/**
+ * Setup click handlers for exclude breeds dropdown
+ */
+function setupExcludeBreedsDropdown() {
+  const trigger = document.getElementById("exclude-breeds-trigger")
+  const dropdown = document.getElementById("exclude-breeds-dropdown")
   if (!trigger || !dropdown) return
 
   // Toggle dropdown on button click
