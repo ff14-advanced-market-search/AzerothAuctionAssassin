@@ -48,27 +48,16 @@ function getDataDir() {
       "AzerothAuctionAssassinData"
     )
   } else {
-    // Windows: For portable builds, exe is directly in the folder
-    // Data directory should be next to the exe (same directory)
-    let exePath = app.getPath("exe")
-    let exeDir = path.dirname(exePath)
-
-    // Check if we're in a temp directory (portable exe extracts to temp when run)
-    const tempPath = process.env.TEMP || process.env.TMP || ""
-    const normalizedTempPath = tempPath.toLowerCase().replace(/\\/g, "/")
-    const normalizedExeDir = exeDir.toLowerCase().replace(/\\/g, "/")
-    const isInTemp = tempPath && normalizedExeDir.includes(normalizedTempPath)
-
-    if (isInTemp) {
-      // Portable exe extracts to temp - use current working directory instead
-      // This is where the user launched the exe from (where the actual exe file is)
-      const cwd = process.cwd()
-      if (cwd && !cwd.toLowerCase().includes("temp")) {
-        exeDir = cwd
-      }
-    }
-
-    return path.join(exeDir, "AzerothAuctionAssassinData")
+    // Windows: Use AppData\Local\AzerothAuctionAssassin\AzerothAuctionAssassinData
+    // This provides a persistent location that doesn't change between runs
+    const localAppData =
+      process.env.LOCALAPPDATA ||
+      path.join(app.getPath("home"), "AppData", "Local")
+    return path.join(
+      localAppData,
+      "AzerothAuctionAssassin",
+      "AzerothAuctionAssassinData"
+    )
   }
 }
 
@@ -76,7 +65,7 @@ function getDataDir() {
 // - In development: use project root
 // - In production: use resources folder (where extraResources are placed)
 //   macOS: App.app/Contents/Resources/StaticData
-//   Windows: resources/StaticData (next to exe) or StaticData (for portable)
+//   Windows: resources/StaticData (next to exe)
 function getStaticDir() {
   if (!app.isPackaged) {
     return path.join(ROOT, "StaticData")
