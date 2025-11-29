@@ -155,35 +155,51 @@ function formatTargetPrice(auction) {
     return `\`target_price\`: ${auction.targetPrice}\n`
   }
 
-  // Parse buyout_prices - it can be a JSON string or already an array
-  let buyoutPrices = []
+  // Parse buyout_prices - it can be a JSON string, array, or number (for ilvl/pets)
+  let actual = null
   if (auction.buyout_prices !== undefined) {
-    if (typeof auction.buyout_prices === "string") {
+    if (typeof auction.buyout_prices === "number") {
+      // For ilvl and pet alerts, buyout_prices is a single number
+      actual = auction.buyout_prices
+    } else if (typeof auction.buyout_prices === "string") {
+      // For regular items, it's a JSON stringified array
       try {
-        buyoutPrices = JSON.parse(auction.buyout_prices)
+        const buyoutPrices = JSON.parse(auction.buyout_prices)
+        if (Array.isArray(buyoutPrices) && buyoutPrices.length > 0) {
+          actual = Math.min(
+            ...buyoutPrices
+              .map((p) => Number(p))
+              .filter((n) => !isNaN(n) && n > 0)
+          )
+        }
       } catch {
         // If parsing fails, try to extract numbers from the string
         const match = auction.buyout_prices.match(/\[(.*?)\]/)
         if (match) {
-          buyoutPrices = match[1]
+          const buyoutPrices = match[1]
             .split(",")
             .map((s) => Number(s.trim()))
-            .filter((n) => !isNaN(n))
+            .filter((n) => !isNaN(n) && n > 0)
+          if (buyoutPrices.length > 0) {
+            actual = Math.min(...buyoutPrices)
+          }
         }
       }
     } else if (Array.isArray(auction.buyout_prices)) {
-      buyoutPrices = auction.buyout_prices
+      // Already an array
+      const validPrices = auction.buyout_prices
+        .map((p) => Number(p))
+        .filter((n) => !isNaN(n) && n > 0)
+      if (validPrices.length > 0) {
+        actual = Math.min(...validPrices)
+      }
     }
   }
 
-  // Get the minimum price from the array (best deal)
-  if (buyoutPrices.length === 0) {
+  // If we couldn't parse a valid price, just show target price
+  if (actual === null || isNaN(actual) || actual <= 0) {
     return `\`target_price\`: ${auction.targetPrice}\n`
   }
-
-  const actual = Math.min(
-    ...buyoutPrices.map((p) => Number(p)).filter((n) => !isNaN(n) && n > 0)
-  )
   if (isNaN(actual) || actual <= 0) {
     return `\`target_price\`: ${auction.targetPrice}\n`
   }
@@ -1275,7 +1291,8 @@ async function runAlerts(state, progress, runOnce = false) {
     realm_names,
     id,
     idType,
-    priceType
+    priceType,
+    targetPrice = null
   ) {
     const tertiary_stats = Object.entries(auction.tertiary_stats)
       .filter(([, present]) => present)
@@ -1287,6 +1304,7 @@ async function runAlerts(state, progress, runOnce = false) {
       [idType]: id,
       itemlink,
       minPrice: auction[priceType],
+      targetPrice,
       [`${priceType}_prices`]: auction[priceType],
       tertiary_stats,
       bonus_ids: auction.bonus_ids,
@@ -1302,7 +1320,8 @@ async function runAlerts(state, progress, runOnce = false) {
     realm_names,
     id,
     idType,
-    priceType
+    priceType,
+    targetPrice = null
   ) {
     return {
       region: state.REGION,
@@ -1311,6 +1330,7 @@ async function runAlerts(state, progress, runOnce = false) {
       [idType]: id,
       itemlink,
       minPrice: auction.buyout,
+      targetPrice,
       [`${priceType}_prices`]: auction.buyout,
       pet_level: auction.current_level,
       quality: auction.quality,
@@ -1547,6 +1567,19 @@ async function runAlerts(state, progress, runOnce = false) {
     const realm_names = state.get_realm_names(connected_id)
     const defaultRealm =
       realm_names && realm_names.length > 0 ? realm_names[0] : null
+
+    // Build lookup maps for O(1) target price lookups (performance optimization)
+    const ilvlTargetPriceMap = new Map()
+    for (const rule of state.desiredIlvlList) {
+      for (const itemID of rule.item_ids) {
+        ilvlTargetPriceMap.set(itemID, rule.buyout)
+      }
+    }
+
+    const petTargetPriceMap = new Map()
+    for (const rule of state.desiredPetIlvlList) {
+      petTargetPriceMap.set(rule.petID, rule.price)
+    }
     for (const [itemIDStr, auction] of Object.entries(all_ah_buyouts)) {
       const itemID = Number(itemIDStr)
       const itemlink = defaultRealm
@@ -1572,6 +1605,8 @@ async function runAlerts(state, progress, runOnce = false) {
       const itemlink = defaultRealm
         ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
         : null
+      // Fast O(1) lookup instead of O(n) search
+      const targetPrice = ilvlTargetPriceMap.get(itemID) || null
       results.push(
         ilvl_results_dict(
           auction,
@@ -1580,7 +1615,8 @@ async function runAlerts(state, progress, runOnce = false) {
           realm_names,
           itemID,
           "itemID",
-          "buyout"
+          "buyout",
+          targetPrice
         )
       )
     }
@@ -1611,6 +1647,8 @@ async function runAlerts(state, progress, runOnce = false) {
       const itemlink = defaultRealm
         ? create_oribos_exchange_pet_link(defaultRealm, petID, state.REGION)
         : null
+      // Fast O(1) lookup instead of O(n) search
+      const targetPrice = petTargetPriceMap.get(petID) || null
       results.push(
         pet_ilvl_results_dict(
           auction,
@@ -1619,7 +1657,8 @@ async function runAlerts(state, progress, runOnce = false) {
           realm_names,
           petID,
           "petID",
-          "buyout"
+          "buyout",
+          targetPrice
         )
       )
     }
