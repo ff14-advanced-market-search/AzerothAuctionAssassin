@@ -69,12 +69,35 @@ function logError(...args) {
   originalError(...args)
   if (logCallback) {
     // Format error messages properly, including stack traces for Error objects
+    // Safely handle errors to prevent circular reference issues
     const errorMsg = args
       .map((arg) => {
         if (arg instanceof Error) {
-          return `${arg.message}\n${arg.stack || ""}`
+          try {
+            // Safely extract message and stack, limiting stack trace length
+            const message = arg.message || String(arg)
+            let stack = ""
+            try {
+              stack = arg.stack || ""
+              // Limit stack trace to prevent excessive recursion
+              if (stack.length > 2000) {
+                stack = stack.substring(0, 2000) + "... (truncated)"
+              }
+            } catch {
+              // If accessing stack causes issues, skip it
+              stack = ""
+            }
+            return `${message}${stack ? "\n" + stack : ""}`
+          } catch {
+            // Fallback if error formatting fails
+            return String(arg)
+          }
         }
-        return String(arg)
+        try {
+          return String(arg)
+        } catch {
+          return "[Unable to stringify argument]"
+        }
       })
       .join(" ")
     logCallback(`[ERROR] ${errorMsg}\n`)
@@ -857,7 +880,14 @@ class MegaData {
       try {
         const url = this.construct_api_url(connectedRealmId, ep)
         const data = await this.makeAhRequest(url, connectedRealmId)
-        if (data?.auctions) all.push(...data.auctions)
+        if (data?.auctions && Array.isArray(data.auctions)) {
+          // Always use a loop to avoid stack overflow with large arrays
+          // Spread operator (all.push(...data.auctions)) can cause "Maximum call stack size exceeded"
+          // Performance difference is negligible compared to network latency
+          for (const auction of data.auctions) {
+            all.push(auction)
+          }
+        }
       } catch (err) {
         logError("AH request failed", err)
       }
