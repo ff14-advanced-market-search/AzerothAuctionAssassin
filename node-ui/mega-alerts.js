@@ -640,8 +640,15 @@ class MegaData {
   /**
    * Make auction house API request for a specific connected realm
    * Updates local timers with last-modified header if available
+   * Retries on 429 rate limit errors with 2 second delay
    */
-  async makeAhRequest(url, connectedRealmId, timeoutMs = 30000) {
+  async makeAhRequest(
+    url,
+    connectedRealmId,
+    timeoutMs = 30000,
+    retryCount = 0
+  ) {
+    const maxRetries = 5
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
       controller.abort()
@@ -653,7 +660,23 @@ class MegaData {
       }
       const res = await fetch(url, { headers, signal: controller.signal })
       clearTimeout(timeoutId)
-      if (res.status === 429) throw new Error("429")
+      if (res.status === 429) {
+        if (retryCount < maxRetries) {
+          log(
+            `Rate limited (429), waiting 2 seconds before retry ${
+              retryCount + 1
+            }/${maxRetries}...`
+          )
+          await delay(2000)
+          return this.makeAhRequest(
+            url,
+            connectedRealmId,
+            timeoutMs,
+            retryCount + 1
+          )
+        }
+        throw new Error("429")
+      }
       if (res.status !== 200) throw new Error(`${res.status}`)
       const data = await res.json()
 
@@ -667,6 +690,21 @@ class MegaData {
       if (error.name === "AbortError") {
         throw new Error(`Request timeout after ${timeoutMs}ms`)
       }
+      // Retry on 429 errors if we haven't exceeded max retries
+      if (error.message === "429" && retryCount < maxRetries) {
+        log(
+          `Rate limited (429), waiting 2 seconds before retry ${
+            retryCount + 1
+          }/${maxRetries}...`
+        )
+        await delay(2000)
+        return this.makeAhRequest(
+          url,
+          connectedRealmId,
+          timeoutMs,
+          retryCount + 1
+        )
+      }
       throw error
     }
   }
@@ -674,8 +712,10 @@ class MegaData {
   /**
    * Make commodity auction house API request
    * Commodities use connected realm IDs -1 (NA) or -2 (EU)
+   * Retries on 429 rate limit errors with 2 second delay
    */
-  async makeCommodityRequest(timeoutMs = 30000) {
+  async makeCommodityRequest(timeoutMs = 30000, retryCount = 0) {
+    const maxRetries = 5
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
       controller.abort()
@@ -693,7 +733,18 @@ class MegaData {
       }
       const res = await fetch(endpoint, { headers, signal: controller.signal })
       clearTimeout(timeoutId)
-      if (res.status === 429) throw new Error("429")
+      if (res.status === 429) {
+        if (retryCount < maxRetries) {
+          log(
+            `Rate limited (429), waiting 2 seconds before retry ${
+              retryCount + 1
+            }/${maxRetries}...`
+          )
+          await delay(2000)
+          return this.makeCommodityRequest(timeoutMs, retryCount + 1)
+        }
+        throw new Error("429")
+      }
       if (res.status !== 200) throw new Error(`${res.status}`)
       const data = await res.json()
       const lastMod = res.headers.get("last-modified")
@@ -703,6 +754,16 @@ class MegaData {
       clearTimeout(timeoutId)
       if (error.name === "AbortError") {
         throw new Error(`Request timeout after ${timeoutMs}ms`)
+      }
+      // Retry on 429 errors if we haven't exceeded max retries
+      if (error.message === "429" && retryCount < maxRetries) {
+        log(
+          `Rate limited (429), waiting 2 seconds before retry ${
+            retryCount + 1
+          }/${maxRetries}...`
+        )
+        await delay(2000)
+        return this.makeCommodityRequest(timeoutMs, retryCount + 1)
       }
       throw error
     }
