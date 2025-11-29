@@ -898,36 +898,36 @@ function setupIpc() {
 
         // Wait for stop to complete with timeout fallback
         // The stopCallback (sendExit) will set alertsProcess = null when stop completes
-        // Add a timeout to ensure state is cleared even if callback never fires
         await new Promise((resolve) => {
-          const timeout = setTimeout(() => {
-            // Timeout fallback: clear state after 1 second even if callback didn't fire
-            if (alertsProcess) {
-              alertsProcess = null
-            }
-            resolve()
-          }, 1000)
-
           // Check if already stopped (callback may have fired synchronously)
           if (!alertsProcess) {
-            clearTimeout(timeout)
             resolve()
             return
           }
 
-          // Give stop callback time to execute (it calls sendExit which sets alertsProcess = null)
-          // Poll briefly to see if state was cleared by callback
-          const checkInterval = setInterval(() => {
+          let intervalId
+          let timeoutId
+
+          const cleanup = () => {
+            if (intervalId) clearInterval(intervalId)
+            if (timeoutId) clearTimeout(timeoutId)
+          }
+
+          // Poll to see if state was cleared by callback
+          intervalId = setInterval(() => {
             if (!alertsProcess) {
-              clearTimeout(timeout)
-              clearInterval(checkInterval)
+              cleanup()
               resolve()
             }
           }, 50) // Check every 50ms
 
-          // Cleanup interval after timeout
-          setTimeout(() => {
-            clearInterval(checkInterval)
+          // Timeout fallback: clear state after 1 second even if callback didn't fire
+          timeoutId = setTimeout(() => {
+            cleanup()
+            if (alertsProcess) {
+              alertsProcess = null
+            }
+            resolve()
           }, 1000)
         })
       } catch (err) {

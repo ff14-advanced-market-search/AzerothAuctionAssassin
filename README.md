@@ -47,7 +47,7 @@ Win:
 
 ```powershell
 npm run build:win
-.\dist-electron\mac\"Azeroth Auction Assassin.exe"
+.\dist-electron\"Azeroth Auction Assassin Setup 2.0.0.exe"
 ```
 
 

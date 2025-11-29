@@ -1,7 +1,7 @@
 {
   "name": "aaa-node-ui",
   "version": "2.0.0",
-  "description": "Node-based GUI to manage Azeroth Auction Assassin configs and run mega_alerts.py",
+  "description": "Node-based GUI to manage Azeroth Auction Assassin configs and run WoW AH Price Scans!",
   "license": "MIT",
   "main": "node-ui/main.js",
   "author": {

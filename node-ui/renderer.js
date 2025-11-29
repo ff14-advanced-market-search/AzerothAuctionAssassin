@@ -874,6 +874,14 @@ function readMegaForm() {
   return out
 }
 
+/**
+ * Render a key-value list with optional label function
+ * @param {HTMLElement} target - Target element to render into
+ * @param {Object} data - Key-value data object
+ * @param {Function} onRemove - Callback for remove button
+ * @param {Function} labelFn - Optional function that receives raw (id, price) and returns HTML string. Must escape HTML internally.
+ * @param {Function} onClick - Optional click handler
+ */
 function renderKVList(target, data, onRemove, labelFn, onClick) {
   target.innerHTML = ""
   const entries = Object.entries(data)
@@ -888,11 +896,8 @@ function renderKVList(target, data, onRemove, labelFn, onClick) {
     const li = document.createElement("li")
     const labelDiv = document.createElement("div")
     if (labelFn) {
-      // labelFn returns HTML - trust it but ensure id/price are escaped if used
-      labelDiv.innerHTML = labelFn(
-        escapeHtml(String(id)),
-        escapeHtml(String(price))
-      )
+      // labelFn receives raw id and price, must escape HTML internally
+      labelDiv.innerHTML = labelFn(String(id), String(price))
     } else {
       // Default: escape id and price for safety
       const strong = document.createElement("strong")
@@ -951,11 +956,12 @@ function renderItemList() {
     filteredData,
     removeItem,
     (itemId, p) => {
+      // labelFn receives raw values, must escape HTML internally
       const name = escapeHtml(getItemName(itemId))
+      const escapedId = escapeHtml(String(itemId))
+      const escapedPrice = escapeHtml(String(p))
       const itemLink = `https://www.wowhead.com/item=${itemId}`
-      return `<strong><a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${itemId}">${itemId}</a> • ${name}</strong> → ${escapeHtml(
-        String(p)
-      )}`
+      return `<strong><a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${itemId}">${escapedId}</a> • ${name}</strong> → ${escapedPrice}`
     },
     handleItemClick
   )

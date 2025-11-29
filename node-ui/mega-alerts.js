@@ -1,5 +1,5 @@
 /* eslint-env node, es6 */
-/* global require, __dirname, console, Buffer, URLSearchParams, module */
+/* global require, __dirname, console, Buffer, URLSearchParams, module, AbortController */
 const fs = require("fs")
 const path = require("path")
 const { setTimeout: delay } = require("timers/promises")
@@ -195,7 +195,7 @@ async function sendDiscordEmbed(webhook, embed) {
       )
     }
   } catch (error) {
-    console.error("Failed to send Discord embed:", error.message)
+    logError("Failed to send Discord embed:", error)
   }
 }
 
@@ -449,36 +449,51 @@ class MegaData {
    * Tokens are valid for 24 hours, but we refresh after 20 hours to be safe
    * If over 20 hours, make a new token and reset the creation time
    */
-  async fetchAccessToken() {
+  async fetchAccessToken(timeoutMs = 30000) {
     if (
       this.access_token &&
       Date.now() / 1000 - this.access_token_creation_unix_time < 20 * 60 * 60
     ) {
       return this.access_token
     }
-    const res = await fetch("https://oauth.battle.net/token", {
-      method: "POST",
-      body: new URLSearchParams({ grant_type: "client_credentials" }),
-      headers: {
-        Authorization:
-          "Basic " +
-          Buffer.from(
-            `${this.cfg.WOW_CLIENT_ID}:${this.cfg.WOW_CLIENT_SECRET}`
-          ).toString("base64"),
-      },
-    })
-    if (!res.ok) {
-      throw new Error(
-        `Failed to get access token: ${res.status} ${await res.text()}`
-      )
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
+
+    try {
+      const res = await fetch("https://oauth.battle.net/token", {
+        method: "POST",
+        body: new URLSearchParams({ grant_type: "client_credentials" }),
+        headers: {
+          Authorization:
+            "Basic " +
+            Buffer.from(
+              `${this.cfg.WOW_CLIENT_ID}:${this.cfg.WOW_CLIENT_SECRET}`
+            ).toString("base64"),
+        },
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+      if (!res.ok) {
+        throw new Error(
+          `Failed to get access token: ${res.status} ${await res.text()}`
+        )
+      }
+      const json = await res.json()
+      if (!json.access_token) {
+        throw new Error(`No access_token in response: ${JSON.stringify(json)}`)
+      }
+      this.access_token = json.access_token
+      this.access_token_creation_unix_time = Math.floor(Date.now() / 1000)
+      return this.access_token
+    } catch (error) {
+      clearTimeout(timeoutId)
+      if (error.name === "AbortError") {
+        throw new Error(`Access token request timeout after ${timeoutMs}ms`)
+      }
+      throw error
     }
-    const json = await res.json()
-    if (!json.access_token) {
-      throw new Error(`No access_token in response: ${JSON.stringify(json)}`)
-    }
-    this.access_token = json.access_token
-    this.access_token_creation_unix_time = Math.floor(Date.now() / 1000)
-    return this.access_token
   }
 
   /**
@@ -726,14 +741,31 @@ class MegaData {
       url =
         "https://eu.api.blizzard.com/data/wow/token/index?namespace=dynamic-eu&locale=en_EU"
     } else return null
-    const headers = {
-      Authorization: `Bearer ${await this.fetchAccessToken()}`,
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, 5000)
+
+    try {
+      const headers = {
+        Authorization: `Bearer ${await this.fetchAccessToken()}`,
+      }
+      const res = await fetch(url, { headers, signal: controller.signal })
+      clearTimeout(timeoutId)
+      if (!res.ok) return null
+      const json = await res.json()
+      if (!("price" in json)) return null
+      return json.price / 10000
+    } catch (error) {
+      clearTimeout(timeoutId)
+      if (error.name === "AbortError") {
+        logError("WoW token price request timeout", error)
+      } else {
+        logError("Failed to get WoW token price", error)
+      }
+      return null
     }
-    const res = await fetch(url, { headers })
-    if (!res.ok) return null
-    const json = await res.json()
-    if (!("price" in json)) return null
-    return json.price / 10000
   }
 
   /**
@@ -870,7 +902,7 @@ class MegaData {
 function create_oribos_exchange_pet_link(realm_name, pet_id, region) {
   const fixed_realm_name = realm_name
     .toLowerCase()
-    .replace("'", "")
+    .replace(/'/g, "")
     .replace(/ /g, "-")
   const url_region = region === "NA" ? "us" : "eu"
   return `https://undermine.exchange/#${url_region}-${fixed_realm_name}/82800-${pet_id}`
@@ -882,7 +914,7 @@ function create_oribos_exchange_pet_link(realm_name, pet_id, region) {
 function create_oribos_exchange_item_link(realm_name, item_id, region) {
   const fixed_realm_name = realm_name
     .toLowerCase()
-    .replace("'", "")
+    .replace(/'/g, "")
     .replace(/ /g, "-")
   const url_region = region === "NA" ? "us" : "eu"
   return `https://undermine.exchange/#${url_region}-${fixed_realm_name}/${item_id}`
