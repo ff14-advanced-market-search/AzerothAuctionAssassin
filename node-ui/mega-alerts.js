@@ -1218,10 +1218,10 @@ async function runAlerts(state, progress, runOnce = false) {
       if (bad_ids.includes(auction.item.id)) return false
     }
 
-    if (!auction.buyout && auction.bid) auction.buyout = auction.bid
-    if (!auction.buyout) return false
-    const buyout = Math.round((auction.buyout / 10000) * 100) / 100
-    if (buyout > rule.buyout) return false
+    const buyout = auction.buyout ?? auction.bid
+    if (!buyout) return false
+    const buyoutValue = Math.round((buyout / 10000) * 100) / 100
+    if (buyoutValue > rule.buyout) return false
 
     return {
       item_id: auction.item.id,
@@ -1391,8 +1391,6 @@ async function runAlerts(state, progress, runOnce = false) {
         )
       )
     }
-    const defaultRealm =
-      realm_names && realm_names.length > 0 ? realm_names[0] : null
     for (const auction of ilvl_ah_buyouts) {
       const itemID = Number(auction.item_id)
       const itemlink = defaultRealm
@@ -1411,8 +1409,6 @@ async function runAlerts(state, progress, runOnce = false) {
       )
     }
     if (state.SHOW_BIDPRICES) {
-      const defaultRealm =
-        realm_names && realm_names.length > 0 ? realm_names[0] : null
       for (const [itemIDStr, auction] of Object.entries(all_ah_bids)) {
         const itemID = Number(itemIDStr)
         const itemlink = defaultRealm
@@ -1431,8 +1427,6 @@ async function runAlerts(state, progress, runOnce = false) {
         )
       }
     }
-    const defaultRealm =
-      realm_names && realm_names.length > 0 ? realm_names[0] : null
     for (const auction of pet_ilvl_ah_buyouts) {
       const petID = auction.pet_species_id
       const itemlink = defaultRealm
@@ -1481,7 +1475,7 @@ async function runAlerts(state, progress, runOnce = false) {
   if (runOnce) return
 
   // Main loop - runs continuously checking for new auction house data
-  while (running && !STOP_REQUESTED) {
+  while (!STOP_REQUESTED) {
     const current_min = new Date().getMinutes()
 
     // Refresh alerts 1 time per hour (at minute 1)

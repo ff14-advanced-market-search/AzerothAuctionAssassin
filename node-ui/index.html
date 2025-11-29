@@ -17,6 +17,13 @@
         var script = document.createElement("script")
         script.src = "https://wow.zamimg.com/widgets/power.js"
         script.async = true
+        script.onload = function () {
+          console.log("Wowhead tooltip script loaded successfully")
+        }
+        script.onerror = function () {
+          console.error("Failed to load Wowhead tooltip script")
+          // Tooltips will be disabled gracefully
+        }
         document.head.appendChild(script)
       })()
     </script>
@@ -228,7 +235,11 @@
               title="Setup a discord channel with a webhook url for sending the alert messages."
             >
               Discord Webhook URL
-              <input name="MEGA_WEBHOOK_URL" type="text" autocomplete="off" />
+              <input
+                name="MEGA_WEBHOOK_URL"
+                type="password"
+                autocomplete="off"
+              />
             </label>
             <label
               title="Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids."

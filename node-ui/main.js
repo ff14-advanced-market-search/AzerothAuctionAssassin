@@ -222,7 +222,7 @@ function ensureDataFiles() {
   }
 
   const defaults = {
-    [FILES.megaData]: readJson(path.join(DATA_DIR, "example_mega_data.json"), {
+    [FILES.megaData]: {
       MEGA_WEBHOOK_URL: "",
       WOW_CLIENT_ID: "",
       WOW_CLIENT_SECRET: "",
@@ -241,7 +241,7 @@ function ensureDataFiles() {
       REFRESH_ALERTS: false,
       DEBUG: false,
       FACTION: "all",
-    }),
+    },
     [FILES.desiredItems]: {},
     [FILES.ilvlList]: [],
     [FILES.petIlvlList]: [],
@@ -501,7 +501,7 @@ function setupIpc() {
         SHOW_BID_PRICES: false,
         MEGA_THREADS: 10,
         WOWHEAD_LINK: false,
-        SCAN_TIME_MIN: 1,
+        SCAN_TIME_MIN: -1,
         SCAN_TIME_MAX: 3,
         NO_LINKS: false,
         NO_RUSSIAN_REALMS: false,
@@ -775,7 +775,24 @@ function setupIpc() {
 
   ipcMain.handle("restore-backup", (_event, { target, filename }) => {
     try {
-      const backupPath = path.join(BACKUP_DIR, filename)
+      // Sanitize filename to prevent path traversal
+      if (
+        !filename ||
+        filename.includes("..") ||
+        filename.includes("/") ||
+        filename.includes("\\") ||
+        filename.includes("\0")
+      ) {
+        return { error: "Invalid filename" }
+      }
+      // Normalize and validate path
+      const normalizedFilename = path.basename(filename)
+      const backupPath = path.join(BACKUP_DIR, normalizedFilename)
+      const resolvedPath = path.resolve(backupPath)
+      const resolvedBackupDir = path.resolve(BACKUP_DIR)
+      if (!resolvedPath.startsWith(resolvedBackupDir)) {
+        return { error: "Invalid backup path" }
+      }
       if (!fs.existsSync(backupPath)) {
         return { error: "Backup file not found" }
       }
