@@ -45,20 +45,15 @@ jobs:
         WIN_CERT_FILE: ${{ env.WIN_CERT_FILE }}
         WIN_CERT_PASSWORD: ${{ env.WIN_CERT_PASSWORD }}
 
-    - name: Sign Windows Executable (if certificate available)
+    - name: Sign Windows Portable Executable (if certificate available)
       run: |
         if (Test-Path "certificate.pfx") {
           $cert_path = "certificate.pfx"
           $password = "${{ secrets.CERT_PASSWORD }}"
           $timestamp_url = "http://timestamp.digicert.com"
-          $executable_path = ".\dist-electron\Azeroth Auction Assassin Setup ${{ env.AAA_VERSION }}.exe"
-          if (Test-Path $executable_path) {
-            $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
-            & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $executable_path
-          }
-          # Also sign portable if it exists
-          $portable_path = ".\dist-electron\Azeroth Auction Assassin-${{ env.AAA_VERSION }}-portable.exe"
+          $portable_path = ".\dist-electron\Azeroth Auction Assassin-${{ env.AAA_VERSION }}.exe"
           if (Test-Path $portable_path) {
+            $signtoolPath = Resolve-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
             & $signtoolPath sign /f $cert_path /p $password /tr $timestamp_url /td sha256 /fd sha256 /v $portable_path
           }
         }
@@ -84,25 +79,14 @@ jobs:
         echo "upload_url_base64=$base64" >> $env:GITHUB_OUTPUT
       shell: pwsh
 
-    - name: Upload Windows Installer to Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: .\dist-electron\Azeroth Auction Assassin Setup ${{ env.AAA_VERSION }}.exe
-        asset_name: AzerothAuctionAssassin-Setup-${{ env.AAA_VERSION }}.exe
-        asset_content_type: application/octet-stream
-      if: ${{ always() }}
-
     - name: Upload Windows Portable to Release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: .\dist-electron\Azeroth Auction Assassin-${{ env.AAA_VERSION }}-portable.exe
-        asset_name: AzerothAuctionAssassin-${{ env.AAA_VERSION }}-portable.exe
+        asset_path: .\dist-electron\Azeroth Auction Assassin-${{ env.AAA_VERSION }}.exe
+        asset_name: AzerothAuctionAssassin-${{ env.AAA_VERSION }}.exe
         asset_content_type: application/octet-stream
       if: ${{ always() }}
 
