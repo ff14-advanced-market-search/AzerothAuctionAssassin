@@ -1,7 +1,6 @@
 const state = {
   megaData: {},
   desiredItems: {},
-  desiredPets: {},
   ilvlList: [],
   petIlvlList: [],
   realmLists: {},

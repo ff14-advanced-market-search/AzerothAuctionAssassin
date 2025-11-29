@@ -116,7 +116,6 @@ console.log("App paths:", {
 const FILES = {
   megaData: path.join(DATA_DIR, "mega_data.json"),
   desiredItems: path.join(DATA_DIR, "desired_items.json"),
-  desiredPets: path.join(DATA_DIR, "desired_pets.json"),
   ilvlList: path.join(DATA_DIR, "desired_ilvl_list.json"),
   petIlvlList: path.join(DATA_DIR, "desired_pet_ilvl_list.json"),
 }
@@ -170,7 +169,6 @@ function saveBackup(fileType, data) {
     const backupFilenames = {
       megaData: `${timestamp}_mega_data.json`,
       desiredItems: `${timestamp}_desired_items.json`,
-      desiredPets: `${timestamp}_desired_pets.json`,
       ilvlList: `${timestamp}_desired_ilvl_list.json`,
       petIlvlList: `${timestamp}_desired_pet_ilvl_list.json`,
     }
@@ -234,7 +232,6 @@ function ensureDataFiles() {
       FACTION: "all",
     }),
     [FILES.desiredItems]: {},
-    [FILES.desiredPets]: {},
     [FILES.ilvlList]: [],
     [FILES.petIlvlList]: [],
   }
@@ -408,7 +405,6 @@ function setupIpc() {
     return {
       megaData: readJson(FILES.megaData, {}),
       desiredItems: readJson(FILES.desiredItems, {}),
-      desiredPets: readJson(FILES.desiredPets, {}),
       ilvlList: readJson(FILES.ilvlList, []),
       petIlvlList: readJson(FILES.petIlvlList, []),
       processRunning: Boolean(alertsProcess),
@@ -446,19 +442,6 @@ function setupIpc() {
     writeJson(FILES.desiredItems, normalized)
     saveBackup("desiredItems", normalized)
     const successMsg = `[SAVE] Successfully saved desired_items.json\n`
-    console.log(successMsg.trim())
-    sendToLogPanel(successMsg)
-    return normalized
-  })
-
-  ipcMain.handle("save-pets", (_event, payload) => {
-    const normalized = normalizeKV(payload || {})
-    const logMsg = `[SAVE] Saving desired_pets.json to: ${FILES.desiredPets}\n`
-    console.log(logMsg.trim())
-    sendToLogPanel(logMsg)
-    writeJson(FILES.desiredPets, normalized)
-    saveBackup("desiredPets", normalized)
-    const successMsg = `[SAVE] Successfully saved desired_pets.json\n`
     console.log(successMsg.trim())
     sendToLogPanel(successMsg)
     return normalized

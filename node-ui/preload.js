@@ -4,7 +4,6 @@ contextBridge.exposeInMainWorld("aaa", {
   loadState: () => ipcRenderer.invoke("load-state"),
   saveMegaData: (data) => ipcRenderer.invoke("save-mega-data", data),
   saveItems: (data) => ipcRenderer.invoke("save-items", data),
-  savePets: (data) => ipcRenderer.invoke("save-pets", data),
   saveIlvl: (data) => ipcRenderer.invoke("save-ilvl", data),
   savePetIlvl: (data) => ipcRenderer.invoke("save-pet-ilvl", data),
   importJson: (target) => ipcRenderer.invoke("import-json", { target }),
