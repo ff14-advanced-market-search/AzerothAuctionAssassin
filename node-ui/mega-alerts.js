@@ -1241,12 +1241,14 @@ async function runAlerts(state, progress, runOnce = false) {
     if (required_lvl < rule.required_min_lvl) return false
     if (required_lvl > rule.required_max_lvl) return false
 
-    if (
-      rule.bonus_lists.length &&
-      rule.bonus_lists[0] !== -1 &&
-      setEqual(new Set(rule.bonus_lists), item_bonus_ids) === false
-    ) {
-      return false
+    if (rule.bonus_lists.length && rule.bonus_lists[0] !== -1) {
+      // Check that all required bonus IDs exist in the item's bonus IDs (subset check)
+      const requiredBonusIds = new Set(rule.bonus_lists)
+      for (const requiredId of requiredBonusIds) {
+        if (!item_bonus_ids.has(requiredId)) {
+          return false
+        }
+      }
     }
 
     if (rule.bonus_lists.length === 1 && rule.bonus_lists[0] === -1) {
@@ -1504,12 +1506,6 @@ async function runAlerts(state, progress, runOnce = false) {
   function intersection(setA, setB) {
     for (const v of setA) if (setB.has(v)) return true
     return false
-  }
-
-  function setEqual(a, b) {
-    if (a.size !== b.size) return false
-    for (const v of a) if (!b.has(v)) return false
-    return true
   }
 
   // Initial fast run across all realms

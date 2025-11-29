@@ -35,7 +35,7 @@
     "node-ui/**/*.{js,html,css,json}": "prettier --write"
   },
   "dependencies": {
-    "undici": "^6.19.8"
+    "undici": "^6.21.2"
   },
   "build": {
     "appId": "com.azerothauctionassassin.app",

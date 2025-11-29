@@ -146,9 +146,6 @@ function clearIlvlForm() {
 }
 
 /**
- * Clear pet ilvl form and reset to "add new" mode
- */
-/**
  * Convert pet quality integer to human-readable label
  * @param {number} quality - Quality value (-1, 0, 1, 2, or 3)
  * @returns {string} Human-readable quality label
