@@ -348,11 +348,12 @@ select:focus {
   padding: 12px 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 10000;
+  z-index: 10001;
   font-weight: 600;
   animation: toastSlideIn 0.3s ease-out;
   max-width: 500px;
   text-align: center;
+  word-wrap: break-word;
 }
 
 .toast.success {

@@ -328,15 +328,122 @@ function showPasteModal(title, placeholder, onSubmit) {
   apply.onclick = async () => {
     const text = ta.value
     if (!text.trim()) return cleanup()
-    await onSubmit(text)
+    // Close modal first, then run onSubmit (which may show toast)
     cleanup()
+    await onSubmit(text)
   }
+}
+
+function validatePetIlvlFormat(data) {
+  // Check if it's the legacy format (object with numeric keys) and convert it
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const keys = Object.keys(data)
+    if (keys.length > 0 && keys.every((k) => !Number.isNaN(Number(k)))) {
+      // Convert legacy format to new format
+      const converted = keys
+        .map((key) => {
+          const petID = Number(key)
+          const price = Number(data[key])
+          if (
+            Number.isNaN(petID) ||
+            petID <= 0 ||
+            Number.isNaN(price) ||
+            price <= 0
+          ) {
+            return null
+          }
+          return {
+            petID,
+            price,
+            minLevel: 1,
+            minQuality: -1,
+            excludeBreeds: [],
+          }
+        })
+        .filter((rule) => rule !== null)
+
+      return { valid: true, converted }
+    }
+  }
+
+  // Must be an array
+  if (!Array.isArray(data)) {
+    return {
+      valid: false,
+      error:
+        'Invalid format. Expected an array of pet rules: [{"petID": 183, "price": 100000, ...}]',
+    }
+  }
+
+  // Validate each rule
+  for (let i = 0; i < data.length; i++) {
+    const rule = data[i]
+    if (!rule || typeof rule !== "object") {
+      return {
+        valid: false,
+        error: `Invalid rule at index ${i}: must be an object`,
+      }
+    }
+
+    // Check required fields
+    if (rule.petID === undefined || rule.petID === null) {
+      return {
+        valid: false,
+        error: `Invalid rule at index ${i}: missing required field "petID"`,
+      }
+    }
+
+    if (rule.price === undefined || rule.price === null) {
+      return {
+        valid: false,
+        error: `Invalid rule at index ${i}: missing required field "price"`,
+      }
+    }
+
+    // Validate types
+    const petID = Number(rule.petID)
+    const price = Number(rule.price)
+
+    if (Number.isNaN(petID) || petID <= 0) {
+      return {
+        valid: false,
+        error: `Invalid rule at index ${i}: "petID" must be a positive number, got ${rule.petID}`,
+      }
+    }
+
+    if (Number.isNaN(price) || price <= 0) {
+      return {
+        valid: false,
+        error: `Invalid rule at index ${i}: "price" must be a positive number, got ${rule.price}`,
+      }
+    }
+  }
+
+  return { valid: true }
 }
 
 async function handlePasteAAA(target, btn) {
   showPasteModal("Import AAA JSON", "{...}", async (raw) => {
     try {
-      const parsed = JSON.parse(raw)
+      let parsed = JSON.parse(raw)
+
+      // Validate pet ilvl format before importing
+      if (target === "petIlvlList") {
+        const validation = validatePetIlvlFormat(parsed)
+        if (!validation.valid) {
+          appendLog(`Import error: ${validation.error}\n`)
+          showToast(validation.error, "error", 5000)
+          return
+        }
+        // If legacy format was converted, use the converted data
+        if (validation.converted) {
+          parsed = validation.converted
+          appendLog(
+            `Converted legacy format: ${validation.converted.length} pet rules imported\n`
+          )
+        }
+      }
+
       if (target === "megaData") {
         state.megaData = await window.aaa.saveMegaData(parsed)
       } else if (target === "desiredItems") {
@@ -349,7 +456,12 @@ async function handlePasteAAA(target, btn) {
       await loadState()
       flashButton(btn, "Imported!")
     } catch (err) {
-      appendLog(`Paste error: ${err}\n`)
+      const errorMsg =
+        err instanceof SyntaxError
+          ? `Invalid JSON: ${err.message}`
+          : `Paste error: ${err.message || err}`
+      appendLog(`${errorMsg}\n`)
+      showToast(errorMsg, "error", 5000)
     }
   })
 }

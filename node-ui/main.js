@@ -565,8 +565,89 @@ function setupIpc() {
     })
     if (res.canceled || !res.filePaths.length) return { canceled: true }
     const src = res.filePaths[0]
-    const data = readJson(src, null)
+    let data = readJson(src, null)
     if (data === null) return { error: "Failed to read JSON" }
+
+    // Validate pet ilvl format before importing
+    if (target === "petIlvlList") {
+      // Check if it's the legacy format (object with numeric keys) and convert it
+      if (data && typeof data === "object" && !Array.isArray(data)) {
+        const keys = Object.keys(data)
+        if (keys.length > 0 && keys.every((k) => !Number.isNaN(Number(k)))) {
+          // Convert legacy format to new format
+          const converted = keys
+            .map((key) => {
+              const petID = Number(key)
+              const price = Number(data[key])
+              if (
+                Number.isNaN(petID) ||
+                petID <= 0 ||
+                Number.isNaN(price) ||
+                price <= 0
+              ) {
+                return null
+              }
+              return {
+                petID,
+                price,
+                minLevel: 1,
+                minQuality: -1,
+                excludeBreeds: [],
+              }
+            })
+            .filter((rule) => rule !== null)
+          data = converted
+        }
+      }
+
+      // Must be an array
+      if (!Array.isArray(data)) {
+        return {
+          error:
+            'Invalid format. Expected an array of pet rules: [{"petID": 183, "price": 100000, ...}]',
+        }
+      }
+
+      // Validate each rule
+      for (let i = 0; i < data.length; i++) {
+        const rule = data[i]
+        if (!rule || typeof rule !== "object") {
+          return {
+            error: `Invalid rule at index ${i}: must be an object`,
+          }
+        }
+
+        // Check required fields
+        if (rule.petID === undefined || rule.petID === null) {
+          return {
+            error: `Invalid rule at index ${i}: missing required field "petID"`,
+          }
+        }
+
+        if (rule.price === undefined || rule.price === null) {
+          return {
+            error: `Invalid rule at index ${i}: missing required field "price"`,
+          }
+        }
+
+        // Validate types
+        const petID = Number(rule.petID)
+        const price = Number(rule.price)
+
+        if (Number.isNaN(petID) || petID <= 0) {
+          return {
+            error: `Invalid rule at index ${i}: "petID" must be a positive number, got ${rule.petID}`,
+          }
+        }
+
+        if (Number.isNaN(price) || price <= 0) {
+          return {
+            error: `Invalid rule at index ${i}: "price" must be a positive number, got ${rule.price}`,
+          }
+        }
+      }
+    }
+
     writeJson(targetPath, data)
     saveBackup(target, data)
     return { data }
