@@ -46,7 +46,7 @@ open "dist-electron/mac/Azeroth Auction Assassin.app"
 Win:
 
 ```bash
-npm run build:mac
+npm run build:win
 ...???...
 ```
 
