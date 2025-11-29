@@ -335,6 +335,23 @@ button.ghost:hover:not(:disabled) {
   gap: 6px;
 }
 
+.sensitive-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sensitive-input-wrapper input {
+  flex: 1;
+}
+
+.show-sensitive-btn {
+  white-space: nowrap;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  min-width: 60px;
+}
+
 input,
 select {
   background: #0b131b;

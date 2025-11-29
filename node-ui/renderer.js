@@ -2643,7 +2643,27 @@ window.addEventListener("DOMContentLoaded", async () => {
   showView("home")
   updateNavigationButtons()
   checkForUpdates()
+  setupSensitiveFieldToggles()
 })
+
+/**
+ * Setup show/hide toggles for sensitive input fields
+ */
+function setupSensitiveFieldToggles() {
+  const showButtons = document.querySelectorAll(".show-sensitive-btn")
+  showButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const fieldName = btn.getAttribute("data-field")
+      const input = document.querySelector(`input[name="${fieldName}"]`)
+      if (!input) return
+
+      const isPassword = input.type === "password"
+      input.type = isPassword ? "text" : "password"
+      btn.textContent = isPassword ? "Hide" : "Show"
+      btn.title = isPassword ? "Hide value" : "Show value"
+    })
+  })
+}
 
 /**
  * Check for app updates and display notification

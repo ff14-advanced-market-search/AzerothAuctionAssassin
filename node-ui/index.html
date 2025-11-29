@@ -242,37 +242,85 @@
               title="Setup a discord channel with a webhook url for sending the alert messages."
             >
               Discord Webhook URL
-              <input
-                name="MEGA_WEBHOOK_URL"
-                type="password"
-                autocomplete="off"
-              />
+              <div class="sensitive-input-wrapper">
+                <input
+                  name="MEGA_WEBHOOK_URL"
+                  type="password"
+                  autocomplete="off"
+                  class="sensitive-input"
+                />
+                <button
+                  type="button"
+                  class="ghost show-sensitive-btn"
+                  data-field="MEGA_WEBHOOK_URL"
+                  title="Show value"
+                >
+                  Show
+                </button>
+              </div>
             </label>
             <label
               title="Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids."
             >
               WoW Client ID
-              <input name="WOW_CLIENT_ID" type="text" autocomplete="off" />
+              <div class="sensitive-input-wrapper">
+                <input
+                  name="WOW_CLIENT_ID"
+                  type="password"
+                  autocomplete="off"
+                  class="sensitive-input"
+                />
+                <button
+                  type="button"
+                  class="ghost show-sensitive-btn"
+                  data-field="WOW_CLIENT_ID"
+                  title="Show value"
+                >
+                  Show
+                </button>
+              </div>
             </label>
             <label
               title="Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids."
             >
               WoW Client Secret
-              <input
-                name="WOW_CLIENT_SECRET"
-                type="password"
-                autocomplete="off"
-              />
+              <div class="sensitive-input-wrapper">
+                <input
+                  name="WOW_CLIENT_SECRET"
+                  type="password"
+                  autocomplete="off"
+                  class="sensitive-input"
+                />
+                <button
+                  type="button"
+                  class="ghost show-sensitive-btn"
+                  data-field="WOW_CLIENT_SECRET"
+                  title="Show value"
+                >
+                  Show
+                </button>
+              </div>
             </label>
             <label
               title="Go to the Saddlebag Exchange Discord and generate a token with the bot command: /wow auctionassassintoken"
             >
               Auction Assassin Token
-              <input
-                name="AUTHENTICATION_TOKEN"
-                type="text"
-                autocomplete="off"
-              />
+              <div class="sensitive-input-wrapper">
+                <input
+                  name="AUTHENTICATION_TOKEN"
+                  type="password"
+                  autocomplete="off"
+                  class="sensitive-input"
+                />
+                <button
+                  type="button"
+                  class="ghost show-sensitive-btn"
+                  data-field="AUTHENTICATION_TOKEN"
+                  title="Show value"
+                >
+                  Show
+                </button>
+              </div>
             </label>
             <label
               title="Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic."
