@@ -36,6 +36,12 @@ const realmIdInput = document.getElementById("realm-id-input")
 const realmFilterInput = document.getElementById("realm-filter-input")
 const resetRealmBtn = document.getElementById("reset-realm-btn")
 const removeRealmBtn = document.getElementById("remove-realm-btn")
+const restoreBackupBtn = document.getElementById("restore-backup-btn")
+const restoreBackupItemsBtn = document.getElementById(
+  "restore-backup-items-btn"
+)
+const restoreBackupIlvlBtn = document.getElementById("restore-backup-ilvl-btn")
+const restoreBackupPetsBtn = document.getElementById("restore-backup-pets-btn")
 const resetSettingsBtn = document.getElementById("reset-settings-btn")
 const resetItemsBtn = document.getElementById("reset-items-btn")
 const resetIlvlBtn = document.getElementById("reset-ilvl-btn")
@@ -331,6 +337,64 @@ function showPasteModal(title, placeholder, onSubmit) {
     // Close modal first, then run onSubmit (which may show toast)
     cleanup()
     await onSubmit(text)
+  }
+}
+
+function showBackupModal(title, backups, onSelect) {
+  const overlay = document.createElement("div")
+  overlay.className = "modal-overlay"
+  const modal = document.createElement("div")
+  modal.className = "modal"
+  modal.style.maxWidth = "500px"
+  const heading = document.createElement("div")
+  heading.style.fontWeight = "700"
+  heading.style.marginBottom = "16px"
+  heading.textContent = title
+  const list = document.createElement("div")
+  list.style.display = "flex"
+  list.style.flexDirection = "column"
+  list.style.gap = "8px"
+  list.style.maxHeight = "400px"
+  list.style.overflowY = "auto"
+  list.style.marginBottom = "16px"
+
+  if (backups.length === 0) {
+    const emptyMsg = document.createElement("div")
+    emptyMsg.className = "muted"
+    emptyMsg.textContent = "No backups found"
+    list.appendChild(emptyMsg)
+  } else {
+    backups.forEach((backup) => {
+      const item = document.createElement("button")
+      item.className = "ghost"
+      item.style.textAlign = "left"
+      item.style.padding = "12px"
+      item.style.cursor = "pointer"
+      item.textContent = backup.displayDate
+      item.onclick = () => {
+        cleanup()
+        onSelect(backup)
+      }
+      list.appendChild(item)
+    })
+  }
+
+  const actions = document.createElement("div")
+  actions.className = "modal-actions"
+  const cancel = document.createElement("button")
+  cancel.className = "ghost"
+  cancel.textContent = "Cancel"
+  actions.appendChild(cancel)
+  modal.appendChild(heading)
+  modal.appendChild(list)
+  modal.appendChild(actions)
+  overlay.appendChild(modal)
+  document.body.appendChild(overlay)
+
+  const cleanup = () => overlay.remove()
+  cancel.onclick = cleanup
+  overlay.onclick = (e) => {
+    if (e.target === overlay) cleanup()
   }
 }
 
@@ -1846,6 +1910,183 @@ document.getElementById("new-ilvl-btn")?.addEventListener("click", () => {
 
 document.getElementById("new-pet-ilvl-btn")?.addEventListener("click", () => {
   clearPetIlvlForm()
+})
+
+// Restore backup button handlers
+restoreBackupBtn?.addEventListener("click", async () => {
+  try {
+    const result = await window.aaa.listBackups("megaData")
+    if (result.error) {
+      appendLog(`Failed to list backups: ${result.error}\n`)
+      showToast(`Failed to list backups: ${result.error}`, "error", 5000)
+      return
+    }
+    const backups = result.backups || []
+    showBackupModal("Select Backup to Restore", backups, async (backup) => {
+      if (
+        confirm(
+          `Restore backup from ${backup.displayDate}? This will replace your current settings.`
+        )
+      ) {
+        try {
+          const restoreResult = await window.aaa.restoreBackup(
+            "megaData",
+            backup.filename
+          )
+          if (restoreResult.error) {
+            appendLog(`Failed to restore backup: ${restoreResult.error}\n`)
+            showToast(
+              `Failed to restore backup: ${restoreResult.error}`,
+              "error",
+              5000
+            )
+          } else {
+            await loadState()
+            flashButton(restoreBackupBtn, "Restored!")
+            showToast("Backup restored successfully", "success", 3000)
+          }
+        } catch (err) {
+          appendLog(`Restore error: ${err}\n`)
+          showToast(`Restore error: ${err.message}`, "error", 5000)
+        }
+      }
+    })
+  } catch (err) {
+    appendLog(`Failed to load backups: ${err}\n`)
+    showToast(`Failed to load backups: ${err.message}`, "error", 5000)
+  }
+})
+
+restoreBackupItemsBtn?.addEventListener("click", async () => {
+  try {
+    const result = await window.aaa.listBackups("desiredItems")
+    if (result.error) {
+      appendLog(`Failed to list backups: ${result.error}\n`)
+      showToast(`Failed to list backups: ${result.error}`, "error", 5000)
+      return
+    }
+    const backups = result.backups || []
+    showBackupModal("Select Backup to Restore", backups, async (backup) => {
+      if (
+        confirm(
+          `Restore backup from ${backup.displayDate}? This will replace your current items.`
+        )
+      ) {
+        try {
+          const restoreResult = await window.aaa.restoreBackup(
+            "desiredItems",
+            backup.filename
+          )
+          if (restoreResult.error) {
+            appendLog(`Failed to restore backup: ${restoreResult.error}\n`)
+            showToast(
+              `Failed to restore backup: ${restoreResult.error}`,
+              "error",
+              5000
+            )
+          } else {
+            await loadState()
+            flashButton(restoreBackupItemsBtn, "Restored!")
+            showToast("Backup restored successfully", "success", 3000)
+          }
+        } catch (err) {
+          appendLog(`Restore error: ${err}\n`)
+          showToast(`Restore error: ${err.message}`, "error", 5000)
+        }
+      }
+    })
+  } catch (err) {
+    appendLog(`Failed to load backups: ${err}\n`)
+    showToast(`Failed to load backups: ${err.message}`, "error", 5000)
+  }
+})
+
+restoreBackupIlvlBtn?.addEventListener("click", async () => {
+  try {
+    const result = await window.aaa.listBackups("ilvlList")
+    if (result.error) {
+      appendLog(`Failed to list backups: ${result.error}\n`)
+      showToast(`Failed to list backups: ${result.error}`, "error", 5000)
+      return
+    }
+    const backups = result.backups || []
+    showBackupModal("Select Backup to Restore", backups, async (backup) => {
+      if (
+        confirm(
+          `Restore backup from ${backup.displayDate}? This will replace your current ilvl rules.`
+        )
+      ) {
+        try {
+          const restoreResult = await window.aaa.restoreBackup(
+            "ilvlList",
+            backup.filename
+          )
+          if (restoreResult.error) {
+            appendLog(`Failed to restore backup: ${restoreResult.error}\n`)
+            showToast(
+              `Failed to restore backup: ${restoreResult.error}`,
+              "error",
+              5000
+            )
+          } else {
+            await loadState()
+            flashButton(restoreBackupIlvlBtn, "Restored!")
+            showToast("Backup restored successfully", "success", 3000)
+          }
+        } catch (err) {
+          appendLog(`Restore error: ${err}\n`)
+          showToast(`Restore error: ${err.message}`, "error", 5000)
+        }
+      }
+    })
+  } catch (err) {
+    appendLog(`Failed to load backups: ${err}\n`)
+    showToast(`Failed to load backups: ${err.message}`, "error", 5000)
+  }
+})
+
+restoreBackupPetsBtn?.addEventListener("click", async () => {
+  try {
+    const result = await window.aaa.listBackups("petIlvlList")
+    if (result.error) {
+      appendLog(`Failed to list backups: ${result.error}\n`)
+      showToast(`Failed to list backups: ${result.error}`, "error", 5000)
+      return
+    }
+    const backups = result.backups || []
+    showBackupModal("Select Backup to Restore", backups, async (backup) => {
+      if (
+        confirm(
+          `Restore backup from ${backup.displayDate}? This will replace your current pet rules.`
+        )
+      ) {
+        try {
+          const restoreResult = await window.aaa.restoreBackup(
+            "petIlvlList",
+            backup.filename
+          )
+          if (restoreResult.error) {
+            appendLog(`Failed to restore backup: ${restoreResult.error}\n`)
+            showToast(
+              `Failed to restore backup: ${restoreResult.error}`,
+              "error",
+              5000
+            )
+          } else {
+            await loadState()
+            flashButton(restoreBackupPetsBtn, "Restored!")
+            showToast("Backup restored successfully", "success", 3000)
+          }
+        } catch (err) {
+          appendLog(`Restore error: ${err}\n`)
+          showToast(`Restore error: ${err.message}`, "error", 5000)
+        }
+      }
+    })
+  } catch (err) {
+    appendLog(`Failed to load backups: ${err}\n`)
+    showToast(`Failed to load backups: ${err.message}`, "error", 5000)
+  }
 })
 
 // Reset button handlers

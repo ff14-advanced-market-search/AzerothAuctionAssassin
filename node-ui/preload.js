@@ -38,4 +38,7 @@ contextBridge.exposeInMainWorld("aaa", {
     ipcRenderer.on("zoom-changed", (_event, zoomFactor) =>
       callback(zoomFactor)
     ),
+  listBackups: (target) => ipcRenderer.invoke("list-backups", { target }),
+  restoreBackup: (target, filename) =>
+    ipcRenderer.invoke("restore-backup", { target, filename }),
 })

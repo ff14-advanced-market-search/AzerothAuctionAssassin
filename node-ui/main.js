@@ -714,6 +714,78 @@ function setupIpc() {
     return { exported: res.filePath }
   })
 
+  ipcMain.handle("list-backups", (_event, { target }) => {
+    try {
+      if (!fs.existsSync(BACKUP_DIR)) {
+        return { backups: [] }
+      }
+      const files = fs.readdirSync(BACKUP_DIR)
+      const backupPatterns = {
+        megaData: /^(\d+)_mega_data\.json$/,
+        desiredItems: /^(\d+)_desired_items\.json$/,
+        ilvlList: /^(\d+)_desired_ilvl_list\.json$/,
+        petIlvlList: /^(\d+)_desired_pet_ilvl_list\.json$/,
+      }
+      const pattern = backupPatterns[target]
+      if (!pattern) {
+        return { error: "Unknown target", backups: [] }
+      }
+      const backupFiles = files
+        .filter((file) => pattern.test(file))
+        .map((file) => {
+          const match = file.match(pattern)
+          if (!match) return null
+          const timestamp = parseInt(match[1], 10)
+          // Parse timestamp: YYYYMMDDHH
+          const year = Math.floor(timestamp / 1_000_000)
+          const month = Math.floor((timestamp % 1_000_000) / 10_000)
+          const day = Math.floor((timestamp % 10_000) / 100)
+          const hour = timestamp % 100
+          const date = new Date(year, month - 1, day, hour)
+          return {
+            filename: file,
+            timestamp,
+            date: date.toISOString(),
+            displayDate: date.toLocaleString(),
+          }
+        })
+        .filter((item) => item !== null)
+        .sort((a, b) => b.timestamp - a.timestamp) // Most recent first
+
+      return { backups: backupFiles }
+    } catch (err) {
+      console.error("Failed to list backups:", err)
+      return { error: err.message, backups: [] }
+    }
+  })
+
+  ipcMain.handle("restore-backup", (_event, { target, filename }) => {
+    try {
+      const backupPath = path.join(BACKUP_DIR, filename)
+      if (!fs.existsSync(backupPath)) {
+        return { error: "Backup file not found" }
+      }
+      const data = readJson(backupPath, null)
+      if (data === null) {
+        return { error: "Failed to read backup file" }
+      }
+      const targetPath = FILES[target]
+      if (!targetPath) {
+        return { error: "Unknown target" }
+      }
+      writeJson(targetPath, data)
+      const logMsg = `[RESTORE] Restored ${filename} to ${path.basename(
+        targetPath
+      )}\n`
+      console.log(logMsg.trim())
+      sendToLogPanel(logMsg)
+      return { success: true, data }
+    } catch (err) {
+      console.error("Failed to restore backup:", err)
+      return { error: err.message }
+    }
+  })
+
   ipcMain.handle("run-mega", () => {
     if (alertsProcess) {
       return { alreadyRunning: true }
