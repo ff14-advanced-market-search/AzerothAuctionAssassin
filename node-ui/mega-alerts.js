@@ -1214,7 +1214,12 @@ async function runAlerts(state, progress, runOnce = false) {
       }
       const price_type =
         "bid_prices" in auction ? "bid_prices" : "buyout_prices"
-      message += "`" + price_type + "`: " + auction[price_type] + "\n"
+      let priceDisplay = auction[price_type]
+      // Convert ilvl prices from copper to gold (ilvl items store price as number in copper)
+      if ("ilvl" in auction && typeof priceDisplay === "number") {
+        priceDisplay = priceDisplay / 10000
+      }
+      message += "`" + price_type + "`: " + priceDisplay + "\n"
 
       const auctionKey = getAuctionKey(auction, connected_id)
       if (!alert_record.has(auctionKey)) {
