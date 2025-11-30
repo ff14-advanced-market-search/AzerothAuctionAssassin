@@ -402,6 +402,7 @@ class MegaData {
     // OAuth token management
     this.access_token = ""
     this.access_token_creation_unix_time = 0
+    this._tokenRefreshPromise = null // Track in-flight token refresh to prevent race conditions
   }
 
   /**
@@ -578,14 +579,38 @@ class MegaData {
    * Fetch or return cached Blizzard OAuth access token
    * Tokens are valid for 24 hours, but we refresh after 20 hours to be safe
    * If over 20 hours, make a new token and reset the creation time
+   * Uses a shared promise to prevent concurrent refresh requests (race condition)
    */
   async fetchAccessToken(timeoutMs = 30000) {
+    // Return cached token if still valid
     if (
       this.access_token &&
       Date.now() / 1000 - this.access_token_creation_unix_time < 20 * 60 * 60
     ) {
       return this.access_token
     }
+
+    // If a refresh is already in progress, return the existing promise
+    if (this._tokenRefreshPromise) {
+      return this._tokenRefreshPromise
+    }
+
+    // Start a new refresh and track it
+    this._tokenRefreshPromise = this._doFetchAccessToken(timeoutMs).finally(
+      () => {
+        // Clear the promise when done (success or failure) so subsequent calls can start a new refresh
+        this._tokenRefreshPromise = null
+      }
+    )
+
+    return this._tokenRefreshPromise
+  }
+
+  /**
+   * Internal helper to perform the actual token fetch
+   * Separated from fetchAccessToken to enable promise sharing for concurrent calls
+   */
+  async _doFetchAccessToken(timeoutMs = 30000) {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
       controller.abort()
