@@ -409,8 +409,11 @@ function createWindow() {
 function setupIpc() {
   ipcMain.handle("load-state", () => {
     ensureDataFiles()
+    const rawMegaData = readJson(FILES.megaData, {})
+    // Normalize mega data to ensure boolean values are properly converted
+    const normalizedMegaData = normalizeMegaData(rawMegaData)
     return {
-      megaData: readJson(FILES.megaData, {}),
+      megaData: normalizedMegaData,
       desiredItems: readJson(FILES.desiredItems, {}),
       ilvlList: readJson(FILES.ilvlList, []),
       petIlvlList: readJson(FILES.petIlvlList, []),

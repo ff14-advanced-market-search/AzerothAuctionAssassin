@@ -859,14 +859,14 @@ async function handleCopyPBSPetIlvl(btn) {
 }
 
 function renderMegaForm(data) {
-  const formData = new FormData(megaForm)
-  for (const [key] of formData.entries()) {
-    const el = megaForm.elements[key]
-    if (!el) continue
+  // Iterate over all form elements, not just FormData entries
+  // This ensures all checkboxes are set, even if they're unchecked
+  for (const el of megaForm.elements) {
+    if (!el.name) continue
     if (el.type === "checkbox") {
-      el.checked = Boolean(data[key])
-    } else {
-      el.value = data[key] ?? ""
+      el.checked = Boolean(data[el.name])
+    } else if (el.type !== "submit" && el.type !== "button") {
+      el.value = data[el.name] ?? ""
     }
   }
   // Handle extra alerts checkboxes separately
@@ -874,17 +874,18 @@ function renderMegaForm(data) {
 }
 
 function readMegaForm() {
-  const formData = new FormData(megaForm)
   const out = {}
-  for (const [key, value] of formData.entries()) {
-    const el = megaForm.elements[key]
+  // Iterate over all form elements, not just FormData entries
+  // This ensures all checkboxes are saved, even if they're unchecked
+  for (const el of megaForm.elements) {
+    if (!el.name) continue
     if (el.type === "checkbox") {
-      out[key] = el.checked
+      out[el.name] = el.checked
     } else if (el.type === "number") {
-      const num = Number(value)
-      out[key] = Number.isNaN(num) ? "" : num
-    } else {
-      out[key] = value
+      const num = Number(el.value)
+      out[el.name] = Number.isNaN(num) ? "" : num
+    } else if (el.type !== "submit" && el.type !== "button") {
+      out[el.name] = el.value
     }
   }
   // Handle extra alerts checkboxes separately
