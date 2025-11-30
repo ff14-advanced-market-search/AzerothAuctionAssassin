@@ -459,9 +459,8 @@ class MegaData {
       baseIlvls,
       baseReq
     ) => {
+      // Process all entries passed (already filtered for grouped entries, all entries for broad)
       for (const entry of entries) {
-        if (entry.ilvl !== ilvl && entry.item_ids && entry.item_ids.length > 0)
-          continue
         const rule = {
           ilvl: entry.ilvl,
           max_ilvl: entry.max_ilvl ?? 10000,
@@ -494,7 +493,20 @@ class MegaData {
       // Python: get_ilvl_items(ilvl, all_item_ids) - passes ilvl and item_ids
       const { itemNames, itemIds, baseIlvls, baseReq } =
         await this.getIlvlItems(ilvl, allIds)
-      addRules(ilvl, list, Array.from(itemIds), itemNames, baseIlvls, baseReq)
+      // Filter to only include entries with matching ilvl and non-empty item_ids
+      // This prevents broad entries (without item_ids) from being processed here
+      const matchingEntries = list.filter(
+        (entry) =>
+          entry.ilvl === ilvl && entry.item_ids && entry.item_ids.length > 0
+      )
+      addRules(
+        ilvl,
+        matchingEntries,
+        Array.from(itemIds),
+        itemNames,
+        baseIlvls,
+        baseReq
+      )
     }
 
     if (broad.length) {
