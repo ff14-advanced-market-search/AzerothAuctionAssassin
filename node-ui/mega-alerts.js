@@ -1133,22 +1133,18 @@ class MegaData {
     this.avoidance_ids = new Set(avoidance)
     this.ilvl_addition = ilvlAdd
 
-    // Log what we found
-    log(`[BONUS IDS] Loaded ${Object.keys(bonus).length} total bonus entries`)
-    log(`[BONUS IDS] Socket IDs: ${socket.length} (${socket.join(", ")})`)
-    log(`[BONUS IDS] Speed IDs: ${speed.length} (${speed.join(", ")})`)
-    log(`[BONUS IDS] Leech IDs: ${leech.length} (${leech.join(", ")})`)
-    log(
-      `[BONUS IDS] Avoidance IDs: ${avoidance.length} (${avoidance.join(", ")})`
-    )
-    log(`[BONUS IDS] Ilvl addition entries: ${Object.keys(ilvlAdd).length}`)
-
-    // Log sample rawStats structure for debugging
-    if (sampleWithRawStats) {
+    // Log what we found (only in debug mode)
+    if (this.DEBUG) {
+      log(`[BONUS IDS] Loaded ${Object.keys(bonus).length} total bonus entries`)
+      log(`[BONUS IDS] Socket IDs: ${socket.length} (${socket.join(", ")})`)
+      log(`[BONUS IDS] Speed IDs: ${speed.length} (${speed.join(", ")})`)
+      log(`[BONUS IDS] Leech IDs: ${leech.length} (${leech.join(", ")})`)
       log(
-        `[BONUS IDS] Sample rawStats structure for bonus ID ${sampleWithRawStats.id}:`,
-        JSON.stringify(sampleWithRawStats.rawStats, null, 2)
+        `[BONUS IDS] Avoidance IDs: ${avoidance.length} (${avoidance.join(
+          ", "
+        )})`
       )
+      log(`[BONUS IDS] Ilvl addition entries: ${Object.keys(ilvlAdd).length}`)
     }
   }
 
@@ -1905,6 +1901,13 @@ async function runAlerts(state, progress, runOnce = false) {
     new Set(Object.values(state.WOW_SERVER_NAMES))
   )
   if (initialRealms.length) {
+    log(
+      `Starting mega-alerts-js for region=${state.REGION}, items=${
+        Object.keys(state.desiredItems).length
+      }, ilvl rules=${state.desiredIlvlList.length}, pet ilvl rules=${
+        state.desiredPetIlvlList.length
+      }`
+    )
     progress("Sending alerts!")
     await runPool(
       initialRealms.map((id) => () => pull_single_realm_data(id)),
@@ -1953,6 +1956,13 @@ async function runAlerts(state, progress, runOnce = false) {
     }
 
     if (matching_realms.length) {
+      log(
+        `Starting mega-alerts-js for region=${state.REGION}, items=${
+          Object.keys(state.desiredItems).length
+        }, ilvl rules=${state.desiredIlvlList.length}, pet ilvl rules=${
+          state.desiredPetIlvlList.length
+        }`
+      )
       progress("Sending alerts!")
       await runPool(
         matching_realms.map((id) => () => pull_single_realm_data(id)),
