@@ -663,38 +663,14 @@ class MegaData {
   }
 
   /**
-   * Get upload timers from Saddlebag Exchange API
-   * Returns a map of connected realm IDs to their upload timer information
-   * Filters by region and excludes Russian realms if NO_RUSSIAN_REALMS is enabled
+   * Get upload timers (collected from realm scans, not from API)
+   * Returns the existing upload_timers map which is populated automatically
+   * from last-modified headers when scanning realms
    */
   async getUploadTimers() {
-    try {
-      const data = await httpJson(`${SADDLEBAG_URL}/api/wow/uploadtimers`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      })
-      const timers = {}
-      const russian = new Set(getRussianRealmIds())
-      for (const t of data.data || []) {
-        if (t.dataSetID === -1 || t.dataSetID === -2) continue
-        if (t.region !== this.REGION) continue
-        if (this.NO_RUSSIAN_REALMS && russian.has(t.dataSetID)) continue
-        timers[t.dataSetID] = {
-          dataSetID: t.dataSetID,
-          dataSetName: t.dataSetName,
-          lastUploadMinute: t.lastUploadMinute,
-          lastUploadTimeRaw: t.lastUploadTimeRaw,
-          lastUploadUnix: t.lastUploadUnix,
-          region: t.region,
-          tableName: t.tableName,
-        }
-      }
-      return timers
-    } catch (err) {
-      logError("Failed to load upload timers", err)
-      return {}
-    }
+    // Upload timers are collected automatically from realm scans via update_local_timers()
+    // No need to hit the API endpoint - just return existing timers
+    return this.upload_timers
   }
 
   /**
@@ -740,7 +716,7 @@ class MegaData {
     return Object.entries(this.WOW_SERVER_NAMES)
       .filter(([, id]) => id === connectedRealmId)
       .map(([name]) => name)
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
   }
 
   /**
@@ -1351,7 +1327,8 @@ async function runAlerts(state, progress, runOnce = false) {
   // Reset stop flag at the start of each run
   STOP_REQUESTED = false
   const alert_record = new Set() // Use Set for O(1) lookup
-  state.upload_timers = await state.getUploadTimers()
+  // Upload timers are collected automatically from realm scans via update_local_timers()
+  // No need to fetch from API - they'll be populated as we scan realms
 
   // Helper to create a stable key for an auction
   function getAuctionKey(auction, connected_id) {
@@ -1954,6 +1931,10 @@ async function runAlerts(state, progress, runOnce = false) {
   const initialRealms = Array.from(
     new Set(Object.values(state.WOW_SERVER_NAMES))
   )
+  // Include commodity/token IDs (-1, -2) if TOKEN_PRICE is configured
+  if (state.TOKEN_PRICE) {
+    initialRealms.push(-1, -2)
+  }
   if (initialRealms.length) {
     log(
       `Starting mega-alerts-js for region=${state.REGION}, items=${
@@ -1983,11 +1964,6 @@ async function runAlerts(state, progress, runOnce = false) {
       alert_record.clear()
     }
 
-    // Get upload timers if we don't have them yet
-    if (!Object.keys(state.upload_timers).length) {
-      state.upload_timers = await state.getUploadTimers()
-    }
-
     // Find realms that match the scan time window
     // Scan starts at lastUploadMinute + SCAN_TIME_MIN
     // Scan ends at lastUploadMinute + SCAN_TIME_MAX
@@ -2000,12 +1976,24 @@ async function runAlerts(state, progress, runOnce = false) {
       )
       .map((r) => r.dataSetID)
 
+    // Include commodity/token IDs (-1, -2) if TOKEN_PRICE is configured
+    // These are always scanned when configured, regardless of upload time
+    if (state.TOKEN_PRICE) {
+      if (!matching_realms.includes(-1)) matching_realms.push(-1)
+      if (!matching_realms.includes(-2)) matching_realms.push(-2)
+    }
+
     // Check for extra alerts (JSON array of minutes to trigger on)
     if (state.EXTRA_ALERTS) {
       try {
         const extra = JSON.parse(state.EXTRA_ALERTS)
         if (extra.includes(current_min)) {
           matching_realms = state.get_upload_time_list().map((r) => r.dataSetID)
+          // Include commodity/token IDs (-1, -2) if TOKEN_PRICE is configured
+          if (state.TOKEN_PRICE) {
+            if (!matching_realms.includes(-1)) matching_realms.push(-1)
+            if (!matching_realms.includes(-2)) matching_realms.push(-2)
+          }
         }
       } catch {
         // Ignore errors when checking extra alert times

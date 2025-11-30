@@ -274,7 +274,12 @@ function normalizeMegaData(input) {
   const output = { ...input }
   for (const key of Object.keys(output)) {
     if (boolKeys.has(key)) {
-      output[key] = Boolean(output[key])
+      const v = output[key]
+      if (typeof v === "string") {
+        output[key] = v.trim().toLowerCase() === "true"
+      } else {
+        output[key] = Boolean(v)
+      }
     } else if (intKeys.has(key)) {
       const num = Number(output[key])
       output[key] = Number.isFinite(num) ? num : 0
