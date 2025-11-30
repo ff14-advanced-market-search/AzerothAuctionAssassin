@@ -145,7 +145,7 @@ function getRussianRealmIds() {
 
 /**
  * Create a Discord embed with specified title, description, and fields
- * Uses blurple color code (0x7289da) and adds current UTC time as footer
+ * Uses blurple color code (0x7289da) and adds current users time as footer
  */
 function createEmbed(title, description, fields) {
   return {
@@ -153,17 +153,7 @@ function createEmbed(title, description, fields) {
     description,
     color: 0x7289da, // Blurple color code
     fields,
-    footer: {
-      text: new Date().toLocaleString("en-US", {
-        timeZone: "UTC",
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      }),
-    },
+    timestamp: new Date().toISOString(), // Discord's native timestamp field (ISO 8601)
   }
 }
 
