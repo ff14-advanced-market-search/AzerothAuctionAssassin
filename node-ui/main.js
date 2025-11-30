@@ -481,6 +481,11 @@ function setupIpc() {
     const logMsg = `[CONFIG] Data paths refreshed to: ${DATA_DIR}\n`
     console.log(logMsg.trim())
     sendToLogPanel(logMsg)
+
+    // Notify renderer to reload state from the new directory
+    BrowserWindow.getAllWindows().forEach((win) =>
+      win.webContents.send("reload-state")
+    )
   }
 
   ipcMain.handle("save-mega-data", (_event, payload) => {

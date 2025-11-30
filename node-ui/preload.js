@@ -45,6 +45,11 @@ contextBridge.exposeInMainWorld("aaa", {
     ipcRenderer.on("zoom-changed", handler)
     return () => ipcRenderer.removeListener("zoom-changed", handler)
   },
+  onReloadState: (callback) => {
+    const handler = () => callback()
+    ipcRenderer.on("reload-state", handler)
+    return () => ipcRenderer.removeListener("reload-state", handler)
+  },
   listBackups: (target) => ipcRenderer.invoke("list-backups", { target }),
   restoreBackup: (target, filename) =>
     ipcRenderer.invoke("restore-backup", { target, filename }),

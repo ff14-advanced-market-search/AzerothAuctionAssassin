@@ -2824,6 +2824,11 @@ window.aaa.onZoomChanged((zoomFactor) => {
   updateZoomDisplay(zoomFactor)
 })
 
+// Listen for reload state requests (e.g., after data directory changes)
+window.aaa.onReloadState(async () => {
+  await loadState()
+})
+
 // Zoom button handlers
 const zoomInBtn = getElement("zoom-in-btn")
 const zoomOutBtn = getElement("zoom-out-btn")
