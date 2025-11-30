@@ -75,6 +75,7 @@ const realmIdInput = getElement("realm-id-input")
 const realmFilterInput = getElement("realm-filter-input")
 const resetRealmBtn = getElement("reset-realm-btn")
 const removeRealmBtn = getElement("remove-realm-btn")
+const removeAllRealmsBtn = getElement("remove-all-realms-btn")
 const restoreBackupBtn = getElement("restore-backup-btn")
 const restoreBackupItemsBtn = getElement("restore-backup-items-btn")
 const restoreBackupIlvlBtn = getElement("restore-backup-ilvl-btn")
@@ -2636,6 +2637,13 @@ async function removeRealm(name, id) {
   renderRealmList()
 }
 
+async function removeAllRealms() {
+  const region = realmRegionSelect?.value || "EU"
+  state.realmLists[region] = {}
+  await saveRealmList(region)
+  renderRealmList()
+}
+
 async function resetRealmList() {
   const region = realmRegionSelect?.value || "EU"
   if (!window.REALM_DATA) {
@@ -2682,6 +2690,17 @@ removeRealmBtn?.addEventListener("click", () => {
   const id = realmIdInput.value
   if (name && id) {
     removeRealm(name, Number(id))
+  }
+})
+
+removeAllRealmsBtn?.addEventListener("click", () => {
+  const region = realmRegionSelect?.value || "EU"
+  if (
+    confirm(
+      `Remove all realms from ${region}? This will empty the entire realm list.`
+    )
+  ) {
+    removeAllRealms()
   }
 })
 
