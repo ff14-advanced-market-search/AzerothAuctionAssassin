@@ -57,6 +57,17 @@ function requestStop() {
   }
 }
 
+/**
+ * Reset module-level state
+ * Clears STOP_REQUESTED flag and callbacks to ensure fresh state on each run
+ * This is preferred over deleting from require.cache as it's more explicit and testable
+ */
+function reset() {
+  STOP_REQUESTED = false
+  logCallback = null
+  stopCallback = null
+}
+
 // Local logging functions that use callback if set (for Electron integration)
 const originalLog = console.log
 const originalError = console.error
@@ -2067,5 +2078,6 @@ module.exports = {
   setStopCallback,
   setPaths,
   requestStop,
+  reset,
   MegaData,
 }

@@ -840,13 +840,13 @@ function setupIpc() {
     try {
       // Load and run mega-alerts directly in this process
       const megaAlertsPath = path.join(__dirname, "mega-alerts.js")
-      const resolvedPath = require.resolve(megaAlertsPath)
-
-      // Clear module cache to ensure fresh state on each run
-      // This prevents STOP_REQUESTED flag from persisting across runs
-      delete require.cache[resolvedPath]
-
       const megaAlerts = require(megaAlertsPath)
+
+      // Reset module-level state to ensure fresh state on each run
+      // This prevents STOP_REQUESTED flag from persisting across runs
+      if (megaAlerts.reset) {
+        megaAlerts.reset()
+      }
 
       // Set paths first (important for packaged apps)
       if (megaAlerts.setPaths) {
