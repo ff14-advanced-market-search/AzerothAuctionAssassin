@@ -1327,6 +1327,7 @@ async function runAlerts(state, progress, runOnce = false) {
   // Reset stop flag at the start of each run
   STOP_REQUESTED = false
   const alert_record = new Set() // Use Set for O(1) lookup
+  let last_token_price = null // Track last token price to only alert on changes
   // Upload timers are collected automatically from realm scans via update_local_timers()
   // No need to fetch from API - they'll be populated as we scan realms
 
@@ -1433,8 +1434,6 @@ async function runAlerts(state, progress, runOnce = false) {
           ? `https://www.wowhead.com/item=${auction.itemID}`
           : auction.itemlink
       if (!state.NO_LINKS) {
-        message += `[${link_label}](${link_url})\n`
-        message += `[Saddlebag link](https://saddlebagexchange.com/wow/item-data/${saddlebag_link_id})\n`
         // Uses ilvl searches for ilvl items, regular searches for others
         // use saddlebag_link_id for non ilvl items, as that corrects for pet ids
         const shoppingListLink =
@@ -1447,6 +1446,9 @@ async function runAlerts(state, progress, runOnce = false) {
             ? `https://saddlebagexchange.com/wow/ilvl-export-search?itemId=${saddlebag_link_id}&ilvl=${auction.ilvl}`
             : `https://saddlebagexchange.com/wow/export-search?itemId=${saddlebag_link_id}`
         message += `[Where to Sell](${whereToSellUrl})\n`
+        // normal item links
+        message += `[${link_label}](${link_url})\n`
+        message += `[Saddlebag link](https://saddlebagexchange.com/wow/item-data/${saddlebag_link_id})\n`
       }
       // Show target price if available (for regular items)
       const targetPriceText = formatTargetPrice(auction)
@@ -1483,21 +1485,29 @@ async function runAlerts(state, progress, runOnce = false) {
   }
 
   /**
-   * Check WoW token price and send alert if below threshold
+   * Check WoW token price and send alert if below threshold and price has changed
+   * Only alerts when the price changes to avoid duplicate alerts for the same price
    */
   async function check_token_price() {
     try {
       if (state.TOKEN_PRICE) {
         const token_price = await state.get_wow_token_price()
         if (token_price && token_price < state.TOKEN_PRICE) {
-          const token_embed = createEmbed(
-            `WoW Token Alert - ${state.REGION}`,
-            `**Token Price:** ${token_price.toLocaleString()} gold\n**Threshold:** ${state.TOKEN_PRICE.toLocaleString()} gold\n**Region:** ${
-              state.REGION
-            }`,
-            []
-          )
-          await state.send_discord_embed(token_embed)
+          // Only alert if the price has changed from the last known price
+          if (last_token_price === null || last_token_price !== token_price) {
+            const token_embed = createEmbed(
+              `WoW Token Alert - ${state.REGION}`,
+              `**Token Price:** ${token_price.toLocaleString()} gold\n**Threshold:** ${state.TOKEN_PRICE.toLocaleString()} gold\n**Region:** ${
+                state.REGION
+              }`,
+              []
+            )
+            await state.send_discord_embed(token_embed)
+            last_token_price = token_price // Store the price after sending alert
+          }
+        } else {
+          // Reset last_token_price if price is now above threshold
+          last_token_price = null
         }
       }
     } catch (err) {
