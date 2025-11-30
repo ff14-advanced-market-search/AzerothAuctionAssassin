@@ -1933,9 +1933,12 @@ async function runAlerts(state, progress, runOnce = false) {
   )
   // Include commodity endpoint for current region if TOKEN_PRICE is configured
   // -1 for NA, -2 for EU (only scan the one for current region)
+  // Only add if not already in the list to avoid duplicate scans
   if (state.TOKEN_PRICE) {
     const commodityId = state.REGION === "EU" ? -2 : -1
-    initialRealms.push(commodityId)
+    if (!initialRealms.includes(commodityId)) {
+      initialRealms.push(commodityId)
+    }
   }
   if (initialRealms.length) {
     log(
