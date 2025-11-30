@@ -1076,6 +1076,9 @@ class MegaData {
     const avoidance = []
     const ilvlAdd = {}
 
+    // Debug: capture sample rawStats structure
+    let sampleWithRawStats = null
+
     for (const [idStr, data] of Object.entries(bonus)) {
       const id = Number(idStr)
       if (isNaN(id)) continue
@@ -1099,6 +1102,11 @@ class MegaData {
 
       // Leech, avoidance, speed are in rawStats
       if (data.rawStats && Array.isArray(data.rawStats)) {
+        // Capture first sample for debugging
+        if (!sampleWithRawStats && data.rawStats.length > 0) {
+          sampleWithRawStats = { id, rawStats: data.rawStats }
+        }
+
         for (const stat of data.rawStats) {
           if (typeof stat === "object" && stat !== null) {
             const statValues = Object.values(stat)
@@ -1121,6 +1129,24 @@ class MegaData {
     this.leech_ids = new Set(leech)
     this.avoidance_ids = new Set(avoidance)
     this.ilvl_addition = ilvlAdd
+
+    // Log what we found
+    log(`[BONUS IDS] Loaded ${Object.keys(bonus).length} total bonus entries`)
+    log(`[BONUS IDS] Socket IDs: ${socket.length} (${socket.join(", ")})`)
+    log(`[BONUS IDS] Speed IDs: ${speed.length} (${speed.join(", ")})`)
+    log(`[BONUS IDS] Leech IDs: ${leech.length} (${leech.join(", ")})`)
+    log(
+      `[BONUS IDS] Avoidance IDs: ${avoidance.length} (${avoidance.join(", ")})`
+    )
+    log(`[BONUS IDS] Ilvl addition entries: ${Object.keys(ilvlAdd).length}`)
+
+    // Log sample rawStats structure for debugging
+    if (sampleWithRawStats) {
+      log(
+        `[BONUS IDS] Sample rawStats structure for bonus ID ${sampleWithRawStats.id}:`,
+        JSON.stringify(sampleWithRawStats.rawStats, null, 2)
+      )
+    }
   }
 
   /**
