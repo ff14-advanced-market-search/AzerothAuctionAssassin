@@ -390,6 +390,9 @@ class MegaData {
     // PET_NAMES from saddlebags (or backup)
     this.PET_NAMES = await this.loadPetNamesBackup()
 
+    // Load desired ilvl list (must be after setBonusIds and getIlvlItems is available)
+    this.desiredIlvlList = await this.loadDesiredIlvlList()
+
     // Get item names from desired ilvl entries
     this.buildIlvlNames()
 
