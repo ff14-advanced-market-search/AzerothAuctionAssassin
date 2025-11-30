@@ -279,12 +279,28 @@ function showView(view) {
 
 function parseNums(text) {
   if (!text) return []
-  return text
+  const values = []
+  const invalid = []
+  text
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean)
-    .map((t) => Number(t))
-    .filter((n) => !Number.isNaN(n))
+    .forEach((t) => {
+      const n = Number(t)
+      if (Number.isNaN(n)) {
+        invalid.push(t)
+      } else {
+        values.push(n)
+      }
+    })
+  if (invalid.length > 0) {
+    throw new Error(
+      `Invalid number tokens: ${invalid.join(
+        ", "
+      )}. All values must be numbers.`
+    )
+  }
+  return values
 }
 
 function updateSuggestions(inputEl, suggestEl, cache) {
@@ -1546,7 +1562,17 @@ function renderIlvlSearchResults(results) {
     btn.className = "primary"
     btn.onclick = () => {
       const form = document.getElementById("ilvl-form")
-      const current = parseNums(form.item_ids.value)
+      let current = []
+      try {
+        current = parseNums(form.item_ids.value)
+      } catch (err) {
+        // If form has invalid data, show error and clear it, then add the new item
+        showToast(
+          "Form contains invalid item IDs. Clearing and adding new item.",
+          "error"
+        )
+        form.item_ids.value = ""
+      }
       if (!current.includes(Number(row.itemID))) {
         current.push(Number(row.itemID))
       }
@@ -2000,9 +2026,10 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
 
   // Validate item IDs if provided
   const itemIdsText = form.item_ids.value.trim()
+  let itemIds = []
   if (itemIdsText) {
     try {
-      const itemIds = parseNums(itemIdsText)
+      itemIds = parseNums(itemIdsText)
       if (!itemIds.every((id) => 1 <= id && id <= 500000)) {
         const errorMsg = "All item IDs should be between 1 and 500,000."
         showToast(errorMsg, "error")
@@ -2010,8 +2037,8 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
         return
       }
     } catch (err) {
-      const errorMsg = "Item IDs should be numbers."
-      showToast(errorMsg, "error")
+      // parseNums now throws with a descriptive error message
+      showToast(err.message || "Item IDs should be numbers.", "error")
       form.item_ids.focus()
       return
     }
@@ -2042,6 +2069,20 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     return
   }
 
+  // Validate bonus_lists if provided
+  let bonusLists = []
+  const bonusListsText = form.bonus_lists.value.trim()
+  if (bonusListsText) {
+    try {
+      bonusLists = parseNums(bonusListsText)
+    } catch (err) {
+      const errorMsg = "Bonus lists should be comma-separated numbers."
+      showToast(errorMsg, "error")
+      form.bonus_lists.focus()
+      return
+    }
+  }
+
   const rule = {
     ilvl: ilvl,
     max_ilvl: maxIlvl,
@@ -2050,8 +2091,8 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     speed: form.speed.checked,
     leech: form.leech.checked,
     avoidance: form.avoidance.checked,
-    item_ids: parseNums(form.item_ids.value),
-    bonus_lists: parseNums(form.bonus_lists.value),
+    item_ids: itemIds,
+    bonus_lists: bonusLists,
     required_min_lvl: minLevel,
     required_max_lvl: maxLevel,
   }
