@@ -87,10 +87,10 @@ function getStaticDir() {
   return path.join(resourcesPath, "StaticData")
 }
 
-const DATA_DIR = getDataDir()
-const STATIC_DIR = getStaticDir()
+let DATA_DIR = getDataDir()
+let STATIC_DIR = getStaticDir()
 
-const BACKUP_DIR = path.join(DATA_DIR, "backup")
+let BACKUP_DIR = path.join(DATA_DIR, "backup")
 
 // Log paths for debugging - always log in packaged mode to help debug data directory location
 console.log("App paths:", {
@@ -106,14 +106,14 @@ console.log("App paths:", {
   STATIC_DIR: STATIC_DIR,
 })
 
-const FILES = {
+let FILES = {
   megaData: path.join(DATA_DIR, "mega_data.json"),
   desiredItems: path.join(DATA_DIR, "desired_items.json"),
   ilvlList: path.join(DATA_DIR, "desired_ilvl_list.json"),
   petIlvlList: path.join(DATA_DIR, "desired_pet_ilvl_list.json"),
 }
 
-const REALM_FILES = {
+let REALM_FILES = {
   EU: path.join(DATA_DIR, "eu-wow-connected-realm-ids.json"),
   NA: path.join(DATA_DIR, "na-wow-connected-realm-ids.json"),
   EUCLASSIC: path.join(DATA_DIR, "euclassic-wow-connected-realm-ids.json"),
@@ -434,6 +434,53 @@ function setupIpc() {
     if (logFileStream) {
       logFileStream.write(message)
     }
+  }
+
+  /**
+   * Refresh all data paths after config changes
+   * Recomputes DATA_DIR, STATIC_DIR, BACKUP_DIR, FILES, and REALM_FILES
+   * and ensures data files exist in the new location
+   */
+  function refreshDataPaths() {
+    DATA_DIR = getDataDir()
+    STATIC_DIR = getStaticDir()
+    BACKUP_DIR = path.join(DATA_DIR, "backup")
+
+    FILES = {
+      megaData: path.join(DATA_DIR, "mega_data.json"),
+      desiredItems: path.join(DATA_DIR, "desired_items.json"),
+      ilvlList: path.join(DATA_DIR, "desired_ilvl_list.json"),
+      petIlvlList: path.join(DATA_DIR, "desired_pet_ilvl_list.json"),
+    }
+
+    REALM_FILES = {
+      EU: path.join(DATA_DIR, "eu-wow-connected-realm-ids.json"),
+      NA: path.join(DATA_DIR, "na-wow-connected-realm-ids.json"),
+      EUCLASSIC: path.join(DATA_DIR, "euclassic-wow-connected-realm-ids.json"),
+      NACLASSIC: path.join(DATA_DIR, "naclassic-wow-connected-realm-ids.json"),
+      NASODCLASSIC: path.join(
+        DATA_DIR,
+        "nasodclassic-wow-connected-realm-ids.json"
+      ),
+      EUSODCLASSIC: path.join(
+        DATA_DIR,
+        "eusodclassic-wow-connected-realm-ids.json"
+      ),
+    }
+
+    // Re-ensure data files exist in new location
+    ensureDataFiles()
+
+    // Update megaAlerts paths if available
+    const resolvedPath = require.resolve("./mega-alerts.js")
+    const megaAlerts = require(resolvedPath)
+    if (megaAlerts.setPaths) {
+      megaAlerts.setPaths(DATA_DIR, STATIC_DIR)
+    }
+
+    const logMsg = `[CONFIG] Data paths refreshed to: ${DATA_DIR}\n`
+    console.log(logMsg.trim())
+    sendToLogPanel(logMsg)
   }
 
   ipcMain.handle("save-mega-data", (_event, payload) => {
@@ -984,7 +1031,11 @@ function setupIpc() {
       const config = loadConfig()
       config.customDataDir = null
       saveConfig(config)
-      return { success: true, dataDir: getDataDir() }
+
+      // Refresh all data paths to use the default directory
+      refreshDataPaths()
+
+      return { success: true, dataDir: DATA_DIR }
     }
 
     // Validate directory exists and is writable
@@ -1000,6 +1051,9 @@ function setupIpc() {
       const config = loadConfig()
       config.customDataDir = dirPath
       saveConfig(config)
+
+      // Refresh all data paths to use the new directory
+      refreshDataPaths()
 
       const logMsg = `[CONFIG] Custom data directory set to: ${dirPath}\n`
       console.log(logMsg.trim())
@@ -1039,6 +1093,9 @@ function setupIpc() {
       const config = loadConfig()
       config.customDataDir = selectedDir
       saveConfig(config)
+
+      // Refresh all data paths to use the new directory
+      refreshDataPaths()
 
       const logMsg = `[CONFIG] Custom data directory set to: ${selectedDir}\n`
       console.log(logMsg.trim())
