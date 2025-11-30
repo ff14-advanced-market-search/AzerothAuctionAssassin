@@ -899,8 +899,13 @@ class MegaData {
    */
   async get_listings_single(connectedRealmId) {
     if (connectedRealmId === -1 || connectedRealmId === -2) {
-      const commodity = await this.makeCommodityRequest()
-      return commodity?.auctions || []
+      try {
+        const commodity = await this.makeCommodityRequest()
+        return commodity?.auctions || []
+      } catch (error) {
+        logError("Commodity AH request failed", error)
+        return []
+      }
     }
     const endpoints = []
     if (this.REGION.includes("CLASSIC")) {
