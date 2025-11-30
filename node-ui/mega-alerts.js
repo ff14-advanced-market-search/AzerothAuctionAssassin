@@ -1657,8 +1657,14 @@ async function runAlerts(state, progress, runOnce = false) {
     if (required_lvl > rule.required_max_lvl) return false
 
     if (rule.bonus_lists.length && rule.bonus_lists[0] !== -1) {
-      // Check that all required bonus IDs exist in the item's bonus IDs (subset check)
+      // Python: set(DESIRED_ILVL_ITEMS["bonus_lists"]) != set(item_bonus_ids)
+      // Require exact match: sets must be equal (same size and same elements)
       const requiredBonusIds = new Set(rule.bonus_lists)
+      if (requiredBonusIds.size !== item_bonus_ids.size) {
+        return false
+      }
+      // Check that every element in requiredBonusIds exists in item_bonus_ids
+      // Since sizes are equal, this also ensures item_bonus_ids has no extra elements
       for (const requiredId of requiredBonusIds) {
         if (!item_bonus_ids.has(requiredId)) {
           return false
