@@ -1908,6 +1908,9 @@ async function runAlerts(state, progress, runOnce = false) {
         state.desiredPetIlvlList.length
       }`
     )
+    log(`[Desired items]: ${JSON.stringify(state.desiredItems)}`)
+    log(`[Desired ilvl rules]: ${JSON.stringify(state.desiredIlvlList)}`)
+    log(`[Desired pet ilvl rules]: ${JSON.stringify(state.desiredPetIlvlList)}`)
     progress("Sending alerts!")
     await runPool(
       initialRealms.map((id) => () => pull_single_realm_data(id)),
