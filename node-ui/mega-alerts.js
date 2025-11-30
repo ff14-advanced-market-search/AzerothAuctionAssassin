@@ -8,8 +8,11 @@ const { fetch } = require("undici")
 // Directory paths - will be set by setPaths() in packaged apps
 let ROOT = path.resolve(__dirname, "..")
 let DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData")
-let STATIC_DIR = path.join(ROOT, "StaticData")
+// eslint-disable-next-line no-unused-vars
+let STATIC_DIR // Set by setPaths() for API compatibility, no longer used for reading files
 const SADDLEBAG_URL = "https://api.saddlebagexchange.com"
+const RAW_GITHUB_BACKUP_PATH =
+  "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData"
 
 // Stop flag and callbacks for Electron integration
 let STOP_REQUESTED = false
@@ -353,23 +356,39 @@ class MegaData {
       this.FACTION = "all" // Retail uses cross-faction AH by default
     }
 
-    // Setup items to snipe
+    // Setup items to snipe (synchronous parts)
     this.desiredItems = this.loadDesiredItems()
-    this.desiredIlvlList = this.loadDesiredIlvlList()
     this.desiredPetIlvlList = this.loadDesiredPetIlvlList()
-    this.validateSnipeLists()
+    // desiredIlvlList will be loaded in initialize() since it needs async getIlvlItems()
+    this.desiredIlvlList = []
 
     // Load realm names (filtered by NO_RUSSIAN_REALMS if enabled)
     this.WOW_SERVER_NAMES = this.loadRealmNames()
 
+    // Initialize empty sets/objects - will be populated by async initialization
+    this.socket_ids = new Set()
+    this.speed_ids = new Set()
+    this.leech_ids = new Set()
+    this.avoidance_ids = new Set()
+    this.ilvl_addition = {}
+    this.ITEM_NAMES = {}
+    this.PET_NAMES = {}
+    this.DESIRED_ILVL_NAMES = {}
+  }
+
+  /**
+   * Async initialization - fetches data from APIs
+   * Must be called after construction before using the instance
+   */
+  async initialize() {
     // Get static lists of ALL bonus id values from raidbots
     // This is the index for all ilvl gear (sockets, leech, avoidance, speed, ilvl additions)
-    this.setBonusIds()
+    await this.setBonusIds()
 
     // Get name dictionaries - only get names of desired items to limit data
-    this.ITEM_NAMES = this.loadItemNames()
+    this.ITEM_NAMES = await this.loadItemNames()
     // PET_NAMES from saddlebags (or backup)
-    this.PET_NAMES = this.loadPetNamesBackup()
+    this.PET_NAMES = await this.loadPetNamesBackup()
 
     // Get item names from desired ilvl entries
     this.buildIlvlNames()
@@ -410,8 +429,9 @@ class MegaData {
    * Load desired ilvl list from JSON file
    * Groups items by ilvl and handles both specific item_ids and broad groups
    * Broad groups don't care about ilvl or item_ids - same generic info for all
+   * NOTE: This must be called after initialize() since it uses async getIlvlItems()
    */
-  loadDesiredIlvlList() {
+  async loadDesiredIlvlList() {
     const file = path.join(DATA_DIR, "desired_ilvl_list.json")
     const list = readJson(file, [])
     if (!Array.isArray(list) || list.length === 0) return []
@@ -469,16 +489,15 @@ class MegaData {
       const ilvl = Number(ilvlStr)
       const allIds = groups.flat()
       // Python: get_ilvl_items(ilvl, all_item_ids) - passes ilvl and item_ids
-      const { itemNames, itemIds, baseIlvls, baseReq } = this.getIlvlItems(
-        ilvl,
-        allIds
-      )
+      const { itemNames, itemIds, baseIlvls, baseReq } =
+        await this.getIlvlItems(ilvl, allIds)
       addRules(ilvl, list, Array.from(itemIds), itemNames, baseIlvls, baseReq)
     }
 
     if (broad.length) {
       // Python: get_ilvl_items() - no params, uses default ilvl=201
-      const { itemNames, itemIds, baseIlvls, baseReq } = this.getIlvlItems()
+      const { itemNames, itemIds, baseIlvls, baseReq } =
+        await this.getIlvlItems()
       addRules(0, broad, Array.from(itemIds), itemNames, baseIlvls, baseReq)
     }
 
@@ -937,105 +956,233 @@ class MegaData {
   }
 
   /**
-   * Load item names from static data file
+   * Load item names from Saddlebag API or GitHub backup
    * Only loads names for items in desiredItems list to limit data
    */
-  loadItemNames() {
+  async loadItemNames() {
     try {
-      const itemNames = readJson(path.join(STATIC_DIR, "item_names.json"), {})
+      const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemnames`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ return_all: true }),
+      })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const itemNames = await response.json()
       const filtered = {}
       Object.entries(itemNames).forEach(([k, v]) => {
         const id = Number(k)
         if (this.desiredItems[id] !== undefined) filtered[id] = v
       })
       return filtered
-    } catch {
-      return {}
+    } catch (err) {
+      logError("Failed to get item names getting backup from github:", err)
+      try {
+        const response = await fetch(
+          `${RAW_GITHUB_BACKUP_PATH}/item_names.json`
+        )
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const itemNames = await response.json()
+        const filtered = {}
+        Object.entries(itemNames).forEach(([k, v]) => {
+          const id = Number(k)
+          if (this.desiredItems[id] !== undefined) filtered[id] = v
+        })
+        return filtered
+      } catch (backupErr) {
+        logError("Failed to get item names from GitHub backup:", backupErr)
+        return {}
+      }
     }
   }
 
   /**
-   * Load pet names from static data file (backup method)
-   * Used when Blizzard API is unavailable
+   * Load pet names from Saddlebag API or GitHub backup
    */
-  loadPetNamesBackup() {
+  async loadPetNamesBackup() {
     try {
-      const petNames = readJson(path.join(STATIC_DIR, "pet_names.json"), {})
+      const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemnames`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pets: true }),
+      })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const petInfo = await response.json()
       const res = {}
-      Object.entries(petNames).forEach(([k, v]) => {
+      Object.entries(petInfo).forEach(([k, v]) => {
         const id = Number(k)
         if (!Number.isNaN(id)) res[id] = v
       })
       return res
-    } catch {
-      return {}
+    } catch (err) {
+      logError("Failed to get pet names getting backup from github:", err)
+      try {
+        const response = await fetch(`${RAW_GITHUB_BACKUP_PATH}/pet_names.json`)
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const petInfo = await response.json()
+        const res = {}
+        Object.entries(petInfo).forEach(([k, v]) => {
+          const id = Number(k)
+          if (!Number.isNaN(id)) res[id] = v
+        })
+        return res
+      } catch (backupErr) {
+        logError("Failed to get pet names from GitHub backup:", backupErr)
+        return {}
+      }
     }
   }
 
   /**
-   * Load bonus IDs from static data file
+   * Load bonus IDs from Raidbots API or GitHub backup
    * Gets static lists of ALL bonus id values from raidbots
    * This is the index for all ilvl gear (sockets, leech, avoidance, speed, ilvl additions)
+   * Processes the data similar to Python's bonus_ids.py
    */
-  setBonusIds() {
+  async setBonusIds() {
+    let bonus = {}
     try {
-      const bonus = readJson(path.join(STATIC_DIR, "bonuses.json"), {})
-      const socket = []
-      const speed = []
-      const leech = []
-      const avoidance = []
-      const ilvlAdd = {}
-      for (const [idStr, data] of Object.entries(bonus)) {
-        const id = Number(idStr)
-        if (data.socket) socket.push(id)
-        if (data.speed) speed.push(id)
-        if (data.leech) leech.push(id)
-        if (data.avoidance) avoidance.push(id)
-        if (typeof data.level === "number") ilvlAdd[id] = data.level
-      }
-      this.socket_ids = new Set(socket)
-      this.speed_ids = new Set(speed)
-      this.leech_ids = new Set(leech)
-      this.avoidance_ids = new Set(avoidance)
-      this.ilvl_addition = ilvlAdd
+      // thanks so much to Seriallos (Raidbots) and BinaryHabitat (GoblinStockAlerts) for organizing this data!
+      const response = await fetch(
+        "https://www.raidbots.com/static/data/live/bonuses.json"
+      )
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const bonusData = await response.json()
+      bonus = bonusData
     } catch (err) {
-      logError("Failed to load bonus ids", err)
-      // Initialize empty sets to prevent undefined errors
-      this.socket_ids = new Set()
-      this.speed_ids = new Set()
-      this.leech_ids = new Set()
-      this.avoidance_ids = new Set()
-      this.ilvl_addition = {}
+      logError(
+        "Failed to get raidbots bonus ids getting backup from github:",
+        err
+      )
+      try {
+        const response = await fetch(`${RAW_GITHUB_BACKUP_PATH}/bonuses.json`)
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        bonus = await response.json()
+      } catch (backupErr) {
+        logError("Failed to get bonus ids from GitHub backup:", backupErr)
+        // Initialize empty sets to prevent undefined errors
+        this.socket_ids = new Set()
+        this.speed_ids = new Set()
+        this.leech_ids = new Set()
+        this.avoidance_ids = new Set()
+        this.ilvl_addition = {}
+        return
+      }
     }
+
+    // Process bonus data similar to Python's bonus_ids.py
+    const socket = []
+    const speed = []
+    const leech = []
+    const avoidance = []
+    const ilvlAdd = {}
+
+    for (const [idStr, data] of Object.entries(bonus)) {
+      const id = Number(idStr)
+      if (isNaN(id)) continue
+
+      // Sockets are simple - check if "socket" key exists
+      if (data.socket) {
+        socket.push(id)
+      }
+
+      // Ilvl addition - items with only "id" and "level" keys
+      if (typeof data.level === "number") {
+        const keys = Object.keys(data)
+        if (
+          keys.length === 2 &&
+          keys.includes("id") &&
+          keys.includes("level")
+        ) {
+          ilvlAdd[id] = data.level
+        }
+      }
+
+      // Leech, avoidance, speed are in rawStats
+      if (data.rawStats && Array.isArray(data.rawStats)) {
+        for (const stat of data.rawStats) {
+          if (typeof stat === "object" && stat !== null) {
+            const statValues = Object.values(stat)
+            if (statValues.includes("Leech")) {
+              leech.push(id)
+            }
+            if (statValues.includes("Avoidance")) {
+              avoidance.push(id)
+            }
+            if (statValues.includes("RunSpeed")) {
+              speed.push(id)
+            }
+          }
+        }
+      }
+    }
+
+    this.socket_ids = new Set(socket)
+    this.speed_ids = new Set(speed)
+    this.leech_ids = new Set(leech)
+    this.avoidance_ids = new Set(avoidance)
+    this.ilvl_addition = ilvlAdd
   }
 
   /**
-   * Get ilvl items from static data file
+   * Get ilvl items from Saddlebag API or GitHub backup
    * Filters by ilvl and optional item_ids list
    * Returns item names, IDs, base ilvls, and base required levels
    * Matches Python behavior: if item_ids is empty, filter by ilvl (default 201)
    * If item_ids is provided, filter by item_ids and ignore ilvl
    */
-  getIlvlItems(ilvl = 201, item_ids = []) {
-    const results = readJson(path.join(STATIC_DIR, "ilvl_items.json"), {})
+  async getIlvlItems(ilvl = 201, item_ids = []) {
+    let results = {}
+    try {
+      // Python behavior: if no item_ids given, reset ilvl to 201
+      let actualIlvl = ilvl
+      if (!item_ids || item_ids.length === 0) {
+        actualIlvl = 201
+      }
 
-    // Python behavior: if no item_ids given, reset ilvl to 201 and filter by ilvl
-    // If item_ids are given, filter by item_ids and ignore ilvl
-    if (!item_ids || item_ids.length === 0) {
-      // Filter by ilvl: keep items with base ilvl >= ilvl
-      for (const key of Object.keys(results)) {
-        const itemIlvl = Number(results[key].ilvl)
-        if (itemIlvl < ilvl) {
-          delete results[key]
+      const jsonData = {
+        ilvl: actualIlvl,
+        itemQuality: -1,
+        required_level: -1,
+        item_class: [2, 4],
+        item_subclass: [-1],
+        item_ids: item_ids || [],
+      }
+
+      const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemdata`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(jsonData),
+      })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      results = await response.json()
+    } catch (err) {
+      logError("Failed to get ilvl items getting backup from github:", err)
+      try {
+        const response = await fetch(
+          `${RAW_GITHUB_BACKUP_PATH}/ilvl_items.json`
+        )
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        results = await response.json()
+      } catch (backupErr) {
+        logError("Failed to get ilvl items from GitHub backup:", backupErr)
+        return {
+          itemNames: {},
+          itemIds: new Set(),
+          baseIlvls: {},
+          baseReq: {},
         }
       }
-    } else {
-      // Filter by item_ids only
-      for (const key of Object.keys(results)) {
-        if (!item_ids.includes(Number(key))) {
-          delete results[key]
+    }
+
+    // Python behavior: if item_ids are given, filter by item_ids and ignore ilvl
+    if (item_ids && item_ids.length > 0) {
+      const filtered = {}
+      for (const [key, value] of Object.entries(results)) {
+        if (item_ids.includes(Number(key))) {
+          filtered[key] = value
         }
       }
+      results = filtered
     }
 
     const itemNames = {}
@@ -1807,6 +1954,8 @@ async function main() {
   STOP_REQUESTED = false
 
   const state = new MegaData()
+  // Initialize async data (bonus IDs, item names, pet names, ilvl items)
+  await state.initialize()
   console.log(
     `Starting mega-alerts-js for region=${state.REGION}, items=${
       Object.keys(state.desiredItems).length
