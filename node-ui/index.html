@@ -367,7 +367,12 @@
               title="Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
             >
               Faction (classic)
-              <input name="FACTION" type="text" />
+              <select name="FACTION">
+                <option value="all">all</option>
+                <option value="alliance">alliance</option>
+                <option value="horde">horde</option>
+                <option value="booty bay">booty bay</option>
+              </select>
             </label>
             <label for="extra-alerts-trigger">
               Extra alerts (minutes 1-59)
