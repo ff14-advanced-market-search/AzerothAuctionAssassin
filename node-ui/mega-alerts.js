@@ -1519,8 +1519,6 @@ async function runAlerts(state, progress, runOnce = false) {
   function clean_listing_data(auctions, connected_id) {
     const all_ah_buyouts = {}
     const all_ah_bids = {}
-    const pet_ah_buyouts = {}
-    const pet_ah_bids = {}
     const ilvl_ah_buyouts = []
     const pet_ilvl_ah_buyouts = []
 
@@ -1583,8 +1581,6 @@ async function runAlerts(state, progress, runOnce = false) {
       !(
         Object.keys(all_ah_buyouts).length ||
         Object.keys(all_ah_bids).length ||
-        Object.keys(pet_ah_buyouts).length ||
-        Object.keys(pet_ah_bids).length ||
         ilvl_ah_buyouts.length ||
         pet_ilvl_ah_buyouts.length
       )
@@ -1599,8 +1595,6 @@ async function runAlerts(state, progress, runOnce = false) {
       all_ah_buyouts,
       all_ah_bids,
       connected_id,
-      pet_ah_buyouts,
-      pet_ah_bids,
       ilvl_ah_buyouts,
       pet_ilvl_ah_buyouts
     )
@@ -1610,8 +1604,6 @@ async function runAlerts(state, progress, runOnce = false) {
     all_ah_buyouts,
     all_ah_bids,
     connected_id,
-    pet_ah_buyouts,
-    pet_ah_bids,
     ilvl_ah_buyouts,
     pet_ilvl_ah_buyouts
   ) {
