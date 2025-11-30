@@ -1931,9 +1931,11 @@ async function runAlerts(state, progress, runOnce = false) {
   const initialRealms = Array.from(
     new Set(Object.values(state.WOW_SERVER_NAMES))
   )
-  // Include commodity/token IDs (-1, -2) if TOKEN_PRICE is configured
+  // Include commodity endpoint for current region if TOKEN_PRICE is configured
+  // -1 for NA, -2 for EU (only scan the one for current region)
   if (state.TOKEN_PRICE) {
-    initialRealms.push(-1, -2)
+    const commodityId = state.REGION === "EU" ? -2 : -1
+    initialRealms.push(commodityId)
   }
   if (initialRealms.length) {
     log(
@@ -1967,6 +1969,7 @@ async function runAlerts(state, progress, runOnce = false) {
     // Find realms that match the scan time window
     // Scan starts at lastUploadMinute + SCAN_TIME_MIN
     // Scan ends at lastUploadMinute + SCAN_TIME_MAX
+    // Commodities are included automatically if they're in upload_timers and match the time window
     let matching_realms = state
       .get_upload_time_list()
       .filter(
@@ -1976,24 +1979,13 @@ async function runAlerts(state, progress, runOnce = false) {
       )
       .map((r) => r.dataSetID)
 
-    // Include commodity/token IDs (-1, -2) if TOKEN_PRICE is configured
-    // These are always scanned when configured, regardless of upload time
-    if (state.TOKEN_PRICE) {
-      if (!matching_realms.includes(-1)) matching_realms.push(-1)
-      if (!matching_realms.includes(-2)) matching_realms.push(-2)
-    }
-
     // Check for extra alerts (JSON array of minutes to trigger on)
     if (state.EXTRA_ALERTS) {
       try {
         const extra = JSON.parse(state.EXTRA_ALERTS)
         if (extra.includes(current_min)) {
+          // Include all realms from upload_timers (commodities included if they've been scanned)
           matching_realms = state.get_upload_time_list().map((r) => r.dataSetID)
-          // Include commodity/token IDs (-1, -2) if TOKEN_PRICE is configured
-          if (state.TOKEN_PRICE) {
-            if (!matching_realms.includes(-1)) matching_realms.push(-1)
-            if (!matching_realms.includes(-2)) matching_realms.push(-2)
-          }
         }
       } catch {
         // Ignore errors when checking extra alert times
