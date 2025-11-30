@@ -333,7 +333,7 @@ class MegaData {
     this.REGION = this.cfg.WOW_REGION
 
     // Set optional configuration variables with defaults
-    this.THREADS = this.normalizeInt(this.cfg.MEGA_THREADS, 48) // Default to 48 threads
+    this.THREADS = Math.max(1, this.normalizeInt(this.cfg.MEGA_THREADS, 48)) // Default to 48 threads, min 1
     this.SCAN_TIME_MIN = this.normalizeInt(this.cfg.SCAN_TIME_MIN, 1) // Minutes before data update to start scans
     this.SCAN_TIME_MAX = this.normalizeInt(this.cfg.SCAN_TIME_MAX, 3) // Minutes after data update to stop scans
     this.REFRESH_ALERTS = Boolean(this.cfg.REFRESH_ALERTS) // Refresh alerts every 1 hour
@@ -1285,17 +1285,20 @@ function create_oribos_exchange_item_link(realm_name, item_id, region) {
  * Uses a pool pattern to limit concurrent executions
  */
 async function runPool(tasks, concurrency) {
+  // Ensure concurrency is at least 1 to prevent Promise.race([]) hang
+  const limit = Math.max(1, Number.isFinite(concurrency) ? concurrency : 1)
+
   const results = []
   const executing = []
   for (const task of tasks) {
     const p = task()
     results.push(p)
-    if (concurrency <= tasks.length) {
+    if (limit <= tasks.length) {
       const e = p.then(() => {
         executing.splice(executing.indexOf(e), 1)
       })
       executing.push(e)
-      if (executing.length >= concurrency) {
+      if (executing.length >= limit) {
         await Promise.race(executing)
       }
     }
