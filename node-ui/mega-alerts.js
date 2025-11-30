@@ -1000,6 +1000,12 @@ class MegaData {
       this.ilvl_addition = ilvlAdd
     } catch (err) {
       logError("Failed to load bonus ids", err)
+      // Initialize empty sets to prevent undefined errors
+      this.socket_ids = new Set()
+      this.speed_ids = new Set()
+      this.leech_ids = new Set()
+      this.avoidance_ids = new Set()
+      this.ilvl_addition = {}
     }
   }
 
@@ -1391,6 +1397,9 @@ async function runAlerts(state, progress, runOnce = false) {
       auction.item.modifiers?.find((m) => m.type === 9)?.value ??
       rule.base_required_levels[auction.item.id]
 
+    // Check for intersection of bonus_ids with socket/speed/leech/avoidance IDs
+    // Python: len(item_bonus_ids & socket_ids) != 0
+    // This returns true if any bonus ID matches the stat's bonus IDs
     const tertiary_stats = {
       sockets: intersection(item_bonus_ids, state.socket_ids),
       leech: intersection(item_bonus_ids, state.leech_ids),
@@ -1404,6 +1413,11 @@ async function runAlerts(state, progress, runOnce = false) {
       speed: rule.speed,
     }
 
+    // Python: if any(desired_tertiary_stats):
+    //         for stat, desired in desired_tertiary_stats.items():
+    //             if desired and not tertiary_stats.get(stat, False):
+    //                 return False
+    // This checks that ALL desired stats are present in the item
     if (Object.values(desired).some(Boolean)) {
       for (const [stat, want] of Object.entries(desired)) {
         if (want && !tertiary_stats[stat]) return false
@@ -1703,8 +1717,16 @@ async function runAlerts(state, progress, runOnce = false) {
     return results
   }
 
+  /**
+   * Check if two sets have any common elements (intersection)
+   * Returns true if any element in setA exists in setB, false otherwise
+   * This matches Python's: len(item_bonus_ids & socket_ids) != 0
+   */
   function intersection(setA, setB) {
-    for (const v of setA) if (setB.has(v)) return true
+    if (!setA || !setB) return false
+    for (const v of setA) {
+      if (setB.has(v)) return true
+    }
     return false
   }
 
