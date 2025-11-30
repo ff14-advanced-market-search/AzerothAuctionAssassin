@@ -1033,6 +1033,16 @@ function readExtraAlerts() {
  * @param {Function} labelFn - Optional function that receives raw (id, price) and returns HTML string. Must escape HTML internally.
  * @param {Function} onClick - Optional click handler
  */
+/**
+ * Render a key-value list with optional label function
+ * @param {HTMLElement} target - Target element to render into
+ * @param {Object} data - Key-value data object
+ * @param {Function} onRemove - Callback for remove button
+ * @param {(labelEl: HTMLElement, id: string, price: string) => void} labelFn
+ *   Optional function that receives the label container and raw (id, price)
+ *   and is responsible for safely populating the DOM (using textContent, etc.).
+ * @param {Function} onClick - Optional click handler
+ */
 function renderKVList(target, data, onRemove, labelFn, onClick) {
   target.innerHTML = ""
   const entries = Object.entries(data)
@@ -1047,10 +1057,10 @@ function renderKVList(target, data, onRemove, labelFn, onClick) {
     const li = document.createElement("li")
     const labelDiv = document.createElement("div")
     if (labelFn) {
-      // labelFn receives raw id and price, must escape HTML internally
-      labelDiv.innerHTML = labelFn(String(id), String(price))
+      // labelFn populates labelDiv using safe DOM APIs
+      labelFn(labelDiv, String(id), String(price))
     } else {
-      // Default: escape id and price for safety
+      // Default: use safe DOM APIs
       const strong = document.createElement("strong")
       strong.textContent = String(id)
       labelDiv.appendChild(strong)
@@ -1106,13 +1116,27 @@ function renderItemList() {
     itemList,
     filteredData,
     removeItem,
-    (itemId, p) => {
-      // labelFn receives raw values, must escape HTML internally
-      const name = escapeHtml(getItemName(itemId))
-      const escapedId = escapeHtml(String(itemId))
-      const escapedPrice = escapeHtml(String(p))
-      const itemLink = `https://www.wowhead.com/item=${itemId}`
-      return `<strong><a href="${itemLink}" target="_blank" rel="noopener noreferrer" data-wowhead="item=${itemId}">${escapedId}</a> • ${name}</strong> → ${escapedPrice}`
+    (labelEl, itemId, p) => {
+      const name = getItemName(itemId) || "Unknown item name"
+      const idNum = Number.parseInt(itemId, 10)
+
+      const strong = document.createElement("strong")
+      const link = document.createElement("a")
+
+      // Guard against unexpected non-numeric IDs
+      const safeId = Number.isFinite(idNum) ? String(idNum) : String(itemId)
+
+      link.href = `https://www.wowhead.com/item=${safeId}`
+      link.target = "_blank"
+      link.rel = "noopener noreferrer"
+      link.setAttribute("data-wowhead", `item=${safeId}`)
+      link.textContent = safeId
+
+      strong.appendChild(link)
+      strong.appendChild(document.createTextNode(` • ${name}`))
+
+      labelEl.appendChild(strong)
+      labelEl.appendChild(document.createTextNode(` → ${String(p)}`))
     },
     handleItemClick
   )
