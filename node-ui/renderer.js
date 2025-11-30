@@ -603,12 +603,20 @@ async function handlePasteAAA(target, btn) {
           showToast(validation.error, "error", 5000)
           return
         }
-        // If legacy format was converted, use the converted data
+        // Legacy object format
         if (validation.converted) {
           parsed = validation.converted
           appendLog(
             `Converted legacy format: ${validation.converted.length} pet rules imported\n`
           )
+          // New array format
+        } else if (validation.validRules) {
+          parsed = validation.validRules
+          if (validation.invalidCount) {
+            appendLog(
+              `Skipped ${validation.invalidCount} invalid pet rules during import\n`
+            )
+          }
         }
       }
 
