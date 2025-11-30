@@ -247,7 +247,7 @@ function formatTargetPrice(auction) {
   const goldBelow = Math.round(target - actual)
   return `\`target_price\`: ${
     auction.targetPrice
-  }\n⚡ Below ${percentBelow}% / ${goldBelow.toLocaleString()}g ⚡\n`
+  }\n\`Below_Target\`: ${percentBelow}% / ${goldBelow.toLocaleString()}g\n`
 }
 
 /**
@@ -1435,10 +1435,16 @@ async function runAlerts(state, progress, runOnce = false) {
       if (!state.NO_LINKS) {
         message += `[${link_label}](${link_url})\n`
         message += `[Saddlebag link](https://saddlebagexchange.com/wow/item-data/${saddlebag_link_id})\n`
-        // Use ilvl-export-search for ilvl items, regular export-search for others
+        // Uses ilvl searches for ilvl items, regular searches for others
+        // use saddlebag_link_id for non ilvl items, as that corrects for pet ids
+        const shoppingListLink =
+          "ilvl" in auction && auction.ilvl
+            ? `https://saddlebagexchange.com/wow/ilvl-shopping-list?itemId=${saddlebag_link_id}&desiredMinIlvl=${auction.ilvl}`
+            : `https://saddlebagexchange.com/wow/shopping-list?itemId=${saddlebag_link_id}`
+        message += `[Shopping List](${shoppingListLink})\n`
         const whereToSellUrl =
           "ilvl" in auction && auction.ilvl
-            ? `https://saddlebagexchange.com/wow/ilvl-export-search?itemId=${auction.itemID}&ilvl=${auction.ilvl}`
+            ? `https://saddlebagexchange.com/wow/ilvl-export-search?itemId=${saddlebag_link_id}&ilvl=${auction.ilvl}`
             : `https://saddlebagexchange.com/wow/export-search?itemId=${saddlebag_link_id}`
         message += `[Where to Sell](${whereToSellUrl})\n`
       }
