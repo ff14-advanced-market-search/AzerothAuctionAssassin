@@ -2505,6 +2505,27 @@ startBtn.addEventListener("click", async () => {
     return // Validation failed, don't start
   }
 
+  // Check if realm list is empty and reset it if needed
+  const region = state.megaData?.WOW_REGION || "EU"
+  const realms = state.realmLists[region] || {}
+  const realmCount = Object.keys(realms).length
+
+  if (realmCount === 0) {
+    // Realm list is empty, reset it to default before starting
+    if (!window.REALM_DATA) {
+      console.error("Realm data not loaded")
+      return
+    }
+    const defaultList = window.REALM_DATA.getRealmListByRegion(region)
+    if (!defaultList) {
+      console.error(`No default list for region: ${region}`)
+      return
+    }
+    state.realmLists[region] = { ...defaultList }
+    await saveRealmList(region)
+    renderRealmList()
+  }
+
   await window.aaa.runMega()
   setRunning(true)
 })
