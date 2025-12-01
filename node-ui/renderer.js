@@ -1512,6 +1512,10 @@ function renderItemSearchResults(results) {
     const div = document.createElement("div")
     div.className = "search-result"
 
+    // Apply discount percentage to the average price
+    const pct = discountPercent() / 100
+    const recommendedPrice = Math.round(Number(row.desiredPrice || 0) * pct)
+
     const innerDiv = document.createElement("div")
     const nameDiv = document.createElement("div")
     const strong = document.createElement("strong")
@@ -1521,7 +1525,7 @@ function renderItemSearchResults(results) {
 
     const metaDiv = document.createElement("div")
     metaDiv.className = "meta"
-    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${row.desiredPrice}`
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${recommendedPrice}`
     innerDiv.appendChild(metaDiv)
 
     div.appendChild(innerDiv)
@@ -1531,7 +1535,7 @@ function renderItemSearchResults(results) {
     btn.onclick = () => {
       const form = document.getElementById("item-form")
       form.id.value = row.itemID
-      form.price.value = row.desiredPrice
+      form.price.value = recommendedPrice
       ensureItemName(String(row.itemID), row.itemName)
       showView("items")
     }
@@ -1569,6 +1573,10 @@ function renderIlvlSearchResults(results) {
     const div = document.createElement("div")
     div.className = "search-result"
 
+    // Apply discount percentage to the average price
+    const pct = discountPercent() / 100
+    const recommendedPrice = Math.round(Number(row.desiredPrice || 0) * pct)
+
     const innerDiv = document.createElement("div")
     const nameDiv = document.createElement("div")
     const strong = document.createElement("strong")
@@ -1578,7 +1586,7 @@ function renderIlvlSearchResults(results) {
 
     const metaDiv = document.createElement("div")
     metaDiv.className = "meta"
-    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${row.desiredPrice}`
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${recommendedPrice}`
     innerDiv.appendChild(metaDiv)
 
     div.appendChild(innerDiv)
@@ -1603,7 +1611,7 @@ function renderIlvlSearchResults(results) {
       }
       form.item_ids.value = current.join(", ")
       if (!form.buyout.value || Number(form.buyout.value) === 0) {
-        form.buyout.value = row.desiredPrice
+        form.buyout.value = recommendedPrice
       }
       ensureItemName(String(row.itemID), row.itemName)
       showView("ilvl")
@@ -1681,6 +1689,10 @@ function renderPetSearchResults(results) {
     const div = document.createElement("div")
     div.className = "search-result"
 
+    // Apply discount percentage to the average price
+    const pct = discountPercent() / 100
+    const recommendedPrice = Math.round(Number(row.desiredPrice || 0) * pct)
+
     const innerDiv = document.createElement("div")
     const nameDiv = document.createElement("div")
     const strong = document.createElement("strong")
@@ -1690,7 +1702,7 @@ function renderPetSearchResults(results) {
 
     const metaDiv = document.createElement("div")
     metaDiv.className = "meta"
-    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${row.desiredPrice}`
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${recommendedPrice}`
     innerDiv.appendChild(metaDiv)
 
     div.appendChild(innerDiv)
@@ -1700,7 +1712,7 @@ function renderPetSearchResults(results) {
     btn.onclick = () => {
       const form = document.getElementById("pet-ilvl-form")
       form.petID.value = row.itemID
-      form.price.value = row.desiredPrice
+      form.price.value = recommendedPrice
       ensurePetName(String(row.itemID), row.itemName)
       showView("pet-ilvl")
     }
