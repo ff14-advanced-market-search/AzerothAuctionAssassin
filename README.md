@@ -15,9 +15,47 @@ If the EXE doesnt install right try the [Installation with python](https://githu
 
 # Video Guides
 
+#### How to Install
+
 [![How to install](https://img.youtube.com/vi/BbP7NTPohIU/0.jpg)](https://www.youtube.com/watch?v=BbP7NTPohIU)
 
+#### How to Make Snipe Lists
+
 [<img width="500" alt="Screenshot 2025-01-12 at 12 31 57 PM" src="https://github.com/user-attachments/assets/3b96a1f0-91a9-4e13-a86a-f255ce8c1ae9" />](https://www.youtube.com/watch?v=7mtAEN6HUN0)
+
+#### AAA 2.0.0 UI
+
+[<img width="500" alt="Saddlebag-Gold-Capped" src="https://github.com/user-attachments/assets/649eced4-09ef-49f3-9da2-2259a3ef5f41" />](https://www.youtube.com/watch?v=uBrrO8rLDSA)
+
+# Desktop GUI 
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/ba8d087e-b5bc-4229-9033-9f39d071a868" />
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/6f1ee039-b39a-48a3-8304-48efbbdb115d" />
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/900ed28d-f134-460b-8632-ca168e956e88" />
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/60ee2d8f-2d66-489f-8025-3fb35dd12caa" />
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/1db130d9-f8bc-4908-8501-d1c0b902251d" />
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/e508a8ab-1849-4781-8f87-2b46fc67334f" />
+
+
+# Alert Example
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/6982a201-a7d5-41e8-b8cf-9127356c5ba1" />
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/6c7fbc5d-893c-4126-aa8c-9d402c744dd9" />
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/37b6ccd2-5811-47e2-8feb-526c9ad60e44" />
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/de09ccca-6158-428f-91a1-037a0747976d" />
+
+Old message format, but cheap Lariat Sniping from dragonflight sniping the most valuable recipes for 1/10th normal cost!
+
+<img width="601" alt="image" src="https://user-images.githubusercontent.com/17516896/224507162-53513e8a-69ab-41e2-a5d5-ea4e51a9fc89.png">
+
 
 # Node GUI (Electron)
 
@@ -50,29 +88,12 @@ npm run build:win
 .\dist-electron\"Azeroth Auction Assassin Setup 2.0.0.exe"
 ```
 
-
-# Desktop GUI 
-
-<img width="500" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/9f1c7e15-6b07-4b56-83ba-b14b998d6ec7">
-
-<img width="500" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/760e8491-1861-4ee5-91ef-ffcddacbac43">
-
-# Alert Example
-
-Latest version:
-
-<img width="543" alt="image" src="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/assets/17516896/c3d93a48-9c5f-4ab4-9d9b-1dbcbcce0d4e">
-
-Old message format, but cheap Lariat Sniping:
-
-<img width="601" alt="image" src="https://user-images.githubusercontent.com/17516896/224507162-53513e8a-69ab-41e2-a5d5-ea4e51a9fc89.png">
-
 # Description 
 
 We support all game modes including: 
 - Retail
-- Classic
-- Season of Discovery Classic
+- Classic (will be available when blizzard fixes their api)
+- Season of Discovery Classic (will be available when blizzard fixes their api)
 
 **Please dontate to our patreon so we can keep the project running.  If you need help setting it up, our creator will personally help any patreon subscribers.**
 
