@@ -724,16 +724,12 @@ async function handlePastePBSItems(btn) {
 async function handleCopyPBSItems(btn) {
   await fetchItemNames()
   const entries = []
-  let first = true
   for (const [id, price] of Object.entries(state.desiredItems)) {
     const name = getItemName(id)
-    const prefix = first ? "Snipe?" : ""
-    entries.push(
-      `${prefix}"${name}";;0;0;0;0;0;0;0;${Math.trunc(Number(price))};;#;;`
-    )
-    first = false
+    entries.push(`"${name}";;0;0;0;0;0;0;0;${Math.trunc(Number(price))};;#;;`)
   }
-  const out = entries.join("")
+  const timestamp = Date.now()
+  const out = `AAA PBS List ${timestamp}^${entries.join("^")}`
   await navigator.clipboard.writeText(out)
   appendLog("Copied PBS items string to clipboard\n")
   flashButton(btn, "Copied!")
@@ -803,23 +799,21 @@ async function handlePastePBSIlvl(btn) {
 async function handleCopyPBSIlvl(btn) {
   await fetchItemNames()
   const entries = []
-  let first = true
   for (const rule of state.ilvlList) {
     const ids = rule.item_ids && rule.item_ids.length ? rule.item_ids : [0]
     for (const id of ids) {
       const name = getItemName(id)
-      const prefix = first ? "Snipe?" : ""
       entries.push(
-        `${prefix}"${name}";;${rule.ilvl};${rule.max_ilvl};${
+        `"${name}";;${rule.ilvl};${rule.max_ilvl};${
           rule.required_min_lvl || 0
         };${rule.required_max_lvl || 0};0;0;0;${Math.trunc(
           Number(rule.buyout) || 0
         )};;#;;`
       )
-      first = false
     }
   }
-  const out = entries.join("")
+  const timestamp = Date.now()
+  const out = `AAA PBS Ilvl List ${timestamp}^${entries.join("^")}`
   await navigator.clipboard.writeText(out)
   appendLog("Copied PBS ilvl string to clipboard\n")
   flashButton(btn, "Copied!")
@@ -867,17 +861,14 @@ async function handlePastePBSPetIlvl(btn) {
 async function handleCopyPBSPetIlvl(btn) {
   await fetchPetNames()
   const entries = []
-  for (let i = 0; i < state.petIlvlList.length; i++) {
-    const rule = state.petIlvlList[i]
+  for (const rule of state.petIlvlList) {
     const name = getPetName(rule.petID)
-    const prefix = i === 0 ? "Snipe^" : ""
     entries.push(
-      `${prefix}"${name}";;0;0;0;0;0;0;0;${Math.trunc(
-        Number(rule.price) || 0
-      )};;#;;`
+      `"${name}";;0;0;0;0;0;0;0;${Math.trunc(Number(rule.price) || 0)};;#;;`
     )
   }
-  const out = entries.join("")
+  const timestamp = Date.now()
+  const out = `AAA PBS Pet Ilvl List ${timestamp}^${entries.join("^")}`
   await navigator.clipboard.writeText(out)
   appendLog("Copied PBS pet string to clipboard\n")
   flashButton(btn, "Copied!")
@@ -2512,6 +2503,27 @@ startBtn.addEventListener("click", async () => {
   const saved = await saveMegaData()
   if (!saved) {
     return // Validation failed, don't start
+  }
+
+  // Check if realm list is empty and reset it if needed
+  const region = state.megaData?.WOW_REGION || "EU"
+  const realms = state.realmLists[region] || {}
+  const realmCount = Object.keys(realms).length
+
+  if (realmCount === 0) {
+    // Realm list is empty, reset it to default before starting
+    if (!window.REALM_DATA) {
+      console.error("Realm data not loaded")
+      return
+    }
+    const defaultList = window.REALM_DATA.getRealmListByRegion(region)
+    if (!defaultList) {
+      console.error(`No default list for region: ${region}`)
+      return
+    }
+    state.realmLists[region] = { ...defaultList }
+    await saveRealmList(region)
+    renderRealmList()
   }
 
   await window.aaa.runMega()
