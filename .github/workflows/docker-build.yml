@@ -3,9 +3,9 @@ name: docker-build
 on:
   push:
     branches:
-      - 'main'
+      - "main"
     paths-ignore:
-      - '**/README.md'
+      - "**/README.md"
 
 jobs:
   docker:

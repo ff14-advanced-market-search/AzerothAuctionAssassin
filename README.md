@@ -12,7 +12,6 @@ This tool enables you to quickly find the most amazing deals **across all realms
 
 If the EXE doesnt install right try the [Installation with python](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Install-with-Python).
 
-
 # Video Guides
 
 #### How to Install
@@ -27,7 +26,7 @@ If the EXE doesnt install right try the [Installation with python](https://githu
 
 [<img width="500" alt="Saddlebag-Gold-Capped" src="https://github.com/user-attachments/assets/649eced4-09ef-49f3-9da2-2259a3ef5f41" />](https://www.youtube.com/watch?v=uBrrO8rLDSA)
 
-# Desktop GUI 
+# Desktop GUI
 
 <img width="500" alt="image" src="https://github.com/user-attachments/assets/ba8d087e-b5bc-4229-9033-9f39d071a868" />
 
@@ -40,7 +39,6 @@ If the EXE doesnt install right try the [Installation with python](https://githu
 <img width="500" alt="image" src="https://github.com/user-attachments/assets/1db130d9-f8bc-4908-8501-d1c0b902251d" />
 
 <img width="500" alt="image" src="https://github.com/user-attachments/assets/e508a8ab-1849-4781-8f87-2b46fc67334f" />
-
 
 # Alert Example
 
@@ -56,7 +54,6 @@ Old message format, but cheap Lariat Sniping from dragonflight sniping the most 
 
 <img width="601" alt="image" src="https://user-images.githubusercontent.com/17516896/224507162-53513e8a-69ab-41e2-a5d5-ea4e51a9fc89.png">
 
-
 # Node GUI (Electron)
 
 Prefer to avoid the PyQt desktop UI? A lightweight Node/Electron GUI manages the same JSON configs and can launch the scanner.
@@ -68,7 +65,7 @@ Prefer to avoid the PyQt desktop UI? A lightweight Node/Electron GUI manages the
 ```bash
 npm install
 npm start
-# if it doesn't start 
+# if it doesn't start
 #  rm -rf node_modules/
 ```
 
@@ -88,14 +85,15 @@ npm run build:win
 .\dist-electron\"Azeroth Auction Assassin Setup 2.0.0.exe"
 ```
 
-# Description 
+# Description
 
-We support all game modes including: 
+We support all game modes including:
+
 - Retail
 - Classic (will be available when blizzard fixes their api)
 - Season of Discovery Classic (will be available when blizzard fixes their api)
 
-**Please dontate to our patreon so we can keep the project running.  If you need help setting it up, our creator will personally help any patreon subscribers.**
+**Please dontate to our patreon so we can keep the project running. If you need help setting it up, our creator will personally help any patreon subscribers.**
 
 https://www.patreon.com/indopan
 

@@ -3,9 +3,7 @@
     {
       "dataSetID": -2,
       "tableName": "EU_retail_commodityListings",
-      "dataSetName": [
-        "EU Commodities"
-      ],
+      "dataSetName": ["EU Commodities"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -14,9 +12,7 @@
     {
       "dataSetID": -1,
       "tableName": "NA_retail_commodityListings",
-      "dataSetName": [
-        "NA Commodities"
-      ],
+      "dataSetName": ["NA Commodities"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:46 GMT",
       "lastUploadMinute": 18,
@@ -25,10 +21,7 @@
     {
       "dataSetID": 4,
       "tableName": "4_singleMinPrices",
-      "dataSetName": [
-        "Kilrogg",
-        "Winterhoof"
-      ],
+      "dataSetName": ["Kilrogg", "Winterhoof"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -37,9 +30,7 @@
     {
       "dataSetID": 5,
       "tableName": "5_singleMinPrices",
-      "dataSetName": [
-        "Proudmoore"
-      ],
+      "dataSetName": ["Proudmoore"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -48,9 +39,7 @@
     {
       "dataSetID": 9,
       "tableName": "9_singleMinPrices",
-      "dataSetName": [
-        "Kil'jaeden"
-      ],
+      "dataSetName": ["Kil'jaeden"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -59,9 +48,7 @@
     {
       "dataSetID": 11,
       "tableName": "11_singleMinPrices",
-      "dataSetName": [
-        "Tichondrius"
-      ],
+      "dataSetName": ["Tichondrius"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -70,11 +57,7 @@
     {
       "dataSetID": 12,
       "tableName": "12_singleMinPrices",
-      "dataSetName": [
-        "Silver Hand",
-        "Thorium Brotherhood",
-        "Farstriders"
-      ],
+      "dataSetName": ["Silver Hand", "Thorium Brotherhood", "Farstriders"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -83,10 +66,7 @@
     {
       "dataSetID": 47,
       "tableName": "47_singleMinPrices",
-      "dataSetName": [
-        "Eitrigg",
-        "Shu'halo"
-      ],
+      "dataSetName": ["Eitrigg", "Shu'halo"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -95,12 +75,7 @@
     {
       "dataSetID": 52,
       "tableName": "52_singleMinPrices",
-      "dataSetName": [
-        "Alleria",
-        "Exodar",
-        "Medivh",
-        "Khadgar"
-      ],
+      "dataSetName": ["Alleria", "Exodar", "Medivh", "Khadgar"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:47 GMT",
       "lastUploadMinute": 17,
@@ -125,10 +100,7 @@
     {
       "dataSetID": 54,
       "tableName": "54_singleMinPrices",
-      "dataSetName": [
-        "Blackhand",
-        "Galakrond"
-      ],
+      "dataSetName": ["Blackhand", "Galakrond"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:45 GMT",
       "lastUploadMinute": 17,
@@ -137,10 +109,7 @@
     {
       "dataSetID": 55,
       "tableName": "55_singleMinPrices",
-      "dataSetName": [
-        "Whisperwind",
-        "Dentarg"
-      ],
+      "dataSetName": ["Whisperwind", "Dentarg"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:45 GMT",
       "lastUploadMinute": 17,
@@ -149,9 +118,7 @@
     {
       "dataSetID": 57,
       "tableName": "57_singleMinPrices",
-      "dataSetName": [
-        "Illidan"
-      ],
+      "dataSetName": ["Illidan"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:55 GMT",
       "lastUploadMinute": 17,
@@ -160,9 +127,7 @@
     {
       "dataSetID": 58,
       "tableName": "58_singleMinPrices",
-      "dataSetName": [
-        "Stormreaver"
-      ],
+      "dataSetName": ["Stormreaver"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:45 GMT",
       "lastUploadMinute": 17,
@@ -171,9 +136,7 @@
     {
       "dataSetID": 60,
       "tableName": "60_singleMinPrices",
-      "dataSetName": [
-        "Stormrage"
-      ],
+      "dataSetName": ["Stormrage"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:53 GMT",
       "lastUploadMinute": 17,
@@ -182,9 +145,7 @@
     {
       "dataSetID": 61,
       "tableName": "61_singleMinPrices",
-      "dataSetName": [
-        "Zul'jin"
-      ],
+      "dataSetName": ["Zul'jin"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:50 GMT",
       "lastUploadMinute": 17,
@@ -193,10 +154,7 @@
     {
       "dataSetID": 63,
       "tableName": "63_singleMinPrices",
-      "dataSetName": [
-        "Durotan",
-        "Ysera"
-      ],
+      "dataSetName": ["Durotan", "Ysera"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:46 GMT",
       "lastUploadMinute": 17,
@@ -205,10 +163,7 @@
     {
       "dataSetID": 64,
       "tableName": "64_singleMinPrices",
-      "dataSetName": [
-        "Bloodhoof",
-        "Duskwood"
-      ],
+      "dataSetName": ["Bloodhoof", "Duskwood"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:45 GMT",
       "lastUploadMinute": 17,
@@ -232,9 +187,7 @@
     {
       "dataSetID": 69,
       "tableName": "69_singleMinPrices",
-      "dataSetName": [
-        "Arthas"
-      ],
+      "dataSetName": ["Arthas"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:35 GMT",
       "lastUploadMinute": 17,
@@ -260,9 +213,7 @@
     {
       "dataSetID": 73,
       "tableName": "73_singleMinPrices",
-      "dataSetName": [
-        "Bleeding Hollow"
-      ],
+      "dataSetName": ["Bleeding Hollow"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:36 GMT",
       "lastUploadMinute": 17,
@@ -271,10 +222,7 @@
     {
       "dataSetID": 75,
       "tableName": "75_singleMinPrices",
-      "dataSetName": [
-        "Argent Dawn",
-        "The Scryers"
-      ],
+      "dataSetName": ["Argent Dawn", "The Scryers"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:46 GMT",
       "lastUploadMinute": 17,
@@ -283,9 +231,7 @@
     {
       "dataSetID": 76,
       "tableName": "76_singleMinPrices",
-      "dataSetName": [
-        "Sargeras"
-      ],
+      "dataSetName": ["Sargeras"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:38 GMT",
       "lastUploadMinute": 17,
@@ -311,12 +257,7 @@
     {
       "dataSetID": 78,
       "tableName": "78_singleMinPrices",
-      "dataSetName": [
-        "Magtheridon",
-        "Anetheron",
-        "Ysondre",
-        "Altar of Storms"
-      ],
+      "dataSetName": ["Magtheridon", "Anetheron", "Ysondre", "Altar of Storms"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:46 GMT",
       "lastUploadMinute": 17,
@@ -379,10 +320,7 @@
     {
       "dataSetID": 99,
       "tableName": "99_singleMinPrices",
-      "dataSetName": [
-        "Llane",
-        "Arygos"
-      ],
+      "dataSetName": ["Llane", "Arygos"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:46 GMT",
       "lastUploadMinute": 17,
@@ -391,9 +329,7 @@
     {
       "dataSetID": 100,
       "tableName": "100_singleMinPrices",
-      "dataSetName": [
-        "Earthen Ring"
-      ],
+      "dataSetName": ["Earthen Ring"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:46 GMT",
       "lastUploadMinute": 17,
@@ -418,10 +354,7 @@
     {
       "dataSetID": 106,
       "tableName": "106_singleMinPrices",
-      "dataSetName": [
-        "Aggramar",
-        "Fizzcrank"
-      ],
+      "dataSetName": ["Aggramar", "Fizzcrank"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:47 GMT",
       "lastUploadMinute": 17,
@@ -430,12 +363,7 @@
     {
       "dataSetID": 113,
       "tableName": "113_singleMinPrices",
-      "dataSetName": [
-        "Suramar",
-        "Windrunner",
-        "Darrowmere",
-        "Draka"
-      ],
+      "dataSetName": ["Suramar", "Windrunner", "Darrowmere", "Draka"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -444,10 +372,7 @@
     {
       "dataSetID": 114,
       "tableName": "114_singleMinPrices",
-      "dataSetName": [
-        "Dragonblight",
-        "Fenris"
-      ],
+      "dataSetName": ["Dragonblight", "Fenris"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -456,10 +381,7 @@
     {
       "dataSetID": 115,
       "tableName": "115_singleMinPrices",
-      "dataSetName": [
-        "Draenor",
-        "Echo Isles"
-      ],
+      "dataSetName": ["Draenor", "Echo Isles"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -468,10 +390,7 @@
     {
       "dataSetID": 117,
       "tableName": "117_singleMinPrices",
-      "dataSetName": [
-        "Bronzebeard",
-        "Shandris"
-      ],
+      "dataSetName": ["Bronzebeard", "Shandris"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -480,10 +399,7 @@
     {
       "dataSetID": 118,
       "tableName": "118_singleMinPrices",
-      "dataSetName": [
-        "Feathermoon",
-        "Scarlet Crusade"
-      ],
+      "dataSetName": ["Feathermoon", "Scarlet Crusade"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -492,9 +408,7 @@
     {
       "dataSetID": 120,
       "tableName": "120_singleMinPrices",
-      "dataSetName": [
-        "Darkspear"
-      ],
+      "dataSetName": ["Darkspear"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -550,10 +464,7 @@
     {
       "dataSetID": 151,
       "tableName": "151_singleMinPrices",
-      "dataSetName": [
-        "Runetotem",
-        "Uther"
-      ],
+      "dataSetName": ["Runetotem", "Uther"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -578,12 +489,7 @@
     {
       "dataSetID": 155,
       "tableName": "155_singleMinPrices",
-      "dataSetName": [
-        "Kalecgos",
-        "Shattered Halls",
-        "Executus",
-        "Deathwing"
-      ],
+      "dataSetName": ["Kalecgos", "Shattered Halls", "Executus", "Deathwing"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:34 GMT",
       "lastUploadMinute": 17,
@@ -607,10 +513,7 @@
     {
       "dataSetID": 158,
       "tableName": "158_singleMinPrices",
-      "dataSetName": [
-        "Greymane",
-        "Tanaris"
-      ],
+      "dataSetName": ["Greymane", "Tanaris"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:46 GMT",
       "lastUploadMinute": 17,
@@ -619,12 +522,7 @@
     {
       "dataSetID": 160,
       "tableName": "160_singleMinPrices",
-      "dataSetName": [
-        "Staghelm",
-        "Dawnbringer",
-        "Madoran",
-        "Azuremyst"
-      ],
+      "dataSetName": ["Staghelm", "Dawnbringer", "Madoran", "Azuremyst"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:47 GMT",
       "lastUploadMinute": 17,
@@ -633,9 +531,7 @@
     {
       "dataSetID": 162,
       "tableName": "162_singleMinPrices",
-      "dataSetName": [
-        "Emerald Dream"
-      ],
+      "dataSetName": ["Emerald Dream"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:48 GMT",
       "lastUploadMinute": 17,
@@ -659,11 +555,7 @@
     {
       "dataSetID": 509,
       "tableName": "509_singleMinPrices",
-      "dataSetName": [
-        "Garona",
-        "Sargeras",
-        "Ner'zhul"
-      ],
+      "dataSetName": ["Garona", "Sargeras", "Ner'zhul"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -672,10 +564,7 @@
     {
       "dataSetID": 510,
       "tableName": "510_singleMinPrices",
-      "dataSetName": [
-        "Vol'jin",
-        "Chants eternels"
-      ],
+      "dataSetName": ["Vol'jin", "Chants eternels"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -684,12 +573,7 @@
     {
       "dataSetID": 512,
       "tableName": "512_singleMinPrices",
-      "dataSetName": [
-        "Arak-arahm",
-        "Rashgarroth",
-        "Kael'thas",
-        "Throk'Feroth"
-      ],
+      "dataSetName": ["Arak-arahm", "Rashgarroth", "Kael'thas", "Throk'Feroth"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -713,12 +597,7 @@
     {
       "dataSetID": 570,
       "tableName": "570_singleMinPrices",
-      "dataSetName": [
-        "Lothar",
-        "Baelgun",
-        "Azshara",
-        "Krag'jin"
-      ],
+      "dataSetName": ["Lothar", "Baelgun", "Azshara", "Krag'jin"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -744,11 +623,7 @@
     {
       "dataSetID": 580,
       "tableName": "580_singleMinPrices",
-      "dataSetName": [
-        "Blackmoore",
-        "Tichondrius",
-        "Lordaeron"
-      ],
+      "dataSetName": ["Blackmoore", "Tichondrius", "Lordaeron"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:07 GMT",
       "lastUploadMinute": 18,
@@ -757,9 +632,7 @@
     {
       "dataSetID": 581,
       "tableName": "581_singleMinPrices",
-      "dataSetName": [
-        "Blackrock"
-      ],
+      "dataSetName": ["Blackrock"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -768,11 +641,7 @@
     {
       "dataSetID": 604,
       "tableName": "604_singleMinPrices",
-      "dataSetName": [
-        "Thrall",
-        "Kargath",
-        "Ambossar"
-      ],
+      "dataSetName": ["Thrall", "Kargath", "Ambossar"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -816,10 +685,7 @@
     {
       "dataSetID": 1070,
       "tableName": "1070_singleMinPrices",
-      "dataSetName": [
-        "Alexstrasza",
-        "Terokkar"
-      ],
+      "dataSetName": ["Alexstrasza", "Terokkar"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:47 GMT",
       "lastUploadMinute": 17,
@@ -828,11 +694,7 @@
     {
       "dataSetID": 1071,
       "tableName": "1071_singleMinPrices",
-      "dataSetName": [
-        "Kirin Tor",
-        "Steamwheedle Cartel",
-        "Sentinels"
-      ],
+      "dataSetName": ["Kirin Tor", "Steamwheedle Cartel", "Sentinels"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:45 GMT",
       "lastUploadMinute": 17,
@@ -841,10 +703,7 @@
     {
       "dataSetID": 1072,
       "tableName": "1072_singleMinPrices",
-      "dataSetName": [
-        "Ravencrest",
-        "Uldaman"
-      ],
+      "dataSetName": ["Ravencrest", "Uldaman"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:34 GMT",
       "lastUploadMinute": 17,
@@ -853,10 +712,7 @@
     {
       "dataSetID": 1080,
       "tableName": "1080_singleMinPrices",
-      "dataSetName": [
-        "Khadgar",
-        "Bloodhoof"
-      ],
+      "dataSetName": ["Khadgar", "Bloodhoof"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -865,11 +721,7 @@
     {
       "dataSetID": 1082,
       "tableName": "1082_singleMinPrices",
-      "dataSetName": [
-        "Kul Tiras",
-        "Alonsus",
-        "Anachronos"
-      ],
+      "dataSetName": ["Kul Tiras", "Alonsus", "Anachronos"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -878,10 +730,7 @@
     {
       "dataSetID": 1084,
       "tableName": "1084_singleMinPrices",
-      "dataSetName": [
-        "Dentarg",
-        "Tarren Mill"
-      ],
+      "dataSetName": ["Dentarg", "Tarren Mill"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:07 GMT",
       "lastUploadMinute": 18,
@@ -890,11 +739,7 @@
     {
       "dataSetID": 1085,
       "tableName": "1085_singleMinPrices",
-      "dataSetName": [
-        "Moonglade",
-        "Steamwheedle Cartel",
-        "The Sha'tar"
-      ],
+      "dataSetName": ["Moonglade", "Steamwheedle Cartel", "The Sha'tar"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -919,10 +764,7 @@
     {
       "dataSetID": 1092,
       "tableName": "1092_singleMinPrices",
-      "dataSetName": [
-        "Drak'thul",
-        "Burning Blade"
-      ],
+      "dataSetName": ["Drak'thul", "Burning Blade"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -948,10 +790,7 @@
     {
       "dataSetID": 1097,
       "tableName": "1097_singleMinPrices",
-      "dataSetName": [
-        "Ysera",
-        "Malorne"
-      ],
+      "dataSetName": ["Ysera", "Malorne"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -960,10 +799,7 @@
     {
       "dataSetID": 1098,
       "tableName": "1098_singleMinPrices",
-      "dataSetName": [
-        "Malygos",
-        "Malfurion"
-      ],
+      "dataSetName": ["Malygos", "Malfurion"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -972,10 +808,7 @@
     {
       "dataSetID": 1099,
       "tableName": "1099_singleMinPrices",
-      "dataSetName": [
-        "Rexxar",
-        "Alleria"
-      ],
+      "dataSetName": ["Rexxar", "Alleria"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1034,12 +867,7 @@
     {
       "dataSetID": 1122,
       "tableName": "1122_singleMinPrices",
-      "dataSetName": [
-        "Uldaman",
-        "Drek'Thar",
-        "Krasus",
-        "Eitrigg"
-      ],
+      "dataSetName": ["Uldaman", "Drek'Thar", "Krasus", "Eitrigg"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1118,10 +946,7 @@
     {
       "dataSetID": 1147,
       "tableName": "1147_singleMinPrices",
-      "dataSetName": [
-        "Kul Tiras",
-        "Bladefist"
-      ],
+      "dataSetName": ["Kul Tiras", "Bladefist"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -1130,10 +955,7 @@
     {
       "dataSetID": 1151,
       "tableName": "1151_singleMinPrices",
-      "dataSetName": [
-        "Rexxar",
-        "Misha"
-      ],
+      "dataSetName": ["Rexxar", "Misha"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -1159,9 +981,7 @@
     {
       "dataSetID": 1171,
       "tableName": "1171_singleMinPrices",
-      "dataSetName": [
-        "Wyrmrest Accord"
-      ],
+      "dataSetName": ["Wyrmrest Accord"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:17 GMT",
       "lastUploadMinute": 17,
@@ -1188,11 +1008,7 @@
     {
       "dataSetID": 1184,
       "tableName": "1184_singleMinPrices",
-      "dataSetName": [
-        "Vek'nilash",
-        "Nazgrel",
-        "Nesingwary"
-      ],
+      "dataSetName": ["Vek'nilash", "Nazgrel", "Nesingwary"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -1218,10 +1034,7 @@
     {
       "dataSetID": 1190,
       "tableName": "1190_singleMinPrices",
-      "dataSetName": [
-        "Baelgun",
-        "Doomhammer"
-      ],
+      "dataSetName": ["Baelgun", "Doomhammer"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:46 GMT",
       "lastUploadMinute": 17,
@@ -1230,9 +1043,7 @@
     {
       "dataSetID": 1301,
       "tableName": "1301_singleMinPrices",
-      "dataSetName": [
-        "Outland"
-      ],
+      "dataSetName": ["Outland"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1241,9 +1052,7 @@
     {
       "dataSetID": 1302,
       "tableName": "1302_singleMinPrices",
-      "dataSetName": [
-        "Archimonde"
-      ],
+      "dataSetName": ["Archimonde"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1252,11 +1061,7 @@
     {
       "dataSetID": 1303,
       "tableName": "1303_singleMinPrices",
-      "dataSetName": [
-        "Grim Batol",
-        "Aggra (Portuguus)",
-        "Frostmane"
-      ],
+      "dataSetName": ["Grim Batol", "Aggra (Portuguus)", "Frostmane"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1265,9 +1070,7 @@
     {
       "dataSetID": 1305,
       "tableName": "1305_singleMinPrices",
-      "dataSetName": [
-        "Kazzak"
-      ],
+      "dataSetName": ["Kazzak"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:08 GMT",
       "lastUploadMinute": 18,
@@ -1276,9 +1079,7 @@
     {
       "dataSetID": 1307,
       "tableName": "1307_singleMinPrices",
-      "dataSetName": [
-        "Chamber of Aspects"
-      ],
+      "dataSetName": ["Chamber of Aspects"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1287,9 +1088,7 @@
     {
       "dataSetID": 1309,
       "tableName": "1309_singleMinPrices",
-      "dataSetName": [
-        "Pozzo dell'Eternita"
-      ],
+      "dataSetName": ["Pozzo dell'Eternita"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1298,10 +1097,7 @@
     {
       "dataSetID": 1313,
       "tableName": "1313_singleMinPrices",
-      "dataSetName": [
-        "Wildhammer",
-        "Thunderhorn"
-      ],
+      "dataSetName": ["Wildhammer", "Thunderhorn"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1310,10 +1106,7 @@
     {
       "dataSetID": 1315,
       "tableName": "1315_singleMinPrices",
-      "dataSetName": [
-        "Elune",
-        "Varimathras"
-      ],
+      "dataSetName": ["Elune", "Varimathras"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1322,9 +1115,7 @@
     {
       "dataSetID": 1316,
       "tableName": "1316_singleMinPrices",
-      "dataSetName": [
-        "Nemesis"
-      ],
+      "dataSetName": ["Nemesis"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1333,10 +1124,7 @@
     {
       "dataSetID": 1325,
       "tableName": "1325_singleMinPrices",
-      "dataSetName": [
-        "Aggramar",
-        "Hellscream"
-      ],
+      "dataSetName": ["Aggramar", "Hellscream"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1345,9 +1133,7 @@
     {
       "dataSetID": 1329,
       "tableName": "1329_singleMinPrices",
-      "dataSetName": [
-        "Ravencrest"
-      ],
+      "dataSetName": ["Ravencrest"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:07 GMT",
       "lastUploadMinute": 18,
@@ -1356,10 +1142,7 @@
     {
       "dataSetID": 1331,
       "tableName": "1331_singleMinPrices",
-      "dataSetName": [
-        "Suramar",
-        "Medivh"
-      ],
+      "dataSetName": ["Suramar", "Medivh"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1368,9 +1151,7 @@
     {
       "dataSetID": 1335,
       "tableName": "1335_singleMinPrices",
-      "dataSetName": [
-        "Ysondre"
-      ],
+      "dataSetName": ["Ysondre"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1379,10 +1160,7 @@
     {
       "dataSetID": 1378,
       "tableName": "1378_singleMinPrices",
-      "dataSetName": [
-        "Dun Modr",
-        "C'Thun"
-      ],
+      "dataSetName": ["Dun Modr", "C'Thun"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1391,12 +1169,7 @@
     {
       "dataSetID": 1379,
       "tableName": "1379_singleMinPrices",
-      "dataSetName": [
-        "Zul'jin",
-        "Uldum",
-        "Sanguino",
-        "Shen'dralar"
-      ],
+      "dataSetName": ["Zul'jin", "Uldum", "Sanguino", "Shen'dralar"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1405,11 +1178,7 @@
     {
       "dataSetID": 1384,
       "tableName": "1384_singleMinPrices",
-      "dataSetName": [
-        "Tyrande",
-        "Los Errantes",
-        "Colinas Pardas"
-      ],
+      "dataSetName": ["Tyrande", "Los Errantes", "Colinas Pardas"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1418,10 +1187,7 @@
     {
       "dataSetID": 1385,
       "tableName": "1385_singleMinPrices",
-      "dataSetName": [
-        "Exodar",
-        "Minahonda"
-      ],
+      "dataSetName": ["Exodar", "Minahonda"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1430,10 +1196,7 @@
     {
       "dataSetID": 1388,
       "tableName": "1388_singleMinPrices",
-      "dataSetName": [
-        "Lightbringer",
-        "Mazrigos"
-      ],
+      "dataSetName": ["Lightbringer", "Mazrigos"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1442,9 +1205,7 @@
     {
       "dataSetID": 1390,
       "tableName": "1390_singleMinPrices",
-      "dataSetName": [
-        "Hyjal"
-      ],
+      "dataSetName": ["Hyjal"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:07 GMT",
       "lastUploadMinute": 18,
@@ -1453,10 +1214,7 @@
     {
       "dataSetID": 1393,
       "tableName": "1393_singleMinPrices",
-      "dataSetName": [
-        "Bronze Dragonflight",
-        "Nordrassil"
-      ],
+      "dataSetName": ["Bronze Dragonflight", "Nordrassil"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1465,10 +1223,7 @@
     {
       "dataSetID": 1396,
       "tableName": "1396_singleMinPrices",
-      "dataSetName": [
-        "Quel'Thalas",
-        "Azjol-Nerub"
-      ],
+      "dataSetName": ["Quel'Thalas", "Azjol-Nerub"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1477,11 +1232,7 @@
     {
       "dataSetID": 1400,
       "tableName": "1400_singleMinPrices",
-      "dataSetName": [
-        "Un'Goro",
-        "Sen'jin",
-        "Area 52"
-      ],
+      "dataSetName": ["Un'Goro", "Sen'jin", "Area 52"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1505,10 +1256,7 @@
     {
       "dataSetID": 1402,
       "tableName": "1402_singleMinPrices",
-      "dataSetName": [
-        "Turalyon",
-        "Doomhammer"
-      ],
+      "dataSetName": ["Turalyon", "Doomhammer"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:07 GMT",
       "lastUploadMinute": 18,
@@ -1517,9 +1265,7 @@
     {
       "dataSetID": 1403,
       "tableName": "1403_singleMinPrices",
-      "dataSetName": [
-        "Draenor"
-      ],
+      "dataSetName": ["Draenor"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:07 GMT",
       "lastUploadMinute": 18,
@@ -1544,10 +1290,7 @@
     {
       "dataSetID": 1406,
       "tableName": "1406_singleMinPrices",
-      "dataSetName": [
-        "Arygos",
-        "Khaz'goroth"
-      ],
+      "dataSetName": ["Arygos", "Khaz'goroth"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1556,10 +1299,7 @@
     {
       "dataSetID": 1408,
       "tableName": "1408_singleMinPrices",
-      "dataSetName": [
-        "Norgannon",
-        "Dun Morogh"
-      ],
+      "dataSetName": ["Norgannon", "Dun Morogh"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1583,10 +1323,7 @@
     {
       "dataSetID": 1417,
       "tableName": "1417_singleMinPrices",
-      "dataSetName": [
-        "Azuremyst",
-        "Stormrage"
-      ],
+      "dataSetName": ["Azuremyst", "Stormrage"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1595,9 +1332,7 @@
     {
       "dataSetID": 1425,
       "tableName": "1425_singleMinPrices",
-      "dataSetName": [
-        "Drakkari"
-      ],
+      "dataSetName": ["Drakkari"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:44 GMT",
       "lastUploadMinute": 17,
@@ -1606,9 +1341,7 @@
     {
       "dataSetID": 1426,
       "tableName": "1426_singleMinPrices",
-      "dataSetName": [
-        "Aerie Peak"
-      ],
+      "dataSetName": ["Aerie Peak"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:46 GMT",
       "lastUploadMinute": 17,
@@ -1617,9 +1350,7 @@
     {
       "dataSetID": 1427,
       "tableName": "1427_singleMinPrices",
-      "dataSetName": [
-        "Ragnaros"
-      ],
+      "dataSetName": ["Ragnaros"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:47 GMT",
       "lastUploadMinute": 17,
@@ -1628,9 +1359,7 @@
     {
       "dataSetID": 1428,
       "tableName": "1428_singleMinPrices",
-      "dataSetName": [
-        "Quel'Thalas"
-      ],
+      "dataSetName": ["Quel'Thalas"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:48 GMT",
       "lastUploadMinute": 17,
@@ -1639,13 +1368,7 @@
     {
       "dataSetID": 1587,
       "tableName": "1587_singleMinPrices",
-      "dataSetName": [
-        "Hellfire",
-        "Runetotem",
-        "Arathor",
-        "Kilrogg",
-        "Nagrand"
-      ],
+      "dataSetName": ["Hellfire", "Runetotem", "Arathor", "Kilrogg", "Nagrand"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1670,12 +1393,7 @@
     {
       "dataSetID": 1597,
       "tableName": "1597_singleMinPrices",
-      "dataSetName": [
-        "Auchindoun",
-        "Dunemaul",
-        "Sylvanas",
-        "Jaedenar"
-      ],
+      "dataSetName": ["Auchindoun", "Dunemaul", "Sylvanas", "Jaedenar"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1704,9 +1422,7 @@
     {
       "dataSetID": 1602,
       "tableName": "1602_singleMinPrices",
-      "dataSetName": [
-        "Gordunni"
-      ],
+      "dataSetName": ["Gordunni"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1715,9 +1431,7 @@
     {
       "dataSetID": 1604,
       "tableName": "1604_singleMinPrices",
-      "dataSetName": [
-        "Soulflayer"
-      ],
+      "dataSetName": ["Soulflayer"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1726,9 +1440,7 @@
     {
       "dataSetID": 1605,
       "tableName": "1605_singleMinPrices",
-      "dataSetName": [
-        "Deathguard"
-      ],
+      "dataSetName": ["Deathguard"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1737,11 +1449,7 @@
     {
       "dataSetID": 1614,
       "tableName": "1614_singleMinPrices",
-      "dataSetName": [
-        "Galakrond",
-        "Deepholm",
-        "Razuvious"
-      ],
+      "dataSetName": ["Galakrond", "Deepholm", "Razuvious"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1750,9 +1458,7 @@
     {
       "dataSetID": 1615,
       "tableName": "1615_singleMinPrices",
-      "dataSetName": [
-        "Howling Fjord"
-      ],
+      "dataSetName": ["Howling Fjord"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1761,9 +1467,7 @@
     {
       "dataSetID": 1618,
       "tableName": "1618_singleMinPrices",
-      "dataSetName": [
-        "Die Aldor"
-      ],
+      "dataSetName": ["Die Aldor"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1787,9 +1491,7 @@
     {
       "dataSetID": 1623,
       "tableName": "1623_singleMinPrices",
-      "dataSetName": [
-        "Fordragon"
-      ],
+      "dataSetName": ["Fordragon"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1798,12 +1500,7 @@
     {
       "dataSetID": 1624,
       "tableName": "1624_singleMinPrices",
-      "dataSetName": [
-        "Naxxramas",
-        "Arathi",
-        "Illidan",
-        "Temple noir"
-      ],
+      "dataSetName": ["Naxxramas", "Arathi", "Illidan", "Temple noir"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1812,9 +1509,7 @@
     {
       "dataSetID": 1922,
       "tableName": "1922_singleMinPrices",
-      "dataSetName": [
-        "Azuregos"
-      ],
+      "dataSetName": ["Azuregos"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1823,9 +1518,7 @@
     {
       "dataSetID": 1923,
       "tableName": "1923_singleMinPrices",
-      "dataSetName": [
-        "Ashenvale"
-      ],
+      "dataSetName": ["Ashenvale"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1834,9 +1527,7 @@
     {
       "dataSetID": 1925,
       "tableName": "1925_singleMinPrices",
-      "dataSetName": [
-        "Eversong"
-      ],
+      "dataSetName": ["Eversong"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1845,11 +1536,7 @@
     {
       "dataSetID": 1928,
       "tableName": "1928_singleMinPrices",
-      "dataSetName": [
-        "Goldrinn",
-        "Lich King",
-        "Greymane"
-      ],
+      "dataSetName": ["Goldrinn", "Lich King", "Greymane"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1874,9 +1561,7 @@
     {
       "dataSetID": 2073,
       "tableName": "2073_singleMinPrices",
-      "dataSetName": [
-        "Stormscale"
-      ],
+      "dataSetName": ["Stormscale"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -1885,10 +1570,7 @@
     {
       "dataSetID": 2074,
       "tableName": "2074_singleMinPrices",
-      "dataSetName": [
-        "Terenas",
-        "Emerald Dream"
-      ],
+      "dataSetName": ["Terenas", "Emerald Dream"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -1897,9 +1579,7 @@
     {
       "dataSetID": 3207,
       "tableName": "3207_singleMinPrices",
-      "dataSetName": [
-        "Goldrinn"
-      ],
+      "dataSetName": ["Goldrinn"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:33 GMT",
       "lastUploadMinute": 17,
@@ -1908,10 +1588,7 @@
     {
       "dataSetID": 3208,
       "tableName": "3208_singleMinPrices",
-      "dataSetName": [
-        "Nemesis",
-        "Tol Barad"
-      ],
+      "dataSetName": ["Nemesis", "Tol Barad"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:33 GMT",
       "lastUploadMinute": 17,
@@ -1920,9 +1597,7 @@
     {
       "dataSetID": 3209,
       "tableName": "3209_singleMinPrices",
-      "dataSetName": [
-        "Azralon"
-      ],
+      "dataSetName": ["Azralon"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:46 GMT",
       "lastUploadMinute": 17,
@@ -1931,9 +1606,7 @@
     {
       "dataSetID": 3234,
       "tableName": "3234_singleMinPrices",
-      "dataSetName": [
-        "Gallywix"
-      ],
+      "dataSetName": ["Gallywix"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:44 GMT",
       "lastUploadMinute": 17,
@@ -1942,9 +1615,7 @@
     {
       "dataSetID": 3391,
       "tableName": "3391_singleMinPrices",
-      "dataSetName": [
-        "Silvermoon"
-      ],
+      "dataSetName": ["Silvermoon"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:08 GMT",
       "lastUploadMinute": 18,
@@ -1984,9 +1655,7 @@
     {
       "dataSetID": 3661,
       "tableName": "3661_singleMinPrices",
-      "dataSetName": [
-        "Hyjal"
-      ],
+      "dataSetName": ["Hyjal"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -1995,10 +1664,7 @@
     {
       "dataSetID": 3666,
       "tableName": "3666_singleMinPrices",
-      "dataSetName": [
-        "Shadowsong",
-        "Aszune"
-      ],
+      "dataSetName": ["Shadowsong", "Aszune"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -2007,9 +1673,7 @@
     {
       "dataSetID": 3674,
       "tableName": "3674_singleMinPrices",
-      "dataSetName": [
-        "Twisting Nether"
-      ],
+      "dataSetName": ["Twisting Nether"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:07 GMT",
       "lastUploadMinute": 18,
@@ -2018,9 +1682,7 @@
     {
       "dataSetID": 3675,
       "tableName": "3675_singleMinPrices",
-      "dataSetName": [
-        "Moon Guard"
-      ],
+      "dataSetName": ["Moon Guard"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:17 GMT",
       "lastUploadMinute": 17,
@@ -2029,9 +1691,7 @@
     {
       "dataSetID": 3676,
       "tableName": "3676_singleMinPrices",
-      "dataSetName": [
-        "Area 52"
-      ],
+      "dataSetName": ["Area 52"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:39 GMT",
       "lastUploadMinute": 17,
@@ -2040,9 +1700,7 @@
     {
       "dataSetID": 3678,
       "tableName": "3678_singleMinPrices",
-      "dataSetName": [
-        "Thrall"
-      ],
+      "dataSetName": ["Thrall"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:39 GMT",
       "lastUploadMinute": 17,
@@ -2051,9 +1709,7 @@
     {
       "dataSetID": 3679,
       "tableName": "3679_singleMinPrices",
-      "dataSetName": [
-        "Aegwynn"
-      ],
+      "dataSetName": ["Aegwynn"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -2062,9 +1718,7 @@
     {
       "dataSetID": 3681,
       "tableName": "3681_singleMinPrices",
-      "dataSetName": [
-        "Magtheridon"
-      ],
+      "dataSetName": ["Magtheridon"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -2073,9 +1727,7 @@
     {
       "dataSetID": 3682,
       "tableName": "3682_singleMinPrices",
-      "dataSetName": [
-        "Ragnaros"
-      ],
+      "dataSetName": ["Ragnaros"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -2084,9 +1736,7 @@
     {
       "dataSetID": 3683,
       "tableName": "3683_singleMinPrices",
-      "dataSetName": [
-        "Dalaran"
-      ],
+      "dataSetName": ["Dalaran"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:38 GMT",
       "lastUploadMinute": 17,
@@ -2095,9 +1745,7 @@
     {
       "dataSetID": 3684,
       "tableName": "3684_singleMinPrices",
-      "dataSetName": [
-        "Mal'Ganis"
-      ],
+      "dataSetName": ["Mal'Ganis"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:50 GMT",
       "lastUploadMinute": 17,
@@ -2106,9 +1754,7 @@
     {
       "dataSetID": 3685,
       "tableName": "3685_singleMinPrices",
-      "dataSetName": [
-        "Turalyon"
-      ],
+      "dataSetName": ["Turalyon"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:35 GMT",
       "lastUploadMinute": 17,
@@ -2117,9 +1763,7 @@
     {
       "dataSetID": 3686,
       "tableName": "3686_singleMinPrices",
-      "dataSetName": [
-        "Antonidas"
-      ],
+      "dataSetName": ["Antonidas"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:07 GMT",
       "lastUploadMinute": 18,
@@ -2128,9 +1772,7 @@
     {
       "dataSetID": 3690,
       "tableName": "3690_singleMinPrices",
-      "dataSetName": [
-        "Khaz Modan"
-      ],
+      "dataSetName": ["Khaz Modan"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -2139,12 +1781,7 @@
     {
       "dataSetID": 3691,
       "tableName": "3691_singleMinPrices",
-      "dataSetName": [
-        "Echsenkessel",
-        "Blackhand",
-        "Mal'Ganis",
-        "Taerar"
-      ],
+      "dataSetName": ["Echsenkessel", "Blackhand", "Mal'Ganis", "Taerar"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:07 GMT",
       "lastUploadMinute": 18,
@@ -2153,9 +1790,7 @@
     {
       "dataSetID": 3692,
       "tableName": "3692_singleMinPrices",
-      "dataSetName": [
-        "Eredar"
-      ],
+      "dataSetName": ["Eredar"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -2164,9 +1799,7 @@
     {
       "dataSetID": 3693,
       "tableName": "3693_singleMinPrices",
-      "dataSetName": [
-        "Kel'Thuzad"
-      ],
+      "dataSetName": ["Kel'Thuzad"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:38 GMT",
       "lastUploadMinute": 17,
@@ -2175,9 +1808,7 @@
     {
       "dataSetID": 3694,
       "tableName": "3694_singleMinPrices",
-      "dataSetName": [
-        "Lightbringer"
-      ],
+      "dataSetName": ["Lightbringer"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:17:16 GMT",
       "lastUploadMinute": 17,
@@ -2186,12 +1817,7 @@
     {
       "dataSetID": 3696,
       "tableName": "3696_singleMinPrices",
-      "dataSetName": [
-        "Nethersturm",
-        "Alexstrasza",
-        "Madmortem",
-        "Proudmoore"
-      ],
+      "dataSetName": ["Nethersturm", "Alexstrasza", "Madmortem", "Proudmoore"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -2200,9 +1826,7 @@
     {
       "dataSetID": 3702,
       "tableName": "3702_singleMinPrices",
-      "dataSetName": [
-        "Argent Dawn"
-      ],
+      "dataSetName": ["Argent Dawn"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:08 GMT",
       "lastUploadMinute": 18,
@@ -2211,9 +1835,7 @@
     {
       "dataSetID": 3703,
       "tableName": "3703_singleMinPrices",
-      "dataSetName": [
-        "Frostwolf"
-      ],
+      "dataSetName": ["Frostwolf"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:05 GMT",
       "lastUploadMinute": 18,
@@ -2222,12 +1844,7 @@
     {
       "dataSetID": 3713,
       "tableName": "3713_singleMinPrices",
-      "dataSetName": [
-        "Al'Akir",
-        "Skullcrusher",
-        "Xavius",
-        "Burning Legion"
-      ],
+      "dataSetName": ["Al'Akir", "Skullcrusher", "Xavius", "Burning Legion"],
       "region": "EU",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:06 GMT",
       "lastUploadMinute": 18,
@@ -2236,11 +1853,7 @@
     {
       "dataSetID": 3721,
       "tableName": "3721_singleMinPrices",
-      "dataSetName": [
-        "Caelestrasz",
-        "Nagrand",
-        "Saurfang"
-      ],
+      "dataSetName": ["Caelestrasz", "Nagrand", "Saurfang"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:43 GMT",
       "lastUploadMinute": 18,
@@ -2249,9 +1862,7 @@
     {
       "dataSetID": 3723,
       "tableName": "3723_singleMinPrices",
-      "dataSetName": [
-        "Barthilas"
-      ],
+      "dataSetName": ["Barthilas"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:41 GMT",
       "lastUploadMinute": 18,
@@ -2275,11 +1886,7 @@
     {
       "dataSetID": 3726,
       "tableName": "3726_singleMinPrices",
-      "dataSetName": [
-        "Khaz'goroth",
-        "Aman'Thul",
-        "Dath'Remar"
-      ],
+      "dataSetName": ["Khaz'goroth", "Aman'Thul", "Dath'Remar"],
       "region": "NA",
       "lastUploadTimeRaw": "Mon, 1 Dec 2025 14:18:46 GMT",
       "lastUploadMinute": 18,
