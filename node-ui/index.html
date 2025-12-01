@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Azeroth Auction Assassin 2</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script>
+      // Include the Wowhead Tooltip script
+      ;(function () {
+        var whTooltips = {
+          colorLinks: true,
+          iconizeLinks: true,
+          renameLinks: true,
+        }
+        var script = document.createElement("script")
+        script.src = "https://wow.zamimg.com/widgets/power.js"
+        script.async = true
+        script.onload = function () {
+          console.log("Wowhead tooltip script loaded successfully")
+        }
+        script.onerror = function () {
+          console.error("Failed to load Wowhead tooltip script")
+          // Tooltips will be disabled gracefully
+        }
+        document.head.appendChild(script)
+      })()
+    </script>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Azeroth Auction Assassin</div>
+          <div class="title">Version: 2.0.0</div>
+        </div>
+        <div class="actions">
+          <div class="nav-controls">
+            <button
+              class="ghost nav-btn-small"
+              id="back-btn"
+              title="Go back"
+              disabled
+            >
+              ←
+            </button>
+            <button
+              class="ghost nav-btn-small"
+              id="forward-btn"
+              title="Go forward"
+              disabled
+            >
+              →
+            </button>
+          </div>
+          <div class="status-pill" id="process-state">Not running</div>
+          <button class="ghost" id="reload-btn">Reload from disk</button>
+          <button class="primary" id="save-settings-btn">Save settings</button>
+          <button class="success" id="start-btn">Start Alerts</button>
+          <button class="danger" id="stop-btn" disabled>Stop</button>
+        </div>
+      </header>
+
+      <div class="nav">
+        <button class="nav-btn active" data-view-target="home">Home</button>
+        <button class="nav-btn" data-view-target="settings">Settings</button>
+        <button class="nav-btn" data-view-target="items">Items</button>
+        <button class="nav-btn" data-view-target="ilvl">
+          BOE Ilvl Gear/Weapons
+        </button>
+        <button class="nav-btn" data-view-target="pet-ilvl">Pets</button>
+        <button class="nav-btn" data-view-target="realms">Realm Lists</button>
+        <button class="nav-btn" data-view-target="logs">Logs</button>
+      </div>
+
+      <main class="grid">
+        <section class="card span-2 view" data-view="home">
+          <div class="home-hero">
+            <div>
+              <div class="eyebrow">Azeroth Auction Assassin</div>
+              <h1>Fast AH Discount Sniping!</h1>
+              <p class="muted">
+                Configure your snipes, launch alerts, and track logs from one
+                place.
+              </p>
+              <div class="home-links">
+                <a
+                  class="ghost-link"
+                  href="https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Guides</a
+                >
+                <a
+                  class="ghost-link"
+                  href="https://www.patreon.com/indopan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Patreon</a
+                >
+                <a
+                  class="ghost-link"
+                  href="https://discord.gg/9dHx2rEq9F"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Discord</a
+                >
+                <a
+                  class="ghost-link"
+                  href="https://saddlebagexchange.com/wow"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Website</a
+                >
+              </div>
+            </div>
+            <div
+              id="update-notification"
+              class="update-notification"
+              style="display: none"
+            >
+              <div id="update-content"></div>
+            </div>
+            <img src="../icon.png" alt="AAA" class="home-icon" />
+          </div>
+        </section>
+
+        <section
+          class="card span-2 view"
+          data-view="settings"
+          id="settings-card"
+        >
+          <div class="page-title">
+            <h2>Settings</h2>
+            <span class="muted">Configure mega_data.json settings</span>
+            <button
+              type="button"
+              class="ghost"
+              id="restore-backup-btn"
+              title="Restore from backup"
+            >
+              Restore Backup
+            </button>
+            <button
+              type="button"
+              class="ghost"
+              id="reset-settings-btn"
+              title="Clear all settings data"
+            >
+              Reset
+            </button>
+          </div>
+          <div class="import-row" style="margin-bottom: 16px">
+            <button
+              type="button"
+              class="ghost"
+              id="import-config-btn"
+              title="Import your mega_data.json config."
+            >
+              Import from AAA file
+            </button>
+            <button type="button" class="ghost" id="export-config-btn">
+              Export to AAA file
+            </button>
+            <button type="button" class="ghost" id="paste-config-btn">
+              Import AAA
+            </button>
+            <button type="button" class="ghost" id="copy-config-btn">
+              Copy AAA to clipboard
+            </button>
+          </div>
+          <form id="mega-form" class="form-grid">
+            <label
+              title="Select where to store your data files (JSON configs, backups, logs). Default is next to the application executable."
+            >
+              Data Directory
+              <div style="display: flex; gap: 8px; align-items: center">
+                <input
+                  type="text"
+                  id="data-dir-input"
+                  readonly
+                  style="flex: 1"
+                  placeholder="Default data directory location"
+                />
+                <button
+                  type="button"
+                  id="select-data-dir-btn"
+                  class="ghost"
+                  style="white-space: nowrap"
+                >
+                  Browse
+                </button>
+                <button
+                  type="button"
+                  id="reset-data-dir-btn"
+                  class="ghost"
+                  style="white-space: nowrap"
+                  title="Reset to default location"
+                >
+                  Reset
+                </button>
+              </div>
+            </label>
+            <label title="Current UI zoom level">
+              UI Zoom Level
+              <div style="display: flex; gap: 8px; align-items: center">
+                <div
+                  id="zoom-level-display"
+                  style="
+                    padding: 8px 12px;
+                    background: rgba(128, 255, 234, 0.2);
+                    border-radius: 4px;
+                    color: #80ffea;
+                    font-weight: 500;
+                    flex: 1;
+                  "
+                >
+                  Loading...
+                </div>
+                <button
+                  type="button"
+                  id="zoom-out-btn"
+                  class="ghost"
+                  title="Zoom out (Command -)"
+                  style="white-space: nowrap"
+                >
+                  Zoom Out
+                </button>
+                <button
+                  type="button"
+                  id="zoom-in-btn"
+                  class="ghost"
+                  title="Zoom in (Command +)"
+                  style="white-space: nowrap"
+                >
+                  Zoom In
+                </button>
+              </div>
+            </label>
+            <label
+              title="Setup a discord channel with a webhook url for sending the alert messages."
+            >
+              Discord Webhook URL
+              <div class="sensitive-input-wrapper">
+                <input
+                  name="MEGA_WEBHOOK_URL"
+                  type="password"
+                  autocomplete="off"
+                  class="sensitive-input"
+                />
+                <button
+                  type="button"
+                  class="ghost show-sensitive-btn"
+                  data-field="MEGA_WEBHOOK_URL"
+                  title="Show value"
+                >
+                  Show
+                </button>
+              </div>
+            </label>
+            <label
+              title="Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids."
+            >
+              WoW Client ID
+              <div class="sensitive-input-wrapper">
+                <input
+                  name="WOW_CLIENT_ID"
+                  type="password"
+                  autocomplete="off"
+                  class="sensitive-input"
+                />
+                <button
+                  type="button"
+                  class="ghost show-sensitive-btn"
+                  data-field="WOW_CLIENT_ID"
+                  title="Show value"
+                >
+                  Show
+                </button>
+              </div>
+            </label>
+            <label
+              title="Go to https://develop.battle.net/access/clients and create a client, get the blizzard oauth client and secret ids."
+            >
+              WoW Client Secret
+              <div class="sensitive-input-wrapper">
+                <input
+                  name="WOW_CLIENT_SECRET"
+                  type="password"
+                  autocomplete="off"
+                  class="sensitive-input"
+                />
+                <button
+                  type="button"
+                  class="ghost show-sensitive-btn"
+                  data-field="WOW_CLIENT_SECRET"
+                  title="Show value"
+                >
+                  Show
+                </button>
+              </div>
+            </label>
+            <label
+              title="Go to the Saddlebag Exchange Discord and generate a token with the bot command: /wow auctionassassintoken"
+            >
+              Auction Assassin Token
+              <div class="sensitive-input-wrapper">
+                <input
+                  name="AUTHENTICATION_TOKEN"
+                  type="password"
+                  autocomplete="off"
+                  class="sensitive-input"
+                />
+                <button
+                  type="button"
+                  class="ghost show-sensitive-btn"
+                  data-field="AUTHENTICATION_TOKEN"
+                  title="Show value"
+                >
+                  Show
+                </button>
+              </div>
+            </label>
+            <label
+              title="Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic."
+            >
+              Region
+              <select name="WOW_REGION">
+                <option value="EU">EU</option>
+                <option value="NA">NA</option>
+                <option value="EUCLASSIC">EUCLASSIC</option>
+                <option value="NACLASSIC">NACLASSIC</option>
+                <option value="NASODCLASSIC">NASODCLASSIC</option>
+                <option value="EUSODCLASSIC">EUSODCLASSIC</option>
+              </select>
+            </label>
+            <label
+              title="Change the thread count. Do 100 for the fastest scans, but RIP to ur CPU and MEM."
+            >
+              Threads
+              <input name="MEGA_THREADS" type="number" min="1" />
+            </label>
+            <label
+              title="Increase or decrease the minutes before or after the data update to start timed scans."
+            >
+              Scan start offset (min)
+              <input name="SCAN_TIME_MIN" type="number" />
+            </label>
+            <label
+              title="Increase or decrease the minutes before or after the data update to stop running scans."
+            >
+              Scan end offset (min)
+              <input name="SCAN_TIME_MAX" type="number" />
+            </label>
+            <label
+              title="Set the price recommendation discount. 1 to 99, smaller number means a better price. ex: if you set 10 percent and avg price is 100k, it recommends you snipe for 10k."
+            >
+              Discount vs Average
+              <input name="DISCOUNT_PERCENT" type="number" min="1" max="99" />
+            </label>
+            <label title="Set a minimum price to alert on wow token prices">
+              Token alert min price
+              <input name="TOKEN_PRICE" type="number" />
+            </label>
+            <label
+              title="Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
+            >
+              Faction (classic)
+              <select name="FACTION">
+                <option value="all">all</option>
+                <option value="alliance">alliance</option>
+                <option value="horde">horde</option>
+                <option value="booty bay">booty bay</option>
+              </select>
+            </label>
+            <label for="extra-alerts-trigger">
+              Extra alerts (minutes 1-59)
+              <div class="extra-alerts-dropdown-wrapper">
+                <button
+                  type="button"
+                  class="ghost extra-alerts-trigger"
+                  id="extra-alerts-trigger"
+                >
+                  <span id="extra-alerts-display">Select minutes...</span>
+                  <span class="dropdown-arrow">▼</span>
+                </button>
+                <div
+                  class="extra-alerts-dropdown"
+                  id="extra-alerts-dropdown"
+                  style="display: none"
+                >
+                  <div class="extra-alerts-list" id="extra-alerts-list">
+                    <!-- Checkboxes will be generated by JavaScript -->
+                  </div>
+                </div>
+              </div>
+            </label>
+            <div class="toggles">
+              <label
+                title="Show items with Bid prices below your price limit on Desired Items"
+                ><input type="checkbox" name="SHOW_BID_PRICES" /> Show bid
+                prices</label
+              >
+              <label
+                title="Disable all Wowhead, undemine and saddlebag links from discord messages."
+                ><input type="checkbox" name="NO_LINKS" /> Disable links</label
+              >
+              <label
+                title="Uses wowhead links instead of Undermine and shows pictures."
+                ><input type="checkbox" name="WOWHEAD_LINK" /> Use wowhead
+                links</label
+              >
+              <label title="Removes alerts from Russian Realms."
+                ><input type="checkbox" name="NO_RUSSIAN_REALMS" /> Exclude RU
+                realms</label
+              >
+              <label title="Set to true to refresh alerts every 1 hour."
+                ><input type="checkbox" name="REFRESH_ALERTS" /> Refresh alerts
+                hourly</label
+              >
+              <label
+                title="Trigger a scan on all realms once. Use this to test make sure your data is working."
+                ><input type="checkbox" name="DEBUG" /> Debug mode</label
+              >
+            </div>
+          </form>
+        </section>
+
+        <section class="card span-2 view" data-view="items">
+          <div class="page-title">
+            <h2>Desired Items</h2>
+            <span class="muted"
+              >Manage basic items to snipe by price alone
+              (desired_items.json)</span
+            >
+            <button
+              type="button"
+              class="ghost"
+              id="restore-backup-items-btn"
+              title="Restore from backup"
+            >
+              Restore Backup
+            </button>
+            <button
+              type="button"
+              class="ghost"
+              id="reset-items-btn"
+              title="Clear all items"
+            >
+              Reset
+            </button>
+          </div>
+          <div class="search-block items-search-full">
+            <div class="search-row">
+              <input
+                type="text"
+                id="item-search-input"
+                list="item-search-suggest"
+                placeholder="Search items by name (retrieves live list, cached after first search)"
+              />
+              <datalist id="item-search-suggest"></datalist>
+              <button type="button" id="item-search-btn" class="ghost">
+                Search
+              </button>
+            </div>
+            <div id="item-search-status" class="muted tiny"></div>
+            <div class="search-results" id="item-search-results"></div>
+          </div>
+          <div class="items-layout">
+            <div class="items-sidebar">
+              <form id="item-form" class="item-form-vertical">
+                <label title="Add the item id of any item you want to buy.">
+                  Item ID
+                  <input type="text" name="id" placeholder="Item ID" />
+                </label>
+                <label title="Pick a price you want to buy at or under.">
+                  Max price
+                  <input type="number" name="price" placeholder="Max price" />
+                </label>
+                <button
+                  type="submit"
+                  class="primary"
+                  title="Add/Update item to your snipe list."
+                >
+                  Add / update
+                </button>
+              </form>
+              <div class="import-grid">
+                <button
+                  type="button"
+                  class="ghost"
+                  id="import-items-btn"
+                  title="Import your desired_items.json config"
+                >
+                  Import from AAA file
+                </button>
+                <button type="button" class="ghost" id="export-items-btn">
+                  Export to AAA file
+                </button>
+                <button type="button" class="ghost" id="paste-items-btn">
+                  Import AAA
+                </button>
+                <button type="button" class="ghost" id="copy-items-btn">
+                  Copy AAA to clipboard
+                </button>
+                <button
+                  type="button"
+                  class="ghost"
+                  id="paste-pbs-items-btn"
+                  title="Import your Point Blank Sniper text files"
+                >
+                  Import PBS
+                </button>
+                <button type="button" class="ghost" id="copy-pbs-items-btn">
+                  Copy PBS to clipboard
+                </button>
+              </div>
+            </div>
+            <div class="items-list-panel">
+              <div class="items-list-header">
+                <h3>Your Items</h3>
+                <input
+                  type="text"
+                  id="item-filter-input"
+                  placeholder="Filter items by name or ID..."
+                  class="filter-input"
+                />
+              </div>
+              <ul class="list" id="item-list"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="card span-2 view" data-view="ilvl">
+          <div class="page-title">
+            <h2>Item Level Rules</h2>
+            <span class="muted"
+              >Configure BOE ilvl sniping rules (desired_ilvl_list.json)</span
+            >
+            <button
+              type="button"
+              class="ghost"
+              id="restore-backup-ilvl-btn"
+              title="Restore from backup"
+            >
+              Restore Backup
+            </button>
+            <button
+              type="button"
+              class="ghost"
+              id="reset-ilvl-btn"
+              title="Clear all ilvl rules"
+            >
+              Reset
+            </button>
+          </div>
+          <div class="search-block items-search-full">
+            <div class="search-row">
+              <input
+                type="text"
+                id="ilvl-search-input"
+                list="ilvl-search-suggest"
+                placeholder="Search items to include in this rule"
+              />
+              <datalist id="ilvl-search-suggest"></datalist>
+              <button type="button" id="ilvl-search-btn" class="ghost">
+                Search
+              </button>
+            </div>
+            <div id="ilvl-search-status" class="muted tiny"></div>
+            <div class="search-results" id="ilvl-search-results"></div>
+          </div>
+          <div class="items-layout">
+            <div class="items-sidebar">
+              <form id="ilvl-form" class="item-form-vertical">
+                <label
+                  title="Set the minimum item level (ilvl) you want to snipe. Ex: 400 ilvl."
+                >
+                  Min ilvl
+                  <input name="ilvl" type="number" value="450" />
+                </label>
+                <label
+                  title="Set the maximum item level (ilvl) you want to snipe. Ex: 500 ilvl."
+                >
+                  Max ilvl
+                  <input name="max_ilvl" type="number" value="10000" />
+                </label>
+                <label title="Set the maximum buyout you want to snipe.">
+                  Buyout
+                  <input name="buyout" type="number" value="100000" />
+                </label>
+                <label
+                  title="Leave blank to snipe all items at this Ilvl. Add the Item IDs of the BOE you want to snipe specific items separated by a comma ex: 1,2,99,420420"
+                >
+                  Item IDs (comma separated)
+                  <input name="item_ids" type="text" />
+                </label>
+                <label
+                  title="Comma-separated list of bonus IDs to match. Example: 6652,10844 Leave empty to match any bonus lists."
+                >
+                  Bonus list IDs (comma separated)
+                  <input name="bonus_lists" type="text" />
+                </label>
+                <label
+                  title="Set the minimum required character level to use gear. Ex: required level 80 for TWW items, 70 for DF items, etc."
+                >
+                  Min player level
+                  <input name="required_min_lvl" type="number" value="1" />
+                </label>
+                <label
+                  title="Set the maximum required character level to use gear. Ex: required level 70 for TWW twink items, etc."
+                >
+                  Max player level
+                  <input name="required_max_lvl" type="number" value="999" />
+                </label>
+                <div class="toggles">
+                  <label title="Do you want the item to have Sockets?"
+                    ><input type="checkbox" name="sockets" /> Sockets</label
+                  >
+                  <label title="Do you want the item to have Speed?"
+                    ><input type="checkbox" name="speed" /> Speed</label
+                  >
+                  <label title="Do you want the item to have Leech?"
+                    ><input type="checkbox" name="leech" /> Leech</label
+                  >
+                  <label title="Do you want the item to have Avoidance?"
+                    ><input type="checkbox" name="avoidance" /> Avoidance</label
+                  >
+                </div>
+                <button
+                  type="submit"
+                  class="primary"
+                  title="Add/Update item to your snipe list."
+                >
+                  Add rule
+                </button>
+                <button
+                  type="button"
+                  class="ghost"
+                  id="new-ilvl-btn"
+                  title="Clear form and start a new rule"
+                >
+                  New Item
+                </button>
+              </form>
+            </div>
+            <div class="items-list-panel">
+              <div class="items-list-header">
+                <h3>Your Rules</h3>
+                <input
+                  type="text"
+                  id="ilvl-filter-input"
+                  placeholder="Filter rules by item name or ID..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="table" id="ilvl-table"></div>
+              <div class="import-grid">
+                <button
+                  type="button"
+                  class="ghost"
+                  id="import-ilvl-btn"
+                  title="Import your desired_ilvl_list.json config"
+                >
+                  Import from AAA file
+                </button>
+                <button type="button" class="ghost" id="export-ilvl-btn">
+                  Export to AAA file
+                </button>
+                <button type="button" class="ghost" id="paste-ilvl-btn">
+                  Import AAA
+                </button>
+                <button type="button" class="ghost" id="copy-ilvl-btn">
+                  Copy AAA to clipboard
+                </button>
+                <button
+                  type="button"
+                  class="ghost"
+                  id="paste-pbs-ilvl-btn"
+                  title="Import your Point Blank Sniper ilvl text files"
+                >
+                  Import PBS
+                </button>
+                <button type="button" class="ghost" id="copy-pbs-ilvl-btn">
+                  Copy PBS to clipboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card span-2 view" data-view="pet-ilvl">
+          <div class="page-title">
+            <h2>Pet Level Rules</h2>
+            <span class="muted"
+              >Configure caged pet sniping rules by pet id
+              (desired_pet_ilvl_list.json)</span
+            >
+            <button
+              type="button"
+              class="ghost"
+              id="restore-backup-pets-btn"
+              title="Restore from backup"
+            >
+              Restore Backup
+            </button>
+            <button
+              type="button"
+              class="ghost"
+              id="reset-pets-btn"
+              title="Clear all pet rules"
+            >
+              Reset
+            </button>
+          </div>
+          <div class="search-block items-search-full">
+            <div class="search-row">
+              <input
+                type="text"
+                id="pet-ilvl-search-input"
+                list="pet-ilvl-search-suggest"
+                placeholder="Search pets to include in this rule"
+              />
+              <datalist id="pet-ilvl-search-suggest"></datalist>
+              <button type="button" id="pet-ilvl-search-btn" class="ghost">
+                Search
+              </button>
+            </div>
+            <div id="pet-ilvl-search-status" class="muted tiny"></div>
+            <div class="search-results" id="pet-ilvl-search-results"></div>
+          </div>
+          <div class="items-layout">
+            <div class="items-sidebar">
+              <form id="pet-ilvl-form" class="item-form-vertical">
+                <label title="Enter the Pet ID you want to snipe">
+                  Pet ID
+                  <input name="petID" type="number" />
+                </label>
+                <label title="Maximum price you're willing to pay">
+                  Max price
+                  <input name="price" type="number" />
+                </label>
+                <label title="Minimum pet level (1-25)">
+                  Min level
+                  <input name="minLevel" type="number" value="1" />
+                </label>
+                <label
+                  title="Minimum pet quality (-1 for any, 0-3 for Poor to Rare)"
+                >
+                  Min quality
+                  <select name="minQuality">
+                    <option value="-1">All</option>
+                    <option value="0">Poor</option>
+                    <option value="1">Common</option>
+                    <option value="2">Uncommon</option>
+                    <option value="3">Rare</option>
+                  </select>
+                </label>
+                <label
+                  for="exclude-breeds-trigger"
+                  title="Breed IDs can be found on warcraftpets.com (https://www.warcraftpets.com/wow-pet-battles/breeds/). For the best pets exclude: 7, 17, 8, 18, 9, 19, 10, 20, 3, 13, 11, 21, 2, 22"
+                >
+                  Exclude breeds
+                  <div class="exclude-breeds-dropdown-wrapper">
+                    <button
+                      type="button"
+                      class="ghost exclude-breeds-trigger"
+                      id="exclude-breeds-trigger"
+                    >
+                      <span id="exclude-breeds-display"
+                        >Select breed IDs...</span
+                      >
+                      <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div
+                      class="exclude-breeds-dropdown"
+                      id="exclude-breeds-dropdown"
+                      style="display: none"
+                    >
+                      <div class="exclude-breeds-list" id="exclude-breeds-list">
+                        <!-- Checkboxes will be generated by JavaScript -->
+                      </div>
+                    </div>
+                  </div>
+                </label>
+                <button type="submit" class="primary">Add pet rule</button>
+                <button
+                  type="button"
+                  class="ghost"
+                  id="new-pet-ilvl-btn"
+                  title="Clear form and start a new pet rule"
+                >
+                  New Item
+                </button>
+              </form>
+              <div class="import-grid">
+                <button type="button" class="ghost" id="import-pet-ilvl-btn">
+                  Import from AAA file
+                </button>
+                <button type="button" class="ghost" id="export-pet-ilvl-btn">
+                  Export to AAA file
+                </button>
+                <button type="button" class="ghost" id="paste-pet-ilvl-btn">
+                  Import AAA
+                </button>
+                <button type="button" class="ghost" id="copy-pet-ilvl-btn">
+                  Copy AAA to clipboard
+                </button>
+                <button
+                  type="button"
+                  class="ghost"
+                  id="paste-pbs-pet-ilvl-btn"
+                  title="Import your Point Blank Sniper pet text files"
+                >
+                  Import PBS
+                </button>
+                <button type="button" class="ghost" id="copy-pbs-pet-ilvl-btn">
+                  Copy PBS to clipboard
+                </button>
+              </div>
+            </div>
+            <div class="items-list-panel">
+              <div class="items-list-header">
+                <h3>Your Rules</h3>
+                <input
+                  type="text"
+                  id="pet-ilvl-filter-input"
+                  placeholder="Filter rules by pet name or ID..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="table" id="pet-ilvl-table"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card span-2 view" data-view="realms">
+          <div class="page-title">
+            <h2>Realm Lists</h2>
+            <span class="muted"
+              >Manage connected realm lists for your region</span
+            >
+          </div>
+          <div class="items-layout">
+            <div class="items-sidebar">
+              <form id="realm-form" class="item-form-vertical">
+                <label>
+                  WoW Region
+                  <select name="region" id="realm-region-select">
+                    <option value="EU">EU</option>
+                    <option value="NA">NA</option>
+                    <option value="EUCLASSIC">EUCLASSIC</option>
+                    <option value="NACLASSIC">NACLASSIC</option>
+                    <option value="NASODCLASSIC">NASODCLASSIC</option>
+                    <option value="EUSODCLASSIC">EUSODCLASSIC</option>
+                  </select>
+                </label>
+                <label>
+                  Realm Name
+                  <input
+                    type="text"
+                    name="realmName"
+                    id="realm-name-input"
+                    placeholder="Realm Name"
+                  />
+                </label>
+                <label>
+                  Realm ID
+                  <input
+                    type="number"
+                    name="realmId"
+                    id="realm-id-input"
+                    placeholder="Realm ID"
+                  />
+                </label>
+                <button type="submit" class="primary">Add Realm</button>
+              </form>
+              <div class="import-vertical">
+                <button type="button" class="ghost" id="reset-realm-btn">
+                  Reset Realm List
+                </button>
+                <button type="button" class="ghost" id="remove-realm-btn">
+                  Remove Realm
+                </button>
+                <button type="button" class="ghost" id="remove-all-realms-btn">
+                  Remove All Realms
+                </button>
+              </div>
+            </div>
+            <div class="items-list-panel">
+              <div class="items-list-header">
+                <h3>Your Realms</h3>
+                <input
+                  type="text"
+                  id="realm-filter-input"
+                  placeholder="Filter realms by name or ID..."
+                  class="filter-input"
+                />
+              </div>
+              <ul class="list" id="realm-list"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="card span-2 view" data-view="logs">
+          <div class="page-title">
+            <h2>Logs</h2>
+            <span class="muted">Output from alerts and system messages</span>
+          </div>
+          <pre id="log-panel"></pre>
+        </section>
+      </main>
+    </div>
+    <script src="./realm-data.js"></script>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

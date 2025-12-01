@@ -1,0 +1,22 @@
+---
+name: "Npm Linters"
+
+on:
+  push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main
+
+jobs:
+  "Prettier":
+    runs-on: ubuntu-latest
+    container: node:20
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Check Prettier formatting
+        run: npm run lint

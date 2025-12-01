@@ -1,0 +1,30 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "globals": {
+    "document": "readonly",
+    "window": "readonly",
+    "navigator": "readonly",
+    "console": "readonly",
+    "setTimeout": "readonly",
+    "setInterval": "readonly",
+    "clearTimeout": "readonly",
+    "clearInterval": "readonly",
+    "fetch": "readonly",
+    "FormData": "readonly",
+    "AbortController": "readonly",
+    "confirm": "readonly",
+    "alert": "readonly",
+    "require": "readonly",
+    "module": "readonly",
+    "process": "readonly",
+    "__dirname": "readonly"
+  },
+  "rules": {
+    "no-undef": "error"
+  }
+}
+

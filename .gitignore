@@ -17,6 +17,10 @@ output
 dist
 venv
 
+# Node / Electron / Typescript
+node_modules/
+dist-electron/
+
 # C extensions
 *.so
 
@@ -181,3 +185,4 @@ AzerothAuctionAssassin-windows/AzerothAuctionAssassin/AzerothAuctionAssassin.csp
 
 #Ignore cursor AI rules
 .cursor/rules/codacy.mdc
+.codacy/
