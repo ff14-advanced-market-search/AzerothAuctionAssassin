@@ -813,7 +813,7 @@ async function handleCopyPBSIlvl(btn) {
     }
   }
   const timestamp = Date.now()
-  const out = `Saddlebag PBS Ilvl List ${timestamp}^${entries.join("^")}`
+  const out = `AAA PBS Ilvl List ${timestamp}^${entries.join("^")}`
   await navigator.clipboard.writeText(out)
   appendLog("Copied PBS ilvl string to clipboard\n")
   flashButton(btn, "Copied!")
@@ -868,7 +868,7 @@ async function handleCopyPBSPetIlvl(btn) {
     )
   }
   const timestamp = Date.now()
-  const out = `Saddlebag PBS Pet Ilvl List ${timestamp}^${entries.join("^")}`
+  const out = `AAA PBS Pet Ilvl List ${timestamp}^${entries.join("^")}`
   await navigator.clipboard.writeText(out)
   appendLog("Copied PBS pet string to clipboard\n")
   flashButton(btn, "Copied!")
