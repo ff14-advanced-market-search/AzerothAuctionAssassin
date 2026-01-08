@@ -1,6 +1,6 @@
 /* eslint-env node, es6 */
-/* global require, __dirname, process, console, setTimeout, clearTimeout, setInterval, clearInterval */
-const { app, BrowserWindow, ipcMain, dialog } = require("electron")
+/* global require, __dirname, process, console, setTimeout, clearTimeout, setInterval, clearInterval, URL */
+const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron")
 const path = require("path")
 const fs = require("fs")
 const https = require("https")
@@ -406,6 +406,38 @@ function createWindow() {
       console.error("Failed to load page:", errorCode, errorDescription)
     }
   )
+
+  // Open external links in the system's default browser instead of Electron window
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url)
+    return { action: "deny" }
+  })
+
+  // Prevent navigation within the Electron window - open external URLs in system browser
+  mainWindow.webContents.on("will-navigate", (event, navigationUrl) => {
+    try {
+      const parsedUrl = new URL(navigationUrl)
+      const currentUrlString = mainWindow.webContents.getURL()
+
+      // If current URL is file://, any http/https URL should open externally
+      if (currentUrlString.startsWith("file://")) {
+        if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
+          event.preventDefault()
+          shell.openExternal(navigationUrl)
+        }
+      } else {
+        // If navigating to a different origin, open in system browser
+        const currentUrl = new URL(currentUrlString)
+        if (parsedUrl.origin !== currentUrl.origin) {
+          event.preventDefault()
+          shell.openExternal(navigationUrl)
+        }
+      }
+    } catch (err) {
+      // If URL parsing fails, allow navigation (fallback)
+      console.error("Error parsing URL in will-navigate:", err)
+    }
+  })
 
   // Open DevTools in development (uncomment for debugging)
   // mainWindow.webContents.openDevTools();
