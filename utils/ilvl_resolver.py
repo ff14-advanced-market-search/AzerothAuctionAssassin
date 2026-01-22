@@ -34,14 +34,25 @@ def _apply_curve(value, curve_id, item_curves):
     c = item_curves.get(str(curve_id)) if isinstance(item_curves, dict) else None
     if not c:
         return value
-    # Curve format TBD; may be points, formula, or lookup. Stub: pass through.
+    # Raidbots: points use playerLevel (input) / itemLevel (output); era curve maps ilvl -> scaled ilvl
     points = c.get("points") or c.get("curve") or []
     if isinstance(points, list) and len(points) >= 2:
-        # Simple linear interpolation between first and last point if value in range
         try:
-            xs = [p[0] if isinstance(p, (list, tuple)) else p.get("x", p) for p in points]
-            ys = [p[1] if isinstance(p, (list, tuple)) else p.get("y", p) for p in points]
-            if xs and ys and min(xs) <= value <= max(xs):
+            xs = []
+            ys = []
+            for p in points:
+                if isinstance(p, (list, tuple)):
+                    xs.append(p[0])
+                    ys.append(p[1])
+                elif isinstance(p, dict):
+                    x = p.get("playerLevel") or p.get("x")
+                    y = p.get("itemLevel") or p.get("y")
+                    if x is not None and y is not None:
+                        xs.append(x)
+                        ys.append(y)
+            if len(xs) < 2 or len(ys) < 2:
+                return value
+            if min(xs) <= value <= max(xs):
                 # Nearest or interpolate; keep simple
                 for i, x in enumerate(xs):
                     if value <= x:
@@ -70,10 +81,8 @@ def resolve_post_midnight_ilvl(
     Returns int item level, or None if base level missing or unresolvable.
     """
     base = _get_base_item_level(item_id, equippable_items)
-    if base is None:
-        return None
-
-    item_level = int(base)
+    # Post-midnight: rely entirely on bonus IDs. Use 0 when no DBC base; itemLevel ops set it.
+    item_level = int(base) if base is not None else 0
     legacy_level_offset = 0
     set_level_ops = {}  # era -> [(priority, amount), ...]
     level_offset_ops = {}  # era -> [amount, ...]

@@ -15,6 +15,23 @@ const RAIDBOTS_BASE = "https://www.raidbots.com/static/data/live"
 const RAW_GITHUB_BACKUP_PATH =
   "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData"
 
+/**
+ * Build equippable-items lookup { id: { baseItemLevel } } from Raidbots array or dict.
+ */
+function normalizeEquippableItems(data) {
+  if (!data || typeof data !== "object") return {}
+  if (Array.isArray(data)) {
+    const out = {}
+    for (const e of data) {
+      if (e && typeof e === "object" && "id" in e) {
+        out[String(e.id)] = { baseItemLevel: e.itemLevel }
+      }
+    }
+    return out
+  }
+  return data
+}
+
 // Stop flag and callbacks for Electron integration
 let STOP_REQUESTED = false
 let logCallback = null
@@ -490,7 +507,9 @@ class MegaData {
         }
         rule.item_ids.forEach((id) => {
           rule.item_names[id] = itemNames[id] ?? "foobar"
-          rule.base_ilvls[id] = baseIlvls[id] ?? 1
+          if (!this.USE_POST_MIDNIGHT_ILVL) {
+            rule.base_ilvls[id] = baseIlvls[id] ?? 1
+          }
           rule.base_required_levels[id] = baseReq[id] ?? 1
         })
         rules.push(rule)
@@ -1118,7 +1137,7 @@ class MegaData {
             .then((r) => (r.ok ? r.json() : {}))
             .catch(() => {}),
         ])
-        this.equippable_items = eq && typeof eq === "object" ? eq : {}
+        this.equippable_items = normalizeEquippableItems(eq)
         this.item_curves = curves && typeof curves === "object" ? curves : {}
         this.item_squish_era = eras && typeof eras === "object" ? eras : {}
       } catch (e) {
@@ -1664,8 +1683,22 @@ async function runAlerts(state, progress, runOnce = false) {
       const points = c.points ?? c.curve ?? []
       if (!Array.isArray(points) || points.length < 2) return value
       try {
-        const xs = points.map((p) => (Array.isArray(p) ? p[0] : p?.x ?? p))
-        const ys = points.map((p) => (Array.isArray(p) ? p[1] : p?.y ?? p))
+        const xs = []
+        const ys = []
+        for (const p of points) {
+          if (Array.isArray(p)) {
+            xs.push(p[0])
+            ys.push(p[1])
+          } else if (p && typeof p === "object") {
+            const x = p.playerLevel ?? p.x
+            const y = p.itemLevel ?? p.y
+            if (x != null && y != null) {
+              xs.push(x)
+              ys.push(y)
+            }
+          }
+        }
+        if (xs.length < 2 || ys.length < 2) return value
         const minX = Math.min(...xs)
         const maxX = Math.max(...xs)
         if (value < minX || value > maxX) return value
@@ -1686,9 +1719,8 @@ async function runAlerts(state, progress, runOnce = false) {
     }
 
     const base = getBase(itemId, equippableItems)
-    if (base == null) return null
-
-    let itemLevel = Number(base)
+    // Post-midnight: rely entirely on bonus IDs. Use 0 when no DBC base; itemLevel ops set it.
+    let itemLevel = base != null ? Number(base) : 0
     let legacyOffset = 0
     const setLevelOps = {}
     const levelOffsetOps = {}
@@ -1846,7 +1878,7 @@ async function runAlerts(state, progress, runOnce = false) {
         state.item_curves,
         state.item_squish_era
       )
-      if (ilvl == null) return false
+      // Resolver always returns a number (0 when no base); no longer null
     } else {
       const base_ilvl = rule.base_ilvls[auction.item.id]
       const ilvl_add = [...item_bonus_ids]

@@ -459,7 +459,7 @@ class MegaData:
         if ilvl_info["item_ids"] == []:
             snipe_info["item_names"] = item_names
             snipe_info["item_ids"] = set(item_names.keys())
-            snipe_info["base_ilvls"] = base_ilvls
+            snipe_info["base_ilvls"] = {} if self.USE_POST_MIDNIGHT_ILVL else base_ilvls
             snipe_info["base_required_levels"] = base_required_levels
             snipe_info["bonus_lists"] = ilvl_info["bonus_lists"]
         else:
@@ -468,9 +468,13 @@ class MegaData:
                 for item_id in ilvl_info["item_ids"]
             }
             snipe_info["item_ids"] = set(ilvl_info["item_ids"])
-            snipe_info["base_ilvls"] = {
-                item_id: base_ilvls.get(item_id, 1) for item_id in ilvl_info["item_ids"]
-            }
+            if self.USE_POST_MIDNIGHT_ILVL:
+                snipe_info["base_ilvls"] = {}
+            else:
+                snipe_info["base_ilvls"] = {
+                    item_id: base_ilvls.get(item_id, 1)
+                    for item_id in ilvl_info["item_ids"]
+                }
             snipe_info["base_required_levels"] = {
                 item_id: base_required_levels.get(item_id, 1)
                 for item_id in ilvl_info["item_ids"]

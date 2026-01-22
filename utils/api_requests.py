@@ -216,17 +216,31 @@ def get_raidbots_bonus_ids():
     return {int(id): data for id, data in bonus_ids.items()}
 
 
+def _normalize_equippable_items(data):
+    """Build lookup { item_id: { baseItemLevel } } from Raidbots array or dict."""
+    if not data:
+        return {}
+    if isinstance(data, list):
+        return {
+            str(e["id"]): {"baseItemLevel": e.get("itemLevel")}
+            for e in data
+            if isinstance(e, dict) and "id" in e
+        }
+    return data
+
+
 def get_raidbots_equippable_items():
     """Fetch equippable items (DBC base item level) from Raidbots for post-midnight ilvl resolver."""
     try:
         data = requests.get(f"{RAIDBOTS_BASE}/equippable-items.json", timeout=10).json()
-        return data
+        return _normalize_equippable_items(data)
     except Exception as e:
         print(f"Failed to get raidbots equippable-items: {e}")
         try:
-            return requests.get(
+            raw = requests.get(
                 f"{RAW_GITHUB_BACKUP_PATH}/equippable-items.json", timeout=10
             ).json()
+            return _normalize_equippable_items(raw)
         except Exception as e2:
             print(f"Fallback equippable-items not found: {e2}")
             return {}
