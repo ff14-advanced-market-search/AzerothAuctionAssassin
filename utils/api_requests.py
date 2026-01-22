@@ -212,7 +212,9 @@ def get_raidbots_bonus_ids():
         bonus_ids = requests.get(f"{RAIDBOTS_BASE}/bonuses.json", timeout=10).json()
     except Exception as e:
         print(f"Failed to get raidbots bonus ids getting backup from github: {e}")
-        bonus_ids = requests.get(f"{RAW_GITHUB_BACKUP_PATH}/bonuses.json", timeout=10).json()
+        bonus_ids = requests.get(
+            f"{RAW_GITHUB_BACKUP_PATH}/bonuses.json", timeout=10
+        ).json()
     return {int(id): data for id, data in bonus_ids.items()}
 
 

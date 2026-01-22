@@ -21,7 +21,11 @@ def _get_base_item_level(item_id, equippable_items):
             continue
         entry = equippable_items[key]
         if isinstance(entry, dict):
-            v = entry.get("baseItemLevel") or entry.get("base_level") or entry.get("ilvl")
+            v = (
+                entry.get("baseItemLevel")
+                or entry.get("base_level")
+                or entry.get("ilvl")
+            )
             if v is not None:
                 return v
     return None
@@ -58,7 +62,11 @@ def _apply_curve(value, curve_id, item_curves):
                     if value <= x:
                         if i == 0:
                             return ys[0]
-                        t = (value - xs[i - 1]) / (x - xs[i - 1]) if x != xs[i - 1] else 1
+                        t = (
+                            (value - xs[i - 1]) / (x - xs[i - 1])
+                            if x != xs[i - 1]
+                            else 1
+                        )
                         return int(ys[i - 1] + t * (ys[i] - ys[i - 1]))
                 return ys[-1]
         except (TypeError, IndexError, ZeroDivisionError):
@@ -151,7 +159,11 @@ def resolve_post_midnight_ilvl(
         if curve_id is not None:
             item_level = _apply_curve(item_level, curve_id, item_curves)
 
-        era_id = era_def.get("id", era_def.get("eraId", 0)) if isinstance(era_def, dict) else 0
+        era_id = (
+            era_def.get("id", era_def.get("eraId", 0))
+            if isinstance(era_def, dict)
+            else 0
+        )
 
         sl = set_level_ops.get(era_id) or set_level_ops.get(0)
         if sl:

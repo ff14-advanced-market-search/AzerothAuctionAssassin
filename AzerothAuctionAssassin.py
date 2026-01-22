@@ -654,7 +654,9 @@ class App(QMainWindow):
         )
         self.settings_page_layout.addWidget(self.debug_mode, 15, 0, 1, 1)
 
-        self.use_post_midnight_ilvl = QCheckBox("Use post-midnight ilvl system", settings_page)
+        self.use_post_midnight_ilvl = QCheckBox(
+            "Use post-midnight ilvl system", settings_page
+        )
         self.use_post_midnight_ilvl.setChecked(True)
         self.use_post_midnight_ilvl.setToolTip(
             "Use post-midnight ilvl system (Raidbots era-based processing). "
@@ -1423,7 +1425,9 @@ class App(QMainWindow):
                 self.debug_mode.setChecked(raw_mega_data["DEBUG"])
 
             if "USE_POST_MIDNIGHT_ILVL" in raw_mega_data:
-                self.use_post_midnight_ilvl.setChecked(raw_mega_data["USE_POST_MIDNIGHT_ILVL"])
+                self.use_post_midnight_ilvl.setChecked(
+                    raw_mega_data["USE_POST_MIDNIGHT_ILVL"]
+                )
         except json.JSONDecodeError:
             QMessageBox.critical(
                 self, "Parsing Error", f"Could not parse JSON data in {path_to_config}"
