@@ -1777,7 +1777,7 @@ async function runAlerts(state, progress, runOnce = false) {
       levelOffsetSecondary.length > 0 ||
       Object.keys(dropLevelOps).length > 0
 
-    if (!hasOps) return itemLevel + legacyOffset
+    if (!hasOps) itemLevel += legacyOffset
 
     let eras = Array.isArray(itemSquishEra) ? itemSquishEra : []
     if (
@@ -1787,7 +1787,7 @@ async function runAlerts(state, progress, runOnce = false) {
     ) {
       eras = itemSquishEra.eras ?? itemSquishEra.data ?? []
     }
-    if (eras.length === 0) return itemLevel + legacyOffset
+    if (eras.length === 0) return itemLevel
 
     for (const eraDef of eras) {
       const curveId =

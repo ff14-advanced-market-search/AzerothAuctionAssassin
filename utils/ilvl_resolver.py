@@ -135,14 +135,14 @@ def resolve_post_midnight_ilvl(
     )
 
     if not has_ops:
-        return item_level + legacy_level_offset
+        item_level += legacy_level_offset
 
     eras = item_squish_era if isinstance(item_squish_era, list) else []
     if not eras and isinstance(item_squish_era, dict):
         eras = item_squish_era.get("eras", item_squish_era.get("data", []))
 
     if not eras:
-        return item_level + legacy_level_offset
+        return item_level
 
     for era_def in eras:
         curve_id = None
