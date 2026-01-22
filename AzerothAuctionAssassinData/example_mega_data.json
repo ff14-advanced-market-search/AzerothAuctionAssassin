@@ -6,5 +6,6 @@
   "EXTRA_ALERTS": "[]",
   "SHOW_BID_PRICES": false,
   "MEGA_THREADS": 48,
-  "WOWHEAD_LINK": false
+  "WOWHEAD_LINK": false,
+  "USE_POST_MIDNIGHT_ILVL": true
 }

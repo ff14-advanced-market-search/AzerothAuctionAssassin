@@ -10,6 +10,7 @@ from utils.helpers import (
     create_embed,
     split_list,
 )
+from utils.ilvl_resolver import resolve_post_midnight_ilvl
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
 
@@ -398,17 +399,30 @@ class Alerts(QThread):
                     if desired and not tertiary_stats.get(stat, False):
                         return False
 
-            # get ilvl
-            base_ilvl = DESIRED_ILVL_ITEMS["base_ilvls"][auction["item"]["id"]]
-            ilvl_addition = [
-                ilvl_addition[bonus_id]
-                for bonus_id in item_bonus_ids
-                if bonus_id in ilvl_addition.keys()
-            ]
-            if len(ilvl_addition) > 0:
-                ilvl = base_ilvl + sum(ilvl_addition)
+            # get ilvl: legacy (Saddlebag base + ilvl_addition) or post-midnight (resolver)
+            if mega_data.USE_POST_MIDNIGHT_ILVL:
+                ilvl = resolve_post_midnight_ilvl(
+                    auction["item"]["id"],
+                    auction["item"]["bonus_lists"],
+                    required_lvl,
+                    mega_data.bonuses_by_id,
+                    mega_data.equippable_items,
+                    mega_data.item_curves,
+                    mega_data.item_squish_era,
+                )
+                if ilvl is None:
+                    return False
             else:
-                ilvl = base_ilvl
+                base_ilvl = DESIRED_ILVL_ITEMS["base_ilvls"][auction["item"]["id"]]
+                ilvl_add = [
+                    ilvl_addition[bonus_id]
+                    for bonus_id in item_bonus_ids
+                    if bonus_id in ilvl_addition.keys()
+                ]
+                if len(ilvl_add) > 0:
+                    ilvl = base_ilvl + sum(ilvl_add)
+                else:
+                    ilvl = base_ilvl
 
             # skip if ilvl is too low
             if ilvl < min_ilvl:

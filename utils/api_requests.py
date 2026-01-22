@@ -196,6 +196,9 @@ def get_pet_names_backup():
     return pet_info
 
 
+RAIDBOTS_BASE = "https://www.raidbots.com/static/data/live"
+
+
 def get_raidbots_bonus_ids():
     """Fetch bonus IDs from an external source and return them in a dictionary format.
     Returns:
@@ -206,13 +209,59 @@ def get_raidbots_bonus_ids():
         - The function ensures that keys in the returned dictionary are integers."""
     try:
         # thanks so much to Seriallos (Raidbots) and BinaryHabitat (GoblinStockAlerts) for organizing this data!
-        bonus_ids = requests.get(
-            "https://www.raidbots.com/static/data/live/bonuses.json"
-        ).json()
+        bonus_ids = requests.get(f"{RAIDBOTS_BASE}/bonuses.json", timeout=10).json()
     except Exception as e:
         print(f"Failed to get raidbots bonus ids getting backup from github: {e}")
-        bonus_ids = requests.get(f"{RAW_GITHUB_BACKUP_PATH}/bonuses.json").json()
+        bonus_ids = requests.get(f"{RAW_GITHUB_BACKUP_PATH}/bonuses.json", timeout=10).json()
     return {int(id): data for id, data in bonus_ids.items()}
+
+
+def get_raidbots_equippable_items():
+    """Fetch equippable items (DBC base item level) from Raidbots for post-midnight ilvl resolver."""
+    try:
+        data = requests.get(f"{RAIDBOTS_BASE}/equippable-items.json", timeout=10).json()
+        return data
+    except Exception as e:
+        print(f"Failed to get raidbots equippable-items: {e}")
+        try:
+            return requests.get(
+                f"{RAW_GITHUB_BACKUP_PATH}/equippable-items.json", timeout=10
+            ).json()
+        except Exception as e2:
+            print(f"Fallback equippable-items not found: {e2}")
+            return {}
+
+
+def get_raidbots_item_curves():
+    """Fetch item curves from Raidbots for post-midnight ilvl resolver."""
+    try:
+        data = requests.get(f"{RAIDBOTS_BASE}/item-curves.json", timeout=10).json()
+        return data
+    except Exception as e:
+        print(f"Failed to get raidbots item-curves: {e}")
+        try:
+            return requests.get(
+                f"{RAW_GITHUB_BACKUP_PATH}/item-curves.json", timeout=10
+            ).json()
+        except Exception as e2:
+            print(f"Fallback item-curves not found: {e2}")
+            return {}
+
+
+def get_raidbots_item_squish_era():
+    """Fetch item squish era list from Raidbots for post-midnight ilvl resolver."""
+    try:
+        data = requests.get(f"{RAIDBOTS_BASE}/item-squish-era.json", timeout=10).json()
+        return data
+    except Exception as e:
+        print(f"Failed to get raidbots item-squish-era: {e}")
+        try:
+            return requests.get(
+                f"{RAW_GITHUB_BACKUP_PATH}/item-squish-era.json", timeout=10
+            ).json()
+        except Exception as e2:
+            print(f"Fallback item-squish-era not found: {e2}")
+            return {}
 
 
 def get_ilvl_items(ilvl=201, item_ids=[]):

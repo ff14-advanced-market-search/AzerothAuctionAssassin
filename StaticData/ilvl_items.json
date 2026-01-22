@@ -1127,6 +1127,54 @@
     "ilvl": 226,
     "is_stackable": 0
   },
+  "190729": {
+    "itemID": 190729,
+    "itemName": "Vigorous Sentinel's Seal",
+    "itemQuality": 3,
+    "required_level": 60,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 2085657,
+    "sell_price": 417131,
+    "ilvl": 242,
+    "is_stackable": 0
+  },
+  "190730": {
+    "itemID": 190730,
+    "itemName": "Matriarch's Shell Band",
+    "itemQuality": 3,
+    "required_level": 60,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 2093218,
+    "sell_price": 418643,
+    "ilvl": 242,
+    "is_stackable": 0
+  },
+  "190732": {
+    "itemID": 190732,
+    "itemName": "Strand of Tainted Relics",
+    "itemQuality": 3,
+    "required_level": 60,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 1437503,
+    "sell_price": 287500,
+    "ilvl": 242,
+    "is_stackable": 0
+  },
+  "190733": {
+    "itemID": 190733,
+    "itemName": "Circle of Akkaris",
+    "itemQuality": 3,
+    "required_level": 60,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 1442519,
+    "sell_price": 288503,
+    "ilvl": 242,
+    "is_stackable": 0
+  },
   "190735": {
     "itemID": 190735,
     "itemName": "Varruth's Guillotine",

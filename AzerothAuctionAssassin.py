@@ -654,6 +654,14 @@ class App(QMainWindow):
         )
         self.settings_page_layout.addWidget(self.debug_mode, 15, 0, 1, 1)
 
+        self.use_post_midnight_ilvl = QCheckBox("Use post-midnight ilvl system", settings_page)
+        self.use_post_midnight_ilvl.setChecked(True)
+        self.use_post_midnight_ilvl.setToolTip(
+            "Use post-midnight ilvl system (Raidbots era-based processing). "
+            "Uncheck for legacy Saddlebag base ilvls."
+        )
+        self.settings_page_layout.addWidget(self.use_post_midnight_ilvl, 15, 1, 1, 1)
+
         self.faction = QComboBox(settings_page)
         self.faction.addItems(["all", "horde", "alliance", "booty bay"])
         self.faction_label = QLabel("Faction AH", settings_page)
@@ -1413,6 +1421,9 @@ class App(QMainWindow):
 
             if "DEBUG" in raw_mega_data:
                 self.debug_mode.setChecked(raw_mega_data["DEBUG"])
+
+            if "USE_POST_MIDNIGHT_ILVL" in raw_mega_data:
+                self.use_post_midnight_ilvl.setChecked(raw_mega_data["USE_POST_MIDNIGHT_ILVL"])
         except json.JSONDecodeError:
             QMessageBox.critical(
                 self, "Parsing Error", f"Could not parse JSON data in {path_to_config}"
@@ -2578,6 +2589,7 @@ class App(QMainWindow):
             self.scan_time_min.setText("1"),
             self.scan_time_max.setText("3"),
             self.debug_mode.setChecked(False)
+            self.use_post_midnight_ilvl.setChecked(True)
 
             self.pet_list = {}
             self.items_list = {}
@@ -2599,6 +2611,7 @@ class App(QMainWindow):
         no_russians = self.russian_realms.isChecked()
         refresh_alerts = self.refresh_alerts.isChecked()
         debug = self.debug_mode.isChecked()
+        use_post_midnight_ilvl = self.use_post_midnight_ilvl.isChecked()
 
         if not reset:
             # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC'
@@ -2672,6 +2685,7 @@ class App(QMainWindow):
                 "WOWHEAD_LINK": wowhead,
                 "NO_LINKS": no_links,
                 "NO_RUSSIAN_REALMS": no_russians,
+                "USE_POST_MIDNIGHT_ILVL": use_post_midnight_ilvl,
                 "REFRESH_ALERTS": refresh_alerts,
                 "DEBUG": debug,
             }
@@ -2697,6 +2711,7 @@ class App(QMainWindow):
             "DISCOUNT_PERCENT": int(discount_percent),
             "TOKEN_PRICE": int(token_price),
             "NO_RUSSIAN_REALMS": no_russians,
+            "USE_POST_MIDNIGHT_ILVL": use_post_midnight_ilvl,
             "REFRESH_ALERTS": refresh_alerts,
             "SCAN_TIME_MAX": int(scan_time_max),
             "SCAN_TIME_MIN": int(scan_time_min),

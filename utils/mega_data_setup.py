@@ -11,8 +11,11 @@ from utils.api_requests import (
     get_pet_names_backup,
     get_petnames,
     get_update_timers_backup,
+    get_raidbots_equippable_items,
+    get_raidbots_item_curves,
+    get_raidbots_item_squish_era,
 )
-from utils.bonus_ids import get_bonus_id_sets
+from utils.bonus_ids import get_bonus_id_sets, get_bonus_ids
 from utils.helpers import get_wow_russian_realm_ids
 from collections import defaultdict
 
@@ -42,6 +45,9 @@ class MegaData:
         self.EXTRA_ALERTS = self.__set_mega_vars("EXTRA_ALERTS", raw_mega_data)
         self.NO_RUSSIAN_REALMS = self.__set_mega_vars(
             "NO_RUSSIAN_REALMS", raw_mega_data
+        )
+        self.USE_POST_MIDNIGHT_ILVL = self.__set_mega_vars(
+            "USE_POST_MIDNIGHT_ILVL", raw_mega_data
         )
         self.DEBUG = self.__set_mega_vars("DEBUG", raw_mega_data)
         self.NO_LINKS = self.__set_mega_vars("NO_LINKS", raw_mega_data)
@@ -107,6 +113,17 @@ class MegaData:
             self.ilvl_addition,
             # self.ilvl_base,
         ) = get_bonus_id_sets()
+
+        self.bonuses_by_id = {}
+        self.equippable_items = {}
+        self.item_curves = {}
+        self.item_squish_era = {}
+        if self.USE_POST_MIDNIGHT_ILVL:
+            bonus_data = get_bonus_ids()
+            self.bonuses_by_id = bonus_data.get("bonuses_by_id", {})
+            self.equippable_items = get_raidbots_equippable_items()
+            self.item_curves = get_raidbots_item_curves()
+            self.item_squish_era = get_raidbots_item_squish_era()
 
         # get item names from desired ilvl entries
         self.DESIRED_ILVL_NAMES = {}
@@ -214,7 +231,7 @@ class MegaData:
             else:
                 return not default_behaviour
 
-        default_true = ["NO_RUSSIAN_REALMS", "REFRESH_ALERTS"]
+        default_true = ["NO_RUSSIAN_REALMS", "REFRESH_ALERTS", "USE_POST_MIDNIGHT_ILVL"]
         default_false = ["DEBUG", "NO_LINKS"]
 
         if var_name in default_true:

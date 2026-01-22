@@ -229,6 +229,7 @@ function ensureDataFiles() {
       SCAN_TIME_MAX: 3,
       NO_LINKS: false,
       NO_RUSSIAN_REALMS: false,
+      USE_POST_MIDNIGHT_ILVL: true,
       DISCOUNT_PERCENT: 10,
       TOKEN_PRICE: 0,
       REFRESH_ALERTS: false,
@@ -261,6 +262,7 @@ function normalizeMegaData(input) {
     "WOWHEAD_LINK",
     "NO_LINKS",
     "NO_RUSSIAN_REALMS",
+    "USE_POST_MIDNIGHT_ILVL",
     "REFRESH_ALERTS",
     "DEBUG",
   ])
@@ -590,6 +592,7 @@ function setupIpc() {
         SCAN_TIME_MAX: 3,
         NO_LINKS: false,
         NO_RUSSIAN_REALMS: false,
+        USE_POST_MIDNIGHT_ILVL: true,
         DISCOUNT_PERCENT: 10,
         TOKEN_PRICE: 0,
         REFRESH_ALERTS: false,
