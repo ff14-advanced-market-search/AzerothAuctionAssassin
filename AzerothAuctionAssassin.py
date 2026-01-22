@@ -843,7 +843,7 @@ class App(QMainWindow):
         self.ilvl_input = QLineEdit(ilvl_page)
         self.ilvl_input_label = QLabel("Min Item Level", ilvl_page)
         self.ilvl_input_label.setToolTip(
-            "Set the minimum item level (ilvl) you want to snipe. Ex: 400 ilvl."
+            "Set the minimum item level (ilvl) you want to snipe. Ex: 150 ilvl."
         )
         self.ilvl_input_label.setFixedSize(120, 15)
         self.ilvl_input.setFixedSize(120, 25)
