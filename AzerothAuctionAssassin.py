@@ -655,14 +655,14 @@ class App(QMainWindow):
         self.settings_page_layout.addWidget(self.debug_mode, 15, 0, 1, 1)
 
         self.use_post_midnight_ilvl = QCheckBox(
-            "Use post-midnight ilvl system", settings_page
+            "Use post-midnight ilvls", settings_page
         )
         self.use_post_midnight_ilvl.setChecked(True)
         self.use_post_midnight_ilvl.setToolTip(
             "Use post-midnight ilvl system (Raidbots era-based processing). "
             "Uncheck for legacy Saddlebag base ilvls."
         )
-        self.settings_page_layout.addWidget(self.use_post_midnight_ilvl, 15, 1, 1, 1)
+        self.settings_page_layout.addWidget(self.use_post_midnight_ilvl, 16, 0, 1, 1)
 
         self.faction = QComboBox(settings_page)
         self.faction.addItems(["all", "horde", "alliance", "booty bay"])
@@ -670,14 +670,14 @@ class App(QMainWindow):
         self.faction_label.setToolTip(
             "Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
         )
-        self.settings_page_layout.addWidget(self.faction_label, 16, 0, 1, 1)
-        self.settings_page_layout.addWidget(self.faction, 17, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.faction_label, 17, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.faction, 18, 0, 1, 1)
 
         self.import_config_button = QPushButton("Import Config")
         self.import_config_button.clicked.connect(self.import_configs)
         self.import_config_button.setToolTip("Import your mega_data.json config.")
 
-        self.settings_page_layout.addWidget(self.import_config_button, 18, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.import_config_button, 19, 0, 1, 1)
 
     def on_region_changed(self, new_region):
         """Handle region changes and refresh statistics if needed"""
