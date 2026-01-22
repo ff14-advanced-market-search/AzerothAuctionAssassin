@@ -880,7 +880,10 @@ function renderMegaForm(data) {
   for (const el of megaForm.elements) {
     if (!el.name) continue
     if (el.type === "checkbox") {
-      el.checked = Boolean(data[el.name])
+      const defaultTrue = el.name === "USE_POST_MIDNIGHT_ILVL"
+      el.checked = defaultTrue
+        ? Boolean(data[el.name] ?? true)
+        : Boolean(data[el.name])
     } else if (el.type !== "submit" && el.type !== "button") {
       el.value = data[el.name] ?? ""
     }
