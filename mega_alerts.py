@@ -718,6 +718,33 @@ class Alerts(QThread):
             }
 
         #### MAIN ####
+        def is_in_scan_window(
+            current_min, last_upload_min, scan_time_min, scan_time_max
+        ):
+            """
+            Check if current_min is within the scan window, handling minute wraparound (0-59).
+
+            Args:
+                current_min: Current minute (0-59)
+                last_upload_min: Last upload minute (0-59)
+                scan_time_min: Minutes before upload to start scanning (can be negative)
+                scan_time_max: Minutes after upload to stop scanning
+
+            Returns:
+                bool: True if current_min is within the scan window
+            """
+            # Calculate the start and end of the scan window, wrapping around 0-59
+            start_min = (last_upload_min + scan_time_min) % 60
+            end_min = (last_upload_min + scan_time_max) % 60
+
+            # Handle wraparound: if start > end, the range crosses the hour boundary
+            if start_min <= end_min:
+                # Normal range (no wraparound): e.g., 5 to 10
+                return start_min <= current_min <= end_min
+            else:
+                # Wraparound range: e.g., 59 to 2 means [59, 0, 1, 2]
+                return current_min >= start_min or current_min <= end_min
+
         def main():
             while self.running:
                 current_min = int(datetime.now().minute)
@@ -731,9 +758,12 @@ class Alerts(QThread):
                 matching_realms = [
                     realm["dataSetID"]
                     for realm in mega_data.get_upload_time_list()
-                    if realm["lastUploadMinute"] + mega_data.SCAN_TIME_MIN
-                    <= current_min
-                    <= realm["lastUploadMinute"] + mega_data.SCAN_TIME_MAX
+                    if is_in_scan_window(
+                        current_min,
+                        realm["lastUploadMinute"],
+                        mega_data.SCAN_TIME_MIN,
+                        mega_data.SCAN_TIME_MAX,
+                    )
                 ]
                 # mega wants extra alerts
                 if mega_data.EXTRA_ALERTS:

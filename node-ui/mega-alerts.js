@@ -2233,12 +2233,46 @@ async function runAlerts(state, progress, runOnce = false) {
     // Scan starts at lastUploadMinute + SCAN_TIME_MIN
     // Scan ends at lastUploadMinute + SCAN_TIME_MAX
     // Commodities are included automatically if they're in upload_timers and match the time window
+
+    /**
+     * Check if current_min is within the scan window, handling minute wraparound (0-59).
+     * @param {number} current_min - Current minute (0-59)
+     * @param {number} last_upload_min - Last upload minute (0-59)
+     * @param {number} scan_time_min - Minutes before upload to start scanning (can be negative)
+     * @param {number} scan_time_max - Minutes after upload to stop scanning
+     * @returns {boolean} True if current_min is within the scan window
+     */
+    const isInScanWindow = (
+      current_min,
+      last_upload_min,
+      scan_time_min,
+      scan_time_max
+    ) => {
+      // Calculate the start and end of the scan window, wrapping around 0-59
+      // JavaScript's modulo operator handles negative numbers differently than Python,
+      // so we need to ensure positive values first
+      const start_min = (((last_upload_min + scan_time_min) % 60) + 60) % 60
+      const end_min = (((last_upload_min + scan_time_max) % 60) + 60) % 60
+
+      // Handle wraparound: if start > end, the range crosses the hour boundary
+      if (start_min <= end_min) {
+        // Normal range (no wraparound): e.g., 5 to 10
+        return start_min <= current_min && current_min <= end_min
+      } else {
+        // Wraparound range: e.g., 59 to 2 means [59, 0, 1, 2]
+        return current_min >= start_min || current_min <= end_min
+      }
+    }
+
     let matching_realms = state
       .get_upload_time_list()
-      .filter(
-        (realm) =>
-          realm.lastUploadMinute + state.SCAN_TIME_MIN <= current_min &&
-          current_min <= realm.lastUploadMinute + state.SCAN_TIME_MAX
+      .filter((realm) =>
+        isInScanWindow(
+          current_min,
+          realm.lastUploadMinute,
+          state.SCAN_TIME_MIN,
+          state.SCAN_TIME_MAX
+        )
       )
       .map((r) => r.dataSetID)
 
