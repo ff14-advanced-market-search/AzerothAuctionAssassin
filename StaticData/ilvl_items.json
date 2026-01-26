@@ -1151,6 +1151,18 @@
     "ilvl": 242,
     "is_stackable": 0
   },
+  "190731": {
+    "itemID": 190731,
+    "itemName": "Deceiver's Illusionary Signet",
+    "itemQuality": 3,
+    "required_level": 60,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 2100778,
+    "sell_price": 420155,
+    "ilvl": 242,
+    "is_stackable": 0
+  },
   "190732": {
     "itemID": 190732,
     "itemName": "Strand of Tainted Relics",
@@ -11745,6 +11757,42 @@
     "purchase_price": 0,
     "sell_price": 0,
     "ilvl": 400,
+    "is_stackable": 0
+  },
+  "258931": {
+    "itemID": 258931,
+    "itemName": "Tarnished Dawnlit Sentinel's Cover",
+    "itemQuality": 2,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 3,
+    "purchase_price": 240882,
+    "sell_price": 48176,
+    "ilvl": 226,
+    "is_stackable": 0
+  },
+  "258941": {
+    "itemID": 258941,
+    "itemName": "Tarnished Dawnlit Commander's Mantle",
+    "itemQuality": 2,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 4,
+    "purchase_price": 232306,
+    "sell_price": 46461,
+    "ilvl": 226,
+    "is_stackable": 0
+  },
+  "258944": {
+    "itemID": 258944,
+    "itemName": "Tarnished Dawnlit Cleaver",
+    "itemQuality": 2,
+    "required_level": 80,
+    "item_class": 2,
+    "item_subclass": 0,
+    "purchase_price": 448228,
+    "sell_price": 89645,
+    "ilvl": 226,
     "is_stackable": 0
   }
 }
