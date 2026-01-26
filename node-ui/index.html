@@ -33,7 +33,7 @@
       <header class="topbar">
         <div>
           <div class="eyebrow">Azeroth Auction Assassin</div>
-          <div class="title">Version: 2.0.2</div>
+          <div class="title">Version: 2.0.3</div>
         </div>
         <div class="actions">
           <div class="nav-controls">
@@ -123,6 +123,11 @@
               <div id="update-content"></div>
             </div>
             <img src="../icon.png" alt="AAA" class="home-icon" />
+          </div>
+          <div class="home-ilvl-warning">
+            <strong>Midnight ilvl squish:</strong> Item levels are now much
+            lower than they were pre–patch 12.0.0. Adjust your ilvl settings
+            accordingly.
           </div>
         </section>
 
@@ -423,6 +428,11 @@
                 title="Trigger a scan on all realms once. Use this to test make sure your data is working."
                 ><input type="checkbox" name="DEBUG" /> Debug mode</label
               >
+              <label
+                title="Use post-midnight ilvl system (Raidbots era-based processing). Uncheck for legacy Saddlebag base ilvls."
+                ><input type="checkbox" name="USE_POST_MIDNIGHT_ILVL" checked />
+                Use post-midnight ilvl system</label
+              >
             </div>
           </form>
         </section>
@@ -575,10 +585,10 @@
             <div class="items-sidebar">
               <form id="ilvl-form" class="item-form-vertical">
                 <label
-                  title="Set the minimum item level (ilvl) you want to snipe. Ex: 400 ilvl."
+                  title="Set the minimum item level (ilvl) you want to snipe. Ex: 150 ilvl."
                 >
                   Min ilvl
-                  <input name="ilvl" type="number" value="450" />
+                  <input name="ilvl" type="number" value="150" />
                 </label>
                 <label
                   title="Set the maximum item level (ilvl) you want to snipe. Ex: 500 ilvl."

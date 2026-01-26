@@ -4,6 +4,9 @@ from utils.api_requests import (
     get_itemnames,
     get_ilvl_items,
     get_raidbots_bonus_ids,
+    get_raidbots_equippable_items,
+    get_raidbots_item_curves,
+    get_raidbots_item_squish_era,
     get_pet_names_backup,
 )
 
@@ -33,6 +36,20 @@ bonuses = get_raidbots_bonus_ids()
 # write to StaticData/bonuses.json
 with open("StaticData/bonuses.json", "w") as f:
     json.dump(bonuses, f, indent=2)
+
+# optional: post-midnight ilvl fallbacks (Raidbots equippable-items, item-curves, item-squish-era)
+equippable = get_raidbots_equippable_items()
+if equippable:
+    with open("StaticData/equippable-items.json", "w") as f:
+        json.dump(equippable, f, indent=2)
+curves = get_raidbots_item_curves()
+if curves:
+    with open("StaticData/item-curves.json", "w") as f:
+        json.dump(curves, f, indent=2)
+squish_era = get_raidbots_item_squish_era()
+if squish_era:
+    with open("StaticData/item-squish-era.json", "w") as f:
+        json.dump(squish_era, f, indent=2)
 
 # get the ilvl items
 json_data = {

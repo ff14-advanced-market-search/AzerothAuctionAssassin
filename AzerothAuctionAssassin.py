@@ -5,7 +5,7 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.6.0"
+AAA_VERSION = "1.6.1"
 
 windowsApp_Path = None
 try:
@@ -654,20 +654,30 @@ class App(QMainWindow):
         )
         self.settings_page_layout.addWidget(self.debug_mode, 15, 0, 1, 1)
 
+        self.use_post_midnight_ilvl = QCheckBox(
+            "Use post-midnight ilvls", settings_page
+        )
+        self.use_post_midnight_ilvl.setChecked(True)
+        self.use_post_midnight_ilvl.setToolTip(
+            "Use post-midnight ilvl system (Raidbots era-based processing). "
+            "Uncheck for legacy Saddlebag base ilvls."
+        )
+        self.settings_page_layout.addWidget(self.use_post_midnight_ilvl, 16, 0, 1, 1)
+
         self.faction = QComboBox(settings_page)
         self.faction.addItems(["all", "horde", "alliance", "booty bay"])
         self.faction_label = QLabel("Faction AH", settings_page)
         self.faction_label.setToolTip(
             "Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
         )
-        self.settings_page_layout.addWidget(self.faction_label, 16, 0, 1, 1)
-        self.settings_page_layout.addWidget(self.faction, 17, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.faction_label, 17, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.faction, 18, 0, 1, 1)
 
         self.import_config_button = QPushButton("Import Config")
         self.import_config_button.clicked.connect(self.import_configs)
         self.import_config_button.setToolTip("Import your mega_data.json config.")
 
-        self.settings_page_layout.addWidget(self.import_config_button, 18, 0, 1, 1)
+        self.settings_page_layout.addWidget(self.import_config_button, 19, 0, 1, 1)
 
     def on_region_changed(self, new_region):
         """Handle region changes and refresh statistics if needed"""
@@ -833,7 +843,7 @@ class App(QMainWindow):
         self.ilvl_input = QLineEdit(ilvl_page)
         self.ilvl_input_label = QLabel("Min Item Level", ilvl_page)
         self.ilvl_input_label.setToolTip(
-            "Set the minimum item level (ilvl) you want to snipe. Ex: 400 ilvl."
+            "Set the minimum item level (ilvl) you want to snipe. Ex: 150 ilvl."
         )
         self.ilvl_input_label.setFixedSize(120, 15)
         self.ilvl_input.setFixedSize(120, 25)
@@ -1413,6 +1423,11 @@ class App(QMainWindow):
 
             if "DEBUG" in raw_mega_data:
                 self.debug_mode.setChecked(raw_mega_data["DEBUG"])
+
+            if "USE_POST_MIDNIGHT_ILVL" in raw_mega_data:
+                self.use_post_midnight_ilvl.setChecked(
+                    raw_mega_data["USE_POST_MIDNIGHT_ILVL"]
+                )
         except json.JSONDecodeError:
             QMessageBox.critical(
                 self, "Parsing Error", f"Could not parse JSON data in {path_to_config}"
@@ -2578,6 +2593,7 @@ class App(QMainWindow):
             self.scan_time_min.setText("1"),
             self.scan_time_max.setText("3"),
             self.debug_mode.setChecked(False)
+            self.use_post_midnight_ilvl.setChecked(True)
 
             self.pet_list = {}
             self.items_list = {}
@@ -2599,6 +2615,7 @@ class App(QMainWindow):
         no_russians = self.russian_realms.isChecked()
         refresh_alerts = self.refresh_alerts.isChecked()
         debug = self.debug_mode.isChecked()
+        use_post_midnight_ilvl = self.use_post_midnight_ilvl.isChecked()
 
         if not reset:
             # Check if WOW_REGION is either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'NASODCLASSIC'
@@ -2672,6 +2689,7 @@ class App(QMainWindow):
                 "WOWHEAD_LINK": wowhead,
                 "NO_LINKS": no_links,
                 "NO_RUSSIAN_REALMS": no_russians,
+                "USE_POST_MIDNIGHT_ILVL": use_post_midnight_ilvl,
                 "REFRESH_ALERTS": refresh_alerts,
                 "DEBUG": debug,
             }
@@ -2697,6 +2715,7 @@ class App(QMainWindow):
             "DISCOUNT_PERCENT": int(discount_percent),
             "TOKEN_PRICE": int(token_price),
             "NO_RUSSIAN_REALMS": no_russians,
+            "USE_POST_MIDNIGHT_ILVL": use_post_midnight_ilvl,
             "REFRESH_ALERTS": refresh_alerts,
             "SCAN_TIME_MAX": int(scan_time_max),
             "SCAN_TIME_MIN": int(scan_time_min),

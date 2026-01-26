@@ -135,7 +135,7 @@ function clearIlvlForm() {
   const form = document.getElementById("ilvl-form")
   if (form) {
     form.reset()
-    form.ilvl.value = 450
+    form.ilvl.value = 150
     form.max_ilvl.value = 10000
     form.buyout.value = 100000
     form.required_min_lvl.value = 1
@@ -880,7 +880,10 @@ function renderMegaForm(data) {
   for (const el of megaForm.elements) {
     if (!el.name) continue
     if (el.type === "checkbox") {
-      el.checked = Boolean(data[el.name])
+      const defaultTrue = el.name === "USE_POST_MIDNIGHT_ILVL"
+      el.checked = defaultTrue
+        ? Boolean(data[el.name] ?? true)
+        : Boolean(data[el.name])
     } else if (el.type !== "submit" && el.type !== "button") {
       el.value = data[el.name] ?? ""
     }
@@ -1256,7 +1259,7 @@ function renderIlvlRules() {
       const form = document.getElementById("ilvl-form")
       if (form) {
         editingIlvlIndex = idx
-        form.ilvl.value = rule.ilvl || 450
+        form.ilvl.value = rule.ilvl || 150
         form.max_ilvl.value = rule.max_ilvl || 10000
         form.buyout.value = rule.buyout || 100000
         form.item_ids.value = (rule.item_ids || []).join(", ")

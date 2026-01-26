@@ -25,6 +25,9 @@ def get_bonus_ids():
         if list(v.keys()) == ["id", "level"]
     }
 
+    # post-midnight ilvl: raw bonus data for resolver (itemLevel, levelOffset, etc.)
+    bonuses_by_id = bonus_id_dict
+
     # the rest are buried in rawStats
     leech, avoidance, speed = {}, {}, {}
     haste, crit, mastery, versatility = {}, {}, {}, {}
@@ -51,7 +54,7 @@ def get_bonus_ids():
         "avoidance": avoidance,
         "speed": speed,
         "ilvl_addition": ilvl_addition,
-        # "ilvl_base": base_level,
+        "bonuses_by_id": bonuses_by_id,
         "haste": haste,
         "crit": crit,
         "mastery": mastery,

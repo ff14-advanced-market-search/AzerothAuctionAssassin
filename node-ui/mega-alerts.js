@@ -11,8 +11,26 @@ let DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData")
 // eslint-disable-next-line no-unused-vars
 let STATIC_DIR // Set by setPaths() for API compatibility, no longer used for reading files
 const SADDLEBAG_URL = "https://api.saddlebagexchange.com"
+const RAIDBOTS_BASE = "https://www.raidbots.com/static/data/live"
 const RAW_GITHUB_BACKUP_PATH =
   "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData"
+
+/**
+ * Build equippable-items lookup { id: { baseItemLevel } } from Raidbots array or dict.
+ */
+function normalizeEquippableItems(data) {
+  if (!data || typeof data !== "object") return {}
+  if (Array.isArray(data)) {
+    const out = {}
+    for (const e of data) {
+      if (e && typeof e === "object" && "id" in e) {
+        out[String(e.id)] = { baseItemLevel: e.itemLevel }
+      }
+    }
+    return out
+  }
+  return data
+}
 
 // Stop flag and callbacks for Electron integration
 let STOP_REQUESTED = false
@@ -340,6 +358,9 @@ class MegaData {
     this.SHOW_BIDPRICES = Boolean(this.cfg.SHOW_BID_PRICES ?? false) // Show items with bid prices
     this.EXTRA_ALERTS = this.cfg.EXTRA_ALERTS // JSON array of extra alert minutes
     this.NO_RUSSIAN_REALMS = Boolean(this.cfg.NO_RUSSIAN_REALMS) // Removes alerts from Russian Realms
+    this.USE_POST_MIDNIGHT_ILVL = Boolean(
+      this.cfg.USE_POST_MIDNIGHT_ILVL ?? true
+    ) // Post-midnight ilvl (Raidbots era-based); false = legacy Saddlebag
     this.DEBUG = Boolean(this.cfg.DEBUG) // Trigger a scan on all realms once for testing
     this.NO_LINKS = Boolean(this.cfg.NO_LINKS) // Disable all Wowhead, undermine and saddlebag links
     this.TOKEN_PRICE =
@@ -372,6 +393,10 @@ class MegaData {
     this.leech_ids = new Set()
     this.avoidance_ids = new Set()
     this.ilvl_addition = {}
+    this.bonuses_by_id = {}
+    this.equippable_items = {}
+    this.item_curves = {}
+    this.item_squish_era = {}
     this.ITEM_NAMES = {}
     this.PET_NAMES = {}
     this.DESIRED_ILVL_NAMES = {}
@@ -482,7 +507,9 @@ class MegaData {
         }
         rule.item_ids.forEach((id) => {
           rule.item_names[id] = itemNames[id] ?? "foobar"
-          rule.base_ilvls[id] = baseIlvls[id] ?? 1
+          if (!this.USE_POST_MIDNIGHT_ILVL) {
+            rule.base_ilvls[id] = baseIlvls[id] ?? 1
+          }
           rule.base_required_levels[id] = baseReq[id] ?? 1
         })
         rules.push(rule)
@@ -1064,9 +1091,7 @@ class MegaData {
     let bonus = {}
     try {
       // thanks so much to Seriallos (Raidbots) and BinaryHabitat (GoblinStockAlerts) for organizing this data!
-      const response = await fetch(
-        "https://www.raidbots.com/static/data/live/bonuses.json"
-      )
+      const response = await fetch(`${RAIDBOTS_BASE}/bonuses.json`)
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const bonusData = await response.json()
       bonus = bonusData
@@ -1087,7 +1112,36 @@ class MegaData {
         this.leech_ids = new Set()
         this.avoidance_ids = new Set()
         this.ilvl_addition = {}
+        this.bonuses_by_id = {}
         return
+      }
+    }
+
+    const bonusesById = {}
+    for (const [k, v] of Object.entries(bonus)) {
+      const id = Number(k)
+      if (!Number.isNaN(id)) bonusesById[id] = v
+    }
+    this.bonuses_by_id = bonusesById
+
+    if (this.USE_POST_MIDNIGHT_ILVL) {
+      try {
+        const [eq, curves, eras] = await Promise.all([
+          fetch(`${RAIDBOTS_BASE}/equippable-items.json`)
+            .then((r) => (r.ok ? r.json() : {}))
+            .catch(() => {}),
+          fetch(`${RAIDBOTS_BASE}/item-curves.json`)
+            .then((r) => (r.ok ? r.json() : {}))
+            .catch(() => {}),
+          fetch(`${RAIDBOTS_BASE}/item-squish-era.json`)
+            .then((r) => (r.ok ? r.json() : {}))
+            .catch(() => {}),
+        ])
+        this.equippable_items = normalizeEquippableItems(eq)
+        this.item_curves = curves && typeof curves === "object" ? curves : {}
+        this.item_squish_era = eras && typeof eras === "object" ? eras : {}
+      } catch (e) {
+        logError("Failed to fetch post-midnight ilvl data:", e)
       }
     }
 
@@ -1594,6 +1648,184 @@ async function runAlerts(state, progress, runOnce = false) {
   }
 
   /**
+   * Resolve post-midnight ilvl from bonus_lists and optional drop_level.
+   * Returns number or null if base level missing / unresolvable.
+   */
+  function resolvePostMidnightIlvl(
+    itemId,
+    bonusLists,
+    dropLevel,
+    bonusesById,
+    equippableItems,
+    itemCurves,
+    itemSquishEra
+  ) {
+    function getBase(itemId, eq) {
+      if (!eq || typeof eq !== "object") return null
+      const keys = [String(itemId)]
+      const n = Number(itemId)
+      if (!Number.isNaN(n)) keys.push(n)
+      for (const key of keys) {
+        if (!(key in eq)) continue
+        const e = eq[key]
+        if (e && typeof e === "object") {
+          const v = e.baseItemLevel ?? e.base_level ?? e.ilvl
+          if (v != null) return v
+        }
+      }
+      return null
+    }
+
+    function applyCurve(value, curveId, curves) {
+      if (!curves || curveId == null) return value
+      const c = curves[String(curveId)]
+      if (!c) return value
+      const points = c.points ?? c.curve ?? []
+      if (!Array.isArray(points) || points.length < 2) return value
+      try {
+        const xs = []
+        const ys = []
+        for (const p of points) {
+          if (Array.isArray(p)) {
+            xs.push(p[0])
+            ys.push(p[1])
+          } else if (p && typeof p === "object") {
+            const x = p.playerLevel ?? p.x
+            const y = p.itemLevel ?? p.y
+            if (x != null && y != null) {
+              xs.push(x)
+              ys.push(y)
+            }
+          }
+        }
+        if (xs.length < 2 || ys.length < 2) return value
+        const minX = Math.min(...xs)
+        const maxX = Math.max(...xs)
+        if (value < minX || value > maxX) return value
+        for (let i = 0; i < xs.length; i++) {
+          if (value <= xs[i]) {
+            if (i === 0) return ys[0]
+            const t =
+              xs[i] !== xs[i - 1]
+                ? (value - xs[i - 1]) / (xs[i] - xs[i - 1])
+                : 1
+            return Math.floor(ys[i - 1] + t * (ys[i] - ys[i - 1]))
+          }
+        }
+        return ys[ys.length - 1]
+      } catch {
+        return value
+      }
+    }
+
+    const base = getBase(itemId, equippableItems)
+    // Post-midnight: rely entirely on bonus IDs. Use 0 when no DBC base; itemLevel ops set it.
+    let itemLevel = base != null ? Number(base) : 0
+    let legacyOffset = 0
+    const setLevelOps = {}
+    const levelOffsetOps = {}
+    const levelOffsetSecondary = []
+    const dropLevelOps = {}
+
+    for (const bid of bonusLists || []) {
+      const b = bonusesById?.[Number(bid)]
+      if (!b || typeof b !== "object") continue
+
+      const il = b.itemLevel
+      if (il != null) {
+        const era = (il && il.squishEra) ?? 0
+        const pr = (il && il.priority) ?? 9999
+        const amt = il && typeof il === "object" ? il.amount : il
+        if (amt != null) {
+          if (!setLevelOps[era]) setLevelOps[era] = []
+          setLevelOps[era].push([pr, amt])
+        }
+      }
+
+      const lo = b.levelOffset
+      if (lo != null) {
+        const era = (lo && lo.squishEra) ?? 0
+        const amt = lo && typeof lo === "object" ? lo.amount : lo
+        if (amt != null) {
+          if (!levelOffsetOps[era]) levelOffsetOps[era] = []
+          levelOffsetOps[era].push(amt)
+        }
+      }
+
+      const los = b.levelOffsetSecondary
+      if (los != null) {
+        const amt = los && typeof los === "object" ? los.amount : los
+        if (amt != null) levelOffsetSecondary.push(amt)
+      }
+
+      const dlc = b.dropLevelCurve
+      if (dlc && typeof dlc === "object") {
+        const era = dlc.squishEra ?? 0
+        const cid = dlc.curveId
+        const off = dlc.offset ?? 0
+        const pr = dlc.priority ?? 9999
+        if (!dropLevelOps[era]) dropLevelOps[era] = []
+        dropLevelOps[era].push([pr, cid, off])
+      }
+
+      if (typeof b.level === "number") legacyOffset += b.level
+    }
+
+    const hasOps =
+      Object.keys(setLevelOps).length > 0 ||
+      Object.keys(levelOffsetOps).length > 0 ||
+      levelOffsetSecondary.length > 0 ||
+      Object.keys(dropLevelOps).length > 0
+
+    if (!hasOps) itemLevel += legacyOffset
+
+    let eras = Array.isArray(itemSquishEra) ? itemSquishEra : []
+    if (
+      eras.length === 0 &&
+      itemSquishEra &&
+      typeof itemSquishEra === "object"
+    ) {
+      eras = itemSquishEra.eras ?? itemSquishEra.data ?? []
+    }
+    if (eras.length === 0) return itemLevel
+
+    for (const eraDef of eras) {
+      const curveId =
+        eraDef && typeof eraDef === "object"
+          ? eraDef.curveId ?? eraDef.curve_id
+          : null
+      if (curveId != null)
+        itemLevel = applyCurve(itemLevel, curveId, itemCurves)
+
+      const eraId =
+        eraDef && typeof eraDef === "object"
+          ? eraDef.id ?? eraDef.eraId ?? 0
+          : 0
+
+      const sl = setLevelOps[eraId] ?? setLevelOps[0]
+      if (sl && sl.length) {
+        const best = sl.slice().sort((a, b) => a[0] - b[0])[0]
+        itemLevel = Number(best[1])
+      }
+
+      const dl = dropLevelOps[eraId] ?? dropLevelOps[0]
+      if (dl && dl.length && dropLevel != null) {
+        const best = dl.slice().sort((a, b) => a[0] - b[0])[0]
+        const [, cid, off] = best
+        const lookup = cid ? dropLevel : 0
+        const scaled = cid ? applyCurve(lookup, cid, itemCurves) : lookup
+        itemLevel = Math.floor(Number(scaled)) + Number(off)
+      }
+
+      const losEra = levelOffsetOps[eraId] ?? levelOffsetOps[0]
+      if (losEra) for (const amt of losEra) itemLevel += Number(amt)
+    }
+
+    for (const amt of levelOffsetSecondary) itemLevel += Number(amt)
+    return itemLevel
+  }
+
+  /**
    * Check if an auction matches the ilvl rule criteria
    * Validates tertiary stats (sockets, leech, avoidance, speed), ilvl, required level, bonus lists, and price
    *
@@ -1635,11 +1867,25 @@ async function runAlerts(state, progress, runOnce = false) {
       }
     }
 
-    const base_ilvl = rule.base_ilvls[auction.item.id]
-    const ilvl_addition = [...item_bonus_ids]
-      .map((b) => state.ilvl_addition[b] || 0)
-      .reduce((a, b) => a + b, 0)
-    const ilvl = base_ilvl + ilvl_addition
+    let ilvl
+    if (state.USE_POST_MIDNIGHT_ILVL) {
+      ilvl = resolvePostMidnightIlvl(
+        auction.item.id,
+        auction.item.bonus_lists,
+        required_lvl,
+        state.bonuses_by_id,
+        state.equippable_items,
+        state.item_curves,
+        state.item_squish_era
+      )
+      // Resolver always returns a number (0 when no base); no longer null
+    } else {
+      const base_ilvl = rule.base_ilvls[auction.item.id]
+      const ilvl_add = [...item_bonus_ids]
+        .map((b) => state.ilvl_addition[b] || 0)
+        .reduce((a, b) => a + b, 0)
+      ilvl = base_ilvl + ilvl_add
+    }
 
     if (ilvl < min_ilvl) return false
     if (ilvl > rule.max_ilvl) return false
