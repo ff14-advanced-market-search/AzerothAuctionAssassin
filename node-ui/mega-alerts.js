@@ -2304,9 +2304,9 @@ async function runAlerts(state, progress, runOnce = false) {
       )
     } else {
       progress(
-        `The updates will come\non min ${Array.from(
+        `The updates will come on min ${Array.from(
           state.get_upload_time_minutes()
-        ).join(",")}\nof each hour.`
+        ).join(",")} of each hour.`
       )
       log(
         `Blizzard API data only updates 1 time per hour. The updates will come on minute ${Array.from(
