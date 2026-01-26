@@ -2264,6 +2264,37 @@ async function runAlerts(state, progress, runOnce = false) {
       }
     }
 
+    /**
+     * Get all scan trigger minutes based on upload times and scan window settings.
+     * @returns {Set<number>} Set of all minutes when scans will trigger
+     */
+    const getScanTriggerMinutes = () => {
+      const scanMinutes = new Set()
+      const uploadMinutes = state.get_upload_time_minutes()
+
+      for (const uploadMin of uploadMinutes) {
+        const start_min = (((uploadMin + state.SCAN_TIME_MIN) % 60) + 60) % 60
+        const end_min = (((uploadMin + state.SCAN_TIME_MAX) % 60) + 60) % 60
+
+        if (start_min <= end_min) {
+          // Normal range (no wraparound)
+          for (let min = start_min; min <= end_min; min++) {
+            scanMinutes.add(min)
+          }
+        } else {
+          // Wraparound range: e.g., 59 to 2 means [59, 0, 1, 2]
+          for (let min = start_min; min < 60; min++) {
+            scanMinutes.add(min)
+          }
+          for (let min = 0; min <= end_min; min++) {
+            scanMinutes.add(min)
+          }
+        }
+      }
+
+      return scanMinutes
+    }
+
     let matching_realms = state
       .get_upload_time_list()
       .filter((realm) =>
@@ -2303,15 +2334,23 @@ async function runAlerts(state, progress, runOnce = false) {
         state.THREADS
       )
     } else {
+      const uploadMinutes = Array.from(state.get_upload_time_minutes()).sort(
+        (a, b) => a - b
+      )
+      const scanTriggerMinutes = Array.from(getScanTriggerMinutes()).sort(
+        (a, b) => a - b
+      )
       progress(
-        `The updates will come on min ${Array.from(
-          state.get_upload_time_minutes()
-        ).join(",")} of each hour.`
+        `The updates will come on min ${uploadMinutes.join(
+          ","
+        )} of each hour. Scans trigger on min ${scanTriggerMinutes.join(",")}.`
       )
       log(
-        `Blizzard API data only updates 1 time per hour. The updates will come on minute ${Array.from(
-          state.get_upload_time_minutes()
-        )} of each hour. ${new Date().toISOString()} is not the update time.`
+        `Blizzard API data only updates 1 time per hour. The updates will come on minute ${uploadMinutes.join(
+          ", "
+        )} of each hour. Scans will trigger on minutes ${scanTriggerMinutes.join(
+          ", "
+        )}. ${new Date().toISOString()} is not the update time.`
       )
       await delay(20000) // Wait 20 seconds before checking again
     }
