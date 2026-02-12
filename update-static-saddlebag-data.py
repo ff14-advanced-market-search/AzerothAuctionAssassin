@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import json, requests
 from utils.api_requests import (
+    WOW_DISCORD_CONSENT,
     get_itemnames,
     get_ilvl_items,
     get_raidbots_bonus_ids,
@@ -13,7 +14,7 @@ from utils.api_requests import (
 # get the upload timers
 upload_timers = requests.post(
     "https://api.saddlebagexchange.com/api/wow/uploadtimers",
-    json={},
+    json={"discord_consent": WOW_DISCORD_CONSENT},
 ).json()
 # write to StaticData/upload_timers.json
 with open("StaticData/upload_timers.json", "w") as f:
@@ -53,6 +54,7 @@ if squish_era:
 
 # get the ilvl items
 json_data = {
+    "discord_consent": WOW_DISCORD_CONSENT,
     "ilvl": 201,
     "itemQuality": -1,
     "required_level": -1,

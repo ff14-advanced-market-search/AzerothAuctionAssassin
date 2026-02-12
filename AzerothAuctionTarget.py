@@ -46,6 +46,12 @@ from PyQt5.QtWidgets import (
     QScrollArea,
 )
 
+WOW_DISCORD_CONSENT = (
+    "I have gone to discord and asked the devs about this api and i know it only updates once per hour "
+    "and will not spam the api like an idiot and there is no point in making more than one request per hour "
+    "and i will not make request for one item at a time i know many apis support calling multiple items at once"
+)
+
 if sys.platform == "win32":
     myappid = "mycompany.myproduct.subproduct.version"  # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
@@ -130,6 +136,7 @@ class RecommendationsRequest(QThread):
             - Sets discount percent and minimum market value as instance variables."""
         super().__init__()
         self.request_data = {
+            "discord_consent": WOW_DISCORD_CONSENT,
             "homeRealmId": realm_id,
             "region": region,
             "commodity": commodity,
@@ -212,7 +219,11 @@ class Item_Statistics(QThread):
             data=requests.post(
                 f"https://api.saddlebagexchange.com/api/wow/megaitemnames",
                 headers={"Accept": "application/json"},
-                json={"region": "EU", "discount": 1},
+                json={
+                    "discord_consent": WOW_DISCORD_CONSENT,
+                    "region": "EU",
+                    "discount": 1,
+                },
             ).json()
         )
 
