@@ -11,6 +11,8 @@ let DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData")
 // eslint-disable-next-line no-unused-vars
 let STATIC_DIR // Set by setPaths() for API compatibility, no longer used for reading files
 const SADDLEBAG_URL = "https://api.saddlebagexchange.com"
+const WOW_DISCORD_CONSENT =
+  "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 const RAIDBOTS_BASE = "https://www.raidbots.com/static/data/live"
 const RAW_GITHUB_BACKUP_PATH =
   "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData"
@@ -1013,7 +1015,10 @@ class MegaData {
       const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemnames`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ return_all: true }),
+        body: JSON.stringify({
+          discord_consent: WOW_DISCORD_CONSENT,
+          return_all: true,
+        }),
       })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const itemNames = await response.json()
@@ -1052,7 +1057,10 @@ class MegaData {
       const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemnames`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pets: true }),
+        body: JSON.stringify({
+          discord_consent: WOW_DISCORD_CONSENT,
+          pets: true,
+        }),
       })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const petInfo = await response.json()
@@ -1238,6 +1246,7 @@ class MegaData {
       }
 
       const jsonData = {
+        discord_consent: WOW_DISCORD_CONSENT,
         ilvl: actualIlvl,
         itemQuality: -1,
         required_level: -1,

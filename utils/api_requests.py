@@ -124,6 +124,12 @@ def get_petnames(access_token):
 RAW_GITHUB_BACKUP_PATH = "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData"
 SADDLEBAG_URL = "https://api.saddlebagexchange.com"
 
+WOW_DISCORD_CONSENT = (
+    "I have gone to discord and asked the devs about this api and i know it only updates once per hour "
+    "and will not spam the api like an idiot and there is no point in making more than one request per hour "
+    "and i will not make request for one item at a time i know many apis support calling multiple items at once"
+)
+
 
 def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     """Get backup of update timers for a specific region, optionally excluding Russian realms.
@@ -139,7 +145,7 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     """
     update_timers = requests.post(
         f"{SADDLEBAG_URL}/api/wow/uploadtimers",
-        json={},
+        json={"discord_consent": WOW_DISCORD_CONSENT},
     ).json()["data"]
     server_update_times = {
         time_data["dataSetID"]: time_data
@@ -168,7 +174,7 @@ def get_itemnames():
     try:
         item_names = requests.post(
             f"{SADDLEBAG_URL}/api/wow/itemnames",
-            json={"return_all": True},
+            json={"discord_consent": WOW_DISCORD_CONSENT, "return_all": True},
         ).json()
     except Exception as e:
         print(f"Failed to get item names getting backup from github: {e}")
@@ -187,7 +193,7 @@ def get_pet_names_backup():
     try:
         pet_info = requests.post(
             f"{SADDLEBAG_URL}/api/wow/itemnames",
-            json={"pets": True},
+            json={"discord_consent": WOW_DISCORD_CONSENT, "pets": True},
         ).json()
     except Exception as e:
         print(f"Failed to get pet names getting backup from github: {e}")
@@ -304,6 +310,7 @@ def get_ilvl_items(ilvl=201, item_ids=[]):
         if not item_ids:
             ilvl = 201
         json_data = {
+            "discord_consent": WOW_DISCORD_CONSENT,
             "ilvl": ilvl,
             "itemQuality": -1,
             "required_level": -1,
