@@ -911,6 +911,18 @@
     "ilvl": 226,
     "is_stackable": 0
   },
+  "190390": {
+    "itemID": 190390,
+    "itemName": "Protector's Diffusion Implement",
+    "itemQuality": 2,
+    "required_level": 60,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 2348477,
+    "sell_price": 469695,
+    "ilvl": 226,
+    "is_stackable": 0
+  },
   "190482": {
     "itemID": 190482,
     "itemName": "Draconium Stiletto",
@@ -11759,6 +11771,42 @@
     "ilvl": 400,
     "is_stackable": 0
   },
+  "245750": {
+    "itemID": 245750,
+    "itemName": "Darkmoon Deck: Void",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 4227345,
+    "sell_price": 845469,
+    "ilvl": 577,
+    "is_stackable": 0
+  },
+  "245829": {
+    "itemID": 245829,
+    "itemName": "Darkmoon Deck: Hunt",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 3965064,
+    "sell_price": 793012,
+    "ilvl": 577,
+    "is_stackable": 0
+  },
+  "245855": {
+    "itemID": 245855,
+    "itemName": "Darkmoon Deck: Blood",
+    "itemQuality": 4,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 4182311,
+    "sell_price": 836462,
+    "ilvl": 577,
+    "is_stackable": 0
+  },
   "258931": {
     "itemID": 258931,
     "itemName": "Tarnished Dawnlit Sentinel's Cover",
@@ -11768,6 +11816,18 @@
     "item_subclass": 3,
     "purchase_price": 240882,
     "sell_price": 48176,
+    "ilvl": 226,
+    "is_stackable": 0
+  },
+  "258940": {
+    "itemID": 258940,
+    "itemName": "Tarnished Dawnlit Commander's Greaves",
+    "itemQuality": 2,
+    "required_level": 80,
+    "item_class": 4,
+    "item_subclass": 4,
+    "purchase_price": 309181,
+    "sell_price": 61836,
     "ilvl": 226,
     "is_stackable": 0
   },
@@ -11792,6 +11852,54 @@
     "item_subclass": 0,
     "purchase_price": 448228,
     "sell_price": 89645,
+    "ilvl": 226,
+    "is_stackable": 0
+  },
+  "258947": {
+    "itemID": 258947,
+    "itemName": "Tarnished Dawnlit Dagger",
+    "itemQuality": 2,
+    "required_level": 80,
+    "item_class": 2,
+    "item_subclass": 15,
+    "purchase_price": 453120,
+    "sell_price": 90624,
+    "ilvl": 226,
+    "is_stackable": 0
+  },
+  "258949": {
+    "itemID": 258949,
+    "itemName": "Tarnished Dawnlit Mace",
+    "itemQuality": 2,
+    "required_level": 80,
+    "item_class": 2,
+    "item_subclass": 4,
+    "purchase_price": 423680,
+    "sell_price": 84736,
+    "ilvl": 226,
+    "is_stackable": 0
+  },
+  "258955": {
+    "itemID": 258955,
+    "itemName": "Tarnished Dawnlit Halberd",
+    "itemQuality": 2,
+    "required_level": 80,
+    "item_class": 2,
+    "item_subclass": 6,
+    "purchase_price": 541829,
+    "sell_price": 108365,
+    "ilvl": 226,
+    "is_stackable": 0
+  },
+  "258957": {
+    "itemID": 258957,
+    "itemName": "Tarnished Dawnlit Staff",
+    "itemQuality": 2,
+    "required_level": 80,
+    "item_class": 2,
+    "item_subclass": 10,
+    "purchase_price": 545943,
+    "sell_price": 109188,
     "ilvl": 226,
     "is_stackable": 0
   }

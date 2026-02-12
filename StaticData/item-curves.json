@@ -264,115 +264,6 @@
       }
     ]
   },
-  "1690": {
-    "curveId": 1690,
-    "points": [
-      {
-        "playerLevel": 1,
-        "itemLevel": 16
-      },
-      {
-        "playerLevel": 7,
-        "itemLevel": 22
-      },
-      {
-        "playerLevel": 10,
-        "itemLevel": 28
-      },
-      {
-        "playerLevel": 11,
-        "itemLevel": 31
-      },
-      {
-        "playerLevel": 12,
-        "itemLevel": 35
-      },
-      {
-        "playerLevel": 14,
-        "itemLevel": 41
-      },
-      {
-        "playerLevel": 15,
-        "itemLevel": 43
-      },
-      {
-        "playerLevel": 17,
-        "itemLevel": 49
-      },
-      {
-        "playerLevel": 18,
-        "itemLevel": 51
-      },
-      {
-        "playerLevel": 21,
-        "itemLevel": 59
-      },
-      {
-        "playerLevel": 22,
-        "itemLevel": 61
-      },
-      {
-        "playerLevel": 24,
-        "itemLevel": 67
-      },
-      {
-        "playerLevel": 25,
-        "itemLevel": 69
-      },
-      {
-        "playerLevel": 37,
-        "itemLevel": 105
-      },
-      {
-        "playerLevel": 38,
-        "itemLevel": 109
-      },
-      {
-        "playerLevel": 40,
-        "itemLevel": 115
-      },
-      {
-        "playerLevel": 41,
-        "itemLevel": 119
-      },
-      {
-        "playerLevel": 43,
-        "itemLevel": 125
-      },
-      {
-        "playerLevel": 44,
-        "itemLevel": 129
-      },
-      {
-        "playerLevel": 47,
-        "itemLevel": 139
-      },
-      {
-        "playerLevel": 49,
-        "itemLevel": 147
-      },
-      {
-        "playerLevel": 50,
-        "itemLevel": 150
-      },
-      {
-        "playerLevel": 53,
-        "itemLevel": 162
-      },
-      {
-        "playerLevel": 54,
-        "itemLevel": 165
-      },
-      {
-        "playerLevel": 60,
-        "itemLevel": 189
-      },
-      {
-        "playerLevel": 70,
-        "itemLevel": 189
-      }
-    ]
-  },
   "1748": {
     "curveId": 1748,
     "points": [
@@ -9635,7 +9526,7 @@
     "points": [
       {
         "playerLevel": 0,
-        "itemLevel": 5
+        "itemLevel": 1
       },
       {
         "playerLevel": 11,
@@ -9643,95 +9534,95 @@
       },
       {
         "playerLevel": 16,
-        "itemLevel": 9
+        "itemLevel": 11
       },
       {
         "playerLevel": 19,
-        "itemLevel": 12
-      },
-      {
-        "playerLevel": 21,
         "itemLevel": 14
       },
       {
-        "playerLevel": 24,
-        "itemLevel": 17
+        "playerLevel": 21,
+        "itemLevel": 16
       },
       {
-        "playerLevel": 26,
+        "playerLevel": 24,
         "itemLevel": 19
       },
       {
-        "playerLevel": 29,
-        "itemLevel": 22
+        "playerLevel": 26,
+        "itemLevel": 21
       },
       {
-        "playerLevel": 31,
+        "playerLevel": 29,
         "itemLevel": 24
       },
       {
-        "playerLevel": 34,
-        "itemLevel": 27
+        "playerLevel": 31,
+        "itemLevel": 26
       },
       {
-        "playerLevel": 36,
+        "playerLevel": 34,
         "itemLevel": 29
       },
       {
-        "playerLevel": 39,
-        "itemLevel": 32
+        "playerLevel": 36,
+        "itemLevel": 31
       },
       {
-        "playerLevel": 41,
+        "playerLevel": 39,
         "itemLevel": 34
       },
       {
-        "playerLevel": 44,
-        "itemLevel": 37
+        "playerLevel": 41,
+        "itemLevel": 36
       },
       {
-        "playerLevel": 46,
+        "playerLevel": 44,
         "itemLevel": 39
       },
       {
+        "playerLevel": 46,
+        "itemLevel": 41
+      },
+      {
         "playerLevel": 49,
-        "itemLevel": 42
+        "itemLevel": 44
       },
       {
         "playerLevel": 53,
-        "itemLevel": 46
+        "itemLevel": 48
       },
       {
         "playerLevel": 56,
-        "itemLevel": 49
+        "itemLevel": 51
       },
       {
         "playerLevel": 59,
-        "itemLevel": 52
-      },
-      {
-        "playerLevel": 63,
         "itemLevel": 54
       },
       {
+        "playerLevel": 63,
+        "itemLevel": 56
+      },
+      {
         "playerLevel": 67,
-        "itemLevel": 57
+        "itemLevel": 59
       },
       {
         "playerLevel": 71,
-        "itemLevel": 61
+        "itemLevel": 63
       },
       {
         "playerLevel": 75,
-        "itemLevel": 65
+        "itemLevel": 67
       },
       {
         "playerLevel": 78,
-        "itemLevel": 69
+        "itemLevel": 71
       },
       {
         "playerLevel": 80,
-        "itemLevel": 72
+        "itemLevel": 74
       }
     ]
   },
@@ -18711,19 +18602,6 @@
       }
     ]
   },
-  "97367": {
-    "curveId": 97367,
-    "points": [
-      {
-        "playerLevel": 1,
-        "itemLevel": 1
-      },
-      {
-        "playerLevel": 90,
-        "itemLevel": 90
-      }
-    ]
-  },
   "97686": {
     "curveId": 97686,
     "points": [
@@ -18778,6 +18656,19 @@
       {
         "playerLevel": 90,
         "itemLevel": 201
+      }
+    ]
+  },
+  "97910": {
+    "curveId": 97910,
+    "points": [
+      {
+        "playerLevel": 1,
+        "itemLevel": 1
+      },
+      {
+        "playerLevel": 80,
+        "itemLevel": 1
       }
     ]
   },
