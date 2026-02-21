@@ -1,6 +1,6 @@
 {
   "name": "aaa-node-ui",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Node-based GUI to manage Azeroth Auction Assassin configs and run WoW AH Price Scans!",
   "license": "MIT",
   "main": "node-ui/main.js",
