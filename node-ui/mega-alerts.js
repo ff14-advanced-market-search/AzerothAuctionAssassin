@@ -779,7 +779,20 @@ class MegaData {
         throw new Error("429")
       }
       if (res.status !== 200) throw new Error(`${res.status}`)
-      const data = await res.json()
+      const text = await res.text()
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch (parseErr) {
+        const snippet = text.slice(0, 200).replace(/\s+/g, " ")
+        logError(
+          "Blizzard AH API returned invalid JSON (Blizzard/API issue, not AAA). Possible truncation or HTML error page.",
+          { parseErr, snippet: snippet + (text.length > 200 ? "..." : "") }
+        )
+        throw new Error(
+          `Blizzard AH API returned invalid JSON (Blizzard/API issue, not AAA): ${parseErr.message}. Response may be truncated or an error page.`
+        )
+      }
 
       const lastMod = res.headers.get("last-modified")
       if (lastMod) {
@@ -849,7 +862,20 @@ class MegaData {
         throw new Error("429")
       }
       if (res.status !== 200) throw new Error(`${res.status}`)
-      const data = await res.json()
+      const text = await res.text()
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch (parseErr) {
+        const snippet = text.slice(0, 200).replace(/\s+/g, " ")
+        logError(
+          "Blizzard Commodity AH API returned invalid JSON (Blizzard/API issue, not AAA). Possible truncation or HTML error page.",
+          { parseErr, snippet: snippet + (text.length > 200 ? "..." : "") }
+        )
+        throw new Error(
+          `Blizzard Commodity AH API returned invalid JSON (Blizzard/API issue, not AAA): ${parseErr.message}. Response may be truncated or an error page.`
+        )
+      }
       const lastMod = res.headers.get("last-modified")
       if (lastMod) this.update_local_timers(connectedId, lastMod)
       return data
