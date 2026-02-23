@@ -799,6 +799,9 @@ class MegaData {
         lastMod &&
         this.upload_timers[connectedRealmId]?.lastUploadTimeRaw === lastMod
       ) {
+        log(
+          `Skip realm ${connectedRealmId} (${this.REGION}): data has not updated yet (Last-Modified unchanged: ${lastMod})`
+        )
         return { auctions: [] }
       }
       if (lastMod) {
@@ -887,6 +890,9 @@ class MegaData {
         lastMod &&
         this.upload_timers[connectedId]?.lastUploadTimeRaw === lastMod
       ) {
+        log(
+          `Skip ${this.REGION} commodities: data has not updated yet (Last-Modified unchanged: ${lastMod})`
+        )
         return { auctions: [] }
       }
       if (lastMod) this.update_local_timers(connectedId, lastMod)

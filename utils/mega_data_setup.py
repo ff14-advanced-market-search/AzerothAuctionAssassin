@@ -677,6 +677,9 @@ class MegaData:
                 lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
                 # If unchanged, data has not updated yet; skip processing
                 if self.upload_timers.get(connectedRealmId, {}).get("lastUploadTimeRaw") == lastUploadTimeRaw:
+                    print(
+                        f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (Last-Modified unchanged: {lastUploadTimeRaw})"
+                    )
                     return {"auctions": []}
                 self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
             except Exception as ex:
@@ -747,6 +750,9 @@ class MegaData:
                 lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
                 # If unchanged, data has not updated yet; skip processing
                 if self.upload_timers.get(connectedRealmId, {}).get("lastUploadTimeRaw") == lastUploadTimeRaw:
+                    print(
+                        f"Skip {self.REGION} commodities: data has not updated yet (Last-Modified unchanged: {lastUploadTimeRaw})"
+                    )
                     return {"auctions": []}
                 self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
             except Exception as ex:
