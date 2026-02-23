@@ -672,26 +672,13 @@ class MegaData:
             time.sleep(1)
             raise Exception(error_message)
 
-        current_time = int(datetime.now().timestamp())
         if "Last-Modified" in dict(req.headers):
             try:
                 lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
+                # If unchanged, data has not updated yet; skip processing
+                if self.upload_timers.get(connectedRealmId, {}).get("lastUploadTimeRaw") == lastUploadTimeRaw:
+                    return {"auctions": []}
                 self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
-
-                # Convert Last-Modified time to unix timestamp
-                last_upload_time = int(
-                    datetime.strptime(
-                        lastUploadTimeRaw, "%a, %d %b %Y %H:%M:%S %Z"
-                    ).timestamp()
-                )
-
-                # # Check if data is older than 2 hours (7200 seconds)
-                # if current_time - last_upload_time > 7200:
-                #     print(
-                #         f"Data for realm {connectedRealmId} is too old (>2 hours), skipping"
-                #     )
-                #     return None
-
             except Exception as ex:
                 print(f"The exception was:", ex)
 
@@ -755,24 +742,13 @@ class MegaData:
             time.sleep(1)
             raise Exception(error_message)
 
-        current_time = int(datetime.now().timestamp())
         if "Last-Modified" in dict(req.headers):
             try:
                 lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
+                # If unchanged, data has not updated yet; skip processing
+                if self.upload_timers.get(connectedRealmId, {}).get("lastUploadTimeRaw") == lastUploadTimeRaw:
+                    return {"auctions": []}
                 self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
-
-                # Convert Last-Modified time to unix timestamp
-                last_upload_time = int(
-                    datetime.strptime(
-                        lastUploadTimeRaw, "%a, %d %b %Y %H:%M:%S %Z"
-                    ).timestamp()
-                )
-
-                # # Check if data is older than 2 hours (7200 seconds)
-                # if current_time - last_upload_time > 7200:
-                #     print(f"Commodity data is too old (>2 hours), skipping")
-                #     return {"auctions": []}
-
             except Exception as ex:
                 print(f"The exception was:", ex)
 
