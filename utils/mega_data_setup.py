@@ -600,6 +600,8 @@ class MegaData:
             auction_info = self.make_commodity_ah_api_request()
             if auction_info is None:
                 return []
+            if auction_info.get("skipped"):
+                return None
             return auction_info["auctions"]
         else:
             print(
@@ -628,6 +630,8 @@ class MegaData:
                     f"{self.REGION} {str(connectedRealmId)} realm data, no auctions found"
                 )
                 continue
+            if auction_info.get("skipped"):
+                return None
             # merge all the auctions
             all_auctions.extend(auction_info["auctions"])
 
@@ -672,26 +676,21 @@ class MegaData:
             time.sleep(1)
             raise Exception(error_message)
 
-        current_time = int(datetime.now().timestamp())
         if "Last-Modified" in dict(req.headers):
             try:
                 lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
+                # If unchanged, data has not updated yet; skip processing
+                if (
+                    self.upload_timers.get(connectedRealmId, {}).get(
+                        "lastUploadTimeRaw"
+                    )
+                    == lastUploadTimeRaw
+                ):
+                    print(
+                        f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (Last-Modified unchanged: {lastUploadTimeRaw})"
+                    )
+                    return {"auctions": [], "skipped": True}
                 self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
-
-                # Convert Last-Modified time to unix timestamp
-                last_upload_time = int(
-                    datetime.strptime(
-                        lastUploadTimeRaw, "%a, %d %b %Y %H:%M:%S %Z"
-                    ).timestamp()
-                )
-
-                # # Check if data is older than 2 hours (7200 seconds)
-                # if current_time - last_upload_time > 7200:
-                #     print(
-                #         f"Data for realm {connectedRealmId} is too old (>2 hours), skipping"
-                #     )
-                #     return None
-
             except Exception as ex:
                 print(f"The exception was:", ex)
 
@@ -755,24 +754,21 @@ class MegaData:
             time.sleep(1)
             raise Exception(error_message)
 
-        current_time = int(datetime.now().timestamp())
         if "Last-Modified" in dict(req.headers):
             try:
                 lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
+                # If unchanged, data has not updated yet; skip processing
+                if (
+                    self.upload_timers.get(connectedRealmId, {}).get(
+                        "lastUploadTimeRaw"
+                    )
+                    == lastUploadTimeRaw
+                ):
+                    print(
+                        f"Skip {self.REGION} commodities: data has not updated yet (Last-Modified unchanged: {lastUploadTimeRaw})"
+                    )
+                    return {"auctions": [], "skipped": True}
                 self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
-
-                # Convert Last-Modified time to unix timestamp
-                last_upload_time = int(
-                    datetime.strptime(
-                        lastUploadTimeRaw, "%a, %d %b %Y %H:%M:%S %Z"
-                    ).timestamp()
-                )
-
-                # # Check if data is older than 2 hours (7200 seconds)
-                # if current_time - last_upload_time > 7200:
-                #     print(f"Commodity data is too old (>2 hours), skipping")
-                #     return {"auctions": []}
-
             except Exception as ex:
                 print(f"The exception was:", ex)
 

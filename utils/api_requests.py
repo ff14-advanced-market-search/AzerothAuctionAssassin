@@ -64,38 +64,6 @@ def get_wow_access_token(client_id, client_secret):
     return access_token
 
 
-@retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
-def get_listings_single(connectedRealmId: int, access_token: str, region: str):
-    """Fetches auction listings for a specific connected realm and region in the World of Warcraft game using the Blizzard API.
-    Parameters:
-        - connectedRealmId (int): Identifier for the connected realm to fetch auction data from.
-        - access_token (str): Authorization token for accessing Blizzard API.
-        - region (str): Region code for which the data is to be fetched ('NA' for North America, 'EU' for Europe).
-    Returns:
-        - list: A list of auction data dictionaries fetched from the specified realm and region.
-    Processing Logic:
-        - Constructs the API URL based on the region code.
-        - Returns a message and exits if the region is unsupported.
-        - Sends a GET request with authorization headers to fetch auction data."""
-    print(f"gather data from connectedRealmId {connectedRealmId} of region {region}")
-    if region == "NA":
-        url = f"https://us.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions?namespace=dynamic-us&locale=en_US"
-    elif region == "EU":
-        url = f"https://eu.api.blizzard.com/data/wow/connected-realm/{str(connectedRealmId)}/auctions?namespace=dynamic-eu&locale=en_EU"
-    else:
-        print(
-            f"{region} is not yet supported, reach out for us to add this region option"
-        )
-        exit(1)
-
-    headers = {"Authorization": f"Bearer {access_token}"}
-
-    req = requests.get(url, headers=headers, timeout=20)
-
-    auction_info = req.json()
-    return auction_info["auctions"]
-
-
 def get_petnames(access_token):
     """Get a dictionary of pet IDs and names from the World of Warcraft API.
     Parameters:

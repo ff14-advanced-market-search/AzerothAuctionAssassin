@@ -795,6 +795,15 @@ class MegaData {
       }
 
       const lastMod = res.headers.get("last-modified")
+      if (
+        lastMod &&
+        this.upload_timers[connectedRealmId]?.lastUploadTimeRaw === lastMod
+      ) {
+        log(
+          `Skip realm ${connectedRealmId} (${this.REGION}): data has not updated yet (Last-Modified unchanged: ${lastMod})`
+        )
+        return { auctions: [], skipped: true }
+      }
       if (lastMod) {
         this.update_local_timers(connectedRealmId, lastMod)
       }
@@ -877,6 +886,15 @@ class MegaData {
         )
       }
       const lastMod = res.headers.get("last-modified")
+      if (
+        lastMod &&
+        this.upload_timers[connectedId]?.lastUploadTimeRaw === lastMod
+      ) {
+        log(
+          `Skip ${this.REGION} commodities: data has not updated yet (Last-Modified unchanged: ${lastMod})`
+        )
+        return { auctions: [], skipped: true }
+      }
       if (lastMod) this.update_local_timers(connectedId, lastMod)
       return data
     } catch (error) {
@@ -956,6 +974,7 @@ class MegaData {
     if (connectedRealmId === -1 || connectedRealmId === -2) {
       try {
         const commodity = await this.makeCommodityRequest()
+        if (commodity?.skipped) return null
         return commodity?.auctions || []
       } catch (error) {
         logError("Commodity AH request failed", error)
@@ -976,6 +995,7 @@ class MegaData {
       try {
         const url = this.construct_api_url(connectedRealmId, ep)
         const data = await this.makeAhRequest(url, connectedRealmId)
+        if (data?.skipped) return null
         if (data?.auctions && Array.isArray(data.auctions)) {
           // Always use a loop to avoid stack overflow with large arrays
           // Spread operator (all.push(...data.auctions)) can cause "Maximum call stack size exceeded"
@@ -1450,6 +1470,7 @@ async function runAlerts(state, progress, runOnce = false) {
    */
   const pull_single_realm_data = async (connected_id) => {
     const auctions = await state.get_listings_single(connected_id)
+    if (auctions === null) return // skipped (Last-Modified unchanged), already logged
     const clean = clean_listing_data(auctions, connected_id)
 
     if (connected_id === -1 || connected_id === -2) {
@@ -2293,10 +2314,9 @@ async function runAlerts(state, progress, runOnce = false) {
       if (start_min <= end_min) {
         // Normal range (no wraparound): e.g., 5 to 10
         return start_min <= current_min && current_min <= end_min
-      } else {
-        // Wraparound range: e.g., 59 to 2 means [59, 0, 1, 2]
-        return current_min >= start_min || current_min <= end_min
       }
+      // Wraparound range: e.g., 59 to 2 means [59, 0, 1, 2]
+      return current_min >= start_min || current_min <= end_min
     }
 
     /**
@@ -2368,6 +2388,8 @@ async function runAlerts(state, progress, runOnce = false) {
         matching_realms.map((id) => () => pull_single_realm_data(id)),
         state.THREADS
       )
+      // Short sleep between cycles; skipping processing speeds things up but may lead to more 429s
+      await delay(5000)
     } else {
       const uploadMinutes = Array.from(state.get_upload_time_minutes()).sort(
         (a, b) => a - b
