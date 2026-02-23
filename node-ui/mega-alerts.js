@@ -795,6 +795,12 @@ class MegaData {
       }
 
       const lastMod = res.headers.get("last-modified")
+      if (
+        lastMod &&
+        this.upload_timers[connectedRealmId]?.lastUploadTimeRaw === lastMod
+      ) {
+        return { auctions: [] }
+      }
       if (lastMod) {
         this.update_local_timers(connectedRealmId, lastMod)
       }
@@ -877,6 +883,12 @@ class MegaData {
         )
       }
       const lastMod = res.headers.get("last-modified")
+      if (
+        lastMod &&
+        this.upload_timers[connectedId]?.lastUploadTimeRaw === lastMod
+      ) {
+        return { auctions: [] }
+      }
       if (lastMod) this.update_local_timers(connectedId, lastMod)
       return data
     } catch (error) {
@@ -2293,10 +2305,9 @@ async function runAlerts(state, progress, runOnce = false) {
       if (start_min <= end_min) {
         // Normal range (no wraparound): e.g., 5 to 10
         return start_min <= current_min && current_min <= end_min
-      } else {
-        // Wraparound range: e.g., 59 to 2 means [59, 0, 1, 2]
-        return current_min >= start_min || current_min <= end_min
       }
+      // Wraparound range: e.g., 59 to 2 means [59, 0, 1, 2]
+      return current_min >= start_min || current_min <= end_min
     }
 
     /**
