@@ -802,7 +802,7 @@ class MegaData {
         log(
           `Skip realm ${connectedRealmId} (${this.REGION}): data has not updated yet (Last-Modified unchanged: ${lastMod})`
         )
-        return { auctions: [] }
+        return { auctions: [], skipped: true }
       }
       if (lastMod) {
         this.update_local_timers(connectedRealmId, lastMod)
@@ -893,7 +893,7 @@ class MegaData {
         log(
           `Skip ${this.REGION} commodities: data has not updated yet (Last-Modified unchanged: ${lastMod})`
         )
-        return { auctions: [] }
+        return { auctions: [], skipped: true }
       }
       if (lastMod) this.update_local_timers(connectedId, lastMod)
       return data
@@ -974,6 +974,7 @@ class MegaData {
     if (connectedRealmId === -1 || connectedRealmId === -2) {
       try {
         const commodity = await this.makeCommodityRequest()
+        if (commodity?.skipped) return null
         return commodity?.auctions || []
       } catch (error) {
         logError("Commodity AH request failed", error)
@@ -994,6 +995,7 @@ class MegaData {
       try {
         const url = this.construct_api_url(connectedRealmId, ep)
         const data = await this.makeAhRequest(url, connectedRealmId)
+        if (data?.skipped) return null
         if (data?.auctions && Array.isArray(data.auctions)) {
           // Always use a loop to avoid stack overflow with large arrays
           // Spread operator (all.push(...data.auctions)) can cause "Maximum call stack size exceeded"
@@ -1468,6 +1470,7 @@ async function runAlerts(state, progress, runOnce = false) {
    */
   const pull_single_realm_data = async (connected_id) => {
     const auctions = await state.get_listings_single(connected_id)
+    if (auctions === null) return // skipped (Last-Modified unchanged), already logged
     const clean = clean_listing_data(auctions, connected_id)
 
     if (connected_id === -1 || connected_id === -2) {

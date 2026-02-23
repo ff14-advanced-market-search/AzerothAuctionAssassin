@@ -600,6 +600,8 @@ class MegaData:
             auction_info = self.make_commodity_ah_api_request()
             if auction_info is None:
                 return []
+            if auction_info.get("skipped"):
+                return None
             return auction_info["auctions"]
         else:
             print(
@@ -628,6 +630,8 @@ class MegaData:
                     f"{self.REGION} {str(connectedRealmId)} realm data, no auctions found"
                 )
                 continue
+            if auction_info.get("skipped"):
+                return None
             # merge all the auctions
             all_auctions.extend(auction_info["auctions"])
 
@@ -680,7 +684,7 @@ class MegaData:
                     print(
                         f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (Last-Modified unchanged: {lastUploadTimeRaw})"
                     )
-                    return {"auctions": []}
+                    return {"auctions": [], "skipped": True}
                 self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
             except Exception as ex:
                 print(f"The exception was:", ex)
@@ -753,7 +757,7 @@ class MegaData:
                     print(
                         f"Skip {self.REGION} commodities: data has not updated yet (Last-Modified unchanged: {lastUploadTimeRaw})"
                     )
-                    return {"auctions": []}
+                    return {"auctions": [], "skipped": True}
                 self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
             except Exception as ex:
                 print(f"The exception was:", ex)

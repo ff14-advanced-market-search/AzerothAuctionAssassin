@@ -77,6 +77,8 @@ class Alerts(QThread):
         #### FUNCTIONS ####
         def pull_single_realm_data(connected_id):
             auctions = mega_data.get_listings_single(connected_id)
+            if auctions is None:
+                return  # skipped (Last-Modified unchanged), already logged
             clean_auctions = clean_listing_data(auctions, connected_id)
             if connected_id in [-1, -2]:
                 check_token_price()
