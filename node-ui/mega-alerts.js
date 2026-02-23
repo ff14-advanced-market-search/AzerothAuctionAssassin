@@ -2385,6 +2385,8 @@ async function runAlerts(state, progress, runOnce = false) {
         matching_realms.map((id) => () => pull_single_realm_data(id)),
         state.THREADS
       )
+      // Short sleep between cycles; skipping processing speeds things up but may lead to more 429s
+      await delay(5000)
     } else {
       const uploadMinutes = Array.from(state.get_upload_time_minutes()).sort(
         (a, b) => a - b

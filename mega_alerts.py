@@ -780,6 +780,8 @@ class Alerts(QThread):
                     for connected_id in matching_realms:
                         pool.submit(pull_single_realm_data, connected_id)
                     pool.shutdown(wait=True)
+                    # Short sleep between cycles; skipping processing speeds things up but may lead to more 429s
+                    time.sleep(5)
 
                 else:
                     self.progress.emit(
