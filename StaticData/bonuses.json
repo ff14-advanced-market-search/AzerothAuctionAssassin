@@ -1,8 +1,4 @@
 {
-  "0": {
-    "id": 0,
-    "serverside": true
-  },
   "1": {
     "id": 1,
     "rawStats": [
@@ -54640,22 +54636,22 @@
   },
   "9120": {
     "id": 9120,
+    "tag": "Heroic",
     "itemLevel": {
       "amount": 72,
       "priority": 0,
       "squishEra": 0
     },
-    "tag": "Heroic",
     "quality": 4
   },
   "9121": {
     "id": 9121,
+    "tag": "Mythic",
     "itemLevel": {
       "amount": 73,
       "priority": 0,
       "squishEra": 0
     },
-    "tag": "Mythic",
     "quality": 4
   },
   "9122": {
@@ -70419,7 +70415,7 @@
   "12245": {
     "id": 12245,
     "itemLevel": {
-      "amount": 259,
+      "amount": 175,
       "priority": 3000,
       "squishEra": 2
     }
@@ -83873,7 +83869,7 @@
           "amounts": [
             {
               "currencyId": 3383,
-              "amount": 10,
+              "amount": 20,
               "name": "Adventurer Dawncrest",
               "icon": "inv_120_crest_adventurer"
             }
@@ -83881,7 +83877,7 @@
         }
       ],
       "currency": {
-        "amount": 10,
+        "amount": 20,
         "name": "Adventurer Dawncrest",
         "id": 3383,
         "icon": "inv_120_crest_adventurer"
@@ -84037,7 +84033,7 @@
           "amounts": [
             {
               "currencyId": 3383,
-              "amount": 30,
+              "amount": 20,
               "name": "Adventurer Dawncrest",
               "icon": "inv_120_crest_adventurer"
             }
@@ -84045,7 +84041,7 @@
         }
       ],
       "currency": {
-        "amount": 30,
+        "amount": 20,
         "name": "Adventurer Dawncrest",
         "id": 3383,
         "icon": "inv_120_crest_adventurer"
@@ -84119,7 +84115,7 @@
           "amounts": [
             {
               "currencyId": 3383,
-              "amount": 40,
+              "amount": 20,
               "name": "Adventurer Dawncrest",
               "icon": "inv_120_crest_adventurer"
             }
@@ -84127,7 +84123,7 @@
         }
       ],
       "currency": {
-        "amount": 40,
+        "amount": 20,
         "name": "Adventurer Dawncrest",
         "id": 3383,
         "icon": "inv_120_crest_adventurer"
@@ -84201,7 +84197,7 @@
           "amounts": [
             {
               "currencyId": 3383,
-              "amount": 50,
+              "amount": 20,
               "name": "Adventurer Dawncrest",
               "icon": "inv_120_crest_adventurer"
             }
@@ -84209,7 +84205,7 @@
         }
       ],
       "currency": {
-        "amount": 50,
+        "amount": 20,
         "name": "Adventurer Dawncrest",
         "id": 3383,
         "icon": "inv_120_crest_adventurer"
@@ -84362,7 +84358,7 @@
           "amounts": [
             {
               "currencyId": 3341,
-              "amount": 10,
+              "amount": 20,
               "name": "Veteran Dawncrest",
               "icon": "inv_120_crest_veteran"
             }
@@ -84370,7 +84366,7 @@
         }
       ],
       "currency": {
-        "amount": 10,
+        "amount": 20,
         "name": "Veteran Dawncrest",
         "id": 3341,
         "icon": "inv_120_crest_veteran"
@@ -84526,7 +84522,7 @@
           "amounts": [
             {
               "currencyId": 3341,
-              "amount": 30,
+              "amount": 20,
               "name": "Veteran Dawncrest",
               "icon": "inv_120_crest_veteran"
             }
@@ -84534,7 +84530,7 @@
         }
       ],
       "currency": {
-        "amount": 30,
+        "amount": 20,
         "name": "Veteran Dawncrest",
         "id": 3341,
         "icon": "inv_120_crest_veteran"
@@ -84608,7 +84604,7 @@
           "amounts": [
             {
               "currencyId": 3341,
-              "amount": 40,
+              "amount": 20,
               "name": "Veteran Dawncrest",
               "icon": "inv_120_crest_veteran"
             }
@@ -84616,7 +84612,7 @@
         }
       ],
       "currency": {
-        "amount": 40,
+        "amount": 20,
         "name": "Veteran Dawncrest",
         "id": 3341,
         "icon": "inv_120_crest_veteran"
@@ -84690,7 +84686,7 @@
           "amounts": [
             {
               "currencyId": 3341,
-              "amount": 50,
+              "amount": 20,
               "name": "Veteran Dawncrest",
               "icon": "inv_120_crest_veteran"
             }
@@ -84698,7 +84694,7 @@
         }
       ],
       "currency": {
-        "amount": 50,
+        "amount": 20,
         "name": "Veteran Dawncrest",
         "id": 3341,
         "icon": "inv_120_crest_veteran"
@@ -84852,7 +84848,7 @@
           "amounts": [
             {
               "currencyId": 3343,
-              "amount": 10,
+              "amount": 20,
               "name": "Champion Dawncrest",
               "icon": "inv_120_crest_champion"
             }
@@ -84860,7 +84856,7 @@
         }
       ],
       "currency": {
-        "amount": 10,
+        "amount": 20,
         "name": "Champion Dawncrest",
         "id": 3343,
         "icon": "inv_120_crest_champion"
@@ -85016,7 +85012,7 @@
           "amounts": [
             {
               "currencyId": 3343,
-              "amount": 30,
+              "amount": 20,
               "name": "Champion Dawncrest",
               "icon": "inv_120_crest_champion"
             }
@@ -85024,7 +85020,7 @@
         }
       ],
       "currency": {
-        "amount": 30,
+        "amount": 20,
         "name": "Champion Dawncrest",
         "id": 3343,
         "icon": "inv_120_crest_champion"
@@ -85098,7 +85094,7 @@
           "amounts": [
             {
               "currencyId": 3343,
-              "amount": 40,
+              "amount": 20,
               "name": "Champion Dawncrest",
               "icon": "inv_120_crest_champion"
             }
@@ -85106,7 +85102,7 @@
         }
       ],
       "currency": {
-        "amount": 40,
+        "amount": 20,
         "name": "Champion Dawncrest",
         "id": 3343,
         "icon": "inv_120_crest_champion"
@@ -85180,7 +85176,7 @@
           "amounts": [
             {
               "currencyId": 3343,
-              "amount": 50,
+              "amount": 20,
               "name": "Champion Dawncrest",
               "icon": "inv_120_crest_champion"
             }
@@ -85188,7 +85184,7 @@
         }
       ],
       "currency": {
-        "amount": 50,
+        "amount": 20,
         "name": "Champion Dawncrest",
         "id": 3343,
         "icon": "inv_120_crest_champion"
@@ -85342,7 +85338,7 @@
           "amounts": [
             {
               "currencyId": 3345,
-              "amount": 10,
+              "amount": 20,
               "name": "Hero Dawncrest",
               "icon": "inv_120_crest_hero"
             }
@@ -85350,7 +85346,7 @@
         }
       ],
       "currency": {
-        "amount": 10,
+        "amount": 20,
         "name": "Hero Dawncrest",
         "id": 3345,
         "icon": "inv_120_crest_hero"
@@ -85506,7 +85502,7 @@
           "amounts": [
             {
               "currencyId": 3345,
-              "amount": 30,
+              "amount": 20,
               "name": "Hero Dawncrest",
               "icon": "inv_120_crest_hero"
             }
@@ -85514,7 +85510,7 @@
         }
       ],
       "currency": {
-        "amount": 30,
+        "amount": 20,
         "name": "Hero Dawncrest",
         "id": 3345,
         "icon": "inv_120_crest_hero"
@@ -85588,7 +85584,7 @@
           "amounts": [
             {
               "currencyId": 3345,
-              "amount": 40,
+              "amount": 20,
               "name": "Hero Dawncrest",
               "icon": "inv_120_crest_hero"
             }
@@ -85596,7 +85592,7 @@
         }
       ],
       "currency": {
-        "amount": 40,
+        "amount": 20,
         "name": "Hero Dawncrest",
         "id": 3345,
         "icon": "inv_120_crest_hero"
@@ -85670,7 +85666,7 @@
           "amounts": [
             {
               "currencyId": 3345,
-              "amount": 50,
+              "amount": 20,
               "name": "Hero Dawncrest",
               "icon": "inv_120_crest_hero"
             }
@@ -85678,7 +85674,7 @@
         }
       ],
       "currency": {
-        "amount": 50,
+        "amount": 20,
         "name": "Hero Dawncrest",
         "id": 3345,
         "icon": "inv_120_crest_hero"
@@ -85832,7 +85828,7 @@
           "amounts": [
             {
               "currencyId": 3347,
-              "amount": 10,
+              "amount": 20,
               "name": "Myth Dawncrest",
               "icon": "inv_120_crest_myth"
             }
@@ -85840,7 +85836,7 @@
         }
       ],
       "currency": {
-        "amount": 10,
+        "amount": 20,
         "name": "Myth Dawncrest",
         "id": 3347,
         "icon": "inv_120_crest_myth"
@@ -85996,7 +85992,7 @@
           "amounts": [
             {
               "currencyId": 3347,
-              "amount": 30,
+              "amount": 20,
               "name": "Myth Dawncrest",
               "icon": "inv_120_crest_myth"
             }
@@ -86004,7 +86000,7 @@
         }
       ],
       "currency": {
-        "amount": 30,
+        "amount": 20,
         "name": "Myth Dawncrest",
         "id": 3347,
         "icon": "inv_120_crest_myth"
@@ -86078,7 +86074,7 @@
           "amounts": [
             {
               "currencyId": 3347,
-              "amount": 40,
+              "amount": 20,
               "name": "Myth Dawncrest",
               "icon": "inv_120_crest_myth"
             }
@@ -86086,7 +86082,7 @@
         }
       ],
       "currency": {
-        "amount": 40,
+        "amount": 20,
         "name": "Myth Dawncrest",
         "id": 3347,
         "icon": "inv_120_crest_myth"
@@ -86160,7 +86156,7 @@
           "amounts": [
             {
               "currencyId": 3347,
-              "amount": 50,
+              "amount": 20,
               "name": "Myth Dawncrest",
               "icon": "inv_120_crest_myth"
             }
@@ -86168,7 +86164,7 @@
         }
       ],
       "currency": {
-        "amount": 50,
+        "amount": 20,
         "name": "Myth Dawncrest",
         "id": 3347,
         "icon": "inv_120_crest_myth"
@@ -90836,7 +90832,7 @@
     "id": 13563,
     "quality": 2,
     "itemLevel": {
-      "amount": 201,
+      "amount": 175,
       "priority": 1000,
       "squishEra": 2
     }
@@ -90883,7 +90879,7 @@
     "id": 13570,
     "quality": 3,
     "itemLevel": {
-      "amount": 220,
+      "amount": 204,
       "priority": 1000,
       "squishEra": 2
     }

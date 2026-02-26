@@ -10967,6 +10967,18 @@
     "ilvl": 610,
     "is_stackable": 0
   },
+  "237917": {
+    "itemID": 237917,
+    "itemName": "Blood-Tempered Greaves",
+    "itemQuality": 3,
+    "required_level": 81,
+    "item_class": 4,
+    "item_subclass": 4,
+    "purchase_price": 165001,
+    "sell_price": 33000,
+    "ilvl": 625,
+    "is_stackable": 0
+  },
   "238027": {
     "itemID": 238027,
     "itemName": "Harvested Creephide Cord",
