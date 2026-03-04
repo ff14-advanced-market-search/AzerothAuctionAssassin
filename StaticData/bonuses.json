@@ -25440,12 +25440,12 @@
     ],
     "stats": "100% Rcor [0.0042]",
     "effect": {
-      "id": 116780,
+      "id": 116854,
       "index": 0,
       "spell": {
-        "id": 317860,
-        "name": "Draconic Empowerment",
-        "icon": "inv_misc_head_dragon_black"
+        "id": 300470,
+        "name": "Shroud of Resolve",
+        "icon": "inv_misc_cape_deathwingraid_d_03"
       }
     },
     "applyBonusId": 13518
@@ -42036,9 +42036,9 @@
   },
   "7880": {
     "id": 7880,
+    "quality": 4,
     "ilevel": "233 @plvl 0 - 233 @plvl 233",
-    "curveId": 28743,
-    "quality": 4
+    "curveId": 28743
   },
   "7881": {
     "id": 7881,
@@ -52521,8 +52521,8 @@
   "8792": {
     "id": 8792,
     "craftedStats": [
-      40,
-      36
+      36,
+      40
     ]
   },
   "8793": {
@@ -54885,6 +54885,7 @@
   },
   "9155": {
     "id": 9155,
+    "quality": 1,
     "effect": {
       "id": 172599,
       "index": 0,
@@ -54893,8 +54894,7 @@
         "name": "Shadow Barrage",
         "icon": "spell_fire_twilightrainoffire"
       }
-    },
-    "quality": 1
+    }
   },
   "9156": {
     "id": 9156,
@@ -54903,6 +54903,7 @@
   },
   "9157": {
     "id": 9157,
+    "quality": 1,
     "effect": {
       "id": 172602,
       "index": 0,
@@ -54911,8 +54912,7 @@
         "name": "Death Grip",
         "icon": "spell_deathknight_strangulate"
       }
-    },
-    "quality": 1
+    }
   },
   "9159": {
     "id": 9159,
@@ -54955,6 +54955,7 @@
   },
   "9162": {
     "id": 9162,
+    "quality": 1,
     "effect": {
       "id": 172632,
       "index": 0,
@@ -54963,11 +54964,11 @@
         "name": "Snowdrift",
         "icon": "spell_fire_blueflamestrike"
       }
-    },
-    "quality": 1
+    }
   },
   "9163": {
     "id": 9163,
+    "quality": 1,
     "effect": {
       "id": 172646,
       "index": 0,
@@ -54976,11 +54977,11 @@
         "name": "Spitfire",
         "icon": "ability_warlock_fireandbrimstone"
       }
-    },
-    "quality": 1
+    }
   },
   "9164": {
     "id": 9164,
+    "quality": 1,
     "effect": {
       "id": 172647,
       "index": 0,
@@ -54989,11 +54990,11 @@
         "name": "Fire Whirl",
         "icon": "spell_fire_playingwithfire"
       }
-    },
-    "quality": 1
+    }
   },
   "9165": {
     "id": 9165,
+    "quality": 1,
     "effect": {
       "id": 172648,
       "index": 0,
@@ -55002,11 +55003,11 @@
         "name": "Frozen Orb",
         "icon": "spell_frost_frozenorb"
       }
-    },
-    "quality": 1
+    }
   },
   "9166": {
     "id": 9166,
+    "quality": 1,
     "effect": {
       "id": 172649,
       "index": 0,
@@ -55015,11 +55016,11 @@
         "name": "Arcanosphere",
         "icon": "ability_mage_arcanosphere"
       }
-    },
-    "quality": 1
+    }
   },
   "9167": {
     "id": 9167,
+    "quality": 1,
     "effect": {
       "id": 172650,
       "index": 0,
@@ -55028,11 +55029,11 @@
         "name": "Blessed Hammer",
         "icon": "paladin_retribution"
       }
-    },
-    "quality": 1
+    }
   },
   "9168": {
     "id": 9168,
+    "quality": 1,
     "effect": {
       "id": 172651,
       "index": 0,
@@ -55041,11 +55042,11 @@
         "name": "Dark Star",
         "icon": "spell_priest_divinestar_shadow"
       }
-    },
-    "quality": 1
+    }
   },
   "9169": {
     "id": 9169,
+    "quality": 1,
     "effect": {
       "id": 172652,
       "index": 0,
@@ -55054,11 +55055,11 @@
         "name": "Fists of Earthen Fury",
         "icon": "monk_ability_fistoffury"
       }
-    },
-    "quality": 1
+    }
   },
   "9170": {
     "id": 9170,
+    "quality": 1,
     "effect": {
       "id": 172653,
       "index": 0,
@@ -55067,11 +55068,11 @@
         "name": "Flying Serpent Kick",
         "icon": "ability_monk_flyingdragonkick"
       }
-    },
-    "quality": 1
+    }
   },
   "9171": {
     "id": 9171,
+    "quality": 1,
     "effect": {
       "id": 172654,
       "index": 0,
@@ -55080,11 +55081,11 @@
         "name": "Holy Dragon Punch",
         "icon": "ability_monk_hurricanestrike"
       }
-    },
-    "quality": 1
+    }
   },
   "9172": {
     "id": 9172,
+    "quality": 1,
     "effect": {
       "id": 172655,
       "index": 0,
@@ -55093,11 +55094,11 @@
         "name": "Earthbreaker",
         "icon": "inv_ore_blackrock_nugget"
       }
-    },
-    "quality": 1
+    }
   },
   "9173": {
     "id": 9173,
+    "quality": 1,
     "effect": {
       "id": 172656,
       "index": 0,
@@ -55106,11 +55107,11 @@
         "name": "Arcane Storm",
         "icon": "spell_druid_astralstorm"
       }
-    },
-    "quality": 1
+    }
   },
   "9174": {
     "id": 9174,
+    "quality": 1,
     "effect": {
       "id": 172657,
       "index": 0,
@@ -55119,11 +55120,11 @@
         "name": "Capacitor Totem",
         "icon": "spell_nature_brilliance"
       }
-    },
-    "quality": 1
+    }
   },
   "9175": {
     "id": 9175,
+    "quality": 1,
     "effect": {
       "id": 172658,
       "index": 0,
@@ -55132,11 +55133,11 @@
         "name": "Dragon's Breath",
         "icon": "inv_misc_head_dragon_01"
       }
-    },
-    "quality": 1
+    }
   },
   "9176": {
     "id": 9176,
+    "quality": 1,
     "effect": {
       "id": 172659,
       "index": 0,
@@ -55145,11 +55146,11 @@
         "name": "Frost Nova",
         "icon": "spell_frost_frostnova"
       }
-    },
-    "quality": 1
+    }
   },
   "9177": {
     "id": 9177,
+    "quality": 1,
     "effect": {
       "id": 172660,
       "index": 0,
@@ -55158,11 +55159,11 @@
         "name": "Ice Wall",
         "icon": "ability_mage_icewall"
       }
-    },
-    "quality": 1
+    }
   },
   "9178": {
     "id": 9178,
+    "quality": 1,
     "effect": {
       "id": 172661,
       "index": 0,
@@ -55171,11 +55172,11 @@
         "name": "Intimidating Shout",
         "icon": "ability_golemthunderclap"
       }
-    },
-    "quality": 1
+    }
   },
   "9179": {
     "id": 9179,
+    "quality": 1,
     "effect": {
       "id": 172662,
       "index": 0,
@@ -55184,11 +55185,11 @@
         "name": "Mighty Ox Kick",
         "icon": "ability_monk_mightyoxkick"
       }
-    },
-    "quality": 1
+    }
   },
   "9180": {
     "id": 9180,
+    "quality": 1,
     "effect": {
       "id": 172663,
       "index": 0,
@@ -55197,11 +55198,11 @@
         "name": "Icebind",
         "icon": "spell_mage_frostbomb"
       }
-    },
-    "quality": 1
+    }
   },
   "9181": {
     "id": 9181,
+    "quality": 1,
     "effect": {
       "id": 172664,
       "index": 0,
@@ -55210,11 +55211,11 @@
         "name": "Thunderstorm",
         "icon": "spell_shaman_thunderstorm"
       }
-    },
-    "quality": 1
+    }
   },
   "9182": {
     "id": 9182,
+    "quality": 1,
     "effect": {
       "id": 172665,
       "index": 0,
@@ -55223,11 +55224,11 @@
         "name": "Alter Time",
         "icon": "spell_mage_altertime"
       }
-    },
-    "quality": 1
+    }
   },
   "9183": {
     "id": 9183,
+    "quality": 1,
     "effect": {
       "id": 172666,
       "index": 0,
@@ -55236,11 +55237,11 @@
         "name": "Anti-Magic Shell",
         "icon": "spell_shadow_antimagicshell"
       }
-    },
-    "quality": 1
+    }
   },
   "9184": {
     "id": 9184,
+    "quality": 1,
     "effect": {
       "id": 172667,
       "index": 0,
@@ -55249,11 +55250,11 @@
         "name": "Dispersion",
         "icon": "spell_shadow_dispersion"
       }
-    },
-    "quality": 1
+    }
   },
   "9185": {
     "id": 9185,
+    "quality": 1,
     "effect": {
       "id": 172668,
       "index": 0,
@@ -55262,11 +55263,11 @@
         "name": "Feign Death",
         "icon": "ability_rogue_feigndeath"
       }
-    },
-    "quality": 1
+    }
   },
   "9186": {
     "id": 9186,
+    "quality": 1,
     "effect": {
       "id": 172669,
       "index": 0,
@@ -55275,11 +55276,11 @@
         "name": "Grounding Totem",
         "icon": "spell_nature_groundingtotem"
       }
-    },
-    "quality": 1
+    }
   },
   "9187": {
     "id": 9187,
+    "quality": 1,
     "effect": {
       "id": 172670,
       "index": 0,
@@ -55288,11 +55289,11 @@
         "name": "Ice Block",
         "icon": "spell_frost_frost"
       }
-    },
-    "quality": 1
+    }
   },
   "9188": {
     "id": 9188,
+    "quality": 1,
     "effect": {
       "id": 172671,
       "index": 0,
@@ -55301,11 +55302,11 @@
         "name": "Spell Reflection",
         "icon": "ability_warrior_shieldreflection"
       }
-    },
-    "quality": 1
+    }
   },
   "9189": {
     "id": 9189,
+    "quality": 1,
     "effect": {
       "id": 172672,
       "index": 0,
@@ -55314,11 +55315,11 @@
         "name": "Vanish",
         "icon": "ability_vanish"
       }
-    },
-    "quality": 1
+    }
   },
   "9190": {
     "id": 9190,
+    "quality": 1,
     "effect": {
       "id": 172673,
       "index": 0,
@@ -55327,11 +55328,11 @@
         "name": "Anti-Magic Zone",
         "icon": "spell_deathknight_antimagiczone"
       }
-    },
-    "quality": 1
+    }
   },
   "9191": {
     "id": 9191,
+    "quality": 1,
     "effect": {
       "id": 172678,
       "index": 0,
@@ -55340,11 +55341,11 @@
         "name": "Gorefiend's Grasp",
         "icon": "ability_deathknight_aoedeathgrip"
       }
-    },
-    "quality": 1
+    }
   },
   "9192": {
     "id": 9192,
+    "quality": 1,
     "effect": {
       "id": 172679,
       "index": 0,
@@ -55353,11 +55354,11 @@
         "name": "Darkness",
         "icon": "ability_demonhunter_darkness"
       }
-    },
-    "quality": 1
+    }
   },
   "9193": {
     "id": 9193,
+    "quality": 1,
     "effect": {
       "id": 172680,
       "index": 0,
@@ -55366,11 +55367,11 @@
         "name": "Smoke Bomb",
         "icon": "ability_rogue_smoke"
       }
-    },
-    "quality": 1
+    }
   },
   "9194": {
     "id": 9194,
+    "quality": 1,
     "effect": {
       "id": 172681,
       "index": 0,
@@ -55379,8 +55380,7 @@
         "name": "Arclight Cannon",
         "icon": "inv_weapon_rifle_33"
       }
-    },
-    "quality": 1
+    }
   },
   "9195": {
     "id": 9195,
@@ -55423,6 +55423,7 @@
   },
   "9198": {
     "id": 9198,
+    "quality": 1,
     "effect": {
       "id": 172685,
       "index": 0,
@@ -55431,8 +55432,7 @@
         "name": "Hunting Bow",
         "icon": "inv_weapon_bow_11"
       }
-    },
-    "quality": 1
+    }
   },
   "9199": {
     "id": 9199,
@@ -55475,6 +55475,7 @@
   },
   "9202": {
     "id": 9202,
+    "quality": 1,
     "effect": {
       "id": 172689,
       "index": 0,
@@ -55483,8 +55484,7 @@
         "name": "Vanguard Sword",
         "icon": "inv_sword_1h_newplayer_a_03"
       }
-    },
-    "quality": 1
+    }
   },
   "9203": {
     "id": 9203,
@@ -55527,6 +55527,7 @@
   },
   "9206": {
     "id": 9206,
+    "quality": 1,
     "effect": {
       "id": 172693,
       "index": 0,
@@ -55535,8 +55536,7 @@
         "name": "Frostscythe",
         "icon": "inv_staff_78"
       }
-    },
-    "quality": 1
+    }
   },
   "9207": {
     "id": 9207,
@@ -55579,6 +55579,7 @@
   },
   "9210": {
     "id": 9210,
+    "quality": 1,
     "effect": {
       "id": 172697,
       "index": 0,
@@ -55587,8 +55588,7 @@
         "name": "Blitzfire Revolver",
         "icon": "inv_weapon_rifle_40"
       }
-    },
-    "quality": 1
+    }
   },
   "9211": {
     "id": 9211,
@@ -61180,9 +61180,9 @@
   },
   "10300": {
     "id": 10300,
+    "tag": "Vanity Crafted",
     "ilevel": "0 @plvl 0 - 450 @plvl 450",
     "curveId": 71196,
-    "tag": "Vanity Crafted",
     "quality": 7
   },
   "10301": {
@@ -61192,10 +61192,10 @@
   },
   "10302": {
     "id": 10302,
+    "tag": "Vanity Crafted",
     "ilevel": "0 @plvl 0 - 456 @plvl 456",
     "curveId": 71351,
-    "quality": 7,
-    "tag": "Vanity Crafted"
+    "quality": 7
   },
   "10303": {
     "id": 10303,
@@ -61385,12 +61385,12 @@
   },
   "10349": {
     "id": 10349,
-    "tag": "Vanity Crafted",
     "itemLevel": {
       "amount": 1,
       "priority": 80,
       "squishEra": 0
     },
+    "tag": "Vanity Crafted",
     "quality": 1
   },
   "10350": {
@@ -61503,6 +61503,7 @@
   },
   "10381": {
     "id": 10381,
+    "quality": 1,
     "effect": {
       "id": 181637,
       "index": 0,
@@ -61511,8 +61512,7 @@
         "name": "Health Brew",
         "icon": "inv_drink_32_disgustingrotgut_color04"
       }
-    },
-    "quality": 1
+    }
   },
   "10382": {
     "id": 10382,
@@ -68937,12 +68937,12 @@
   },
   "12041": {
     "id": 12041,
-    "quality": 4,
     "itemLevel": {
       "amount": 616,
       "priority": 1,
       "squishEra": 1
-    }
+    },
+    "quality": 4
   },
   "12042": {
     "id": 12042,
@@ -68986,12 +68986,12 @@
   },
   "12051": {
     "id": 12051,
-    "quality": 4,
     "itemLevel": {
       "amount": 662,
       "priority": 1,
       "squishEra": 1
-    }
+    },
+    "quality": 4
   },
   "12052": {
     "id": 12052,
@@ -81200,6 +81200,7 @@
   },
   "12549": {
     "id": 12549,
+    "quality": 3,
     "rawStats": [
       {
         "stat": 7,
@@ -81212,8 +81213,7 @@
         "name": "StrInt"
       }
     ],
-    "stats": "50% Sta [0.2045], 50% StrInt [0.2045]",
-    "quality": 3
+    "stats": "50% Sta [0.2045], 50% StrInt [0.2045]"
   },
   "12550": {
     "id": 12550,
@@ -81549,15 +81549,15 @@
   },
   "12616": {
     "id": 12616,
+    "quality": 3,
     "ilevel": "18 @plvl 1 - 578 @plvl 578",
-    "curveId": 87662,
-    "quality": 3
+    "curveId": 87662
   },
   "12617": {
     "id": 12617,
-    "quality": 4,
     "ilevel": "24 @plvl 1 - 584 @plvl 584",
     "curveId": 89644,
+    "quality": 4,
     "rawStats": [
       {
         "stat": 7,
@@ -82219,6 +82219,7 @@
   "12682": {
     "id": 12682,
     "tag": "Rank 1/4",
+    "quality": 2,
     "effect": {
       "id": 203483,
       "index": 0,
@@ -82227,8 +82228,7 @@
         "name": "Adding",
         "icon": "inv_cape_special_explorer_b_03"
       }
-    },
-    "quality": 2
+    }
   },
   "12683": {
     "id": 12683,
@@ -82350,6 +82350,7 @@
       "fullName": "Explorer 1/8",
       "bonusId": 12704,
       "itemLevel": 245,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 1048738,
@@ -82674,6 +82675,7 @@
       "fullName": "Explorer 2/8",
       "bonusId": 12762,
       "itemLevel": 248,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 1048738,
@@ -82835,6 +82837,7 @@
       "fullName": "Explorer 3/8",
       "bonusId": 12763,
       "itemLevel": 252,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 1048738,
@@ -82996,6 +82999,7 @@
       "fullName": "Explorer 4/8",
       "bonusId": 12764,
       "itemLevel": 255,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 1048738,
@@ -83157,6 +83161,7 @@
       "fullName": "Explorer 5/8",
       "bonusId": 12765,
       "itemLevel": 258,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 1048738,
@@ -83318,6 +83323,7 @@
       "fullName": "Explorer 6/8",
       "bonusId": 12766,
       "itemLevel": 261,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 1048738,
@@ -83479,6 +83485,7 @@
       "fullName": "Explorer 7/8",
       "bonusId": 12767,
       "itemLevel": 265,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 1048738,
@@ -83640,6 +83647,7 @@
       "fullName": "Explorer 8/8",
       "bonusId": 12768,
       "itemLevel": 268,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 1048738,
@@ -83800,6 +83808,7 @@
       "fullName": "Adventurer 1/6",
       "bonusId": 12769,
       "itemLevel": 220,
+      "seasonId": 34,
       "highWatermarkDiscounts": [
         {
           "type": "currency",
@@ -83862,6 +83871,7 @@
       "fullName": "Adventurer 2/6",
       "bonusId": 12770,
       "itemLevel": 224,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -83944,6 +83954,7 @@
       "fullName": "Adventurer 3/6",
       "bonusId": 12771,
       "itemLevel": 227,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84026,6 +84037,7 @@
       "fullName": "Adventurer 4/6",
       "bonusId": 12772,
       "itemLevel": 230,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84108,6 +84120,7 @@
       "fullName": "Adventurer 5/6",
       "bonusId": 12773,
       "itemLevel": 233,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84190,6 +84203,7 @@
       "fullName": "Adventurer 6/6",
       "bonusId": 12774,
       "itemLevel": 237,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84277,6 +84291,12 @@
   },
   "12777": {
     "id": 12777,
+    "quality": 4,
+    "itemLevel": {
+      "amount": 233,
+      "priority": 0,
+      "squishEra": 2
+    },
     "upgrade": {
       "group": 609,
       "level": 1,
@@ -84284,6 +84304,8 @@
       "name": "Veteran",
       "fullName": "Veteran 1/6",
       "bonusId": 12777,
+      "itemLevel": 233,
+      "seasonId": 34,
       "highWatermarkDiscounts": [
         {
           "type": "currency",
@@ -84328,12 +84350,6 @@
           "accountWide": false
         }
       ]
-    },
-    "quality": 4,
-    "itemLevel": {
-      "amount": 233,
-      "priority": 0,
-      "squishEra": 2
     }
   },
   "12778": {
@@ -84351,6 +84367,7 @@
       "fullName": "Veteran 2/6",
       "bonusId": 12778,
       "itemLevel": 237,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84433,6 +84450,7 @@
       "fullName": "Veteran 3/6",
       "bonusId": 12779,
       "itemLevel": 240,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84515,6 +84533,7 @@
       "fullName": "Veteran 4/6",
       "bonusId": 12780,
       "itemLevel": 243,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84597,6 +84616,7 @@
       "fullName": "Veteran 5/6",
       "bonusId": 12781,
       "itemLevel": 246,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84679,6 +84699,7 @@
       "fullName": "Veteran 6/6",
       "bonusId": 12782,
       "itemLevel": 250,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84779,6 +84800,7 @@
       "fullName": "Champion 1/6",
       "bonusId": 12785,
       "itemLevel": 246,
+      "seasonId": 34,
       "highWatermarkDiscounts": [
         {
           "type": "currency",
@@ -84841,6 +84863,7 @@
       "fullName": "Champion 2/6",
       "bonusId": 12786,
       "itemLevel": 250,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -84923,6 +84946,7 @@
       "fullName": "Champion 3/6",
       "bonusId": 12787,
       "itemLevel": 253,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85005,6 +85029,7 @@
       "fullName": "Champion 4/6",
       "bonusId": 12788,
       "itemLevel": 256,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85087,6 +85112,7 @@
       "fullName": "Champion 5/6",
       "bonusId": 12789,
       "itemLevel": 259,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85169,6 +85195,7 @@
       "fullName": "Champion 6/6",
       "bonusId": 12790,
       "itemLevel": 263,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85269,6 +85296,7 @@
       "fullName": "Hero 1/6",
       "bonusId": 12793,
       "itemLevel": 259,
+      "seasonId": 34,
       "highWatermarkDiscounts": [
         {
           "type": "currency",
@@ -85331,6 +85359,7 @@
       "fullName": "Hero 2/6",
       "bonusId": 12794,
       "itemLevel": 263,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85413,6 +85442,7 @@
       "fullName": "Hero 3/6",
       "bonusId": 12795,
       "itemLevel": 266,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85495,6 +85525,7 @@
       "fullName": "Hero 4/6",
       "bonusId": 12796,
       "itemLevel": 269,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85577,6 +85608,7 @@
       "fullName": "Hero 5/6",
       "bonusId": 12797,
       "itemLevel": 272,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85659,6 +85691,7 @@
       "fullName": "Hero 6/6",
       "bonusId": 12798,
       "itemLevel": 276,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85759,6 +85792,7 @@
       "fullName": "Myth 1/6",
       "bonusId": 12801,
       "itemLevel": 272,
+      "seasonId": 34,
       "highWatermarkDiscounts": [
         {
           "type": "currency",
@@ -85821,6 +85855,7 @@
       "fullName": "Myth 2/6",
       "bonusId": 12802,
       "itemLevel": 276,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85903,6 +85938,7 @@
       "fullName": "Myth 3/6",
       "bonusId": 12803,
       "itemLevel": 279,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -85985,6 +86021,7 @@
       "fullName": "Myth 4/6",
       "bonusId": 12804,
       "itemLevel": 282,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -86067,6 +86104,7 @@
       "fullName": "Myth 5/6",
       "bonusId": 12805,
       "itemLevel": 285,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -86149,6 +86187,7 @@
       "fullName": "Myth 6/6",
       "bonusId": 12806,
       "itemLevel": 289,
+      "seasonId": 34,
       "costs": [
         {
           "mask_inv_type": 0,
@@ -87186,21 +87225,22 @@
   },
   "12859": {
     "id": 12859,
+    "itemLevel": {
+      "amount": 330,
+      "priority": 9999,
+      "squishEra": 2,
+      "curveId": 88583
+    },
     "upgrade": {
       "group": 619,
       "level": 3,
       "max": 8,
       "name": "Explorer",
       "fullName": "Explorer 3/8",
-      "bonusId": 12859
+      "bonusId": 12859,
+      "itemLevel": 330
     },
-    "quality": 2,
-    "itemLevel": {
-      "amount": 330,
-      "priority": 9999,
-      "squishEra": 2,
-      "curveId": 88583
-    }
+    "quality": 2
   },
   "12860": {
     "id": 12860,
@@ -88140,6 +88180,7 @@
   },
   "13210": {
     "id": 13210,
+    "tag": "Rank 1/4",
     "effect": {
       "id": 213707,
       "index": 0,
@@ -88148,8 +88189,7 @@
         "name": "Adding",
         "icon": "inv_cape_special_explorer_b_03"
       }
-    },
-    "tag": "Rank 1/4"
+    }
   },
   "13211": {
     "id": 13211,
@@ -91502,5 +91542,24 @@
       "squishEra": 1
     },
     "quality": 4
+  },
+  "13729": {
+    "id": 13729,
+    "dropLevelCurve": {
+      "curveId": 101225,
+      "offset": 0,
+      "priority": 1,
+      "squishEra": 2
+    }
+  },
+  "13730": {
+    "id": 13730,
+    "dropLevelCurve": {
+      "curveId": 101225,
+      "offset": 6,
+      "priority": 1,
+      "squishEra": 2
+    },
+    "quality": 3
   }
 }

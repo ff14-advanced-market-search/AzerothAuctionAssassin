@@ -18724,5 +18724,42 @@
         "itemLevel": 201
       }
     ]
+  },
+  "101225": {
+    "curveId": 101225,
+    "points": [
+      {
+        "playerLevel": 70,
+        "itemLevel": 133
+      },
+      {
+        "playerLevel": 83,
+        "itemLevel": 133
+      },
+      {
+        "playerLevel": 84,
+        "itemLevel": 152
+      },
+      {
+        "playerLevel": 86,
+        "itemLevel": 152
+      },
+      {
+        "playerLevel": 87,
+        "itemLevel": 165
+      },
+      {
+        "playerLevel": 89,
+        "itemLevel": 165
+      },
+      {
+        "playerLevel": 90,
+        "itemLevel": 192
+      },
+      {
+        "playerLevel": 100,
+        "itemLevel": 192
+      }
+    ]
   }
 }
