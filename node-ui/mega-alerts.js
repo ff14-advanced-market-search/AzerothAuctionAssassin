@@ -1279,16 +1279,16 @@ class MegaData {
    * Get ilvl items from Saddlebag API or GitHub backup
    * Filters by ilvl and optional item_ids list
    * Returns item names, IDs, base ilvls, and base required levels
-   * Matches Python behavior: if item_ids is empty, filter by ilvl (default 201)
+   * Matches Python behavior: if item_ids is empty, filter by ilvl (default 196)
    * If item_ids is provided, filter by item_ids and ignore ilvl
    */
-  async getIlvlItems(ilvl = 201, item_ids = []) {
+  async getIlvlItems(ilvl = 196, item_ids = []) {
     let results = {}
     try {
-      // Python behavior: if no item_ids given, reset ilvl to 201
+      // Python behavior: if no item_ids given, reset ilvl to 196
       let actualIlvl = ilvl
       if (!item_ids || item_ids.length === 0) {
-        actualIlvl = 201
+        actualIlvl = 196
       }
 
       const jsonData = {

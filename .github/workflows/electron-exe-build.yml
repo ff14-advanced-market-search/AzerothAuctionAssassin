@@ -1,7 +1,7 @@
 name: Build EXE & DMG for Electron App
 
 env:
-  AAA_VERSION: "2.0.7"
+  AAA_VERSION: "2.0.8"
 
 on:
   workflow_dispatch:
