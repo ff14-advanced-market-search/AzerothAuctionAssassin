@@ -254,10 +254,10 @@ def get_raidbots_item_squish_era():
             return {}
 
 
-def get_ilvl_items(ilvl=201, item_ids=[]):
+def get_ilvl_items(ilvl=196, item_ids=[]):
     """Get item details based on the item level and item IDs provided.
     Parameters:
-        - ilvl (int): The item level threshold for filtering items, default is 201.
+        - ilvl (int): The item level threshold for filtering items, default is 196.
         - item_ids (list): List of item IDs to filter; if empty or None, items are fetched based on ilvl only.
     Returns:
         - tuple: A tuple containing four elements:
@@ -266,17 +266,17 @@ def get_ilvl_items(ilvl=201, item_ids=[]):
             - dict: Base item levels keyed by item ID.
             - dict: Base required levels keyed by item ID.
     Processing Logic:
-        - If item_ids is not provided or is empty, resets ilvl to 201.
+        - If item_ids is not provided or is empty, resets ilvl to 196.
         - Fetches item data from the Saddlebag URL, using a backup source if the request fails.
         - Filters results specifically for item IDs if given."""
     try:
         # if no item_ids are given, get all items at or above the given ilvl
         # this gets weird when someone wants a high ilvl item as we have the base ilvl in the DB
-        # but not the max ilvl, so we just set it to 201
+        # but not the max ilvl, so we just set it to 196
         if item_ids is None:
             item_ids = []
         if not item_ids:
-            ilvl = 201
+            ilvl = 196
         json_data = {
             "discord_consent": WOW_DISCORD_CONSENT,
             "ilvl": ilvl,
