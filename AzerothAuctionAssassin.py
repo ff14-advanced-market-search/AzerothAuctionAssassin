@@ -19,6 +19,7 @@ except Exception as ex:
 # i hate the way that looks but if it isnt broken dont fix it
 
 from utils.version import AAA_VERSION
+
 try:
     AAA_VERSION
 except NameError:
