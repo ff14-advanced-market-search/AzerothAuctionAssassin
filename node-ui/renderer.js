@@ -40,6 +40,24 @@ function getElement(id) {
 const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
+let cachedSaddlebagUserAgent = null
+
+async function saddlebagUserAgent() {
+  if (cachedSaddlebagUserAgent) return cachedSaddlebagUserAgent
+  try {
+    const v = await window.aaa.getAppVersion()
+    cachedSaddlebagUserAgent = `AzerothAuctionAssassin/${v}`
+  } catch {
+    cachedSaddlebagUserAgent = "AzerothAuctionAssassin/unknown"
+  }
+  return cachedSaddlebagUserAgent
+}
+
+async function saddlebagFetchHeaders(base = {}) {
+  const ua = await saddlebagUserAgent()
+  return { ...base, "User-Agent": ua }
+}
+
 const state = {
   megaData: {},
   desiredItems: {},
@@ -1467,10 +1485,10 @@ async function fetchItemNames() {
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
-        headers: {
+        headers: await saddlebagFetchHeaders({
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }),
         body: JSON.stringify({
           discord_consent: WOW_DISCORD_CONSENT,
           region,
@@ -1650,10 +1668,10 @@ async function fetchPetNames() {
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
-        headers: {
+        headers: await saddlebagFetchHeaders({
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }),
         body: JSON.stringify({
           discord_consent: WOW_DISCORD_CONSENT,
           region,
@@ -1761,10 +1779,10 @@ async function validateToken(token) {
       "https://api.saddlebagexchange.com/api/wow/checkmegatoken",
       {
         method: "POST",
-        headers: {
+        headers: await saddlebagFetchHeaders({
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }),
         body: JSON.stringify({
           discord_consent: WOW_DISCORD_CONSENT,
           token: token.trim(),

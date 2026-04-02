@@ -4,7 +4,7 @@
 # so it can locate them before doing the other imports
 import sys
 
-AAT_VERSION = "0.0.2"
+AAT_VERSION = "0.0.3"
 
 windowsApp_Path = None
 try:
@@ -51,6 +51,14 @@ WOW_DISCORD_CONSENT = (
     "and will not spam the api like an idiot and there is no point in making more than one request per hour "
     "and i will not make request for one item at a time i know many apis support calling multiple items at once"
 )
+
+
+def _aat_saddlebag_headers(extra=None):
+    headers = {"User-Agent": f"AzerothAuctionTarget/{AAT_VERSION}"}
+    if extra:
+        headers.update(extra)
+    return headers
+
 
 if sys.platform == "win32":
     myappid = "mycompany.myproduct.subproduct.version"  # arbitrary string
@@ -170,7 +178,7 @@ class RecommendationsRequest(QThread):
 
         marketshare_recommendations = requests.post(
             f"https://api.saddlebagexchange.com/api/wow/itemstats",
-            headers={"Accept": "application/json"},
+            headers=_aat_saddlebag_headers({"Accept": "application/json"}),
             json=self.request_data,
         ).json()
         print(self.request_data)
@@ -218,7 +226,7 @@ class Item_Statistics(QThread):
         item_statistics = pd.DataFrame(
             data=requests.post(
                 f"https://api.saddlebagexchange.com/api/wow/megaitemnames",
-                headers={"Accept": "application/json"},
+                headers=_aat_saddlebag_headers({"Accept": "application/json"}),
                 json={
                     "discord_consent": WOW_DISCORD_CONSENT,
                     "region": "EU",

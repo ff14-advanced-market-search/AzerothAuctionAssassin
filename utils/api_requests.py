@@ -1,6 +1,7 @@
 import requests
 from tenacity import retry, stop_after_attempt
 from utils.helpers import get_wow_russian_realm_ids
+from utils.version import AAA_VERSION
 
 
 ## DISCORD API CALLS ##
@@ -92,6 +93,15 @@ def get_petnames(access_token):
 RAW_GITHUB_BACKUP_PATH = "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData"
 SADDLEBAG_URL = "https://api.saddlebagexchange.com"
 
+
+def saddlebag_request_headers(extra=None):
+    """Headers for api.saddlebagexchange.com (versioned User-Agent)."""
+    headers = {"User-Agent": f"AzerothAuctionAssassin/{AAA_VERSION}"}
+    if extra:
+        headers.update(extra)
+    return headers
+
+
 WOW_DISCORD_CONSENT = (
     "I have gone to discord and asked the devs about this api and i know it only updates once per hour "
     "and will not spam the api like an idiot and there is no point in making more than one request per hour "
@@ -114,6 +124,7 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     update_timers = requests.post(
         f"{SADDLEBAG_URL}/api/wow/uploadtimers",
         json={"discord_consent": WOW_DISCORD_CONSENT},
+        headers=saddlebag_request_headers(),
     ).json()["data"]
     server_update_times = {
         time_data["dataSetID"]: time_data
@@ -143,6 +154,7 @@ def get_itemnames():
         item_names = requests.post(
             f"{SADDLEBAG_URL}/api/wow/itemnames",
             json={"discord_consent": WOW_DISCORD_CONSENT, "return_all": True},
+            headers=saddlebag_request_headers(),
         ).json()
     except Exception as e:
         print(f"Failed to get item names getting backup from github: {e}")
@@ -162,6 +174,7 @@ def get_pet_names_backup():
         pet_info = requests.post(
             f"{SADDLEBAG_URL}/api/wow/itemnames",
             json={"discord_consent": WOW_DISCORD_CONSENT, "pets": True},
+            headers=saddlebag_request_headers(),
         ).json()
     except Exception as e:
         print(f"Failed to get pet names getting backup from github: {e}")
@@ -290,6 +303,7 @@ def get_ilvl_items(ilvl=196, item_ids=[]):
             f"{SADDLEBAG_URL}/api/wow/itemdata",
             json=json_data,
             timeout=10,
+            headers=saddlebag_request_headers(),
         ).json()
     except Exception as e:
         print(f"Failed to get ilvl items getting backup from github: {e}")

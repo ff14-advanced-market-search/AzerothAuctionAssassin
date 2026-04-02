@@ -9,12 +9,14 @@ from utils.api_requests import (
     get_raidbots_item_curves,
     get_raidbots_item_squish_era,
     get_pet_names_backup,
+    saddlebag_request_headers,
 )
 
 # get the upload timers
 upload_timers = requests.post(
     "https://api.saddlebagexchange.com/api/wow/uploadtimers",
     json={"discord_consent": WOW_DISCORD_CONSENT},
+    headers=saddlebag_request_headers(),
 ).json()
 # write to StaticData/upload_timers.json
 with open("StaticData/upload_timers.json", "w") as f:
@@ -65,6 +67,7 @@ json_data = {
 ilvl_items = requests.post(
     "https://api.saddlebagexchange.com/api/wow/itemdata",
     json=json_data,
+    headers=saddlebag_request_headers(),
 ).json()
 # write to StaticData/ilvl_items.json
 with open("StaticData/ilvl_items.json", "w") as f:

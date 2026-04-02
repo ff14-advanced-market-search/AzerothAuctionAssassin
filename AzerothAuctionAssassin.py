@@ -5,8 +5,6 @@
 import sys
 from datetime import datetime
 
-AAA_VERSION = "1.6.4"
-
 windowsApp_Path = None
 try:
     if sys.argv[1] == "run-from-windows-bin":
@@ -19,6 +17,14 @@ try:
 except Exception as ex:
     pass
 # i hate the way that looks but if it isnt broken dont fix it
+
+from utils.version import AAA_VERSION
+try:
+    AAA_VERSION
+except NameError:
+    AAA_VERSION = "1.6.5"
+
+from utils.api_requests import saddlebag_request_headers
 
 import breeze_resources
 import ctypes
@@ -104,7 +110,7 @@ class Item_And_Pet_Statistics(QThread):
         item_statistics = pd.DataFrame(
             data=requests.post(
                 f"https://api.saddlebagexchange.com/api/wow/megaitemnames",
-                headers={"Accept": "application/json"},
+                headers=saddlebag_request_headers({"Accept": "application/json"}),
                 json={
                     "discord_consent": WOW_DISCORD_CONSENT,
                     "region": self.region,
@@ -116,7 +122,7 @@ class Item_And_Pet_Statistics(QThread):
         pet_statistics = pd.DataFrame(
             data=requests.post(
                 f"https://api.saddlebagexchange.com/api/wow/megaitemnames",
-                headers={"Accept": "application/json"},
+                headers=saddlebag_request_headers({"Accept": "application/json"}),
                 json={
                     "discord_consent": WOW_DISCORD_CONSENT,
                     "region": self.region,
@@ -2826,6 +2832,7 @@ class App(QMainWindow):
         response = requests.post(
             self.token_auth_url,
             json={"token": f"{self.authentication_token.text()}"},
+            headers=saddlebag_request_headers(),
         )
 
         response_dict = response.json()
