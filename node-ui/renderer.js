@@ -47,10 +47,10 @@ async function saddlebagUserAgent() {
   try {
     const v = await window.aaa.getAppVersion()
     cachedSaddlebagUserAgent = `AzerothAuctionAssassin/${v}`
+    return cachedSaddlebagUserAgent
   } catch {
-    cachedSaddlebagUserAgent = "AzerothAuctionAssassin/unknown"
+    return "AzerothAuctionAssassin/unknown"
   }
-  return cachedSaddlebagUserAgent
 }
 
 async function saddlebagFetchHeaders(base = {}) {

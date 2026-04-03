@@ -17,6 +17,7 @@ upload_timers = requests.post(
     "https://api.saddlebagexchange.com/api/wow/uploadtimers",
     json={"discord_consent": WOW_DISCORD_CONSENT},
     headers=saddlebag_request_headers(),
+    timeout=10,
 ).json()
 # write to StaticData/upload_timers.json
 with open("StaticData/upload_timers.json", "w") as f:
@@ -68,6 +69,7 @@ ilvl_items = requests.post(
     "https://api.saddlebagexchange.com/api/wow/itemdata",
     json=json_data,
     headers=saddlebag_request_headers(),
+    timeout=10,
 ).json()
 # write to StaticData/ilvl_items.json
 with open("StaticData/ilvl_items.json", "w") as f:

@@ -125,6 +125,7 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
         f"{SADDLEBAG_URL}/api/wow/uploadtimers",
         json={"discord_consent": WOW_DISCORD_CONSENT},
         headers=saddlebag_request_headers(),
+        timeout=10,
     ).json()["data"]
     server_update_times = {
         time_data["dataSetID"]: time_data
@@ -155,6 +156,7 @@ def get_itemnames():
             f"{SADDLEBAG_URL}/api/wow/itemnames",
             json={"discord_consent": WOW_DISCORD_CONSENT, "return_all": True},
             headers=saddlebag_request_headers(),
+            timeout=10,
         ).json()
     except Exception as e:
         print(f"Failed to get item names getting backup from github: {e}")
@@ -175,6 +177,7 @@ def get_pet_names_backup():
             f"{SADDLEBAG_URL}/api/wow/itemnames",
             json={"discord_consent": WOW_DISCORD_CONSENT, "pets": True},
             headers=saddlebag_request_headers(),
+            timeout=10,
         ).json()
     except Exception as e:
         print(f"Failed to get pet names getting backup from github: {e}")
