@@ -40,22 +40,11 @@ function getElement(id) {
 const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
-let cachedSaddlebagUserAgent = null
+// Keep in sync with root package.json version (avoid IPC on every Saddlebag request — was causing UI jitter)
+const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.0.9"
 
-async function saddlebagUserAgent() {
-  if (cachedSaddlebagUserAgent) return cachedSaddlebagUserAgent
-  try {
-    const v = await window.aaa.getAppVersion()
-    cachedSaddlebagUserAgent = `AzerothAuctionAssassin/${v}`
-    return cachedSaddlebagUserAgent
-  } catch {
-    return "AzerothAuctionAssassin/unknown"
-  }
-}
-
-async function saddlebagFetchHeaders(base = {}) {
-  const ua = await saddlebagUserAgent()
-  return { ...base, "User-Agent": ua }
+function saddlebagFetchHeaders(base = {}) {
+  return { ...base, "User-Agent": SADDLEBAG_USER_AGENT }
 }
 
 const state = {
@@ -1485,7 +1474,7 @@ async function fetchItemNames() {
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
-        headers: await saddlebagFetchHeaders({
+        headers: saddlebagFetchHeaders({
           "Content-Type": "application/json",
           Accept: "application/json",
         }),
@@ -1668,7 +1657,7 @@ async function fetchPetNames() {
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
-        headers: await saddlebagFetchHeaders({
+        headers: saddlebagFetchHeaders({
           "Content-Type": "application/json",
           Accept: "application/json",
         }),
@@ -1779,7 +1768,7 @@ async function validateToken(token) {
       "https://api.saddlebagexchange.com/api/wow/checkmegatoken",
       {
         method: "POST",
-        headers: await saddlebagFetchHeaders({
+        headers: saddlebagFetchHeaders({
           "Content-Type": "application/json",
           Accept: "application/json",
         }),
