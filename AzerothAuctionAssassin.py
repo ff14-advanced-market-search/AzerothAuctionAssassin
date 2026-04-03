@@ -18,11 +18,9 @@ except Exception as ex:
     pass
 # i hate the way that looks but if it isnt broken dont fix it
 
-from utils.version import AAA_VERSION
-
 try:
-    AAA_VERSION
-except NameError:
+    from utils.version import AAA_VERSION
+except ImportError:
     AAA_VERSION = "1.6.5"
 
 from utils.api_requests import saddlebag_request_headers
