@@ -67,6 +67,9 @@ const unifiedSheetState = {
 
 function getSheetColumnsOrdered(allRows) {
   const rawCols = collectSheetColumns(allRows)
+  if (rawCols.length === 0) {
+    return []
+  }
   const merged = mergeSavedColumnOrder(
     rawCols,
     unifiedSheetState.sheetColumnOrder
@@ -401,6 +404,22 @@ function appendSheetTableCell(td, col, rawVal) {
     td.appendChild(a)
     return
   }
+  if (col === "time") {
+    if (!trimmed) {
+      delete td.dataset.sheetTimeIso
+      td.textContent = ""
+      return
+    }
+    const d = new Date(trimmed)
+    if (!Number.isNaN(d.getTime())) {
+      td.dataset.sheetTimeIso = d.toISOString()
+      td.textContent = d.toLocaleString()
+    } else {
+      delete td.dataset.sheetTimeIso
+      td.textContent = cleaned
+    }
+    return
+  }
   td.textContent = cleaned
 }
 
@@ -483,7 +502,7 @@ function parseSheetCellNumber(val) {
   return Number.isFinite(n) ? n : null
 }
 
-/** Min/max for time column filters: locale string, ISO, or epoch ms / s. */
+/** Min/max for time column filters: ISO-8601, epoch ms/s, or other Date.parse-accepted strings. */
 function parseSheetTimeFilterBound(raw) {
   const s = String(raw ?? "").trim()
   if (s === "") return null
@@ -619,7 +638,15 @@ function buildSpreadsheetRowsForEmbed(embed) {
   return rows
 }
 
-function formatEmbedTimestamp(iso) {
+/** ISO string for sheet/CSV data so time filters and exports round-trip reliably. */
+function embedTimestampToIso(iso) {
+  if (!iso) return ""
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? "" : d.toISOString()
+}
+
+/** Localized display for Discord-style footers and detail tables (not for sheet cell data). */
+function formatEmbedTimestampDisplay(iso) {
   if (!iso) return ""
   const d = new Date(iso)
   return Number.isNaN(d.getTime()) ? "" : d.toLocaleString()
@@ -635,7 +662,7 @@ function getAllUnifiedSheetRows() {
   const rows = []
   for (const { embed } of alertEmbedHistory) {
     if (isWowTokenAlertEmbed(embed)) continue
-    const timeStr = formatEmbedTimestamp(embed.timestamp)
+    const timeStr = embedTimestampToIso(embed.timestamp)
     const tsNum =
       embed.timestamp && !Number.isNaN(new Date(embed.timestamp).getTime())
         ? new Date(embed.timestamp).getTime()
@@ -660,7 +687,7 @@ function getAccentColor(embed) {
 }
 
 function createDiscordFooterLine(iso) {
-  const ts = formatEmbedTimestamp(iso)
+  const ts = formatEmbedTimestampDisplay(iso)
   if (!ts) return null
   const foot = document.createElement("div")
   foot.className = "discord-embed-footer"
@@ -795,7 +822,7 @@ function createAlertTableGroup(embed, fields) {
     group.appendChild(table)
   }
 
-  const ts = formatEmbedTimestamp(embed.timestamp)
+  const ts = formatEmbedTimestampDisplay(embed.timestamp)
   if (ts) {
     const tf = document.createElement("div")
     tf.className = "alert-table-ts"
@@ -866,7 +893,7 @@ function renderNumericFilterPanel(dash) {
     maxIn.value = f.max != null ? String(f.max) : ""
     const syncRangeFilterPlaceholders = () => {
       if (f.column === "time") {
-        minIn.placeholder = "From (table time, ISO, or epoch ms)"
+        minIn.placeholder = "From (copy Time cell, ISO, or epoch ms)"
         maxIn.placeholder = "To (optional)"
       } else {
         minIn.placeholder = "Min (optional)"
@@ -971,7 +998,10 @@ function computeUnifiedSheetDisplay() {
 }
 
 function csvEscapeField(val) {
-  const s = String(val ?? "")
+  let s = String(val ?? "")
+  if (/^[\t\r ]*[=+\-@]/.test(s)) {
+    s = `'${s}`
+  }
   if (/[",\r\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`
   return s
 }
@@ -1296,7 +1326,7 @@ function createUnifiedSheetDashboard() {
     "For numeric columns, choose a column and optional min / max. Bounds use the numbers parsed from cells (prices, percentages, etc.); leave min or max empty for an open-ended range."
   const filterHintTime = document.createElement("p")
   filterHintTime.textContent =
-    "Time filters use each alert’s embed timestamp (not the text in other columns). Paste a Time cell value, ISO-8601, or Unix ms."
+    "Time filters use each alert’s embed timestamp. The sheet shows local time; copying a Time cell puts ISO-8601 on the clipboard. You can also paste ISO-8601 or Unix ms."
   filterHint.appendChild(filterHintNumeric)
   filterHint.appendChild(filterHintTime)
   filterPanel.appendChild(filterTitle)
@@ -1402,6 +1432,23 @@ function createUnifiedSheetDashboard() {
   scroll.className = "alert-sheet-scroll unified"
   const table = document.createElement("table")
   table.className = "alert-sheet-table unified"
+  table.addEventListener("copy", (e) => {
+    const sel = window.getSelection()
+    if (!sel || sel.isCollapsed) return
+    let node = sel.anchorNode
+    if (!node) return
+    if (node.nodeType === Node.TEXT_NODE) node = node.parentElement
+    const td =
+      node && typeof node.closest === "function" ? node.closest("td") : null
+    if (
+      !td ||
+      td.dataset.sheetTimeIso == null ||
+      td.dataset.sheetTimeIso === ""
+    )
+      return
+    e.preventDefault()
+    e.clipboardData.setData("text/plain", td.dataset.sheetTimeIso)
+  })
   const thead = document.createElement("thead")
   const tbody = document.createElement("tbody")
   table.appendChild(thead)
