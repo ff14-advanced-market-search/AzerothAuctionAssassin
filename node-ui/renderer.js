@@ -1220,6 +1220,7 @@ function reorderSheetColumns(dash, fromCol, toCol) {
   unifiedSheetState.sheetColumnOrder = order
   saveSheetColumnOrder(order)
   refreshUnifiedSheetTable(dash)
+  renderColumnControlPanel(dash)
 }
 
 function createUnifiedSheetDashboard() {
@@ -2484,7 +2485,16 @@ function renderMegaForm(data) {
         el.checked = Boolean(data[el.name])
       }
     } else if (el.type !== "submit" && el.type !== "button") {
-      el.value = data[el.name] ?? ""
+      if (el.name === "MAX_IN_APP_ALERTS") {
+        const v = data[el.name]
+        el.value = String(
+          v === undefined || v === null || v === ""
+            ? DEFAULT_MAX_IN_APP_ALERTS
+            : v
+        )
+      } else {
+        el.value = data[el.name] ?? ""
+      }
     }
   }
   // Handle extra alerts checkboxes separately
