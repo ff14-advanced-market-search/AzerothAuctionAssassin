@@ -1110,6 +1110,13 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   flex-wrap: wrap;
 }
 
+.alerts-page-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+}
+
 .alerts-toolbar {
   display: flex;
   align-items: center;
