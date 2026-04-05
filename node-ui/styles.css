@@ -1112,6 +1112,8 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
 
 .alerts-view-toggle {
   display: inline-flex;
+  flex-wrap: wrap;
+  max-width: 100%;
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
@@ -1154,7 +1156,8 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
 }
 
 .alert-embed-group,
-.alert-table-group {
+.alert-table-group,
+.alert-sheet-group {
   content-visibility: auto;
   contain-intrinsic-size: 0 200px;
   contain: layout style;
@@ -1216,6 +1219,11 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   margin-bottom: 8px;
 }
 
+.discord-embed-desc strong,
+.alert-table-desc strong {
+  margin-right: 0.35em;
+}
+
 .discord-embed-card .discord-embed-fields {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -1264,6 +1272,73 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   background: rgba(0, 0, 0, 0.35);
   padding: 1px 5px;
   border-radius: 3px;
+}
+
+.alert-sheet-group {
+  background: #0d1117;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 4px solid var(--embed-accent, #5865f2);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.alert-sheet-caption {
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.alert-sheet-scroll {
+  overflow: auto;
+  max-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  background: #010409;
+}
+
+.alert-sheet-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #e6edf3;
+}
+
+.alert-sheet-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #161b22;
+  color: #8b949e;
+  font-weight: 600;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid #30363d;
+  border-bottom: 2px solid #58a6ff;
+  white-space: nowrap;
+}
+
+.alert-sheet-table tbody td {
+  padding: 6px 10px;
+  border: 1px solid #21262d;
+  vertical-align: top;
+  max-width: 280px;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.alert-sheet-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.alert-sheet-ts {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #8b949e;
+  font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
 .alert-table-group {

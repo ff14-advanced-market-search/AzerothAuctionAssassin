@@ -586,9 +586,20 @@ class MegaData:
         return set(realm["lastUploadMinute"] for realm in self.get_upload_time_list())
 
     def get_realm_names(self, connectedRealmId):
-        realm_names = [
-            name for name, id in self.WOW_SERVER_NAMES.items() if id == connectedRealmId
-        ]
+        # Match JSON int/str realm IDs to API numeric connected realm IDs
+        realm_names = []
+        try:
+            want = int(connectedRealmId)
+            for name, rid in self.WOW_SERVER_NAMES.items():
+                try:
+                    if int(rid) == want:
+                        realm_names.append(name)
+                except (TypeError, ValueError):
+                    continue
+        except (TypeError, ValueError):
+            for name, rid in self.WOW_SERVER_NAMES.items():
+                if rid == connectedRealmId:
+                    realm_names.append(name)
         realm_names.sort()
         return realm_names
 

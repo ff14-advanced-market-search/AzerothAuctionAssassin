@@ -919,8 +919,8 @@
             <div>
               <h2>Alerts</h2>
               <span class="muted"
-                >In-app stream of Discord embeds (snipes and token alerts).
-                Newest at the bottom.</span
+                >Discord-style embeds, stacked cards, a compact details layout,
+                or a spreadsheet table. Newest at the bottom.</span
               >
             </div>
             <div class="alerts-toolbar">
@@ -932,15 +932,31 @@
                 <button
                   type="button"
                   class="ghost alerts-view-btn"
-                  id="alerts-view-cards"
+                  id="alerts-view-discord"
                   aria-pressed="true"
+                >
+                  Discord
+                </button>
+                <button
+                  type="button"
+                  class="ghost alerts-view-btn"
+                  id="alerts-view-cards"
+                  aria-pressed="false"
                 >
                   Cards
                 </button>
                 <button
                   type="button"
                   class="ghost alerts-view-btn"
-                  id="alerts-view-table"
+                  id="alerts-view-details"
+                  aria-pressed="false"
+                >
+                  Details
+                </button>
+                <button
+                  type="button"
+                  class="ghost alerts-view-btn"
+                  id="alerts-view-sheet"
                   aria-pressed="false"
                 >
                   Table

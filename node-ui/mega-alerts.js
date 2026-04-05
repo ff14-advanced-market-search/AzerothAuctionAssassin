@@ -609,7 +609,7 @@ class MegaData {
     if (this.NO_RUSSIAN_REALMS) {
       const russian = new Set(getRussianRealmIds())
       realmNames = Object.fromEntries(
-        Object.entries(realmNames).filter(([, id]) => !russian.has(id))
+        Object.entries(realmNames).filter(([, id]) => !russian.has(Number(id)))
       )
     }
     return realmNames
@@ -756,10 +756,19 @@ class MegaData {
 
   /**
    * Get realm names for a given connected realm ID
+   * Uses numeric comparison so JSON string IDs (e.g. "121") match API numbers (121)
    */
   get_realm_names(connectedRealmId) {
+    const n = Number(connectedRealmId)
+    const useNumeric =
+      connectedRealmId !== null &&
+      connectedRealmId !== undefined &&
+      connectedRealmId !== "" &&
+      !Number.isNaN(n)
     return Object.entries(this.WOW_SERVER_NAMES)
-      .filter(([, id]) => id === connectedRealmId)
+      .filter(([, id]) =>
+        useNumeric ? Number(id) === n : id === connectedRealmId
+      )
       .map(([name]) => name)
       .sort((a, b) => a.localeCompare(b))
   }
@@ -1604,9 +1613,25 @@ async function runAlerts(state, progress, runOnce = false) {
     }
 
     if (embed_fields.length) {
-      let desc = `**region:** ${state.REGION}\n`
-      desc += `**realmID:** ${clean[0].realmID ?? ""} ${is_russian_realm}\n`
-      desc += `**realmNames:** ${clean[0].realmNames}${suffix}`
+      const meta = clean[0] || {}
+      const realmIdForDesc = meta.realmID ?? meta.realmId ?? connected_id ?? ""
+      let realmNamesLine = ""
+      if (Array.isArray(meta.realmNames)) {
+        realmNamesLine = meta.realmNames.length
+          ? meta.realmNames.join(", ")
+          : ""
+      } else if (meta.realmNames != null && meta.realmNames !== "") {
+        realmNamesLine = String(meta.realmNames)
+      }
+      if (!realmNamesLine) {
+        const resolved = state.get_realm_names(connected_id)
+        realmNamesLine = resolved.length
+          ? resolved.join(", ")
+          : `(connected realm ${realmIdForDesc})`
+      }
+      let desc = `**region:** ${state.REGION ?? ""}\n`
+      desc += `**realmID:** ${realmIdForDesc} ${is_russian_realm}\n`
+      desc += `**realmNames:** ${realmNamesLine}${suffix}`
       for (const chunk of splitList(embed_fields, 10)) {
         const item_embed = createEmbed(
           `${state.REGION} SNIPE FOUND!`,

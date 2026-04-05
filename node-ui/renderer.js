@@ -10,8 +10,20 @@ const ALERTS_VIEW_STORAGE_KEY = "aaa-alerts-view-mode"
 
 const alertEmbedHistory = []
 
-let alertsViewMode =
-  localStorage.getItem(ALERTS_VIEW_STORAGE_KEY) === "table" ? "table" : "cards"
+const ALERT_VIEW_MODES = ["discord", "cards", "details", "sheet"]
+
+function loadStoredAlertsViewMode() {
+  const v = localStorage.getItem(ALERTS_VIEW_STORAGE_KEY)
+  if (ALERT_VIEW_MODES.includes(v)) {
+    return v
+  }
+  if (v === "table") {
+    return "details"
+  }
+  return "discord"
+}
+
+let alertsViewMode = loadStoredAlertsViewMode()
 
 /**
  * Closing `)` for `[label](url)` when the URL may contain balanced parentheses
@@ -158,6 +170,122 @@ function fieldDetailBody(value) {
   return kept.join("\n").trim()
 }
 
+function parseDescriptionMeta(description) {
+  const out = { region: "", realmID: "", realmNames: "" }
+  if (!description) return out
+  const r1 = description.match(/^\s*\*\*region:\*\*\s*(.+)$/im)
+  const r2 = description.match(/^\s*\*\*realmID:\*\*\s*(.+)$/im)
+  const r3 = description.match(/^\s*\*\*realmNames:\*\*\s*(.+)$/im)
+  if (r1) out.region = r1[1].trim()
+  if (r2) out.realmID = r2[1].trim()
+  if (r3) out.realmNames = r3[1].trim()
+  return out
+}
+
+const LINK_LABEL_TO_COL = {
+  "Shopping List": "link_shopping_list",
+  "Where to Sell": "link_where_to_sell",
+  "Wowhead link": "link_wowhead",
+  "Undermine link": "link_undermine",
+  "Saddlebag link": "link_saddlebag",
+}
+
+function linkLabelToColumnKey(label) {
+  if (LINK_LABEL_TO_COL[label]) return LINK_LABEL_TO_COL[label]
+  const slug = String(label)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "")
+  return slug ? `link_${slug}` : ""
+}
+
+function parseFieldKeyValues(text) {
+  const o = {}
+  for (const line of String(text).split("\n")) {
+    if (isLineOnlyMarkdownLink(line)) continue
+    const t = line.trim()
+    if (!t) continue
+    const tick = t.match(/^`([^`]+)`\s*(.*)$/)
+    if (tick) {
+      const k = tick[1].replace(/:\s*$/, "").trim()
+      if (k) o[k] = tick[2].trim()
+      continue
+    }
+    const colon = t.indexOf(":")
+    if (colon > 0) {
+      const k = t
+        .slice(0, colon)
+        .trim()
+        .replace(/^`+|`+$/g, "")
+      const v = t.slice(colon + 1).trim()
+      if (k) o[k] = v
+    }
+  }
+  return o
+}
+
+const SHEET_COL_ORDER = [
+  "region",
+  "realmID",
+  "realmNames",
+  "item",
+  "itemID",
+  "petID",
+  "ilvl",
+  "tertiary_stats",
+  "required_lvl",
+  "bonus_ids",
+  "target_price",
+  "Below_Target",
+  "buyout_prices",
+  "bid_prices",
+  "link_shopping_list",
+  "link_where_to_sell",
+  "link_wowhead",
+  "link_undermine",
+  "link_saddlebag",
+  "title",
+  "message",
+]
+
+function collectSheetColumns(rows) {
+  const set = new Set()
+  for (const r of rows) {
+    Object.keys(r).forEach((k) => set.add(k))
+  }
+  const ordered = []
+  for (const c of SHEET_COL_ORDER) {
+    if (set.has(c)) ordered.push(c)
+  }
+  const rest = [...set].filter((c) => !ordered.includes(c)).sort()
+  return [...ordered, ...rest]
+}
+
+function buildSpreadsheetRowsForEmbed(embed) {
+  const fields = Array.isArray(embed.fields) ? embed.fields : []
+  const meta = parseDescriptionMeta(embed.description)
+  if (!fields.length) {
+    const row = { ...meta }
+    if (embed.title) row.title = embed.title
+    row.message = String(embed.description || "")
+      .replace(/\s*\n\s*/g, " ")
+      .trim()
+    return [row]
+  }
+  const rows = []
+  for (const f of fields) {
+    const row = { ...meta, item: f.name || "" }
+    Object.assign(row, parseFieldKeyValues(String(f.value || "")))
+    for (const { label, url } of extractMarkdownLinks(String(f.value || ""))) {
+      const col = linkLabelToColumnKey(label)
+      if (col) row[col] = url
+    }
+    rows.push(row)
+  }
+  return rows
+}
+
 function formatEmbedTimestamp(iso) {
   if (!iso) return ""
   const d = new Date(iso)
@@ -178,6 +306,53 @@ function createDiscordFooterLine(iso) {
   foot.className = "discord-embed-footer"
   foot.textContent = ts
   return foot
+}
+
+/** One Discord-style card: title, description, field grid (like the Discord client). */
+function createDiscordFlatGroup(embed, fields) {
+  const wrap = document.createElement("div")
+  wrap.className = "alert-embed-group alert-embed-discord-flat"
+  const card = document.createElement("article")
+  card.className = "discord-embed-card discord-embed-flat"
+  card.style.setProperty("--embed-accent", getAccentColor(embed))
+  if (embed.title) {
+    const t = document.createElement("div")
+    t.className = "discord-embed-title"
+    appendRichDiscordText(t, embed.title)
+    card.appendChild(t)
+  }
+  if (embed.description) {
+    const desc = document.createElement("div")
+    desc.className = "discord-embed-desc"
+    appendRichDiscordText(desc, embed.description)
+    card.appendChild(desc)
+  }
+  if (fields.length) {
+    const grid = document.createElement("div")
+    grid.className = "discord-embed-fields"
+    for (const f of fields) {
+      const fieldWrap = document.createElement("div")
+      fieldWrap.className = "discord-embed-field"
+      if (f.name) {
+        const nameEl = document.createElement("div")
+        nameEl.className = "discord-embed-field-name"
+        appendRichDiscordText(nameEl, f.name)
+        fieldWrap.appendChild(nameEl)
+      }
+      if (f.value != null && f.value !== "") {
+        const valEl = document.createElement("div")
+        valEl.className = "discord-embed-field-value"
+        appendRichDiscordText(valEl, String(f.value))
+        fieldWrap.appendChild(valEl)
+      }
+      grid.appendChild(fieldWrap)
+    }
+    card.appendChild(grid)
+  }
+  const foot = createDiscordFooterLine(embed.timestamp)
+  if (foot) card.appendChild(foot)
+  wrap.appendChild(card)
+  return wrap
 }
 
 function createAlertCardsGroup(embed, fields) {
@@ -334,27 +509,91 @@ function createAlertTableGroup(embed, fields) {
   return group
 }
 
+function createAlertSpreadsheetGroup(embed) {
+  const group = document.createElement("div")
+  group.className = "alert-sheet-group"
+  group.style.setProperty("--embed-accent", getAccentColor(embed))
+
+  if (embed.title) {
+    const cap = document.createElement("div")
+    cap.className = "alert-sheet-caption"
+    cap.textContent = embed.title
+    group.appendChild(cap)
+  }
+
+  const rows = buildSpreadsheetRowsForEmbed(embed)
+  const columns = collectSheetColumns(rows)
+
+  const scroll = document.createElement("div")
+  scroll.className = "alert-sheet-scroll"
+  const table = document.createElement("table")
+  table.className = "alert-sheet-table"
+
+  const thead = document.createElement("thead")
+  const hr = document.createElement("tr")
+  for (const col of columns) {
+    const th = document.createElement("th")
+    th.textContent = col
+    th.title = col
+    hr.appendChild(th)
+  }
+  thead.appendChild(hr)
+  table.appendChild(thead)
+
+  const tbody = document.createElement("tbody")
+  for (const row of rows) {
+    const tr = document.createElement("tr")
+    for (const col of columns) {
+      const td = document.createElement("td")
+      const v = row[col]
+      td.textContent = v !== undefined && v !== null ? String(v) : ""
+      tr.appendChild(td)
+    }
+    tbody.appendChild(tr)
+  }
+  table.appendChild(tbody)
+  scroll.appendChild(table)
+  group.appendChild(scroll)
+
+  const ts = formatEmbedTimestamp(embed.timestamp)
+  if (ts) {
+    const tf = document.createElement("div")
+    tf.className = "alert-sheet-ts"
+    tf.textContent = ts
+    group.appendChild(tf)
+  }
+  return group
+}
+
 function buildAlertElement(embed, mode) {
   const fields = Array.isArray(embed.fields) ? embed.fields : []
-  if (mode === "table") {
+  if (mode === "discord") {
+    return createDiscordFlatGroup(embed, fields)
+  }
+  if (mode === "cards") {
+    return createAlertCardsGroup(embed, fields)
+  }
+  if (mode === "details") {
     return createAlertTableGroup(embed, fields)
   }
-  return createAlertCardsGroup(embed, fields)
+  if (mode === "sheet") {
+    return createAlertSpreadsheetGroup(embed)
+  }
+  return createDiscordFlatGroup(embed, fields)
 }
 
 function refreshAlertsViewToggleButtons() {
-  const cardsBtn = document.getElementById("alerts-view-cards")
-  const tableBtn = document.getElementById("alerts-view-table")
-  if (!cardsBtn || !tableBtn) return
-  const isCards = alertsViewMode === "cards"
-  cardsBtn.classList.toggle("alerts-view-btn-active", isCards)
-  tableBtn.classList.toggle("alerts-view-btn-active", !isCards)
-  cardsBtn.setAttribute("aria-pressed", isCards ? "true" : "false")
-  tableBtn.setAttribute("aria-pressed", isCards ? "false" : "true")
+  for (const m of ALERT_VIEW_MODES) {
+    const btn = document.getElementById(`alerts-view-${m}`)
+    if (!btn) continue
+    const on = alertsViewMode === m
+    btn.classList.toggle("alerts-view-btn-active", on)
+    btn.setAttribute("aria-pressed", on ? "true" : "false")
+  }
 }
 
 function setAlertsViewMode(mode) {
-  if (mode !== "cards" && mode !== "table") return
+  if (!ALERT_VIEW_MODES.includes(mode)) return
   if (mode === alertsViewMode) return
   alertsViewMode = mode
   localStorage.setItem(ALERTS_VIEW_STORAGE_KEY, mode)
@@ -3308,12 +3547,11 @@ clearAlertsBtn?.addEventListener("click", () => {
   }
 })
 
-document.getElementById("alerts-view-cards")?.addEventListener("click", () => {
-  setAlertsViewMode("cards")
-})
-document.getElementById("alerts-view-table")?.addEventListener("click", () => {
-  setAlertsViewMode("table")
-})
+for (const m of ALERT_VIEW_MODES) {
+  document.getElementById(`alerts-view-${m}`)?.addEventListener("click", () => {
+    setAlertsViewMode(m)
+  })
+}
 
 window.addEventListener("DOMContentLoaded", async () => {
   refreshAlertsViewToggleButtons()
