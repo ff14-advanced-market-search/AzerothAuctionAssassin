@@ -40,6 +40,13 @@ function getElement(id) {
 const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
+// Keep in sync with root package.json version (avoid IPC on every Saddlebag request — was causing UI jitter)
+const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.0.9"
+
+function saddlebagFetchHeaders(base = {}) {
+  return { ...base, "User-Agent": SADDLEBAG_USER_AGENT }
+}
+
 const state = {
   megaData: {},
   desiredItems: {},
@@ -1467,10 +1474,10 @@ async function fetchItemNames() {
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
-        headers: {
+        headers: saddlebagFetchHeaders({
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }),
         body: JSON.stringify({
           discord_consent: WOW_DISCORD_CONSENT,
           region,
@@ -1650,10 +1657,10 @@ async function fetchPetNames() {
       "https://api.saddlebagexchange.com/api/wow/megaitemnames",
       {
         method: "POST",
-        headers: {
+        headers: saddlebagFetchHeaders({
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }),
         body: JSON.stringify({
           discord_consent: WOW_DISCORD_CONSENT,
           region,
@@ -1761,10 +1768,10 @@ async function validateToken(token) {
       "https://api.saddlebagexchange.com/api/wow/checkmegatoken",
       {
         method: "POST",
-        headers: {
+        headers: saddlebagFetchHeaders({
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }),
         body: JSON.stringify({
           discord_consent: WOW_DISCORD_CONSENT,
           token: token.trim(),

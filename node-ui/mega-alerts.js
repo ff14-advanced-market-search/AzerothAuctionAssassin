@@ -5,6 +5,15 @@ const path = require("path")
 const { setTimeout: delay } = require("timers/promises")
 const { fetch } = require("undici")
 
+const AAA_NODE_UI_VERSION = "2.0.9"
+
+function saddlebagFetchHeaders(base = {}) {
+  return {
+    ...base,
+    "User-Agent": `AzerothAuctionAssassin/${AAA_NODE_UI_VERSION}`,
+  }
+}
+
 // Directory paths - will be set by setPaths() in packaged apps
 let ROOT = path.resolve(__dirname, "..")
 let DATA_DIR = path.join(ROOT, "AzerothAuctionAssassinData")
@@ -1060,7 +1069,7 @@ class MegaData {
     try {
       const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemnames`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: saddlebagFetchHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           discord_consent: WOW_DISCORD_CONSENT,
           return_all: true,
@@ -1102,7 +1111,7 @@ class MegaData {
     try {
       const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemnames`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: saddlebagFetchHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           discord_consent: WOW_DISCORD_CONSENT,
           pets: true,
@@ -1303,7 +1312,7 @@ class MegaData {
 
       const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemdata`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: saddlebagFetchHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(jsonData),
       })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
