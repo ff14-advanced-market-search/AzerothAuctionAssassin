@@ -1167,7 +1167,7 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
 }
 
 .alerts-stream:empty::before {
-  content: "No alerts yet. Start alerts — snipe and token embeds appear here like in Discord.";
+  content: "No alerts yet. Start alerts — messages appear here like in Discord.";
   color: var(--muted);
   font-size: 14px;
   line-height: 1.5;
