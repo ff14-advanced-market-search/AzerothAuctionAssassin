@@ -159,10 +159,17 @@ button.ghost:hover:not(:disabled) {
 
 .nav {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  flex-wrap: wrap;
   margin-top: 16px;
   margin-bottom: 14px;
+}
+
+.nav-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 .nav-btn {
@@ -1231,6 +1238,28 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   white-space: pre-wrap;
   word-break: break-word;
   margin-bottom: 8px;
+}
+
+.alert-embed-meta-block {
+  font-size: 14px;
+  color: #dbdee1;
+  margin-bottom: 8px;
+  line-height: 1.45;
+}
+
+.alert-embed-meta-row {
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.alert-embed-meta-key {
+  font-weight: 700;
+  color: #fff;
+  margin-right: 0.25em;
+}
+
+.alert-embed-meta-val {
+  color: #dbdee1;
 }
 
 .discord-embed-desc strong,

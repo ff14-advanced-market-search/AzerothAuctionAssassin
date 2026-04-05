@@ -238,13 +238,98 @@ function fieldDetailBody(value) {
 function parseDescriptionMeta(description) {
   const out = { region: "", realmID: "", realmNames: "" }
   if (!description) return out
-  const r1 = description.match(/^\s*\*\*region:\*\*\s*(.+)$/im)
-  const r2 = description.match(/^\s*\*\*realmID:\*\*\s*(.+)$/im)
-  const r3 = description.match(/^\s*\*\*realmNames:\*\*\s*(.+)$/im)
-  if (r1) out.region = r1[1].trim()
-  if (r2) out.realmID = r2[1].trim()
-  if (r3) out.realmNames = r3[1].trim()
+  const s = String(description)
+  const pick = (re) => {
+    const m = s.match(re)
+    return m ? m[1].trim() : ""
+  }
+  out.region =
+    pick(/^\s*\*\*region:\*\*\s*(.+)$/im) || pick(/^\s*region:\s*(.+)$/im)
+  out.realmID =
+    pick(/^\s*\*\*realmID:\*\*\s*(.+)$/im) || pick(/^\s*realmID:\s*(.+)$/im)
+  out.realmNames =
+    pick(/^\s*\*\*realmNames:\*\*\s*(.+)$/im) ||
+    pick(/^\s*realmNames:\s*(.+)$/im)
   return out
+}
+
+function isDescriptionMetaLine(line) {
+  const t = String(line).trim()
+  return (
+    /^\*\*region:\*\*/i.test(t) ||
+    /^\*\*realmID:\*\*/i.test(t) ||
+    /^\*\*realmNames:\*\*/i.test(t) ||
+    /^region:/i.test(t) ||
+    /^realmID:/i.test(t) ||
+    /^realmNames:/i.test(t)
+  )
+}
+
+/** Drop leading region / realmID / realmNames lines (Discord embed header). */
+function removeDescriptionMetaLines(description) {
+  if (!description) return ""
+  const lines = String(description).split(/\r?\n/)
+  const rest = []
+  let atHead = true
+  for (const line of lines) {
+    const empty = line.trim() === ""
+    if (atHead) {
+      if (empty) continue
+      if (isDescriptionMetaLine(line)) continue
+      atHead = false
+    }
+    rest.push(line)
+  }
+  return rest.join("\n").trim()
+}
+
+function descriptionMetaHasValues(meta) {
+  return Boolean(
+    String(meta?.region || "").trim() ||
+      String(meta?.realmID || "").trim() ||
+      String(meta?.realmNames || "").trim()
+  )
+}
+
+/** Structured realm/region lines + remaining description (Discord + Details cards). */
+function appendParsedDescriptionMeta(host, rawDescription, descClassName) {
+  if (rawDescription == null || rawDescription === "") return
+  const metaObj = parseDescriptionMeta(rawDescription)
+  const hasMeta = descriptionMetaHasValues(metaObj)
+  if (hasMeta) {
+    const block = document.createElement("div")
+    block.className = "alert-embed-meta-block"
+    const defs = [
+      ["region", "region"],
+      ["realmID", "realmID"],
+      ["realmNames", "realmNames"],
+    ]
+    for (const [key, label] of defs) {
+      const v = String(metaObj[key] || "").trim()
+      if (!v) continue
+      const row = document.createElement("div")
+      row.className = "alert-embed-meta-row"
+      const kEl = document.createElement("span")
+      kEl.className = "alert-embed-meta-key"
+      kEl.textContent = `${label}: `
+      const vEl = document.createElement("span")
+      vEl.className = "alert-embed-meta-val"
+      vEl.textContent = v
+      row.appendChild(kEl)
+      row.appendChild(vEl)
+      block.appendChild(row)
+    }
+    host.appendChild(block)
+  }
+  const remainder = hasMeta
+    ? removeDescriptionMetaLines(rawDescription)
+    : String(rawDescription)
+  if (remainder.trim()) {
+    const desc = document.createElement("div")
+    desc.className = descClassName
+    appendRichDiscordText(desc, remainder.trim())
+    host.appendChild(desc)
+  }
 }
 
 const LINK_LABEL_TO_COL = {
@@ -596,10 +681,7 @@ function createDiscordFlatGroup(embed, fields) {
     card.appendChild(t)
   }
   if (embed.description) {
-    const desc = document.createElement("div")
-    desc.className = "discord-embed-desc"
-    appendRichDiscordText(desc, embed.description)
-    card.appendChild(desc)
+    appendParsedDescriptionMeta(card, embed.description, "discord-embed-desc")
   }
   if (fields.length) {
     const grid = document.createElement("div")
@@ -645,10 +727,7 @@ function createAlertTableGroup(embed, fields) {
       meta.appendChild(th)
     }
     if (embed.description) {
-      const d = document.createElement("div")
-      d.className = "alert-table-desc"
-      appendRichDiscordText(d, embed.description)
-      meta.appendChild(d)
+      appendParsedDescriptionMeta(meta, embed.description, "alert-table-desc")
     }
     group.appendChild(meta)
   }
