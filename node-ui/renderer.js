@@ -5,7 +5,8 @@ function escapeHtml(text) {
   return div.innerHTML
 }
 
-const MAX_IN_APP_ALERTS = 120
+const DEFAULT_MAX_IN_APP_ALERTS = 120
+const MAX_IN_APP_ALERTS_HARD_CAP = 5000
 const ALERTS_VIEW_STORAGE_KEY = "aaa-alerts-view-mode"
 
 const alertEmbedHistory = []
@@ -1484,8 +1485,9 @@ function appendAlertEmbed(embed) {
 
   alertEmbedHistory.push({ embed })
 
+  const cap = getMaxInAppAlerts()
   if (alertsViewMode === "sheet") {
-    if (alertEmbedHistory.length > MAX_IN_APP_ALERTS) {
+    if (alertEmbedHistory.length > cap) {
       alertEmbedHistory.shift()
     }
     let dash = stream.querySelector(".alert-sheet-dashboard")
@@ -1495,7 +1497,7 @@ function appendAlertEmbed(embed) {
     }
     if (dash) refreshUnifiedSheetTable(dash)
   } else {
-    if (alertEmbedHistory.length > MAX_IN_APP_ALERTS) {
+    if (alertEmbedHistory.length > cap) {
       alertEmbedHistory.shift()
       if (stream.firstChild) {
         stream.removeChild(stream.firstChild)
@@ -1557,6 +1559,34 @@ const state = {
   petIlvlList: [],
   realmLists: {},
   processRunning: false,
+}
+
+function getMaxInAppAlerts() {
+  const raw = state.megaData?.MAX_IN_APP_ALERTS
+  const n = Number(raw)
+  if (!Number.isFinite(n) || !Number.isInteger(n)) {
+    return DEFAULT_MAX_IN_APP_ALERTS
+  }
+  return Math.min(MAX_IN_APP_ALERTS_HARD_CAP, Math.max(1, n))
+}
+
+/** Drop oldest alerts when history exceeds settings cap; refresh Alerts UI. */
+function trimAlertEmbedHistoryToLimit() {
+  const max = getMaxInAppAlerts()
+  let changed = false
+  while (alertEmbedHistory.length > max) {
+    alertEmbedHistory.shift()
+    changed = true
+  }
+  if (!changed) return
+  const stream = getElement("alerts-stream")
+  if (!stream) return
+  if (alertsViewMode === "sheet") {
+    const dash = stream.querySelector(".alert-sheet-dashboard")
+    if (dash) refreshUnifiedSheetTable(dash)
+  } else {
+    redrawAlertsStream()
+  }
 }
 
 const megaForm = getElement("mega-form")
@@ -2943,6 +2973,8 @@ async function loadState() {
   fetchPetNames().then(() => {
     renderPetIlvlRules()
   })
+
+  trimAlertEmbedHistoryToLimit()
 }
 
 async function loadDataDir() {
@@ -3449,6 +3481,11 @@ async function saveMegaData(skipValidation = false) {
         field: megaForm.TOKEN_PRICE,
         label: "Token alert min price",
       },
+      MAX_IN_APP_ALERTS: {
+        value: data.MAX_IN_APP_ALERTS,
+        field: megaForm.MAX_IN_APP_ALERTS,
+        label: "Max in-app alerts",
+      },
     }
 
     for (const [key, { value, field, label }] of Object.entries(
@@ -3479,6 +3516,16 @@ async function saveMegaData(skipValidation = false) {
       return false
     }
 
+    const maxInApp = Number(data.MAX_IN_APP_ALERTS)
+    if (maxInApp < 1 || maxInApp > MAX_IN_APP_ALERTS_HARD_CAP) {
+      showToast(
+        `Max in-app alerts must be an integer from 1 to ${MAX_IN_APP_ALERTS_HARD_CAP}.`,
+        "error"
+      )
+      megaForm.MAX_IN_APP_ALERTS?.focus()
+      return false
+    }
+
     // Validate authentication token
     const token = data.AUTHENTICATION_TOKEN || ""
     const tokenValidation = await validateToken(token)
@@ -3491,6 +3538,7 @@ async function saveMegaData(skipValidation = false) {
 
   state.megaData = await window.aaa.saveMegaData(data)
   renderMegaForm(state.megaData)
+  trimAlertEmbedHistoryToLimit()
   if (!skipValidation) {
     showToast("Settings saved successfully!", "success", 2000)
   }

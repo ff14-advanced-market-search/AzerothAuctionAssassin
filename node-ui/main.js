@@ -237,6 +237,7 @@ function ensureDataFiles() {
       FACTION: "all",
       DISCORD_ALERTS_ENABLED: true,
       IN_APP_ALERTS_ENABLED: false,
+      MAX_IN_APP_ALERTS: 120,
     },
     [FILES.desiredItems]: {},
     [FILES.ilvlList]: [],
@@ -275,11 +276,13 @@ function normalizeMegaData(input) {
     "SCAN_TIME_MIN",
     "SCAN_TIME_MAX",
     "TOKEN_PRICE",
+    "MAX_IN_APP_ALERTS",
   ])
 
   const output = {
     DISCORD_ALERTS_ENABLED: true,
     IN_APP_ALERTS_ENABLED: false,
+    MAX_IN_APP_ALERTS: 120,
     ...(input || {}),
   }
   for (const key of Object.keys(output)) {
@@ -608,6 +611,7 @@ function setupIpc() {
         FACTION: "all",
         DISCORD_ALERTS_ENABLED: true,
         IN_APP_ALERTS_ENABLED: false,
+        MAX_IN_APP_ALERTS: 120,
       }
     )
     const normalized = normalizeMegaData(defaultData)
