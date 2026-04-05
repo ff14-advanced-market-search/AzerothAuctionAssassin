@@ -317,28 +317,43 @@ async function httpJson(url, opts = {}, retries = 3, timeoutMs = 5000) {
 }
 
 /**
- * Send a Discord embed message to the webhook
+ * Send a Discord embed message to the webhook and/or in-app UI
+ * @param {object} opts
+ * @param {boolean} opts.postToDiscord
+ * @param {boolean} opts.notifyApp
  */
-async function sendDiscordEmbed(webhook, embed) {
+async function sendDiscordEmbed(webhook, embed, opts = {}) {
+  const postToDiscord = opts.postToDiscord === true
+  const notifyApp = opts.notifyApp === true
+  if (!postToDiscord && !notifyApp) return
   try {
-    if (alertEmbedCallback) {
+    if (notifyApp && alertEmbedCallback) {
       try {
         alertEmbedCallback(JSON.parse(JSON.stringify(embed)))
       } catch (cbErr) {
         originalError("alertEmbedCallback failed:", cbErr)
       }
     }
-    const response = await fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ embeds: [embed] }),
-    })
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "Unknown error")
-      logError(
-        `Discord webhook failed: ${response.status} ${response.statusText}`,
-        errorText
-      )
+    if (postToDiscord) {
+      const url = webhook && String(webhook).trim()
+      if (!url) {
+        logError(
+          "Discord alerts are enabled but MEGA_WEBHOOK_URL is missing or empty"
+        )
+        return
+      }
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ embeds: [embed] }),
+      })
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error")
+        logError(
+          `Discord webhook failed: ${response.status} ${response.statusText}`,
+          errorText
+        )
+      }
     }
   } catch (error) {
     logError("Failed to send Discord embed:", error)
@@ -348,9 +363,17 @@ async function sendDiscordEmbed(webhook, embed) {
 /**
  * Send a plain text Discord message to the webhook
  */
-async function sendDiscordMessage(webhook, message) {
+async function sendDiscordMessage(webhook, message, postToDiscord = true) {
+  if (!postToDiscord) return
   try {
-    const response = await fetch(webhook, {
+    const url = webhook && String(webhook).trim()
+    if (!url) {
+      logError(
+        "Discord alerts are enabled but MEGA_WEBHOOK_URL is missing or empty"
+      )
+      return
+    }
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: message }),
@@ -377,6 +400,12 @@ class MegaData {
     this.cfg = readJson(path.join(DATA_DIR, "mega_data.json"), {})
     this.WEBHOOK_URL = this.cfg.MEGA_WEBHOOK_URL
     this.REGION = this.cfg.WOW_REGION
+    this.DISCORD_ALERTS_ENABLED = Boolean(
+      this.cfg.DISCORD_ALERTS_ENABLED ?? true
+    )
+    this.IN_APP_ALERTS_ENABLED = Boolean(
+      this.cfg.IN_APP_ALERTS_ENABLED ?? false
+    )
 
     // Set optional configuration variables with defaults
     this.THREADS = Math.max(1, this.normalizeInt(this.cfg.MEGA_THREADS, 48)) // Default to 48 threads, min 1
@@ -730,14 +759,21 @@ class MegaData {
    * Send a Discord message using the configured webhook
    */
   send_discord_message(message) {
-    return sendDiscordMessage(this.WEBHOOK_URL, message)
+    return sendDiscordMessage(
+      this.WEBHOOK_URL,
+      message,
+      this.DISCORD_ALERTS_ENABLED
+    )
   }
 
   /**
    * Send a Discord embed using the configured webhook
    */
   send_discord_embed(embed) {
-    return sendDiscordEmbed(this.WEBHOOK_URL, embed)
+    return sendDiscordEmbed(this.WEBHOOK_URL, embed, {
+      postToDiscord: this.DISCORD_ALERTS_ENABLED,
+      notifyApp: this.IN_APP_ALERTS_ENABLED,
+    })
   }
 
   /**
@@ -2486,7 +2522,8 @@ async function main() {
   if (state.DEBUG) {
     await sendDiscordMessage(
       state.WEBHOOK_URL,
-      "DEBUG MODE: starting mega alerts to run once and then exit operations"
+      "DEBUG MODE: starting mega alerts to run once and then exit operations",
+      state.DISCORD_ALERTS_ENABLED
     )
     await runAlerts(state, () => {}, true)
   } else {
@@ -2494,7 +2531,8 @@ async function main() {
       state.WEBHOOK_URL,
       "🟢Starting mega alerts and scan all AH data instantly.🟢\n" +
         "🟢These first few messages might be old.🟢\n" +
-        "🟢All future messages will release seconds after the new data is available.🟢"
+        "🟢All future messages will release seconds after the new data is available.🟢",
+      state.DISCORD_ALERTS_ENABLED
     )
     await delay(1000)
     await runAlerts(state, (msg) => log("[progress]", msg))

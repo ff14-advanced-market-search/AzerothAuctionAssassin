@@ -1110,6 +1110,19 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   flex-wrap: wrap;
 }
 
+.alerts-toolbar-sep {
+  width: 1px;
+  align-self: stretch;
+  min-height: 28px;
+  background: var(--border);
+  margin: 2px 2px 2px 4px;
+  flex-shrink: 0;
+}
+
+.alerts-toolbar-side {
+  flex-shrink: 0;
+}
+
 .alerts-view-toggle {
   display: inline-flex;
   flex-wrap: wrap;
@@ -1284,14 +1297,23 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
 
 .alert-sheet-toolbar {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.alert-sheet-toolbar-actions {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
 
 .alert-sheet-search {
-  flex: 1 1 200px;
-  min-width: 160px;
+  flex: none;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -1323,6 +1345,14 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   line-height: 1.45;
   color: #8b949e;
   margin: -4px 0 12px;
+}
+
+.alert-sheet-filter-hint p {
+  margin: 0 0 8px;
+}
+
+.alert-sheet-filter-hint p:last-child {
+  margin-bottom: 0;
 }
 
 .alert-sheet-panel-actions {

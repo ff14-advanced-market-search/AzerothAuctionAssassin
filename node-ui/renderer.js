@@ -10,7 +10,7 @@ const ALERTS_VIEW_STORAGE_KEY = "aaa-alerts-view-mode"
 
 const alertEmbedHistory = []
 
-const ALERT_VIEW_MODES = ["discord", "details", "sheet"]
+const ALERT_VIEW_MODES = ["sheet", "discord", "details"]
 
 const SHEET_COL_PAGE_SIZE = 15
 const SHEET_COLUMN_ORDER_STORAGE_KEY = "aaa-alerts-sheet-column-order"
@@ -85,7 +85,7 @@ function loadStoredAlertsViewMode() {
   if (v === "cards") {
     return "discord"
   }
-  return "discord"
+  return "sheet"
 }
 
 let alertsViewMode = loadStoredAlertsViewMode()
@@ -345,10 +345,11 @@ function parseFieldKeyValues(text) {
 
 const SHEET_COL_ORDER = [
   "item",
+  "buyout_prices",
+  "realmNames",
   "time",
   "region",
   "realmID",
-  "realmNames",
   "itemID",
   "petID",
   "ilvl",
@@ -357,7 +358,6 @@ const SHEET_COL_ORDER = [
   "bonus_ids",
   "target_price",
   "Below_Target",
-  "buyout_prices",
   "bid_prices",
   "link_shopping_list",
   "link_where_to_sell",
@@ -862,18 +862,11 @@ function renderColumnControlPanel(dash) {
   } of ${totalPages}`
 }
 
-function refreshUnifiedSheetTable(dash) {
-  const table = dash.querySelector(".alert-sheet-table.unified")
-  const thead = table?.querySelector("thead")
-  const tbody = table?.querySelector("tbody")
-  const footer = dash.querySelector(".alert-sheet-unified-footer")
-  if (!table || !thead || !tbody || !footer) return
-
+function computeUnifiedSheetDisplay() {
   const allRows = getAllUnifiedSheetRows()
   const allCols = getSheetColumnsOrdered(allRows)
   ensureSheetColumnVisibility(allCols)
   const q = unifiedSheetState.searchRaw.trim()
-
   let working = allRows.filter((r) => rowMatchesSheetSearch(r, q))
   working = working.filter((r) =>
     rowPassesNumericFilters(r, unifiedSheetState.numericFilters)
@@ -886,7 +879,6 @@ function refreshUnifiedSheetTable(dash) {
       return String(v).trim() !== ""
     })
   )
-
   const sortCol = unifiedSheetState.sortCol
   const sortDir = unifiedSheetState.sortDir
   if (sortCol && allCols.includes(sortCol)) {
@@ -894,8 +886,124 @@ function refreshUnifiedSheetTable(dash) {
       compareSheetRows(a, b, sortCol, sortDir)
     )
   }
-
   const cols = visibleSheetColumns(allCols)
+  return { allRows, allCols, working, cols }
+}
+
+function csvEscapeField(val) {
+  const s = String(val ?? "")
+  if (/[",\r\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`
+  return s
+}
+
+function sheetCellPlainExport(col, rawVal) {
+  const cleaned = stripLeadingColonSpace(
+    rawVal !== undefined && rawVal != null ? rawVal : ""
+  )
+  const trimmed = cleaned.trim()
+  if (col.startsWith("link_") && /^https?:\/\//i.test(trimmed)) return trimmed
+  return cleaned
+}
+
+function downloadUnifiedSheetAsCsv() {
+  const { allRows, working, cols } = computeUnifiedSheetDisplay()
+  if (!cols.length) {
+    showToast(
+      "No columns to export — use Column controls or add alerts first.",
+      "error"
+    )
+    return
+  }
+  const headerLine = cols
+    .map((c) => csvEscapeField(getSheetColumnHeaderLabel(c)))
+    .join(",")
+  const lines = [headerLine]
+  for (const row of working) {
+    lines.push(
+      cols.map((c) => csvEscapeField(sheetCellPlainExport(c, row[c]))).join(",")
+    )
+  }
+  const blob = new Blob(["\ufeff", lines.join("\r\n")], {
+    type: "text/csv;charset=utf-8",
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `aaa-alerts-${new Date()
+    .toISOString()
+    .slice(0, 19)
+    .replace(/:/g, "-")}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function getLocalHourRangeMs() {
+  const now = new Date()
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    0,
+    0,
+    0
+  )
+  const end = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    59,
+    59,
+    999
+  )
+  return { startMs: start.getTime(), endMs: end.getTime() }
+}
+
+function syncSheetFilterPanelFromState(root) {
+  const filterPanel = root.querySelector(".alert-sheet-filter-panel")
+  const btnFilter = root.querySelector("#aaa-sheet-toggle-filter")
+  if (filterPanel) filterPanel.hidden = !unifiedSheetState.filterPanelOpen
+  if (btnFilter) {
+    btnFilter.textContent = unifiedSheetState.filterPanelOpen
+      ? "Hide range filter"
+      : "Show range filter"
+  }
+  if (unifiedSheetState.filterPanelOpen) {
+    renderNumericFilterPanel(root)
+  }
+  refreshUnifiedSheetTable(root)
+}
+
+function applyCurrentHourTimeFilter() {
+  const { startMs, endMs } = getLocalHourRangeMs()
+  unifiedSheetState.numericFilters = unifiedSheetState.numericFilters.filter(
+    (f) => f && f.column !== "time"
+  )
+  unifiedSheetState.numericFilters.push({
+    id: unifiedSheetState.nextFilterId++,
+    column: "time",
+    min: String(startMs),
+    max: String(endMs),
+  })
+  unifiedSheetState.filterPanelOpen = true
+  const needRedraw = alertsViewMode !== "sheet"
+  if (needRedraw) {
+    setAlertsViewMode("sheet")
+  }
+  const stream = getElement("alerts-stream")
+  const root = stream?.querySelector(".alert-sheet-dashboard")
+  if (root) syncSheetFilterPanelFromState(root)
+}
+
+function refreshUnifiedSheetTable(dash) {
+  const table = dash.querySelector(".alert-sheet-table.unified")
+  const thead = table?.querySelector("thead")
+  const tbody = table?.querySelector("tbody")
+  const footer = dash.querySelector(".alert-sheet-unified-footer")
+  if (!table || !thead || !tbody || !footer) return
+
+  const { allRows, working, cols } = computeUnifiedSheetDisplay()
   thead.replaceChildren()
   const hr = document.createElement("tr")
   if (cols.length === 0) {
@@ -921,7 +1029,7 @@ function refreshUnifiedSheetTable(dash) {
       })
       const label = document.createElement("span")
       label.className = "alert-sheet-col-label"
-      label.textContent = col
+      label.textContent = getSheetColumnHeaderLabel(col)
       label.title = "Click to sort"
       label.addEventListener("click", (e) => {
         e.stopPropagation()
@@ -1028,6 +1136,7 @@ function createUnifiedSheetDashboard() {
 
   const btnFilter = document.createElement("button")
   btnFilter.type = "button"
+  btnFilter.id = "aaa-sheet-toggle-filter"
   btnFilter.className = "ghost alert-sheet-toggle"
   btnFilter.textContent = unifiedSheetState.filterPanelOpen
     ? "Hide range filter"
@@ -1043,7 +1152,8 @@ function createUnifiedSheetDashboard() {
   const btnColReset = document.createElement("button")
   btnColReset.type = "button"
   btnColReset.className = "ghost alert-sheet-toggle"
-  btnColReset.title = "Restore default column order (item, time, region, …)"
+  btnColReset.title =
+    "Restore default column order (item, buyout_prices, realmNames, time, …)"
   btnColReset.textContent = "Reset column order"
   btnColReset.addEventListener("click", () => {
     unifiedSheetState.sheetColumnOrder = null
@@ -1056,10 +1166,13 @@ function createUnifiedSheetDashboard() {
     renderColumnControlPanel(root)
   })
 
+  const toolbarActions = document.createElement("div")
+  toolbarActions.className = "alert-sheet-toolbar-actions"
+  toolbarActions.appendChild(btnFilter)
+  toolbarActions.appendChild(btnCol)
+  toolbarActions.appendChild(btnColReset)
+  toolbar.appendChild(toolbarActions)
   toolbar.appendChild(search)
-  toolbar.appendChild(btnFilter)
-  toolbar.appendChild(btnCol)
-  toolbar.appendChild(btnColReset)
 
   const filterPanel = document.createElement("div")
   filterPanel.className = "alert-sheet-panel alert-sheet-filter-panel"
@@ -1098,8 +1211,14 @@ function createUnifiedSheetDashboard() {
   filterList.className = "alert-sheet-filter-list"
   const filterHint = document.createElement("div")
   filterHint.className = "alert-sheet-filter-hint"
-  filterHint.textContent =
+  const filterHintNumeric = document.createElement("p")
+  filterHintNumeric.textContent =
+    "For numeric columns, choose a column and optional min / max. Bounds use the numbers parsed from cells (prices, percentages, etc.); leave min or max empty for an open-ended range."
+  const filterHintTime = document.createElement("p")
+  filterHintTime.textContent =
     "Time filters use each alert’s embed timestamp (not the text in other columns). Paste a Time cell value, ISO-8601, or Unix ms."
+  filterHint.appendChild(filterHintNumeric)
+  filterHint.appendChild(filterHintTime)
   filterPanel.appendChild(filterTitle)
   filterPanel.appendChild(filterHint)
   filterPanel.appendChild(filterActions)
@@ -1574,6 +1693,10 @@ function showView(view) {
   navButtons.forEach((btn) =>
     btn.classList.toggle("active", btn.dataset.viewTarget === view)
   )
+  if (view === "alerts") {
+    redrawAlertsStream()
+    refreshAlertsViewToggleButtons()
+  }
   // Initialize exclude breeds dropdown when pet-ilvl view is shown
   if (view === "pet-ilvl") {
     // Use setTimeout to ensure DOM is ready
@@ -2194,10 +2317,15 @@ function renderMegaForm(data) {
   for (const el of megaForm.elements) {
     if (!el.name) continue
     if (el.type === "checkbox") {
-      const defaultTrue = el.name === "USE_POST_MIDNIGHT_ILVL"
-      el.checked = defaultTrue
-        ? Boolean(data[el.name] ?? true)
-        : Boolean(data[el.name])
+      if (el.name === "USE_POST_MIDNIGHT_ILVL") {
+        el.checked = Boolean(data[el.name] ?? true)
+      } else if (el.name === "DISCORD_ALERTS_ENABLED") {
+        el.checked = Boolean(data[el.name] ?? true)
+      } else if (el.name === "IN_APP_ALERTS_ENABLED") {
+        el.checked = Boolean(data[el.name] ?? false)
+      } else {
+        el.checked = Boolean(data[el.name])
+      }
     } else if (el.type !== "submit" && el.type !== "button") {
       el.value = data[el.name] ?? ""
     }
@@ -3128,13 +3256,17 @@ async function saveMegaData(skipValidation = false) {
   const data = readMegaForm()
 
   if (!skipValidation) {
-    // Validate required string fields
-    const requiredFields = {
-      MEGA_WEBHOOK_URL: {
-        value: (data.MEGA_WEBHOOK_URL || "").trim(),
-        field: megaForm.MEGA_WEBHOOK_URL,
-        label: "Discord Webhook URL",
-      },
+    const discordOn = Boolean(data.DISCORD_ALERTS_ENABLED)
+    const inAppOn = Boolean(data.IN_APP_ALERTS_ENABLED)
+    if (!discordOn && !inAppOn) {
+      showToast(
+        "Enable at least one: Send alerts to Discord, or Show alerts in the app.",
+        "error"
+      )
+      return false
+    }
+
+    const requiredApiFields = {
       WOW_CLIENT_ID: {
         value: (data.WOW_CLIENT_ID || "").trim(),
         field: megaForm.WOW_CLIENT_ID,
@@ -3147,9 +3279,7 @@ async function saveMegaData(skipValidation = false) {
       },
     }
 
-    for (const [key, { value, field, label }] of Object.entries(
-      requiredFields
-    )) {
+    for (const { value, field, label } of Object.values(requiredApiFields)) {
       if (!value) {
         const errorMsg = `${label} cannot be empty.`
         showToast(errorMsg, "error")
@@ -3164,10 +3294,29 @@ async function saveMegaData(skipValidation = false) {
       }
     }
 
+    if (discordOn) {
+      const wh = (data.MEGA_WEBHOOK_URL || "").trim()
+      if (!wh) {
+        showToast(
+          "Discord Webhook URL cannot be empty when Discord alerts are enabled.",
+          "error"
+        )
+        megaForm.MEGA_WEBHOOK_URL?.focus()
+        return false
+      }
+      if (wh.length < 20) {
+        const errorMsg =
+          "Discord Webhook URL value is invalid. Contact the devs on discord."
+        showToast(errorMsg, "error")
+        megaForm.MEGA_WEBHOOK_URL?.focus()
+        return false
+      }
+    }
+
     // Validate that Client ID and Secret are not the same
     if (
-      requiredFields.WOW_CLIENT_ID.value ===
-      requiredFields.WOW_CLIENT_SECRET.value
+      requiredApiFields.WOW_CLIENT_ID.value ===
+      requiredApiFields.WOW_CLIENT_SECRET.value
     ) {
       const errorMsg =
         "Client ID and Secret cannot be the same value. Read the wiki:\n\nhttps://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Installation-Guide#4-go-to-httpsdevelopbattlenetaccessclients-and-create-a-client-get-the-blizzard-oauth-client-and-secret-ids--you-will-use-these-values-for-the-wow_client_id-and-wow_client_secret-later-on"
@@ -4168,6 +4317,7 @@ copyPBSPetIlvlBtn?.addEventListener("click", () =>
 
 window.aaa.onMegaLog((line) => appendLog(line))
 window.aaa.onMegaAlertEmbed((embed) => {
+  if (!state.megaData?.IN_APP_ALERTS_ENABLED) return
   if (embed && typeof embed === "object") {
     appendAlertEmbed(embed)
   }
@@ -4223,6 +4373,14 @@ const clearAlertsBtn = getElement("clear-alerts-btn")
 clearAlertsBtn?.addEventListener("click", () => {
   alertEmbedHistory.length = 0
   redrawAlertsStream()
+})
+
+getElement("alerts-download-csv-btn")?.addEventListener("click", () => {
+  downloadUnifiedSheetAsCsv()
+})
+
+getElement("alerts-filter-hour-btn")?.addEventListener("click", () => {
+  applyCurrentHourTimeFilter()
 })
 
 for (const m of ALERT_VIEW_MODES) {

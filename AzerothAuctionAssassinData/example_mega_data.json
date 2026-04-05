@@ -7,5 +7,7 @@
   "SHOW_BID_PRICES": false,
   "MEGA_THREADS": 48,
   "WOWHEAD_LINK": false,
-  "USE_POST_MIDNIGHT_ILVL": true
+  "USE_POST_MIDNIGHT_ILVL": true,
+  "DISCORD_ALERTS_ENABLED": true,
+  "IN_APP_ALERTS_ENABLED": false
 }

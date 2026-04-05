@@ -235,6 +235,8 @@ function ensureDataFiles() {
       REFRESH_ALERTS: false,
       DEBUG: false,
       FACTION: "all",
+      DISCORD_ALERTS_ENABLED: true,
+      IN_APP_ALERTS_ENABLED: false,
     },
     [FILES.desiredItems]: {},
     [FILES.ilvlList]: [],
@@ -265,6 +267,8 @@ function normalizeMegaData(input) {
     "USE_POST_MIDNIGHT_ILVL",
     "REFRESH_ALERTS",
     "DEBUG",
+    "DISCORD_ALERTS_ENABLED",
+    "IN_APP_ALERTS_ENABLED",
   ])
   const intKeys = new Set([
     "MEGA_THREADS",
@@ -273,7 +277,11 @@ function normalizeMegaData(input) {
     "TOKEN_PRICE",
   ])
 
-  const output = { ...input }
+  const output = {
+    DISCORD_ALERTS_ENABLED: true,
+    IN_APP_ALERTS_ENABLED: false,
+    ...(input || {}),
+  }
   for (const key of Object.keys(output)) {
     if (boolKeys.has(key)) {
       const v = output[key]
@@ -598,6 +606,8 @@ function setupIpc() {
         REFRESH_ALERTS: false,
         DEBUG: false,
         FACTION: "all",
+        DISCORD_ALERTS_ENABLED: true,
+        IN_APP_ALERTS_ENABLED: false,
       }
     )
     const normalized = normalizeMegaData(defaultData)

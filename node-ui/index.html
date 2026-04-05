@@ -404,6 +404,16 @@
             </label>
             <div class="toggles">
               <label
+                title="Post auction alerts to your Discord webhook when mega alerts are running."
+                ><input type="checkbox" name="DISCORD_ALERTS_ENABLED" checked />
+                Send alerts to Discord</label
+              >
+              <label
+                title="Show the same alert embeds in the Alerts tab (Table / Discord / Details). Does not affect the Logs tab."
+                ><input type="checkbox" name="IN_APP_ALERTS_ENABLED" /> Show
+                alerts in the app</label
+              >
+              <label
                 title="Show items with Bid prices below your price limit on Desired Items"
                 ><input type="checkbox" name="SHOW_BID_PRICES" /> Show bid
                 prices</label
@@ -924,6 +934,23 @@
               >
             </div>
             <div class="alerts-toolbar">
+              <button
+                type="button"
+                class="ghost alerts-toolbar-side"
+                id="alerts-download-csv-btn"
+                title="Export the Table view (respects search, range filters, and visible columns)"
+              >
+                Download CSV
+              </button>
+              <button
+                type="button"
+                class="ghost alerts-toolbar-side"
+                id="alerts-filter-hour-btn"
+                title="Open Table and add a time range for the current local hour"
+              >
+                Filter to current hour
+              </button>
+              <div class="alerts-toolbar-sep" aria-hidden="true"></div>
               <div
                 class="alerts-view-toggle"
                 role="group"
@@ -932,8 +959,16 @@
                 <button
                   type="button"
                   class="ghost alerts-view-btn"
-                  id="alerts-view-discord"
+                  id="alerts-view-sheet"
                   aria-pressed="true"
+                >
+                  Table
+                </button>
+                <button
+                  type="button"
+                  class="ghost alerts-view-btn"
+                  id="alerts-view-discord"
+                  aria-pressed="false"
                 >
                   Discord
                 </button>
@@ -944,14 +979,6 @@
                   aria-pressed="false"
                 >
                   Details
-                </button>
-                <button
-                  type="button"
-                  class="ghost alerts-view-btn"
-                  id="alerts-view-sheet"
-                  aria-pressed="false"
-                >
-                  Table
                 </button>
               </div>
               <button type="button" class="ghost" id="clear-alerts-btn">
