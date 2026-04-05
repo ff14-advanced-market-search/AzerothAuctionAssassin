@@ -4445,7 +4445,6 @@ copyPBSPetIlvlBtn?.addEventListener("click", () =>
 
 window.aaa.onMegaLog((line) => appendLog(line))
 window.aaa.onMegaAlertEmbed((embed) => {
-  if (!state.megaData?.IN_APP_ALERTS_ENABLED) return
   if (embed && typeof embed === "object") {
     appendAlertEmbed(embed)
   }
