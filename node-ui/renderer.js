@@ -10,7 +10,22 @@ const ALERTS_VIEW_STORAGE_KEY = "aaa-alerts-view-mode"
 
 const alertEmbedHistory = []
 
-const ALERT_VIEW_MODES = ["discord", "cards", "details", "sheet"]
+const ALERT_VIEW_MODES = ["discord", "details", "sheet"]
+
+const unifiedSheetState = {
+  searchRaw: "",
+  sortCol: null,
+  sortDir: "asc",
+  columnVisible: {},
+  numericFilters: [],
+  nextFilterId: 1,
+  colPage: 0,
+  colPanelOpen: false,
+  filterPanelOpen: false,
+}
+
+const SHEET_COL_PAGE_SIZE = 15
+let sheetSearchDebounceTimer = null
 
 function loadStoredAlertsViewMode() {
   const v = localStorage.getItem(ALERTS_VIEW_STORAGE_KEY)
@@ -19,6 +34,9 @@ function loadStoredAlertsViewMode() {
   }
   if (v === "table") {
     return "details"
+  }
+  if (v === "cards") {
+    return "discord"
   }
   return "discord"
 }
@@ -226,10 +244,11 @@ function parseFieldKeyValues(text) {
 }
 
 const SHEET_COL_ORDER = [
+  "item",
+  "time",
   "region",
   "realmID",
   "realmNames",
-  "item",
   "itemID",
   "petID",
   "ilvl",
@@ -252,7 +271,9 @@ const SHEET_COL_ORDER = [
 function collectSheetColumns(rows) {
   const set = new Set()
   for (const r of rows) {
-    Object.keys(r).forEach((k) => set.add(k))
+    Object.keys(r).forEach((k) => {
+      if (!k.startsWith("__")) set.add(k)
+    })
   }
   const ordered = []
   for (const c of SHEET_COL_ORDER) {
@@ -260,6 +281,95 @@ function collectSheetColumns(rows) {
   }
   const rest = [...set].filter((c) => !ordered.includes(c)).sort()
   return [...ordered, ...rest]
+}
+
+function parseSheetCellNumber(val) {
+  if (val == null || val === "") return null
+  const s = String(val).replace(/,/g, "").trim()
+  const pct = s.match(/([\d.]+)\s*%/)
+  if (pct) {
+    const n = parseFloat(pct[1])
+    return Number.isFinite(n) ? n : null
+  }
+  const m = s.match(/-?[\d.]+(?:e[+-]?\d+)?/)
+  if (!m) return null
+  const n = parseFloat(m[0])
+  return Number.isFinite(n) ? n : null
+}
+
+function compareSheetRows(a, b, col, dir) {
+  const mul = dir === "desc" ? -1 : 1
+  if (col === "time") {
+    return ((a.__ts || 0) - (b.__ts || 0)) * mul
+  }
+  const va = a[col]
+  const vb = b[col]
+  const na = parseSheetCellNumber(va)
+  const nb = parseSheetCellNumber(vb)
+  if (na !== null && nb !== null && na !== nb) {
+    return (na - nb) * mul
+  }
+  return (
+    String(va ?? "")
+      .toLowerCase()
+      .localeCompare(String(vb ?? "").toLowerCase()) * mul
+  )
+}
+
+function rowMatchesSheetSearch(row, q) {
+  if (!q) return true
+  const ql = q.toLowerCase()
+  for (const [k, v] of Object.entries(row)) {
+    if (k.startsWith("__")) continue
+    if (String(v).toLowerCase().includes(ql)) return true
+  }
+  return false
+}
+
+function rowPassesNumericFilters(row, filters) {
+  for (const f of filters) {
+    if (!f || !f.column) continue
+    const n = parseSheetCellNumber(row[f.column])
+    if (n === null) return false
+    const minS = f.min
+    const maxS = f.max
+    if (minS !== "" && minS != null && String(minS).trim() !== "") {
+      const min = parseFloat(String(minS).replace(/,/g, ""))
+      if (Number.isFinite(min) && n < min) return false
+    }
+    if (maxS !== "" && maxS != null && String(maxS).trim() !== "") {
+      const max = parseFloat(String(maxS).replace(/,/g, ""))
+      if (Number.isFinite(max) && n > max) return false
+    }
+  }
+  return true
+}
+
+function getNumericColumnCandidates(rows, cols) {
+  return cols.filter((col) => {
+    if (col.startsWith("link_")) return false
+    let num = 0
+    let tot = 0
+    for (const r of rows) {
+      const v = r[col]
+      if (v === undefined || v === null || String(v).trim() === "") continue
+      tot++
+      if (parseSheetCellNumber(v) !== null) num++
+    }
+    return tot > 0 && num >= Math.min(2, tot)
+  })
+}
+
+function ensureSheetColumnVisibility(cols) {
+  for (const c of cols) {
+    if (unifiedSheetState.columnVisible[c] === undefined) {
+      unifiedSheetState.columnVisible[c] = true
+    }
+  }
+}
+
+function visibleSheetColumns(allCols) {
+  return allCols.filter((c) => unifiedSheetState.columnVisible[c] !== false)
 }
 
 function buildSpreadsheetRowsForEmbed(embed) {
@@ -290,6 +400,26 @@ function formatEmbedTimestamp(iso) {
   if (!iso) return ""
   const d = new Date(iso)
   return Number.isNaN(d.getTime()) ? "" : d.toLocaleString()
+}
+
+function getAllUnifiedSheetRows() {
+  const rows = []
+  for (const { embed } of alertEmbedHistory) {
+    const timeStr = formatEmbedTimestamp(embed.timestamp)
+    const tsNum =
+      embed.timestamp && !Number.isNaN(new Date(embed.timestamp).getTime())
+        ? new Date(embed.timestamp).getTime()
+        : 0
+    const per = buildSpreadsheetRowsForEmbed(embed)
+    for (const r of per) {
+      rows.push({
+        ...r,
+        time: timeStr,
+        __ts: tsNum,
+      })
+    }
+  }
+  return rows
 }
 
 function getAccentColor(embed) {
@@ -353,64 +483,6 @@ function createDiscordFlatGroup(embed, fields) {
   if (foot) card.appendChild(foot)
   wrap.appendChild(card)
   return wrap
-}
-
-function createAlertCardsGroup(embed, fields) {
-  const group = document.createElement("div")
-  group.className = "alert-embed-group"
-  const accent = getAccentColor(embed)
-  group.style.setProperty("--embed-accent", accent)
-
-  const header = document.createElement("div")
-  header.className = "discord-embed-card discord-embed-summary"
-  header.style.setProperty("--embed-accent", accent)
-  if (embed.title) {
-    const t = document.createElement("div")
-    t.className = "discord-embed-title"
-    appendRichDiscordText(t, embed.title)
-    header.appendChild(t)
-  }
-  if (embed.description) {
-    const desc = document.createElement("div")
-    desc.className = "discord-embed-desc"
-    appendRichDiscordText(desc, embed.description)
-    header.appendChild(desc)
-  }
-  group.appendChild(header)
-
-  if (fields.length) {
-    const list = document.createElement("div")
-    list.className = "alert-embed-item-list"
-    for (const f of fields) {
-      const item = document.createElement("article")
-      item.className = "discord-embed-card discord-embed-item-card"
-      item.style.setProperty("--embed-accent", accent)
-      if (f.name) {
-        const nameEl = document.createElement("div")
-        nameEl.className = "discord-embed-item-title"
-        appendRichDiscordText(nameEl, f.name)
-        item.appendChild(nameEl)
-      }
-      if (f.value != null && f.value !== "") {
-        const valEl = document.createElement("div")
-        valEl.className = "discord-embed-field-value"
-        appendRichDiscordText(valEl, String(f.value))
-        item.appendChild(valEl)
-      }
-      list.appendChild(item)
-    }
-    group.appendChild(list)
-  }
-
-  const foot = createDiscordFooterLine(embed.timestamp)
-  if (foot) {
-    const wrap = document.createElement("div")
-    wrap.className = "alert-embed-group-footer"
-    wrap.appendChild(foot)
-    group.appendChild(wrap)
-  }
-
-  return group
 }
 
 function createAlertTableGroup(embed, fields) {
@@ -509,60 +581,434 @@ function createAlertTableGroup(embed, fields) {
   return group
 }
 
-function createAlertSpreadsheetGroup(embed) {
-  const group = document.createElement("div")
-  group.className = "alert-sheet-group"
-  group.style.setProperty("--embed-accent", getAccentColor(embed))
+function renderNumericFilterPanel(dash) {
+  const box = dash.querySelector(".alert-sheet-filter-list")
+  if (!box) return
+  box.replaceChildren()
+  const allRows = getAllUnifiedSheetRows()
+  const allCols = collectSheetColumns(allRows)
+  const numericCols = getNumericColumnCandidates(allRows, allCols)
 
-  if (embed.title) {
-    const cap = document.createElement("div")
-    cap.className = "alert-sheet-caption"
-    cap.textContent = embed.title
-    group.appendChild(cap)
+  for (const f of unifiedSheetState.numericFilters) {
+    const row = document.createElement("div")
+    row.className = "alert-sheet-filter-row"
+    row.dataset.filterId = String(f.id)
+
+    const head = document.createElement("div")
+    head.className = "alert-sheet-filter-row-head"
+    const summary = document.createElement("span")
+    summary.className = "alert-sheet-filter-summary"
+    const minL = f.min !== "" && f.min != null ? String(f.min) : "—"
+    const maxL = f.max !== "" && f.max != null ? String(f.max) : "—"
+    summary.textContent = `${f.column || "?"} ∈ [${minL}, ${maxL}]`
+    const rm = document.createElement("button")
+    rm.type = "button"
+    rm.className = "ghost alert-sheet-filter-remove"
+    rm.textContent = "Remove"
+    rm.addEventListener("click", () => {
+      unifiedSheetState.numericFilters =
+        unifiedSheetState.numericFilters.filter((x) => x.id !== f.id)
+      renderNumericFilterPanel(dash)
+      refreshUnifiedSheetTable(dash)
+    })
+    head.appendChild(summary)
+    head.appendChild(rm)
+    row.appendChild(head)
+
+    const grid = document.createElement("div")
+    grid.className = "alert-sheet-filter-grid"
+    const sel = document.createElement("select")
+    sel.className = "alert-sheet-select"
+    const opt0 = document.createElement("option")
+    opt0.value = ""
+    opt0.textContent = "Column"
+    sel.appendChild(opt0)
+    for (const c of numericCols) {
+      const opt = document.createElement("option")
+      opt.value = c
+      opt.textContent = c
+      if (f.column === c) opt.selected = true
+      sel.appendChild(opt)
+    }
+    sel.addEventListener("change", () => {
+      f.column = sel.value
+      summary.textContent = `${f.column || "?"} ∈ [${
+        f.min !== "" && f.min != null ? String(f.min) : "—"
+      }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
+      refreshUnifiedSheetTable(dash)
+    })
+    const minIn = document.createElement("input")
+    minIn.type = "text"
+    minIn.className = "alert-sheet-filter-input"
+    minIn.placeholder = "Min (optional)"
+    minIn.value = f.min != null ? String(f.min) : ""
+    minIn.addEventListener("input", () => {
+      f.min = minIn.value
+      summary.textContent = `${f.column || "?"} ∈ [${
+        f.min !== "" && f.min != null ? String(f.min) : "—"
+      }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
+      refreshUnifiedSheetTable(dash)
+    })
+    const maxIn = document.createElement("input")
+    maxIn.type = "text"
+    maxIn.className = "alert-sheet-filter-input"
+    maxIn.placeholder = "Max (optional)"
+    maxIn.value = f.max != null ? String(f.max) : ""
+    maxIn.addEventListener("input", () => {
+      f.max = maxIn.value
+      summary.textContent = `${f.column || "?"} ∈ [${
+        f.min !== "" && f.min != null ? String(f.min) : "—"
+      }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
+      refreshUnifiedSheetTable(dash)
+    })
+    grid.appendChild(sel)
+    grid.appendChild(minIn)
+    grid.appendChild(maxIn)
+    row.appendChild(grid)
+    box.appendChild(row)
+  }
+}
+
+function renderColumnControlPanel(dash) {
+  const box = dash.querySelector(".alert-sheet-col-checkboxes")
+  const pageLabel = dash.querySelector(".alert-sheet-col-page-label")
+  if (!box || !pageLabel) return
+  const allRows = getAllUnifiedSheetRows()
+  const allCols = collectSheetColumns(allRows)
+  ensureSheetColumnVisibility(allCols)
+  const totalPages = Math.max(
+    1,
+    Math.ceil(allCols.length / SHEET_COL_PAGE_SIZE)
+  )
+  if (unifiedSheetState.colPage >= totalPages) {
+    unifiedSheetState.colPage = totalPages - 1
+  }
+  const start = unifiedSheetState.colPage * SHEET_COL_PAGE_SIZE
+  const slice = allCols.slice(start, start + SHEET_COL_PAGE_SIZE)
+  box.replaceChildren()
+  for (const col of slice) {
+    const lab = document.createElement("label")
+    lab.className = "alert-sheet-col-check"
+    const cb = document.createElement("input")
+    cb.type = "checkbox"
+    cb.checked = unifiedSheetState.columnVisible[col] !== false
+    cb.addEventListener("change", () => {
+      unifiedSheetState.columnVisible[col] = cb.checked
+      refreshUnifiedSheetTable(dash)
+    })
+    lab.appendChild(cb)
+    lab.appendChild(document.createTextNode(` ${col}`))
+    box.appendChild(lab)
+  }
+  pageLabel.textContent = `Page ${
+    unifiedSheetState.colPage + 1
+  } of ${totalPages}`
+}
+
+function refreshUnifiedSheetTable(dash) {
+  const table = dash.querySelector(".alert-sheet-table.unified")
+  const thead = table?.querySelector("thead")
+  const tbody = table?.querySelector("tbody")
+  const footer = dash.querySelector(".alert-sheet-unified-footer")
+  if (!table || !thead || !tbody || !footer) return
+
+  const allRows = getAllUnifiedSheetRows()
+  const allCols = collectSheetColumns(allRows)
+  ensureSheetColumnVisibility(allCols)
+  const q = unifiedSheetState.searchRaw.trim()
+
+  let working = allRows.filter((r) => rowMatchesSheetSearch(r, q))
+  working = working.filter((r) =>
+    rowPassesNumericFilters(r, unifiedSheetState.numericFilters)
+  )
+
+  const sortCol = unifiedSheetState.sortCol
+  const sortDir = unifiedSheetState.sortDir
+  if (sortCol && allCols.includes(sortCol)) {
+    working = [...working].sort((a, b) =>
+      compareSheetRows(a, b, sortCol, sortDir)
+    )
   }
 
-  const rows = buildSpreadsheetRowsForEmbed(embed)
-  const columns = collectSheetColumns(rows)
-
-  const scroll = document.createElement("div")
-  scroll.className = "alert-sheet-scroll"
-  const table = document.createElement("table")
-  table.className = "alert-sheet-table"
-
-  const thead = document.createElement("thead")
+  const cols = visibleSheetColumns(allCols)
+  thead.replaceChildren()
   const hr = document.createElement("tr")
-  for (const col of columns) {
+  if (cols.length === 0) {
     const th = document.createElement("th")
-    th.textContent = col
-    th.title = col
+    th.textContent = "—"
     hr.appendChild(th)
+  } else {
+    for (const col of cols) {
+      const th = document.createElement("th")
+      th.dataset.col = col
+      th.className = "alert-sheet-th-sortable"
+      th.title = "Click to sort"
+      const label = document.createElement("span")
+      label.textContent = col
+      th.appendChild(label)
+      if (unifiedSheetState.sortCol === col) {
+        const ind = document.createElement("span")
+        ind.className = "alert-sheet-sort-ind"
+        ind.textContent = unifiedSheetState.sortDir === "desc" ? " ▼" : " ▲"
+        th.appendChild(ind)
+      }
+      hr.appendChild(th)
+    }
   }
   thead.appendChild(hr)
-  table.appendChild(thead)
 
-  const tbody = document.createElement("tbody")
-  for (const row of rows) {
+  tbody.replaceChildren()
+  if (cols.length === 0) {
     const tr = document.createElement("tr")
-    for (const col of columns) {
-      const td = document.createElement("td")
-      const v = row[col]
-      td.textContent = v !== undefined && v !== null ? String(v) : ""
-      tr.appendChild(td)
-    }
+    const td = document.createElement("td")
+    td.className = "alert-sheet-empty-msg"
+    td.textContent =
+      allRows.length === 0
+        ? "No alerts yet."
+        : "No columns visible — open Column controls or click Show all."
+    tr.appendChild(td)
     tbody.appendChild(tr)
+  } else {
+    for (const row of working) {
+      const tr = document.createElement("tr")
+      for (const col of cols) {
+        const td = document.createElement("td")
+        const v = row[col]
+        td.textContent = v !== undefined && v !== null ? String(v) : ""
+        tr.appendChild(td)
+      }
+      tbody.appendChild(tr)
+    }
   }
+
+  footer.textContent = `Showing ${working.length} of ${allRows.length} rows`
+}
+
+function createUnifiedSheetDashboard() {
+  const root = document.createElement("div")
+  root.className = "alert-sheet-dashboard"
+
+  const toolbar = document.createElement("div")
+  toolbar.className = "alert-sheet-toolbar"
+
+  const search = document.createElement("input")
+  search.type = "search"
+  search.className = "alert-sheet-search"
+  search.placeholder = "Search all columns…"
+  search.autocomplete = "off"
+  search.value = unifiedSheetState.searchRaw
+  search.addEventListener("input", () => {
+    unifiedSheetState.searchRaw = search.value
+    if (sheetSearchDebounceTimer) clearTimeout(sheetSearchDebounceTimer)
+    sheetSearchDebounceTimer = setTimeout(() => {
+      sheetSearchDebounceTimer = null
+      refreshUnifiedSheetTable(root)
+    }, 120)
+  })
+
+  const btnFilter = document.createElement("button")
+  btnFilter.type = "button"
+  btnFilter.className = "ghost alert-sheet-toggle"
+  btnFilter.textContent = unifiedSheetState.filterPanelOpen
+    ? "Hide numeric filter"
+    : "Show numeric filter"
+
+  const btnCol = document.createElement("button")
+  btnCol.type = "button"
+  btnCol.className = "ghost alert-sheet-toggle"
+  btnCol.textContent = unifiedSheetState.colPanelOpen
+    ? "Hide column controls"
+    : "Show column controls"
+
+  toolbar.appendChild(search)
+  toolbar.appendChild(btnFilter)
+  toolbar.appendChild(btnCol)
+
+  const filterPanel = document.createElement("div")
+  filterPanel.className = "alert-sheet-panel alert-sheet-filter-panel"
+  filterPanel.hidden = !unifiedSheetState.filterPanelOpen
+  const filterTitle = document.createElement("div")
+  filterTitle.className = "alert-sheet-panel-title"
+  filterTitle.textContent = "Numeric filter"
+  const filterActions = document.createElement("div")
+  filterActions.className = "alert-sheet-panel-actions"
+  const addF = document.createElement("button")
+  addF.type = "button"
+  addF.className = "primary"
+  addF.textContent = "Add filter"
+  addF.addEventListener("click", () => {
+    unifiedSheetState.numericFilters.push({
+      id: unifiedSheetState.nextFilterId++,
+      column: "",
+      min: "",
+      max: "",
+    })
+    renderNumericFilterPanel(root)
+    refreshUnifiedSheetTable(root)
+  })
+  const clearF = document.createElement("button")
+  clearF.type = "button"
+  clearF.className = "danger"
+  clearF.textContent = "Clear all"
+  clearF.addEventListener("click", () => {
+    unifiedSheetState.numericFilters = []
+    renderNumericFilterPanel(root)
+    refreshUnifiedSheetTable(root)
+  })
+  filterActions.appendChild(addF)
+  filterActions.appendChild(clearF)
+  const filterList = document.createElement("div")
+  filterList.className = "alert-sheet-filter-list"
+  filterPanel.appendChild(filterTitle)
+  filterPanel.appendChild(filterActions)
+  filterPanel.appendChild(filterList)
+
+  const colPanel = document.createElement("div")
+  colPanel.className = "alert-sheet-panel alert-sheet-col-panel"
+  colPanel.hidden = !unifiedSheetState.colPanelOpen
+  const colTitle = document.createElement("div")
+  colTitle.className = "alert-sheet-panel-title"
+  colTitle.textContent = "Column controls"
+  const colNav = document.createElement("div")
+  colNav.className = "alert-sheet-col-nav"
+  const colChecks = document.createElement("div")
+  colChecks.className = "alert-sheet-col-checkboxes"
+  const colPageLabel = document.createElement("span")
+  colPageLabel.className = "alert-sheet-col-page-label"
+  const prevP = document.createElement("button")
+  prevP.type = "button"
+  prevP.className = "ghost"
+  prevP.textContent = "Previous"
+  const nextP = document.createElement("button")
+  nextP.type = "button"
+  nextP.className = "ghost"
+  nextP.textContent = "Next"
+  const showAll = document.createElement("button")
+  showAll.type = "button"
+  showAll.className = "success"
+  showAll.textContent = "Show all"
+  const hideAll = document.createElement("button")
+  hideAll.type = "button"
+  hideAll.className = "danger"
+  hideAll.textContent = "Hide all"
+  colNav.appendChild(prevP)
+  colNav.appendChild(colPageLabel)
+  colNav.appendChild(nextP)
+  const colFoot = document.createElement("div")
+  colFoot.className = "alert-sheet-col-foot"
+  colFoot.appendChild(showAll)
+  colFoot.appendChild(hideAll)
+  colPanel.appendChild(colTitle)
+  colPanel.appendChild(colChecks)
+  colPanel.appendChild(colNav)
+  colPanel.appendChild(colFoot)
+
+  prevP.addEventListener("click", () => {
+    if (unifiedSheetState.colPage > 0) {
+      unifiedSheetState.colPage--
+      renderColumnControlPanel(root)
+    }
+  })
+  nextP.addEventListener("click", () => {
+    const allRows = getAllUnifiedSheetRows()
+    const allCols = collectSheetColumns(allRows)
+    const totalPages = Math.max(
+      1,
+      Math.ceil(allCols.length / SHEET_COL_PAGE_SIZE)
+    )
+    if (unifiedSheetState.colPage < totalPages - 1) {
+      unifiedSheetState.colPage++
+      renderColumnControlPanel(root)
+    }
+  })
+  showAll.addEventListener("click", () => {
+    const allRows = getAllUnifiedSheetRows()
+    const allCols = collectSheetColumns(allRows)
+    for (const c of allCols) unifiedSheetState.columnVisible[c] = true
+    renderColumnControlPanel(root)
+    refreshUnifiedSheetTable(root)
+  })
+  hideAll.addEventListener("click", () => {
+    const allRows = getAllUnifiedSheetRows()
+    const allCols = collectSheetColumns(allRows)
+    for (const c of allCols) unifiedSheetState.columnVisible[c] = false
+    renderColumnControlPanel(root)
+    refreshUnifiedSheetTable(root)
+  })
+
+  btnFilter.addEventListener("click", () => {
+    unifiedSheetState.filterPanelOpen = !unifiedSheetState.filterPanelOpen
+    filterPanel.hidden = !unifiedSheetState.filterPanelOpen
+    btnFilter.textContent = unifiedSheetState.filterPanelOpen
+      ? "Hide numeric filter"
+      : "Show numeric filter"
+    if (unifiedSheetState.filterPanelOpen) {
+      renderNumericFilterPanel(root)
+    }
+  })
+  btnCol.addEventListener("click", () => {
+    unifiedSheetState.colPanelOpen = !unifiedSheetState.colPanelOpen
+    colPanel.hidden = !unifiedSheetState.colPanelOpen
+    btnCol.textContent = unifiedSheetState.colPanelOpen
+      ? "Hide column controls"
+      : "Show column controls"
+    if (unifiedSheetState.colPanelOpen) {
+      renderColumnControlPanel(root)
+    }
+  })
+
+  const scroll = document.createElement("div")
+  scroll.className = "alert-sheet-scroll unified"
+  const table = document.createElement("table")
+  table.className = "alert-sheet-table unified"
+  const thead = document.createElement("thead")
+  const tbody = document.createElement("tbody")
+  table.appendChild(thead)
   table.appendChild(tbody)
   scroll.appendChild(table)
-  group.appendChild(scroll)
 
-  const ts = formatEmbedTimestamp(embed.timestamp)
-  if (ts) {
-    const tf = document.createElement("div")
-    tf.className = "alert-sheet-ts"
-    tf.textContent = ts
-    group.appendChild(tf)
+  table.addEventListener("click", (e) => {
+    const th = e.target.closest("th[data-col]")
+    if (!th) return
+    const col = th.dataset.col
+    if (unifiedSheetState.sortCol === col) {
+      unifiedSheetState.sortDir =
+        unifiedSheetState.sortDir === "asc" ? "desc" : "asc"
+    } else {
+      unifiedSheetState.sortCol = col
+      unifiedSheetState.sortDir = "asc"
+    }
+    refreshUnifiedSheetTable(root)
+  })
+
+  const footer = document.createElement("div")
+  footer.className = "alert-sheet-unified-footer"
+
+  root.appendChild(toolbar)
+  root.appendChild(filterPanel)
+  root.appendChild(colPanel)
+  root.appendChild(scroll)
+  root.appendChild(footer)
+
+  renderNumericFilterPanel(root)
+  renderColumnControlPanel(root)
+  refreshUnifiedSheetTable(root)
+  return root
+}
+
+function redrawAlertsStream() {
+  const stream = getElement("alerts-stream")
+  if (!stream) return
+  stream.replaceChildren()
+  if (alertsViewMode === "sheet") {
+    stream.appendChild(createUnifiedSheetDashboard())
+    return
   }
-  return group
+  const frag = document.createDocumentFragment()
+  for (const { embed } of alertEmbedHistory) {
+    frag.appendChild(buildAlertElement(embed, alertsViewMode))
+  }
+  stream.appendChild(frag)
 }
 
 function buildAlertElement(embed, mode) {
@@ -570,14 +1016,8 @@ function buildAlertElement(embed, mode) {
   if (mode === "discord") {
     return createDiscordFlatGroup(embed, fields)
   }
-  if (mode === "cards") {
-    return createAlertCardsGroup(embed, fields)
-  }
   if (mode === "details") {
     return createAlertTableGroup(embed, fields)
-  }
-  if (mode === "sheet") {
-    return createAlertSpreadsheetGroup(embed)
   }
   return createDiscordFlatGroup(embed, fields)
 }
@@ -597,14 +1037,7 @@ function setAlertsViewMode(mode) {
   if (mode === alertsViewMode) return
   alertsViewMode = mode
   localStorage.setItem(ALERTS_VIEW_STORAGE_KEY, mode)
-  const stream = getElement("alerts-stream")
-  if (!stream) return
-  stream.replaceChildren()
-  const frag = document.createDocumentFragment()
-  for (const { embed } of alertEmbedHistory) {
-    frag.appendChild(buildAlertElement(embed, mode))
-  }
-  stream.appendChild(frag)
+  redrawAlertsStream()
   refreshAlertsViewToggleButtons()
 }
 
@@ -617,12 +1050,23 @@ function appendAlertEmbed(embed) {
   alertEmbedHistory.push({ embed })
   if (alertEmbedHistory.length > MAX_IN_APP_ALERTS) {
     alertEmbedHistory.shift()
-    if (stream.firstChild) {
-      stream.removeChild(stream.firstChild)
-    }
   }
 
-  stream.appendChild(buildAlertElement(embed, alertsViewMode))
+  if (alertsViewMode === "sheet") {
+    let dash = stream.querySelector(".alert-sheet-dashboard")
+    if (!dash) {
+      redrawAlertsStream()
+      dash = stream.querySelector(".alert-sheet-dashboard")
+    }
+    if (dash) refreshUnifiedSheetTable(dash)
+  } else {
+    if (alertEmbedHistory.length > MAX_IN_APP_ALERTS) {
+      if (stream.firstChild) {
+        stream.removeChild(stream.firstChild)
+      }
+    }
+    stream.appendChild(buildAlertElement(embed, alertsViewMode))
+  }
   if (nearBottom) {
     stream.scrollTop = stream.scrollHeight
   }
@@ -3541,10 +3985,7 @@ navButtons.forEach((btn) => {
 const clearAlertsBtn = getElement("clear-alerts-btn")
 clearAlertsBtn?.addEventListener("click", () => {
   alertEmbedHistory.length = 0
-  const stream = getElement("alerts-stream")
-  if (stream) {
-    stream.replaceChildren()
-  }
+  redrawAlertsStream()
 })
 
 for (const m of ALERT_VIEW_MODES) {
