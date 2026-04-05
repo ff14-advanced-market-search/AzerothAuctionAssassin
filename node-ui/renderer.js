@@ -1483,11 +1483,11 @@ function appendAlertEmbed(embed) {
     stream.scrollHeight - stream.scrollTop - stream.clientHeight < 140
 
   alertEmbedHistory.push({ embed })
-  if (alertEmbedHistory.length > MAX_IN_APP_ALERTS) {
-    alertEmbedHistory.shift()
-  }
 
   if (alertsViewMode === "sheet") {
+    if (alertEmbedHistory.length > MAX_IN_APP_ALERTS) {
+      alertEmbedHistory.shift()
+    }
     let dash = stream.querySelector(".alert-sheet-dashboard")
     if (!dash) {
       redrawAlertsStream()
@@ -1496,6 +1496,7 @@ function appendAlertEmbed(embed) {
     if (dash) refreshUnifiedSheetTable(dash)
   } else {
     if (alertEmbedHistory.length > MAX_IN_APP_ALERTS) {
+      alertEmbedHistory.shift()
       if (stream.firstChild) {
         stream.removeChild(stream.firstChild)
       }

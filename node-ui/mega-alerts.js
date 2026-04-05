@@ -316,6 +316,39 @@ async function httpJson(url, opts = {}, retries = 3, timeoutMs = 5000) {
   throw lastErr
 }
 
+const DISCORD_WEBHOOK_TIMEOUT_MS = 5000
+
+/**
+ * POST to Discord webhook with AbortController timeout so stalled requests
+ * do not block the alert loop.
+ * @returns {Promise<Response|null>} null on timeout
+ */
+async function fetchDiscordWebhook(url, bodyJson) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => {
+    controller.abort()
+  }, DISCORD_WEBHOOK_TIMEOUT_MS)
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bodyJson),
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+    return response
+  } catch (error) {
+    clearTimeout(timeoutId)
+    if (error.name === "AbortError") {
+      logError(
+        `Discord webhook request timed out after ${DISCORD_WEBHOOK_TIMEOUT_MS}ms`
+      )
+      return null
+    }
+    throw error
+  }
+}
+
 /**
  * Send a Discord embed message to the webhook and/or in-app UI
  * @param {object} opts
@@ -342,11 +375,8 @@ async function sendDiscordEmbed(webhook, embed, opts = {}) {
         )
         return
       }
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ embeds: [embed] }),
-      })
+      const response = await fetchDiscordWebhook(url, { embeds: [embed] })
+      if (!response) return
       if (!response.ok) {
         const errorText = await response.text().catch(() => "Unknown error")
         logError(
@@ -373,11 +403,8 @@ async function sendDiscordMessage(webhook, message, postToDiscord = true) {
       )
       return
     }
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: message }),
-    })
+    const response = await fetchDiscordWebhook(url, { content: message })
+    if (!response) return
     if (!response.ok) {
       const errorText = await response.text().catch(() => "Unknown error")
       logError(
@@ -1551,11 +1578,9 @@ async function runAlerts(state, progress, runOnce = false) {
 
     const russian = new Set(getRussianRealmIds())
     const suffix =
-      clean[0].realmID && russian.has(clean[0].realmID) ? " **(RU)**\n" : "\n"
+      clean[0].realmID && russian.has(clean[0].realmID) ? " (RU)\n" : "\n"
     const is_russian_realm =
-      clean[0].realmID && russian.has(clean[0].realmID)
-        ? "**(Russian Realm)**"
-        : ""
+      clean[0].realmID && russian.has(clean[0].realmID) ? "(Russian Realm)" : ""
 
     const embed_fields = []
     for (const auction of clean) {
@@ -1665,9 +1690,11 @@ async function runAlerts(state, progress, runOnce = false) {
           ? resolved.join(", ")
           : `(connected realm ${realmIdForDesc})`
       }
-      let desc = `**region:** ${state.REGION ?? ""}\n`
-      desc += `**realmID:** ${realmIdForDesc} ${is_russian_realm}\n`
-      desc += `**realmNames:** ${realmNamesLine}${suffix}`
+      let desc = `region: ${state.REGION ?? ""}\n`
+      desc += `realmID: ${realmIdForDesc}${
+        is_russian_realm ? ` ${is_russian_realm}` : ""
+      }\n`
+      desc += `realmNames: ${realmNamesLine}${suffix}`
       for (const chunk of splitList(embed_fields, 10)) {
         const item_embed = createEmbed(
           `${state.REGION} SNIPE FOUND!`,
