@@ -1095,6 +1095,114 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   font-size: 12px;
 }
 
+.alerts-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.alerts-stream {
+  background: #060a0f;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 14px;
+  min-height: 420px;
+  max-height: 78vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.alerts-stream:empty::before {
+  content: "No alerts yet. Start alerts — snipe and token embeds appear here like in Discord.";
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  display: block;
+  padding: 8px 4px;
+}
+
+.discord-embed-card {
+  --embed-accent: #5865f2;
+  background: #2b2d31;
+  border-radius: 4px;
+  border-left: 4px solid var(--embed-accent);
+  max-width: 520px;
+  padding: 10px 14px 12px 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #dbdee1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.discord-embed-card .discord-embed-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.discord-embed-card .discord-embed-desc {
+  font-size: 14px;
+  color: #dbdee1;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 8px;
+}
+
+.discord-embed-card .discord-embed-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px 12px;
+  margin-top: 4px;
+}
+
+.discord-embed-card .discord-embed-field {
+  min-width: 0;
+}
+
+.discord-embed-card .discord-embed-field-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+
+.discord-embed-card .discord-embed-field-value {
+  font-size: 13px;
+  color: #dbdee1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.discord-embed-card .discord-embed-footer {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #949ba4;
+}
+
+.discord-embed-link {
+  color: #00a8fc;
+  text-decoration: none;
+}
+
+.discord-embed-link:hover {
+  text-decoration: underline;
+}
+
+.discord-embed-code {
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
 .view {
   display: none;
 }

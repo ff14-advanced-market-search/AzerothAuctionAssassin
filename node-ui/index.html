@@ -71,6 +71,7 @@
         </button>
         <button class="nav-btn" data-view-target="pet-ilvl">Pets</button>
         <button class="nav-btn" data-view-target="realms">Realm Lists</button>
+        <button class="nav-btn" data-view-target="alerts">Alerts</button>
         <button class="nav-btn" data-view-target="logs">Logs</button>
       </div>
 
@@ -911,6 +912,26 @@
               <ul class="list" id="realm-list"></ul>
             </div>
           </div>
+        </section>
+
+        <section class="card span-2 view" data-view="alerts">
+          <div class="page-title alerts-page-head">
+            <div>
+              <h2>Alerts</h2>
+              <span class="muted"
+                >In-app stream of Discord embeds (snipes and token alerts).
+                Newest at the bottom.</span
+              >
+            </div>
+            <button type="button" class="ghost" id="clear-alerts-btn">
+              Clear
+            </button>
+          </div>
+          <div
+            id="alerts-stream"
+            class="alerts-stream"
+            aria-live="polite"
+          ></div>
         </section>
 
         <section class="card span-2 view" data-view="logs">

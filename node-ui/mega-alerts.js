@@ -47,6 +47,7 @@ function normalizeEquippableItems(data) {
 let STOP_REQUESTED = false
 let logCallback = null
 let stopCallback = null
+let alertEmbedCallback = null
 
 /**
  * Set directory paths (used by Electron main process in packaged apps)
@@ -76,6 +77,14 @@ function setStopCallback(callback) {
 }
 
 /**
+ * Set callback when a Discord embed is sent (same payload as the webhook)
+ * Used by Electron to mirror alerts in the app UI
+ */
+function setAlertEmbedCallback(callback) {
+  alertEmbedCallback = callback
+}
+
+/**
  * Request that the alert loop stop
  * Sets STOP_REQUESTED flag and calls stop callback if set
  */
@@ -95,6 +104,7 @@ function reset() {
   STOP_REQUESTED = false
   logCallback = null
   stopCallback = null
+  alertEmbedCallback = null
 }
 
 // Local logging functions that use callback if set (for Electron integration)
@@ -311,6 +321,13 @@ async function httpJson(url, opts = {}, retries = 3, timeoutMs = 5000) {
  */
 async function sendDiscordEmbed(webhook, embed) {
   try {
+    if (alertEmbedCallback) {
+      try {
+        alertEmbedCallback(JSON.parse(JSON.stringify(embed)))
+      } catch (cbErr) {
+        originalError("alertEmbedCallback failed:", cbErr)
+      }
+    }
     const response = await fetch(webhook, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -2464,6 +2481,7 @@ module.exports = {
   main,
   setLogCallback,
   setStopCallback,
+  setAlertEmbedCallback,
   setPaths,
   requestStop,
   reset,

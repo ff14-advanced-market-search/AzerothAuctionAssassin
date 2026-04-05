@@ -952,6 +952,13 @@ function setupIpc() {
       if (megaAlerts.setStopCallback) {
         megaAlerts.setStopCallback(() => sendExit(0))
       }
+      if (megaAlerts.setAlertEmbedCallback) {
+        megaAlerts.setAlertEmbedCallback((embed) => {
+          BrowserWindow.getAllWindows().forEach((win) =>
+            win.webContents.send("mega-alert-embed", embed)
+          )
+        })
+      }
 
       // Run in background (don't await - it runs continuously)
       megaAlerts.main().catch((err) => {

@@ -5,6 +5,139 @@ function escapeHtml(text) {
   return div.innerHTML
 }
 
+const MAX_IN_APP_ALERTS = 200
+
+function appendInlineFormattedDiscord(container, text) {
+  if (!text) return
+  const segments = text.split(/(`[^`\n]+`)/g)
+  for (const part of segments) {
+    if (!part) continue
+    if (part.startsWith("`") && part.endsWith("`") && part.length >= 2) {
+      const code = document.createElement("code")
+      code.className = "discord-embed-code"
+      code.textContent = part.slice(1, -1)
+      container.appendChild(code)
+      continue
+    }
+    const boldRe = /\*\*(.+?)\*\*/g
+    let last = 0
+    let bm
+    while ((bm = boldRe.exec(part)) !== null) {
+      if (bm.index > last) {
+        container.appendChild(
+          document.createTextNode(part.slice(last, bm.index))
+        )
+      }
+      const strong = document.createElement("strong")
+      strong.textContent = bm[1]
+      container.appendChild(strong)
+      last = bm.lastIndex
+    }
+    if (last < part.length) {
+      container.appendChild(document.createTextNode(part.slice(last)))
+    }
+  }
+}
+
+function appendRichDiscordText(container, raw) {
+  if (raw == null || raw === "") return
+  const str = String(raw)
+  const linkRe = /\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g
+  let last = 0
+  let m
+  while ((m = linkRe.exec(str)) !== null) {
+    appendInlineFormattedDiscord(container, str.slice(last, m.index))
+    const a = document.createElement("a")
+    a.href = m[2]
+    a.textContent = m[1]
+    a.target = "_blank"
+    a.rel = "noopener noreferrer"
+    a.className = "discord-embed-link"
+    container.appendChild(a)
+    last = m.lastIndex
+  }
+  appendInlineFormattedDiscord(container, str.slice(last))
+}
+
+function formatEmbedTimestamp(iso) {
+  if (!iso) return ""
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleString()
+}
+
+function createDiscordEmbedCard(embed) {
+  const card = document.createElement("article")
+  card.className = "discord-embed-card"
+  const colorNum = embed.color
+  const color =
+    typeof colorNum === "number" && colorNum >= 0
+      ? `#${colorNum.toString(16).padStart(6, "0")}`
+      : "#5865f2"
+  card.style.setProperty("--embed-accent", color)
+
+  if (embed.title) {
+    const t = document.createElement("div")
+    t.className = "discord-embed-title"
+    appendRichDiscordText(t, embed.title)
+    card.appendChild(t)
+  }
+
+  if (embed.description) {
+    const desc = document.createElement("div")
+    desc.className = "discord-embed-desc"
+    appendRichDiscordText(desc, embed.description)
+    card.appendChild(desc)
+  }
+
+  const fields = Array.isArray(embed.fields) ? embed.fields : []
+  if (fields.length) {
+    const grid = document.createElement("div")
+    grid.className = "discord-embed-fields"
+    for (const f of fields) {
+      const wrap = document.createElement("div")
+      wrap.className = "discord-embed-field"
+      if (f.name) {
+        const nameEl = document.createElement("div")
+        nameEl.className = "discord-embed-field-name"
+        appendRichDiscordText(nameEl, f.name)
+        wrap.appendChild(nameEl)
+      }
+      if (f.value != null && f.value !== "") {
+        const valEl = document.createElement("div")
+        valEl.className = "discord-embed-field-value"
+        appendRichDiscordText(valEl, String(f.value))
+        wrap.appendChild(valEl)
+      }
+      grid.appendChild(wrap)
+    }
+    card.appendChild(grid)
+  }
+
+  const ts = formatEmbedTimestamp(embed.timestamp)
+  if (ts) {
+    const foot = document.createElement("div")
+    foot.className = "discord-embed-footer"
+    foot.textContent = ts
+    card.appendChild(foot)
+  }
+
+  return card
+}
+
+function appendAlertEmbed(embed) {
+  const stream = getElement("alerts-stream")
+  if (!stream) return
+  const nearBottom =
+    stream.scrollHeight - stream.scrollTop - stream.clientHeight < 140
+  stream.appendChild(createDiscordEmbedCard(embed))
+  while (stream.children.length > MAX_IN_APP_ALERTS) {
+    stream.removeChild(stream.firstChild)
+  }
+  if (nearBottom) {
+    stream.scrollTop = stream.scrollHeight
+  }
+}
+
 // Helper function for fetch with timeout
 async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
   const controller = new AbortController()
@@ -2863,6 +2996,11 @@ copyPBSPetIlvlBtn?.addEventListener("click", () =>
 )
 
 window.aaa.onMegaLog((line) => appendLog(line))
+window.aaa.onMegaAlertEmbed((embed) => {
+  if (embed && typeof embed === "object") {
+    appendAlertEmbed(embed)
+  }
+})
 window.aaa.onMegaExit((code) => {
   appendLog(`\nProcess exited with code ${code}\n`)
   setRunning(false)
@@ -2908,6 +3046,14 @@ zoomOutBtn?.addEventListener("click", async () => {
 
 navButtons.forEach((btn) => {
   btn.addEventListener("click", () => showView(btn.dataset.viewTarget))
+})
+
+const clearAlertsBtn = getElement("clear-alerts-btn")
+clearAlertsBtn?.addEventListener("click", () => {
+  const stream = getElement("alerts-stream")
+  if (stream) {
+    stream.replaceChildren()
+  }
 })
 
 window.addEventListener("DOMContentLoaded", async () => {
