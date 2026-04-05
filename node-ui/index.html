@@ -923,9 +923,33 @@
                 Newest at the bottom.</span
               >
             </div>
-            <button type="button" class="ghost" id="clear-alerts-btn">
-              Clear
-            </button>
+            <div class="alerts-toolbar">
+              <div
+                class="alerts-view-toggle"
+                role="group"
+                aria-label="Alert layout"
+              >
+                <button
+                  type="button"
+                  class="ghost alerts-view-btn"
+                  id="alerts-view-cards"
+                  aria-pressed="true"
+                >
+                  Cards
+                </button>
+                <button
+                  type="button"
+                  class="ghost alerts-view-btn"
+                  id="alerts-view-table"
+                  aria-pressed="false"
+                >
+                  Table
+                </button>
+              </div>
+              <button type="button" class="ghost" id="clear-alerts-btn">
+                Clear
+              </button>
+            </div>
           </div>
           <div
             id="alerts-stream"

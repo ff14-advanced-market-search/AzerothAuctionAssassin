@@ -5,7 +5,33 @@ function escapeHtml(text) {
   return div.innerHTML
 }
 
-const MAX_IN_APP_ALERTS = 200
+const MAX_IN_APP_ALERTS = 120
+const ALERTS_VIEW_STORAGE_KEY = "aaa-alerts-view-mode"
+
+const alertEmbedHistory = []
+
+let alertsViewMode =
+  localStorage.getItem(ALERTS_VIEW_STORAGE_KEY) === "table" ? "table" : "cards"
+
+/**
+ * Closing `)` for `[label](url)` when the URL may contain balanced parentheses
+ * (regex `[^)\s]+` breaks on the first `)` inside URLs such as item links).
+ */
+function findMarkdownLinkUrlEnd(str, urlStartIndex) {
+  let depth = 0
+  for (let i = urlStartIndex; i < str.length; i++) {
+    const c = str[i]
+    if (c === "(") {
+      depth++
+    } else if (c === ")") {
+      if (depth === 0) {
+        return i
+      }
+      depth--
+    }
+  }
+  return -1
+}
 
 function appendInlineFormattedDiscord(container, text) {
   if (!text) return
@@ -42,21 +68,94 @@ function appendInlineFormattedDiscord(container, text) {
 function appendRichDiscordText(container, raw) {
   if (raw == null || raw === "") return
   const str = String(raw)
-  const linkRe = /\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g
-  let last = 0
-  let m
-  while ((m = linkRe.exec(str)) !== null) {
-    appendInlineFormattedDiscord(container, str.slice(last, m.index))
-    const a = document.createElement("a")
-    a.href = m[2]
-    a.textContent = m[1]
-    a.target = "_blank"
-    a.rel = "noopener noreferrer"
-    a.className = "discord-embed-link"
-    container.appendChild(a)
-    last = m.lastIndex
+  let i = 0
+  while (i < str.length) {
+    const openB = str.indexOf("[", i)
+    if (openB === -1) {
+      appendInlineFormattedDiscord(container, str.slice(i))
+      break
+    }
+    appendInlineFormattedDiscord(container, str.slice(i, openB))
+    const closeB = str.indexOf("]", openB + 1)
+    if (closeB === -1) {
+      appendInlineFormattedDiscord(container, str.slice(openB))
+      break
+    }
+    if (str[closeB + 1] !== "(") {
+      appendInlineFormattedDiscord(container, str.slice(openB, closeB + 1))
+      i = closeB + 1
+      continue
+    }
+    const urlStart = closeB + 2
+    const closeP = findMarkdownLinkUrlEnd(str, urlStart)
+    if (closeP === -1) {
+      appendInlineFormattedDiscord(container, str.slice(openB))
+      break
+    }
+    const label = str.slice(openB + 1, closeB)
+    const url = str.slice(urlStart, closeP).trim()
+    if (/^https?:\/\//i.test(url)) {
+      const a = document.createElement("a")
+      a.href = url
+      a.textContent = label
+      a.target = "_blank"
+      a.rel = "noopener noreferrer"
+      a.className = "discord-embed-link"
+      container.appendChild(a)
+      i = closeP + 1
+    } else {
+      appendInlineFormattedDiscord(container, str.slice(openB, closeP + 1))
+      i = closeP + 1
+    }
   }
-  appendInlineFormattedDiscord(container, str.slice(last))
+}
+
+function extractMarkdownLinks(str) {
+  const out = []
+  const s = String(str)
+  let i = 0
+  while (i < s.length) {
+    const openB = s.indexOf("[", i)
+    if (openB === -1) break
+    const closeB = s.indexOf("]", openB + 1)
+    if (closeB === -1) break
+    if (s[closeB + 1] !== "(") {
+      i = openB + 1
+      continue
+    }
+    const urlStart = closeB + 2
+    const closeP = findMarkdownLinkUrlEnd(s, urlStart)
+    if (closeP === -1) {
+      i = openB + 1
+      continue
+    }
+    const label = s.slice(openB + 1, closeB)
+    const url = s.slice(urlStart, closeP).trim()
+    if (/^https?:\/\//i.test(url)) {
+      out.push({ label, url })
+    }
+    i = closeP + 1
+  }
+  return out
+}
+
+function isLineOnlyMarkdownLink(line) {
+  const t = line.trim()
+  if (!t.startsWith("[") || !t.endsWith(")")) return false
+  const closeB = t.indexOf("]", 1)
+  if (closeB < 1 || t[closeB + 1] !== "(") return false
+  const closeP = findMarkdownLinkUrlEnd(t, closeB + 2)
+  return closeP === t.length - 1
+}
+
+function fieldDetailBody(value) {
+  const lines = String(value).split("\n")
+  const kept = []
+  for (const line of lines) {
+    if (isLineOnlyMarkdownLink(line)) continue
+    kept.push(line)
+  }
+  return kept.join("\n").trim()
 }
 
 function formatEmbedTimestamp(iso) {
@@ -65,74 +164,226 @@ function formatEmbedTimestamp(iso) {
   return Number.isNaN(d.getTime()) ? "" : d.toLocaleString()
 }
 
-function createDiscordEmbedCard(embed) {
-  const card = document.createElement("article")
-  card.className = "discord-embed-card"
+function getAccentColor(embed) {
   const colorNum = embed.color
-  const color =
-    typeof colorNum === "number" && colorNum >= 0
-      ? `#${colorNum.toString(16).padStart(6, "0")}`
-      : "#5865f2"
-  card.style.setProperty("--embed-accent", color)
+  return typeof colorNum === "number" && colorNum >= 0
+    ? `#${colorNum.toString(16).padStart(6, "0")}`
+    : "#5865f2"
+}
 
+function createDiscordFooterLine(iso) {
+  const ts = formatEmbedTimestamp(iso)
+  if (!ts) return null
+  const foot = document.createElement("div")
+  foot.className = "discord-embed-footer"
+  foot.textContent = ts
+  return foot
+}
+
+function createAlertCardsGroup(embed, fields) {
+  const group = document.createElement("div")
+  group.className = "alert-embed-group"
+  const accent = getAccentColor(embed)
+  group.style.setProperty("--embed-accent", accent)
+
+  const header = document.createElement("div")
+  header.className = "discord-embed-card discord-embed-summary"
+  header.style.setProperty("--embed-accent", accent)
   if (embed.title) {
     const t = document.createElement("div")
     t.className = "discord-embed-title"
     appendRichDiscordText(t, embed.title)
-    card.appendChild(t)
+    header.appendChild(t)
   }
-
   if (embed.description) {
     const desc = document.createElement("div")
     desc.className = "discord-embed-desc"
     appendRichDiscordText(desc, embed.description)
-    card.appendChild(desc)
+    header.appendChild(desc)
   }
+  group.appendChild(header)
 
-  const fields = Array.isArray(embed.fields) ? embed.fields : []
   if (fields.length) {
-    const grid = document.createElement("div")
-    grid.className = "discord-embed-fields"
+    const list = document.createElement("div")
+    list.className = "alert-embed-item-list"
     for (const f of fields) {
-      const wrap = document.createElement("div")
-      wrap.className = "discord-embed-field"
+      const item = document.createElement("article")
+      item.className = "discord-embed-card discord-embed-item-card"
+      item.style.setProperty("--embed-accent", accent)
       if (f.name) {
         const nameEl = document.createElement("div")
-        nameEl.className = "discord-embed-field-name"
+        nameEl.className = "discord-embed-item-title"
         appendRichDiscordText(nameEl, f.name)
-        wrap.appendChild(nameEl)
+        item.appendChild(nameEl)
       }
       if (f.value != null && f.value !== "") {
         const valEl = document.createElement("div")
         valEl.className = "discord-embed-field-value"
         appendRichDiscordText(valEl, String(f.value))
-        wrap.appendChild(valEl)
+        item.appendChild(valEl)
       }
-      grid.appendChild(wrap)
+      list.appendChild(item)
     }
-    card.appendChild(grid)
+    group.appendChild(list)
+  }
+
+  const foot = createDiscordFooterLine(embed.timestamp)
+  if (foot) {
+    const wrap = document.createElement("div")
+    wrap.className = "alert-embed-group-footer"
+    wrap.appendChild(foot)
+    group.appendChild(wrap)
+  }
+
+  return group
+}
+
+function createAlertTableGroup(embed, fields) {
+  const group = document.createElement("div")
+  group.className = "alert-table-group"
+  const accent = getAccentColor(embed)
+  group.style.setProperty("--embed-accent", accent)
+
+  if (embed.title || embed.description) {
+    const meta = document.createElement("div")
+    meta.className = "alert-table-meta"
+    if (embed.title) {
+      const th = document.createElement("div")
+      th.className = "alert-table-title"
+      appendRichDiscordText(th, embed.title)
+      meta.appendChild(th)
+    }
+    if (embed.description) {
+      const d = document.createElement("div")
+      d.className = "alert-table-desc"
+      appendRichDiscordText(d, embed.description)
+      meta.appendChild(d)
+    }
+    group.appendChild(meta)
+  }
+
+  if (!fields.length) {
+    if (!embed.title && !embed.description) {
+      const empty = document.createElement("div")
+      empty.className = "alert-table-empty"
+      empty.textContent = "No item rows in this alert."
+      group.appendChild(empty)
+    }
+  } else {
+    const table = document.createElement("table")
+    table.className = "alert-items-table"
+    const thead = document.createElement("thead")
+    const hr = document.createElement("tr")
+    for (const label of ["Item", "Details", "Links"]) {
+      const th = document.createElement("th")
+      th.textContent = label
+      hr.appendChild(th)
+    }
+    thead.appendChild(hr)
+    table.appendChild(thead)
+    const tbody = document.createElement("tbody")
+    for (const f of fields) {
+      const tr = document.createElement("tr")
+      const tdName = document.createElement("td")
+      tdName.className = "col-item"
+      if (f.name) appendRichDiscordText(tdName, f.name)
+      const tdDet = document.createElement("td")
+      tdDet.className = "col-details"
+      const det = fieldDetailBody(f.value || "")
+      if (det) {
+        const div = document.createElement("div")
+        div.className = "alert-table-details-text"
+        appendRichDiscordText(div, det)
+        tdDet.appendChild(div)
+      }
+      const tdLinks = document.createElement("td")
+      tdLinks.className = "col-links"
+      const links = extractMarkdownLinks(String(f.value || ""))
+      if (links.length) {
+        const ul = document.createElement("ul")
+        ul.className = "alert-link-list"
+        for (const { label, url } of links) {
+          const li = document.createElement("li")
+          const a = document.createElement("a")
+          a.href = url
+          a.textContent = label || url
+          a.target = "_blank"
+          a.rel = "noopener noreferrer"
+          a.className = "discord-embed-link"
+          li.appendChild(a)
+          ul.appendChild(li)
+        }
+        tdLinks.appendChild(ul)
+      }
+      tr.appendChild(tdName)
+      tr.appendChild(tdDet)
+      tr.appendChild(tdLinks)
+      tbody.appendChild(tr)
+    }
+    table.appendChild(tbody)
+    group.appendChild(table)
   }
 
   const ts = formatEmbedTimestamp(embed.timestamp)
   if (ts) {
-    const foot = document.createElement("div")
-    foot.className = "discord-embed-footer"
-    foot.textContent = ts
-    card.appendChild(foot)
+    const tf = document.createElement("div")
+    tf.className = "alert-table-ts"
+    tf.textContent = ts
+    group.appendChild(tf)
   }
+  return group
+}
 
-  return card
+function buildAlertElement(embed, mode) {
+  const fields = Array.isArray(embed.fields) ? embed.fields : []
+  if (mode === "table") {
+    return createAlertTableGroup(embed, fields)
+  }
+  return createAlertCardsGroup(embed, fields)
+}
+
+function refreshAlertsViewToggleButtons() {
+  const cardsBtn = document.getElementById("alerts-view-cards")
+  const tableBtn = document.getElementById("alerts-view-table")
+  if (!cardsBtn || !tableBtn) return
+  const isCards = alertsViewMode === "cards"
+  cardsBtn.classList.toggle("alerts-view-btn-active", isCards)
+  tableBtn.classList.toggle("alerts-view-btn-active", !isCards)
+  cardsBtn.setAttribute("aria-pressed", isCards ? "true" : "false")
+  tableBtn.setAttribute("aria-pressed", isCards ? "false" : "true")
+}
+
+function setAlertsViewMode(mode) {
+  if (mode !== "cards" && mode !== "table") return
+  if (mode === alertsViewMode) return
+  alertsViewMode = mode
+  localStorage.setItem(ALERTS_VIEW_STORAGE_KEY, mode)
+  const stream = getElement("alerts-stream")
+  if (!stream) return
+  stream.replaceChildren()
+  const frag = document.createDocumentFragment()
+  for (const { embed } of alertEmbedHistory) {
+    frag.appendChild(buildAlertElement(embed, mode))
+  }
+  stream.appendChild(frag)
+  refreshAlertsViewToggleButtons()
 }
 
 function appendAlertEmbed(embed) {
   const stream = getElement("alerts-stream")
-  if (!stream) return
+  if (!stream || !embed || typeof embed !== "object") return
   const nearBottom =
     stream.scrollHeight - stream.scrollTop - stream.clientHeight < 140
-  stream.appendChild(createDiscordEmbedCard(embed))
-  while (stream.children.length > MAX_IN_APP_ALERTS) {
-    stream.removeChild(stream.firstChild)
+
+  alertEmbedHistory.push({ embed })
+  if (alertEmbedHistory.length > MAX_IN_APP_ALERTS) {
+    alertEmbedHistory.shift()
+    if (stream.firstChild) {
+      stream.removeChild(stream.firstChild)
+    }
   }
+
+  stream.appendChild(buildAlertElement(embed, alertsViewMode))
   if (nearBottom) {
     stream.scrollTop = stream.scrollHeight
   }
@@ -3050,13 +3301,22 @@ navButtons.forEach((btn) => {
 
 const clearAlertsBtn = getElement("clear-alerts-btn")
 clearAlertsBtn?.addEventListener("click", () => {
+  alertEmbedHistory.length = 0
   const stream = getElement("alerts-stream")
   if (stream) {
     stream.replaceChildren()
   }
 })
 
+document.getElementById("alerts-view-cards")?.addEventListener("click", () => {
+  setAlertsViewMode("cards")
+})
+document.getElementById("alerts-view-table")?.addEventListener("click", () => {
+  setAlertsViewMode("table")
+})
+
 window.addEventListener("DOMContentLoaded", async () => {
+  refreshAlertsViewToggleButtons()
   await loadState()
   showView("home")
   updateNavigationButtons()
