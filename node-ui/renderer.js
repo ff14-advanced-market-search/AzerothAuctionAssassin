@@ -12,11 +12,51 @@ const alertEmbedHistory = []
 
 const ALERT_VIEW_MODES = ["discord", "details", "sheet"]
 
+const SHEET_COL_PAGE_SIZE = 15
+const SHEET_COLUMN_ORDER_STORAGE_KEY = "aaa-alerts-sheet-column-order"
+let sheetSearchDebounceTimer = null
+
+function loadSheetColumnOrderFromStorage() {
+  try {
+    const raw = localStorage.getItem(SHEET_COLUMN_ORDER_STORAGE_KEY)
+    if (!raw) return null
+    const a = JSON.parse(raw)
+    return Array.isArray(a) && a.every((x) => typeof x === "string") ? a : null
+  } catch {
+    return null
+  }
+}
+
+function saveSheetColumnOrder(order) {
+  try {
+    localStorage.setItem(SHEET_COLUMN_ORDER_STORAGE_KEY, JSON.stringify(order))
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
+function mergeSavedColumnOrder(rawCols, saved) {
+  if (!saved || saved.length === 0) return [...rawCols]
+  const set = new Set(rawCols)
+  const out = []
+  for (const c of saved) {
+    if (set.has(c)) {
+      out.push(c)
+      set.delete(c)
+    }
+  }
+  for (const c of rawCols) {
+    if (set.has(c)) out.push(c)
+  }
+  return out
+}
+
 const unifiedSheetState = {
   searchRaw: "",
   sortCol: null,
   sortDir: "asc",
   columnVisible: {},
+  sheetColumnOrder: loadSheetColumnOrderFromStorage(),
   numericFilters: [],
   nextFilterId: 1,
   colPage: 0,
@@ -24,8 +64,15 @@ const unifiedSheetState = {
   filterPanelOpen: false,
 }
 
-const SHEET_COL_PAGE_SIZE = 15
-let sheetSearchDebounceTimer = null
+function getSheetColumnsOrdered(allRows) {
+  const rawCols = collectSheetColumns(allRows)
+  const merged = mergeSavedColumnOrder(
+    rawCols,
+    unifiedSheetState.sheetColumnOrder
+  )
+  unifiedSheetState.sheetColumnOrder = merged
+  return merged
+}
 
 function loadStoredAlertsViewMode() {
   const v = localStorage.getItem(ALERTS_VIEW_STORAGE_KEY)
@@ -218,6 +265,59 @@ function linkLabelToColumnKey(label) {
   return slug ? `link_${slug}` : ""
 }
 
+/** Discord-style link column → table header / anchor text (matches in-app alerts). */
+const LINK_COLUMN_DISPLAY = {
+  link_shopping_list: "Shopping List",
+  link_where_to_sell: "Where to Sell",
+  link_where_to_search: "Where to Sell",
+  link_wowhead: "Wowhead link",
+  link_undermine: "Undermine link",
+  link_saddlebag: "Saddlebag link",
+}
+
+function stripLeadingColonSpace(val) {
+  if (val == null) return ""
+  let s = String(val).trimStart()
+  s = s.replace(/^(?:\s*:\s*)+/, "")
+  return s.trimStart()
+}
+
+function getSheetColumnHeaderLabel(col) {
+  if (col === "time") return "Time"
+  if (LINK_COLUMN_DISPLAY[col]) return LINK_COLUMN_DISPLAY[col]
+  if (col.startsWith("link_")) {
+    const slug = col.slice(5)
+    return slug
+      .split("_")
+      .map((p) =>
+        p ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : ""
+      )
+      .filter(Boolean)
+      .join(" ")
+  }
+  return col
+}
+
+function appendSheetTableCell(td, col, rawVal) {
+  td.replaceChildren()
+  const cleaned = stripLeadingColonSpace(
+    rawVal !== undefined && rawVal !== null ? rawVal : ""
+  )
+  const trimmed = cleaned.trim()
+  if (col.startsWith("link_") && /^https?:\/\//i.test(trimmed)) {
+    const a = document.createElement("a")
+    a.href = trimmed
+    a.textContent =
+      LINK_COLUMN_DISPLAY[col] || getSheetColumnHeaderLabel(col) || "Link"
+    a.target = "_blank"
+    a.rel = "noopener noreferrer"
+    a.className = "discord-embed-link alert-sheet-cell-link"
+    td.appendChild(a)
+    return
+  }
+  td.textContent = cleaned
+}
+
 function parseFieldKeyValues(text) {
   const o = {}
   for (const line of String(text).split("\n")) {
@@ -227,7 +327,7 @@ function parseFieldKeyValues(text) {
     const tick = t.match(/^`([^`]+)`\s*(.*)$/)
     if (tick) {
       const k = tick[1].replace(/:\s*$/, "").trim()
-      if (k) o[k] = tick[2].trim()
+      if (k) o[k] = stripLeadingColonSpace(tick[2].trim())
       continue
     }
     const colon = t.indexOf(":")
@@ -236,7 +336,7 @@ function parseFieldKeyValues(text) {
         .slice(0, colon)
         .trim()
         .replace(/^`+|`+$/g, "")
-      const v = t.slice(colon + 1).trim()
+      const v = stripLeadingColonSpace(t.slice(colon + 1).trim())
       if (k) o[k] = v
     }
   }
@@ -285,7 +385,7 @@ function collectSheetColumns(rows) {
 
 function parseSheetCellNumber(val) {
   if (val == null || val === "") return null
-  const s = String(val).replace(/,/g, "").trim()
+  const s = String(stripLeadingColonSpace(val)).replace(/,/g, "").trim()
   const pct = s.match(/([\d.]+)\s*%/)
   if (pct) {
     const n = parseFloat(pct[1])
@@ -297,13 +397,26 @@ function parseSheetCellNumber(val) {
   return Number.isFinite(n) ? n : null
 }
 
+/** Min/max for time column filters: locale string, ISO, or epoch ms / s. */
+function parseSheetTimeFilterBound(raw) {
+  const s = String(raw ?? "").trim()
+  if (s === "") return null
+  const fromDate = Date.parse(s)
+  if (!Number.isNaN(fromDate)) return fromDate
+  const n = Number(String(s).replace(/,/g, ""))
+  if (!Number.isFinite(n)) return null
+  if (n > 1e11 && n < 1e14) return Math.round(n)
+  if (n > 1e9 && n < 1e11) return Math.round(n * 1000)
+  return null
+}
+
 function compareSheetRows(a, b, col, dir) {
   const mul = dir === "desc" ? -1 : 1
   if (col === "time") {
     return ((a.__ts || 0) - (b.__ts || 0)) * mul
   }
-  const va = a[col]
-  const vb = b[col]
+  const va = stripLeadingColonSpace(a[col])
+  const vb = stripLeadingColonSpace(b[col])
   const na = parseSheetCellNumber(va)
   const nb = parseSheetCellNumber(vb)
   if (na !== null && nb !== null && na !== nb) {
@@ -321,7 +434,8 @@ function rowMatchesSheetSearch(row, q) {
   const ql = q.toLowerCase()
   for (const [k, v] of Object.entries(row)) {
     if (k.startsWith("__")) continue
-    if (String(v).toLowerCase().includes(ql)) return true
+    const s = stripLeadingColonSpace(v).toLowerCase()
+    if (s.includes(ql)) return true
   }
   return false
 }
@@ -329,15 +443,31 @@ function rowMatchesSheetSearch(row, q) {
 function rowPassesNumericFilters(row, filters) {
   for (const f of filters) {
     if (!f || !f.column) continue
-    const n = parseSheetCellNumber(row[f.column])
-    if (n === null) return false
     const minS = f.min
     const maxS = f.max
-    if (minS !== "" && minS != null && String(minS).trim() !== "") {
+    const minActive = minS !== "" && minS != null && String(minS).trim() !== ""
+    const maxActive = maxS !== "" && maxS != null && String(maxS).trim() !== ""
+    if (f.column === "time") {
+      if (!minActive && !maxActive) continue
+      const ts = row.__ts
+      if (!ts || Number.isNaN(ts)) return false
+      if (minActive) {
+        const minMs = parseSheetTimeFilterBound(minS)
+        if (minMs != null && ts < minMs) return false
+      }
+      if (maxActive) {
+        const maxMs = parseSheetTimeFilterBound(maxS)
+        if (maxMs != null && ts > maxMs) return false
+      }
+      continue
+    }
+    const n = parseSheetCellNumber(row[f.column])
+    if (n === null) return false
+    if (minActive) {
       const min = parseFloat(String(minS).replace(/,/g, ""))
       if (Number.isFinite(min) && n < min) return false
     }
-    if (maxS !== "" && maxS != null && String(maxS).trim() !== "") {
+    if (maxActive) {
       const max = parseFloat(String(maxS).replace(/,/g, ""))
       if (Number.isFinite(max) && n > max) return false
     }
@@ -347,6 +477,13 @@ function rowPassesNumericFilters(row, filters) {
 
 function getNumericColumnCandidates(rows, cols) {
   return cols.filter((col) => {
+    if (col === "time") {
+      return rows.some(
+        (r) =>
+          (Number(r.__ts) > 0 && !Number.isNaN(Number(r.__ts))) ||
+          (r.time != null && String(r.time).trim() !== "")
+      )
+    }
     if (col.startsWith("link_")) return false
     let num = 0
     let tot = 0
@@ -402,9 +539,16 @@ function formatEmbedTimestamp(iso) {
   return Number.isNaN(d.getTime()) ? "" : d.toLocaleString()
 }
 
+/** WoW token price embeds (no item fields); keep out of sheet so columns stay auction-focused. */
+function isWowTokenAlertEmbed(embed) {
+  const t = embed && embed.title != null ? String(embed.title).trim() : ""
+  return /^WoW\s+Token\s+Alert\b/i.test(t)
+}
+
 function getAllUnifiedSheetRows() {
   const rows = []
   for (const { embed } of alertEmbedHistory) {
+    if (isWowTokenAlertEmbed(embed)) continue
     const timeStr = formatEmbedTimestamp(embed.timestamp)
     const tsNum =
       embed.timestamp && !Number.isNaN(new Date(embed.timestamp).getTime())
@@ -586,7 +730,7 @@ function renderNumericFilterPanel(dash) {
   if (!box) return
   box.replaceChildren()
   const allRows = getAllUnifiedSheetRows()
-  const allCols = collectSheetColumns(allRows)
+  const allCols = getSheetColumnsOrdered(allRows)
   const numericCols = getNumericColumnCandidates(allRows, allCols)
 
   for (const f of unifiedSheetState.numericFilters) {
@@ -600,7 +744,9 @@ function renderNumericFilterPanel(dash) {
     summary.className = "alert-sheet-filter-summary"
     const minL = f.min !== "" && f.min != null ? String(f.min) : "—"
     const maxL = f.max !== "" && f.max != null ? String(f.max) : "—"
-    summary.textContent = `${f.column || "?"} ∈ [${minL}, ${maxL}]`
+    summary.textContent = `${getSheetColumnHeaderLabel(
+      f.column || "?"
+    )} ∈ [${minL}, ${maxL}]`
     const rm = document.createElement("button")
     rm.type = "button"
     rm.className = "ghost alert-sheet-filter-remove"
@@ -626,37 +772,46 @@ function renderNumericFilterPanel(dash) {
     for (const c of numericCols) {
       const opt = document.createElement("option")
       opt.value = c
-      opt.textContent = c
+      opt.textContent = getSheetColumnHeaderLabel(c)
       if (f.column === c) opt.selected = true
       sel.appendChild(opt)
     }
-    sel.addEventListener("change", () => {
-      f.column = sel.value
-      summary.textContent = `${f.column || "?"} ∈ [${
-        f.min !== "" && f.min != null ? String(f.min) : "—"
-      }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
-      refreshUnifiedSheetTable(dash)
-    })
     const minIn = document.createElement("input")
     minIn.type = "text"
     minIn.className = "alert-sheet-filter-input"
-    minIn.placeholder = "Min (optional)"
     minIn.value = f.min != null ? String(f.min) : ""
-    minIn.addEventListener("input", () => {
-      f.min = minIn.value
-      summary.textContent = `${f.column || "?"} ∈ [${
+    const maxIn = document.createElement("input")
+    maxIn.type = "text"
+    maxIn.className = "alert-sheet-filter-input"
+    maxIn.value = f.max != null ? String(f.max) : ""
+    const syncRangeFilterPlaceholders = () => {
+      if (f.column === "time") {
+        minIn.placeholder = "From (table time, ISO, or epoch ms)"
+        maxIn.placeholder = "To (optional)"
+      } else {
+        minIn.placeholder = "Min (optional)"
+        maxIn.placeholder = "Max (optional)"
+      }
+    }
+    syncRangeFilterPlaceholders()
+    sel.addEventListener("change", () => {
+      f.column = sel.value
+      syncRangeFilterPlaceholders()
+      summary.textContent = `${getSheetColumnHeaderLabel(f.column || "?")} ∈ [${
         f.min !== "" && f.min != null ? String(f.min) : "—"
       }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
       refreshUnifiedSheetTable(dash)
     })
-    const maxIn = document.createElement("input")
-    maxIn.type = "text"
-    maxIn.className = "alert-sheet-filter-input"
-    maxIn.placeholder = "Max (optional)"
-    maxIn.value = f.max != null ? String(f.max) : ""
+    minIn.addEventListener("input", () => {
+      f.min = minIn.value
+      summary.textContent = `${getSheetColumnHeaderLabel(f.column || "?")} ∈ [${
+        f.min !== "" && f.min != null ? String(f.min) : "—"
+      }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
+      refreshUnifiedSheetTable(dash)
+    })
     maxIn.addEventListener("input", () => {
       f.max = maxIn.value
-      summary.textContent = `${f.column || "?"} ∈ [${
+      summary.textContent = `${getSheetColumnHeaderLabel(f.column || "?")} ∈ [${
         f.min !== "" && f.min != null ? String(f.min) : "—"
       }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
       refreshUnifiedSheetTable(dash)
@@ -674,7 +829,7 @@ function renderColumnControlPanel(dash) {
   const pageLabel = dash.querySelector(".alert-sheet-col-page-label")
   if (!box || !pageLabel) return
   const allRows = getAllUnifiedSheetRows()
-  const allCols = collectSheetColumns(allRows)
+  const allCols = getSheetColumnsOrdered(allRows)
   ensureSheetColumnVisibility(allCols)
   const totalPages = Math.max(
     1,
@@ -697,7 +852,9 @@ function renderColumnControlPanel(dash) {
       refreshUnifiedSheetTable(dash)
     })
     lab.appendChild(cb)
-    lab.appendChild(document.createTextNode(` ${col}`))
+    lab.appendChild(
+      document.createTextNode(` ${getSheetColumnHeaderLabel(col)}`)
+    )
     box.appendChild(lab)
   }
   pageLabel.textContent = `Page ${
@@ -713,13 +870,21 @@ function refreshUnifiedSheetTable(dash) {
   if (!table || !thead || !tbody || !footer) return
 
   const allRows = getAllUnifiedSheetRows()
-  const allCols = collectSheetColumns(allRows)
+  const allCols = getSheetColumnsOrdered(allRows)
   ensureSheetColumnVisibility(allCols)
   const q = unifiedSheetState.searchRaw.trim()
 
   let working = allRows.filter((r) => rowMatchesSheetSearch(r, q))
   working = working.filter((r) =>
     rowPassesNumericFilters(r, unifiedSheetState.numericFilters)
+  )
+  working = working.filter((row) =>
+    Object.keys(row).some((k) => {
+      if (k.startsWith("__")) return false
+      const v = row[k]
+      if (v === undefined || v === null) return false
+      return String(v).trim() !== ""
+    })
   )
 
   const sortCol = unifiedSheetState.sortCol
@@ -742,9 +907,34 @@ function refreshUnifiedSheetTable(dash) {
       const th = document.createElement("th")
       th.dataset.col = col
       th.className = "alert-sheet-th-sortable"
-      th.title = "Click to sort"
+      const grip = document.createElement("span")
+      grip.className = "alert-sheet-col-drag"
+      grip.textContent = "⋮⋮"
+      grip.draggable = true
+      grip.title = "Drag to reorder column"
+      grip.setAttribute("aria-hidden", "true")
+      grip.addEventListener("dragstart", (e) => {
+        e.stopPropagation()
+        e.dataTransfer.setData("text/plain", col)
+        e.dataTransfer.effectAllowed = "move"
+        th.classList.add("alert-sheet-th-dragging")
+      })
       const label = document.createElement("span")
+      label.className = "alert-sheet-col-label"
       label.textContent = col
+      label.title = "Click to sort"
+      label.addEventListener("click", (e) => {
+        e.stopPropagation()
+        if (unifiedSheetState.sortCol === col) {
+          unifiedSheetState.sortDir =
+            unifiedSheetState.sortDir === "asc" ? "desc" : "asc"
+        } else {
+          unifiedSheetState.sortCol = col
+          unifiedSheetState.sortDir = "asc"
+        }
+        refreshUnifiedSheetTable(dash)
+      })
+      th.appendChild(grip)
       th.appendChild(label)
       if (unifiedSheetState.sortCol === col) {
         const ind = document.createElement("span")
@@ -752,6 +942,24 @@ function refreshUnifiedSheetTable(dash) {
         ind.textContent = unifiedSheetState.sortDir === "desc" ? " ▼" : " ▲"
         th.appendChild(ind)
       }
+      th.addEventListener("dragover", (e) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = "move"
+        th.classList.add("alert-sheet-th-drop-target")
+      })
+      th.addEventListener("dragleave", (e) => {
+        if (!th.contains(e.relatedTarget)) {
+          th.classList.remove("alert-sheet-th-drop-target")
+        }
+      })
+      th.addEventListener("drop", (e) => {
+        e.preventDefault()
+        th.classList.remove("alert-sheet-th-drop-target")
+        const fromCol = e.dataTransfer.getData("text/plain")
+        if (fromCol && fromCol !== col) {
+          reorderSheetColumns(dash, fromCol, col)
+        }
+      })
       hr.appendChild(th)
     }
   }
@@ -773,8 +981,7 @@ function refreshUnifiedSheetTable(dash) {
       const tr = document.createElement("tr")
       for (const col of cols) {
         const td = document.createElement("td")
-        const v = row[col]
-        td.textContent = v !== undefined && v !== null ? String(v) : ""
+        appendSheetTableCell(td, col, row[col])
         tr.appendChild(td)
       }
       tbody.appendChild(tr)
@@ -782,6 +989,19 @@ function refreshUnifiedSheetTable(dash) {
   }
 
   footer.textContent = `Showing ${working.length} of ${allRows.length} rows`
+}
+
+function reorderSheetColumns(dash, fromCol, toCol) {
+  const allRows = getAllUnifiedSheetRows()
+  const order = [...getSheetColumnsOrdered(allRows)]
+  const fi = order.indexOf(fromCol)
+  const ti = order.indexOf(toCol)
+  if (fi < 0 || ti < 0 || fromCol === toCol) return
+  const [moved] = order.splice(fi, 1)
+  order.splice(ti, 0, moved)
+  unifiedSheetState.sheetColumnOrder = order
+  saveSheetColumnOrder(order)
+  refreshUnifiedSheetTable(dash)
 }
 
 function createUnifiedSheetDashboard() {
@@ -810,8 +1030,8 @@ function createUnifiedSheetDashboard() {
   btnFilter.type = "button"
   btnFilter.className = "ghost alert-sheet-toggle"
   btnFilter.textContent = unifiedSheetState.filterPanelOpen
-    ? "Hide numeric filter"
-    : "Show numeric filter"
+    ? "Hide range filter"
+    : "Show range filter"
 
   const btnCol = document.createElement("button")
   btnCol.type = "button"
@@ -820,16 +1040,33 @@ function createUnifiedSheetDashboard() {
     ? "Hide column controls"
     : "Show column controls"
 
+  const btnColReset = document.createElement("button")
+  btnColReset.type = "button"
+  btnColReset.className = "ghost alert-sheet-toggle"
+  btnColReset.title = "Restore default column order (item, time, region, …)"
+  btnColReset.textContent = "Reset column order"
+  btnColReset.addEventListener("click", () => {
+    unifiedSheetState.sheetColumnOrder = null
+    try {
+      localStorage.removeItem(SHEET_COLUMN_ORDER_STORAGE_KEY)
+    } catch {
+      // ignore
+    }
+    refreshUnifiedSheetTable(root)
+    renderColumnControlPanel(root)
+  })
+
   toolbar.appendChild(search)
   toolbar.appendChild(btnFilter)
   toolbar.appendChild(btnCol)
+  toolbar.appendChild(btnColReset)
 
   const filterPanel = document.createElement("div")
   filterPanel.className = "alert-sheet-panel alert-sheet-filter-panel"
   filterPanel.hidden = !unifiedSheetState.filterPanelOpen
   const filterTitle = document.createElement("div")
   filterTitle.className = "alert-sheet-panel-title"
-  filterTitle.textContent = "Numeric filter"
+  filterTitle.textContent = "Range filter"
   const filterActions = document.createElement("div")
   filterActions.className = "alert-sheet-panel-actions"
   const addF = document.createElement("button")
@@ -859,7 +1096,12 @@ function createUnifiedSheetDashboard() {
   filterActions.appendChild(clearF)
   const filterList = document.createElement("div")
   filterList.className = "alert-sheet-filter-list"
+  const filterHint = document.createElement("div")
+  filterHint.className = "alert-sheet-filter-hint"
+  filterHint.textContent =
+    "Time filters use each alert’s embed timestamp (not the text in other columns). Paste a Time cell value, ISO-8601, or Unix ms."
   filterPanel.appendChild(filterTitle)
+  filterPanel.appendChild(filterHint)
   filterPanel.appendChild(filterActions)
   filterPanel.appendChild(filterList)
 
@@ -911,7 +1153,7 @@ function createUnifiedSheetDashboard() {
   })
   nextP.addEventListener("click", () => {
     const allRows = getAllUnifiedSheetRows()
-    const allCols = collectSheetColumns(allRows)
+    const allCols = getSheetColumnsOrdered(allRows)
     const totalPages = Math.max(
       1,
       Math.ceil(allCols.length / SHEET_COL_PAGE_SIZE)
@@ -923,14 +1165,14 @@ function createUnifiedSheetDashboard() {
   })
   showAll.addEventListener("click", () => {
     const allRows = getAllUnifiedSheetRows()
-    const allCols = collectSheetColumns(allRows)
+    const allCols = getSheetColumnsOrdered(allRows)
     for (const c of allCols) unifiedSheetState.columnVisible[c] = true
     renderColumnControlPanel(root)
     refreshUnifiedSheetTable(root)
   })
   hideAll.addEventListener("click", () => {
     const allRows = getAllUnifiedSheetRows()
-    const allCols = collectSheetColumns(allRows)
+    const allCols = getSheetColumnsOrdered(allRows)
     for (const c of allCols) unifiedSheetState.columnVisible[c] = false
     renderColumnControlPanel(root)
     refreshUnifiedSheetTable(root)
@@ -940,8 +1182,8 @@ function createUnifiedSheetDashboard() {
     unifiedSheetState.filterPanelOpen = !unifiedSheetState.filterPanelOpen
     filterPanel.hidden = !unifiedSheetState.filterPanelOpen
     btnFilter.textContent = unifiedSheetState.filterPanelOpen
-      ? "Hide numeric filter"
-      : "Show numeric filter"
+      ? "Hide range filter"
+      : "Show range filter"
     if (unifiedSheetState.filterPanelOpen) {
       renderNumericFilterPanel(root)
     }
@@ -967,18 +1209,13 @@ function createUnifiedSheetDashboard() {
   table.appendChild(tbody)
   scroll.appendChild(table)
 
-  table.addEventListener("click", (e) => {
-    const th = e.target.closest("th[data-col]")
-    if (!th) return
-    const col = th.dataset.col
-    if (unifiedSheetState.sortCol === col) {
-      unifiedSheetState.sortDir =
-        unifiedSheetState.sortDir === "asc" ? "desc" : "asc"
-    } else {
-      unifiedSheetState.sortCol = col
-      unifiedSheetState.sortDir = "asc"
-    }
-    refreshUnifiedSheetTable(root)
+  table.addEventListener("dragend", () => {
+    table.querySelectorAll("th").forEach((th) => {
+      th.classList.remove(
+        "alert-sheet-th-dragging",
+        "alert-sheet-th-drop-target"
+      )
+    })
   })
 
   const footer = document.createElement("div")

@@ -1318,6 +1318,13 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   color: var(--text);
 }
 
+.alert-sheet-filter-hint {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #8b949e;
+  margin: -4px 0 12px;
+}
+
 .alert-sheet-panel-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1411,12 +1418,46 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
 }
 
 .alert-sheet-th-sortable {
-  cursor: pointer;
   user-select: none;
 }
 
+.alert-sheet-col-drag {
+  display: inline-block;
+  cursor: grab;
+  margin-right: 6px;
+  padding: 0 2px;
+  color: #8b949e;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: -2px;
+  vertical-align: middle;
+}
+
+.alert-sheet-col-drag:active {
+  cursor: grabbing;
+}
+
+.alert-sheet-col-label {
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.alert-sheet-col-label:hover {
+  text-decoration: underline;
+}
+
 .alert-sheet-th-sortable:hover {
-  background: rgba(88, 166, 255, 0.12);
+  background: rgba(88, 166, 255, 0.08);
+}
+
+.alert-sheet-th-dragging {
+  opacity: 0.55;
+}
+
+.alert-sheet-th-drop-target {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -2px;
+  background: rgba(78, 167, 255, 0.12);
 }
 
 .alert-sheet-sort-ind {
@@ -1489,6 +1530,12 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   max-width: 280px;
   word-break: break-word;
   white-space: pre-wrap;
+}
+
+.alert-sheet-table tbody td:has(a.alert-sheet-cell-link) {
+  max-width: none;
+  white-space: nowrap;
+  word-break: normal;
 }
 
 .alert-sheet-table tbody tr:nth-child(even) {
