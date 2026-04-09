@@ -7,6 +7,7 @@ function escapeHtml(text) {
 
 const DEFAULT_MAX_IN_APP_ALERTS = 120
 const MAX_IN_APP_ALERTS_HARD_CAP = 5000
+const DEFAULT_ALERT_SOUND_VOLUME = 70
 const ALERTS_VIEW_STORAGE_KEY = "aaa-alerts-view-mode"
 
 const alertEmbedHistory = []
@@ -1650,17 +1651,27 @@ const state = {
 }
 
 let alertAudioCtx = null
+let alertAudioEl = null
+let alertAudioSrc = ""
 let lastAlertSoundAt = 0
 
 function isAlertSoundEnabled() {
   return Boolean(state.megaData?.ALERT_SOUND_ENABLED)
 }
 
-function playAlertSound() {
-  if (!isAlertSoundEnabled()) return
-  const now = Date.now()
-  if (now - lastAlertSoundAt < 120) return
-  lastAlertSoundAt = now
+function getAlertSoundVolume() {
+  const n = Number(state.megaData?.ALERT_SOUND_VOLUME)
+  if (!Number.isFinite(n) || !Number.isInteger(n)) {
+    return DEFAULT_ALERT_SOUND_VOLUME
+  }
+  return Math.min(100, Math.max(1, n))
+}
+
+function getAlertSoundFile() {
+  return String(state.megaData?.ALERT_SOUND_FILE || "").trim()
+}
+
+function playBuiltInAlertSound(volume) {
   try {
     if (!alertAudioCtx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext
@@ -1676,8 +1687,9 @@ function playAlertSound() {
     osc.type = "triangle"
     osc.frequency.setValueAtTime(880, t0)
     osc.frequency.exponentialRampToValueAtTime(1320, t0 + 0.08)
+    const vol = Math.max(0.01, Math.min(1, Number(volume || 0) / 100))
     gain.gain.setValueAtTime(0.0001, t0)
-    gain.gain.exponentialRampToValueAtTime(0.08, t0 + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.08 * vol, t0 + 0.01)
     gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12)
     osc.connect(gain)
     gain.connect(alertAudioCtx.destination)
@@ -1685,6 +1697,36 @@ function playAlertSound() {
     osc.stop(t0 + 0.13)
   } catch {
     // ignore audio errors so alerts continue normally
+  }
+}
+
+function playAlertSound() {
+  if (!isAlertSoundEnabled()) return
+  const now = Date.now()
+  if (now - lastAlertSoundAt < 120) return
+  lastAlertSoundAt = now
+  const vol = getAlertSoundVolume()
+  const soundFile = getAlertSoundFile()
+  if (!soundFile) {
+    playBuiltInAlertSound(vol)
+    return
+  }
+  try {
+    const src = `file://${encodeURI(soundFile)}`
+    if (!alertAudioEl || alertAudioSrc !== src) {
+      alertAudioEl = new Audio(src)
+      alertAudioSrc = src
+    }
+    alertAudioEl.volume = Math.max(0.01, Math.min(1, vol / 100))
+    alertAudioEl.currentTime = 0
+    const playPromise = alertAudioEl.play()
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {
+        playBuiltInAlertSound(vol)
+      })
+    }
+  } catch {
+    playBuiltInAlertSound(vol)
   }
 }
 
@@ -1786,8 +1828,28 @@ const pastePetIlvlBtn = getElement("paste-pet-ilvl-btn")
 const copyPetIlvlBtn = getElement("copy-pet-ilvl-btn")
 const pastePBSPetIlvlBtn = getElement("paste-pbs-pet-ilvl-btn")
 const copyPBSPetIlvlBtn = getElement("copy-pbs-pet-ilvl-btn")
+const alertSoundVolumeSlider = getElement("alert-sound-volume-slider")
+const alertSoundVolumeInput = getElement("alert-sound-volume-input")
+const alertSoundFileInput = getElement("alert-sound-file-input")
+const alertSoundBrowseBtn = getElement("alert-sound-browse-btn")
+const alertSoundClearBtn = getElement("alert-sound-clear-btn")
 let itemNameMap = {}
 let petNameMap = {}
+
+function normalizeAlertSoundVolumeInput(raw) {
+  const n = Number(raw)
+  if (!Number.isFinite(n)) return DEFAULT_ALERT_SOUND_VOLUME
+  return Math.min(100, Math.max(1, Math.trunc(n)))
+}
+
+function syncAlertSoundControlsFromData(data) {
+  const v = normalizeAlertSoundVolumeInput(data?.ALERT_SOUND_VOLUME)
+  if (alertSoundVolumeSlider) alertSoundVolumeSlider.value = String(v)
+  if (alertSoundVolumeInput) alertSoundVolumeInput.value = String(v)
+  if (alertSoundFileInput) {
+    alertSoundFileInput.value = String(data?.ALERT_SOUND_FILE || "")
+  }
+}
 
 let itemSearchCache = null
 let itemSearchLoading = false
@@ -2571,6 +2633,8 @@ function renderMegaForm(data) {
             ? DEFAULT_MAX_IN_APP_ALERTS
             : v
         )
+      } else if (el.name === "ALERT_SOUND_VOLUME") {
+        el.value = String(normalizeAlertSoundVolumeInput(data[el.name]))
       } else {
         el.value = data[el.name] ?? ""
       }
@@ -2578,6 +2642,7 @@ function renderMegaForm(data) {
   }
   // Handle extra alerts checkboxes separately
   renderExtraAlerts(data.EXTRA_ALERTS || "")
+  syncAlertSoundControlsFromData(data)
 }
 
 function readMegaForm() {
@@ -3622,6 +3687,11 @@ async function saveMegaData(skipValidation = false) {
         field: megaForm.MAX_IN_APP_ALERTS,
         label: "Max in-app alerts",
       },
+      ALERT_SOUND_VOLUME: {
+        value: data.ALERT_SOUND_VOLUME,
+        field: megaForm.ALERT_SOUND_VOLUME,
+        label: "Alert sound volume",
+      },
     }
 
     for (const [key, { value, field, label }] of Object.entries(
@@ -3659,6 +3729,13 @@ async function saveMegaData(skipValidation = false) {
         "error"
       )
       megaForm.MAX_IN_APP_ALERTS?.focus()
+      return false
+    }
+
+    const soundVolume = Number(data.ALERT_SOUND_VOLUME)
+    if (soundVolume < 1 || soundVolume > 100) {
+      showToast("Alert sound volume must be an integer from 1 to 100.", "error")
+      megaForm.ALERT_SOUND_VOLUME?.focus()
       return false
     }
 
@@ -4566,6 +4643,36 @@ resetDataDirBtn?.addEventListener("click", async () => {
     }
   } catch (err) {
     showToast(`Error: ${err.message}`, "error")
+  }
+})
+
+alertSoundVolumeSlider?.addEventListener("input", () => {
+  if (!alertSoundVolumeInput || !alertSoundVolumeSlider) return
+  alertSoundVolumeInput.value = alertSoundVolumeSlider.value
+})
+
+alertSoundVolumeInput?.addEventListener("input", () => {
+  if (!alertSoundVolumeSlider || !alertSoundVolumeInput) return
+  const v = normalizeAlertSoundVolumeInput(alertSoundVolumeInput.value)
+  alertSoundVolumeInput.value = String(v)
+  alertSoundVolumeSlider.value = String(v)
+})
+
+alertSoundBrowseBtn?.addEventListener("click", async () => {
+  try {
+    const result = await window.aaa.selectAlertSoundFile()
+    if (result?.canceled || !result?.filePath) return
+    if (alertSoundFileInput) {
+      alertSoundFileInput.value = result.filePath
+    }
+  } catch (err) {
+    showToast(`Error selecting sound file: ${err.message}`, "error")
+  }
+})
+
+alertSoundClearBtn?.addEventListener("click", () => {
+  if (alertSoundFileInput) {
+    alertSoundFileInput.value = ""
   }
 })
 

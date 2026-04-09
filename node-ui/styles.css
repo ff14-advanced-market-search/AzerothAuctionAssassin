@@ -498,6 +498,46 @@ select:focus {
   align-items: center;
 }
 
+.alert-sound-panel {
+  padding: 12px;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alert-sound-panel-title {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.alert-sound-volume-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#alert-sound-volume-slider {
+  flex: 1;
+}
+
+#alert-sound-volume-input {
+  width: 84px;
+}
+
+.alert-sound-file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#alert-sound-file-input {
+  flex: 1;
+}
+
 .extra-alerts-dropdown-wrapper {
   position: relative;
   margin-top: 8px;

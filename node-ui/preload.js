@@ -40,6 +40,7 @@ contextBridge.exposeInMainWorld("aaa", {
   getDataDir: () => ipcRenderer.invoke("get-data-dir"),
   getCustomDataDir: () => ipcRenderer.invoke("get-custom-data-dir"),
   selectDataDir: () => ipcRenderer.invoke("select-data-dir"),
+  selectAlertSoundFile: () => ipcRenderer.invoke("select-alert-sound-file"),
   setCustomDataDir: (dirPath) =>
     ipcRenderer.invoke("set-custom-data-dir", dirPath),
   getZoomLevel: () => ipcRenderer.invoke("get-zoom-level"),

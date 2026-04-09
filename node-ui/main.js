@@ -238,6 +238,8 @@ function ensureDataFiles() {
       DISCORD_ALERTS_ENABLED: true,
       IN_APP_ALERTS_ENABLED: false,
       ALERT_SOUND_ENABLED: false,
+      ALERT_SOUND_VOLUME: 70,
+      ALERT_SOUND_FILE: "",
       MAX_IN_APP_ALERTS: 120,
     },
     [FILES.desiredItems]: {},
@@ -279,12 +281,15 @@ function normalizeMegaData(input) {
     "SCAN_TIME_MAX",
     "TOKEN_PRICE",
     "MAX_IN_APP_ALERTS",
+    "ALERT_SOUND_VOLUME",
   ])
 
   const output = {
     DISCORD_ALERTS_ENABLED: true,
     IN_APP_ALERTS_ENABLED: false,
     ALERT_SOUND_ENABLED: false,
+    ALERT_SOUND_VOLUME: 70,
+    ALERT_SOUND_FILE: "",
     MAX_IN_APP_ALERTS: 120,
     ...(input || {}),
   }
@@ -615,6 +620,8 @@ function setupIpc() {
         DISCORD_ALERTS_ENABLED: true,
         IN_APP_ALERTS_ENABLED: false,
         ALERT_SOUND_ENABLED: false,
+        ALERT_SOUND_VOLUME: 70,
+        ALERT_SOUND_FILE: "",
         MAX_IN_APP_ALERTS: 120,
       }
     )
@@ -1173,6 +1180,24 @@ function setupIpc() {
       sendToLogPanel(errorMsg)
       return { success: false, error: err.message }
     }
+  })
+
+  ipcMain.handle("select-alert-sound-file", async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ["openFile"],
+      title: "Select Alert Sound File",
+      filters: [
+        {
+          name: "Audio",
+          extensions: ["mp3", "wav", "ogg", "m4a", "aac", "flac"],
+        },
+        { name: "All Files", extensions: ["*"] },
+      ],
+    })
+    if (result.canceled || !result.filePaths.length) {
+      return { canceled: true }
+    }
+    return { filePath: result.filePaths[0] }
   })
 
   // Zoom level handlers
