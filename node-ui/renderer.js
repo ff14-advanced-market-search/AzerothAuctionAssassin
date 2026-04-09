@@ -1672,6 +1672,21 @@ function getAlertSoundFile() {
   return String(state.megaData?.ALERT_SOUND_FILE || "").trim()
 }
 
+function toLocalFileAudioSrc(soundFile) {
+  const raw = String(soundFile || "").trim()
+  if (!raw) return ""
+  if (/^file:\/\//i.test(raw)) return raw
+  const normalized = raw.replace(/\\/g, "/")
+  const encoded = encodeURI(normalized).replace(/#/g, "%23")
+  if (/^[a-zA-Z]:\//.test(normalized)) {
+    return `file:///${encoded}`
+  }
+  if (normalized.startsWith("/")) {
+    return `file://${encoded}`
+  }
+  return `file:///${encoded}`
+}
+
 function playBuiltInAlertSound(volume) {
   try {
     if (!alertAudioCtx) {
@@ -1719,7 +1734,7 @@ function playAlertSound() {
     return
   }
   try {
-    const src = `file://${encodeURI(soundFile)}`
+    const src = toLocalFileAudioSrc(soundFile)
     if (!alertAudioEl || alertAudioSrc !== src) {
       alertAudioEl = new Audio(src)
       alertAudioSrc = src
