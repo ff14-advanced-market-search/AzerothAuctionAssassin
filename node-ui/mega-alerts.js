@@ -2390,6 +2390,26 @@ async function runAlerts(state, progress, runOnce = false) {
 
   if (runOnce) return
 
+  const DEFAULT_EXTRA_ALERT_MINUTES = [15, 30, 45]
+
+  const getEffectiveExtraAlertMinutes = () => {
+    if (!state.EXTRA_ALERTS) {
+      return DEFAULT_EXTRA_ALERT_MINUTES
+    }
+    try {
+      const parsed = JSON.parse(state.EXTRA_ALERTS)
+      if (!Array.isArray(parsed)) {
+        return DEFAULT_EXTRA_ALERT_MINUTES
+      }
+      const sanitized = parsed.filter(
+        (min) => Number.isInteger(min) && min >= 1 && min <= 59
+      )
+      return sanitized.length ? sanitized : DEFAULT_EXTRA_ALERT_MINUTES
+    } catch {
+      return DEFAULT_EXTRA_ALERT_MINUTES
+    }
+  }
+
   // Main loop - runs continuously checking for new auction house data
   while (!STOP_REQUESTED) {
     const current_min = new Date().getMinutes()
@@ -2476,17 +2496,12 @@ async function runAlerts(state, progress, runOnce = false) {
       )
       .map((r) => r.dataSetID)
 
-    // Check for extra alerts (JSON array of minutes to trigger on)
-    if (state.EXTRA_ALERTS) {
-      try {
-        const extra = JSON.parse(state.EXTRA_ALERTS)
-        if (extra.includes(current_min)) {
-          // Include all realms from upload_timers (commodities included if they've been scanned)
-          matching_realms = state.get_upload_time_list().map((r) => r.dataSetID)
-        }
-      } catch {
-        // Ignore errors when checking extra alert times
-      }
+    // Check for extra alerts (JSON array of minutes to trigger on).
+    // If no extra alerts are configured, default to quarter-hour checks.
+    const extraAlertMinutes = getEffectiveExtraAlertMinutes()
+    if (extraAlertMinutes.includes(current_min)) {
+      // Include all realms from upload_timers (commodities included if they've been scanned)
+      matching_realms = state.get_upload_time_list().map((r) => r.dataSetID)
     }
 
     if (matching_realms.length) {
