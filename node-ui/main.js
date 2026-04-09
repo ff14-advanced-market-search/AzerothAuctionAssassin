@@ -235,6 +235,9 @@ function ensureDataFiles() {
       REFRESH_ALERTS: false,
       DEBUG: false,
       FACTION: "all",
+      DISCORD_ALERTS_ENABLED: true,
+      IN_APP_ALERTS_ENABLED: false,
+      MAX_IN_APP_ALERTS: 120,
     },
     [FILES.desiredItems]: {},
     [FILES.ilvlList]: [],
@@ -265,15 +268,23 @@ function normalizeMegaData(input) {
     "USE_POST_MIDNIGHT_ILVL",
     "REFRESH_ALERTS",
     "DEBUG",
+    "DISCORD_ALERTS_ENABLED",
+    "IN_APP_ALERTS_ENABLED",
   ])
   const intKeys = new Set([
     "MEGA_THREADS",
     "SCAN_TIME_MIN",
     "SCAN_TIME_MAX",
     "TOKEN_PRICE",
+    "MAX_IN_APP_ALERTS",
   ])
 
-  const output = { ...input }
+  const output = {
+    DISCORD_ALERTS_ENABLED: true,
+    IN_APP_ALERTS_ENABLED: false,
+    MAX_IN_APP_ALERTS: 120,
+    ...(input || {}),
+  }
   for (const key of Object.keys(output)) {
     if (boolKeys.has(key)) {
       const v = output[key]
@@ -598,6 +609,9 @@ function setupIpc() {
         REFRESH_ALERTS: false,
         DEBUG: false,
         FACTION: "all",
+        DISCORD_ALERTS_ENABLED: true,
+        IN_APP_ALERTS_ENABLED: false,
+        MAX_IN_APP_ALERTS: 120,
       }
     )
     const normalized = normalizeMegaData(defaultData)
@@ -951,6 +965,13 @@ function setupIpc() {
       }
       if (megaAlerts.setStopCallback) {
         megaAlerts.setStopCallback(() => sendExit(0))
+      }
+      if (megaAlerts.setAlertEmbedCallback) {
+        megaAlerts.setAlertEmbedCallback((embed) => {
+          BrowserWindow.getAllWindows().forEach((win) =>
+            win.webContents.send("mega-alert-embed", embed)
+          )
+        })
       }
 
       // Run in background (don't await - it runs continuously)

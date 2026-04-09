@@ -5,7 +5,7 @@ const path = require("path")
 const { setTimeout: delay } = require("timers/promises")
 const { fetch } = require("undici")
 
-const AAA_NODE_UI_VERSION = "2.0.9"
+const AAA_NODE_UI_VERSION = "2.1.0"
 
 function saddlebagFetchHeaders(base = {}) {
   return {
@@ -47,6 +47,7 @@ function normalizeEquippableItems(data) {
 let STOP_REQUESTED = false
 let logCallback = null
 let stopCallback = null
+let alertEmbedCallback = null
 
 /**
  * Set directory paths (used by Electron main process in packaged apps)
@@ -76,6 +77,14 @@ function setStopCallback(callback) {
 }
 
 /**
+ * Set callback when a Discord embed is sent (same payload as the webhook)
+ * Used by Electron to mirror alerts in the app UI
+ */
+function setAlertEmbedCallback(callback) {
+  alertEmbedCallback = callback
+}
+
+/**
  * Request that the alert loop stop
  * Sets STOP_REQUESTED flag and calls stop callback if set
  */
@@ -95,6 +104,7 @@ function reset() {
   STOP_REQUESTED = false
   logCallback = null
   stopCallback = null
+  alertEmbedCallback = null
 }
 
 // Local logging functions that use callback if set (for Electron integration)
@@ -306,22 +316,74 @@ async function httpJson(url, opts = {}, retries = 3, timeoutMs = 5000) {
   throw lastErr
 }
 
+const DISCORD_WEBHOOK_TIMEOUT_MS = 5000
+
 /**
- * Send a Discord embed message to the webhook
+ * POST to Discord webhook with AbortController timeout so stalled requests
+ * do not block the alert loop.
+ * @returns {Promise<Response|null>} null on timeout
  */
-async function sendDiscordEmbed(webhook, embed) {
+async function fetchDiscordWebhook(url, bodyJson) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => {
+    controller.abort()
+  }, DISCORD_WEBHOOK_TIMEOUT_MS)
   try {
-    const response = await fetch(webhook, {
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ embeds: [embed] }),
+      body: JSON.stringify(bodyJson),
+      signal: controller.signal,
     })
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "Unknown error")
+    clearTimeout(timeoutId)
+    return response
+  } catch (error) {
+    clearTimeout(timeoutId)
+    if (error.name === "AbortError") {
       logError(
-        `Discord webhook failed: ${response.status} ${response.statusText}`,
-        errorText
+        `Discord webhook request timed out after ${DISCORD_WEBHOOK_TIMEOUT_MS}ms`
       )
+      return null
+    }
+    throw error
+  }
+}
+
+/**
+ * Send a Discord embed message to the webhook and/or in-app UI
+ * @param {object} opts
+ * @param {boolean} opts.postToDiscord
+ * @param {boolean} opts.notifyApp
+ */
+async function sendDiscordEmbed(webhook, embed, opts = {}) {
+  const postToDiscord = opts.postToDiscord === true
+  const notifyApp = opts.notifyApp === true
+  if (!postToDiscord && !notifyApp) return
+  try {
+    if (notifyApp && alertEmbedCallback) {
+      try {
+        alertEmbedCallback(JSON.parse(JSON.stringify(embed)))
+      } catch (cbErr) {
+        originalError("alertEmbedCallback failed:", cbErr)
+      }
+    }
+    if (postToDiscord) {
+      const url = webhook && String(webhook).trim()
+      if (!url) {
+        logError(
+          "Discord alerts are enabled but MEGA_WEBHOOK_URL is missing or empty"
+        )
+        return
+      }
+      const response = await fetchDiscordWebhook(url, { embeds: [embed] })
+      if (!response) return
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error")
+        logError(
+          `Discord webhook failed: ${response.status} ${response.statusText}`,
+          errorText
+        )
+      }
     }
   } catch (error) {
     logError("Failed to send Discord embed:", error)
@@ -331,13 +393,18 @@ async function sendDiscordEmbed(webhook, embed) {
 /**
  * Send a plain text Discord message to the webhook
  */
-async function sendDiscordMessage(webhook, message) {
+async function sendDiscordMessage(webhook, message, postToDiscord = true) {
+  if (!postToDiscord) return
   try {
-    const response = await fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: message }),
-    })
+    const url = webhook && String(webhook).trim()
+    if (!url) {
+      logError(
+        "Discord alerts are enabled but MEGA_WEBHOOK_URL is missing or empty"
+      )
+      return
+    }
+    const response = await fetchDiscordWebhook(url, { content: message })
+    if (!response) return
     if (!response.ok) {
       const errorText = await response.text().catch(() => "Unknown error")
       logError(
@@ -360,6 +427,12 @@ class MegaData {
     this.cfg = readJson(path.join(DATA_DIR, "mega_data.json"), {})
     this.WEBHOOK_URL = this.cfg.MEGA_WEBHOOK_URL
     this.REGION = this.cfg.WOW_REGION
+    this.DISCORD_ALERTS_ENABLED = Boolean(
+      this.cfg.DISCORD_ALERTS_ENABLED ?? true
+    )
+    this.IN_APP_ALERTS_ENABLED = Boolean(
+      this.cfg.IN_APP_ALERTS_ENABLED ?? false
+    )
 
     // Set optional configuration variables with defaults
     this.THREADS = Math.max(1, this.normalizeInt(this.cfg.MEGA_THREADS, 48)) // Default to 48 threads, min 1
@@ -592,7 +665,7 @@ class MegaData {
     if (this.NO_RUSSIAN_REALMS) {
       const russian = new Set(getRussianRealmIds())
       realmNames = Object.fromEntries(
-        Object.entries(realmNames).filter(([, id]) => !russian.has(id))
+        Object.entries(realmNames).filter(([, id]) => !russian.has(Number(id)))
       )
     }
     return realmNames
@@ -713,14 +786,21 @@ class MegaData {
    * Send a Discord message using the configured webhook
    */
   send_discord_message(message) {
-    return sendDiscordMessage(this.WEBHOOK_URL, message)
+    return sendDiscordMessage(
+      this.WEBHOOK_URL,
+      message,
+      this.DISCORD_ALERTS_ENABLED
+    )
   }
 
   /**
    * Send a Discord embed using the configured webhook
    */
   send_discord_embed(embed) {
-    return sendDiscordEmbed(this.WEBHOOK_URL, embed)
+    return sendDiscordEmbed(this.WEBHOOK_URL, embed, {
+      postToDiscord: this.DISCORD_ALERTS_ENABLED,
+      notifyApp: this.IN_APP_ALERTS_ENABLED,
+    })
   }
 
   /**
@@ -739,10 +819,19 @@ class MegaData {
 
   /**
    * Get realm names for a given connected realm ID
+   * Uses numeric comparison so JSON string IDs (e.g. "121") match API numbers (121)
    */
   get_realm_names(connectedRealmId) {
+    const n = Number(connectedRealmId)
+    const useNumeric =
+      connectedRealmId !== null &&
+      connectedRealmId !== undefined &&
+      connectedRealmId !== "" &&
+      !Number.isNaN(n)
     return Object.entries(this.WOW_SERVER_NAMES)
-      .filter(([, id]) => id === connectedRealmId)
+      .filter(([, id]) =>
+        useNumeric ? Number(id) === n : id === connectedRealmId
+      )
       .map(([name]) => name)
       .sort((a, b) => a.localeCompare(b))
   }
@@ -1489,11 +1578,9 @@ async function runAlerts(state, progress, runOnce = false) {
 
     const russian = new Set(getRussianRealmIds())
     const suffix =
-      clean[0].realmID && russian.has(clean[0].realmID) ? " **(RU)**\n" : "\n"
+      clean[0].realmID && russian.has(clean[0].realmID) ? " (RU)\n" : "\n"
     const is_russian_realm =
-      clean[0].realmID && russian.has(clean[0].realmID)
-        ? "**(Russian Realm)**"
-        : ""
+      clean[0].realmID && russian.has(clean[0].realmID) ? "(Russian Realm)" : ""
 
     const embed_fields = []
     for (const auction of clean) {
@@ -1587,9 +1674,27 @@ async function runAlerts(state, progress, runOnce = false) {
     }
 
     if (embed_fields.length) {
-      let desc = `**region:** ${state.REGION}\n`
-      desc += `**realmID:** ${clean[0].realmID ?? ""} ${is_russian_realm}\n`
-      desc += `**realmNames:** ${clean[0].realmNames}${suffix}`
+      const meta = clean[0] || {}
+      const realmIdForDesc = meta.realmID ?? meta.realmId ?? connected_id ?? ""
+      let realmNamesLine = ""
+      if (Array.isArray(meta.realmNames)) {
+        realmNamesLine = meta.realmNames.length
+          ? meta.realmNames.join(", ")
+          : ""
+      } else if (meta.realmNames != null && meta.realmNames !== "") {
+        realmNamesLine = String(meta.realmNames)
+      }
+      if (!realmNamesLine) {
+        const resolved = state.get_realm_names(connected_id)
+        realmNamesLine = resolved.length
+          ? resolved.join(", ")
+          : `(connected realm ${realmIdForDesc})`
+      }
+      let desc = `region: ${state.REGION ?? ""}\n`
+      desc += `realmID: ${realmIdForDesc}${
+        is_russian_realm ? ` ${is_russian_realm}` : ""
+      }\n`
+      desc += `realmNames: ${realmNamesLine}${suffix}`
       for (const chunk of splitList(embed_fields, 10)) {
         const item_embed = createEmbed(
           `${state.REGION} SNIPE FOUND!`,
@@ -2444,7 +2549,8 @@ async function main() {
   if (state.DEBUG) {
     await sendDiscordMessage(
       state.WEBHOOK_URL,
-      "DEBUG MODE: starting mega alerts to run once and then exit operations"
+      "DEBUG MODE: starting mega alerts to run once and then exit operations",
+      state.DISCORD_ALERTS_ENABLED
     )
     await runAlerts(state, () => {}, true)
   } else {
@@ -2452,7 +2558,8 @@ async function main() {
       state.WEBHOOK_URL,
       "🟢Starting mega alerts and scan all AH data instantly.🟢\n" +
         "🟢These first few messages might be old.🟢\n" +
-        "🟢All future messages will release seconds after the new data is available.🟢"
+        "🟢All future messages will release seconds after the new data is available.🟢",
+      state.DISCORD_ALERTS_ENABLED
     )
     await delay(1000)
     await runAlerts(state, (msg) => log("[progress]", msg))
@@ -2464,6 +2571,7 @@ module.exports = {
   main,
   setLogCallback,
   setStopCallback,
+  setAlertEmbedCallback,
   setPaths,
   requestStop,
   reset,

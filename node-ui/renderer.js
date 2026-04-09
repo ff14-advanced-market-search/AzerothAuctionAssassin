@@ -5,6 +5,1559 @@ function escapeHtml(text) {
   return div.innerHTML
 }
 
+const DEFAULT_MAX_IN_APP_ALERTS = 120
+const MAX_IN_APP_ALERTS_HARD_CAP = 5000
+const ALERTS_VIEW_STORAGE_KEY = "aaa-alerts-view-mode"
+
+const alertEmbedHistory = []
+
+const ALERT_VIEW_MODES = ["sheet", "discord", "details"]
+
+const SHEET_COL_PAGE_SIZE = 15
+const SHEET_COLUMN_ORDER_STORAGE_KEY = "aaa-alerts-sheet-column-order"
+let sheetSearchDebounceTimer = null
+
+function loadSheetColumnOrderFromStorage() {
+  try {
+    const raw = localStorage.getItem(SHEET_COLUMN_ORDER_STORAGE_KEY)
+    if (!raw) return null
+    const a = JSON.parse(raw)
+    return Array.isArray(a) && a.every((x) => typeof x === "string") ? a : null
+  } catch {
+    return null
+  }
+}
+
+function saveSheetColumnOrder(order) {
+  try {
+    localStorage.setItem(SHEET_COLUMN_ORDER_STORAGE_KEY, JSON.stringify(order))
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
+function mergeSavedColumnOrder(rawCols, saved) {
+  if (!saved || saved.length === 0) return [...rawCols]
+  const set = new Set(rawCols)
+  const out = []
+  for (const c of saved) {
+    if (set.has(c)) {
+      out.push(c)
+      set.delete(c)
+    }
+  }
+  for (const c of rawCols) {
+    if (set.has(c)) out.push(c)
+  }
+  return out
+}
+
+const unifiedSheetState = {
+  searchRaw: "",
+  sortCol: null,
+  sortDir: "asc",
+  columnVisible: {},
+  sheetColumnOrder: loadSheetColumnOrderFromStorage(),
+  numericFilters: [],
+  nextFilterId: 1,
+  colPage: 0,
+  colPanelOpen: false,
+  filterPanelOpen: false,
+}
+
+function getSheetColumnsOrdered(allRows) {
+  const rawCols = collectSheetColumns(allRows)
+  if (rawCols.length === 0) {
+    return []
+  }
+  const merged = mergeSavedColumnOrder(
+    rawCols,
+    unifiedSheetState.sheetColumnOrder
+  )
+  unifiedSheetState.sheetColumnOrder = merged
+  return merged
+}
+
+function loadStoredAlertsViewMode() {
+  const v = localStorage.getItem(ALERTS_VIEW_STORAGE_KEY)
+  if (ALERT_VIEW_MODES.includes(v)) {
+    return v
+  }
+  if (v === "table") {
+    return "details"
+  }
+  if (v === "cards") {
+    return "discord"
+  }
+  return "sheet"
+}
+
+let alertsViewMode = loadStoredAlertsViewMode()
+
+/**
+ * Closing `)` for `[label](url)` when the URL may contain balanced parentheses
+ * (regex `[^)\s]+` breaks on the first `)` inside URLs such as item links).
+ */
+function findMarkdownLinkUrlEnd(str, urlStartIndex) {
+  let depth = 0
+  for (let i = urlStartIndex; i < str.length; i++) {
+    const c = str[i]
+    if (c === "(") {
+      depth++
+    } else if (c === ")") {
+      if (depth === 0) {
+        return i
+      }
+      depth--
+    }
+  }
+  return -1
+}
+
+function appendInlineFormattedDiscord(container, text) {
+  if (!text) return
+  const segments = text.split(/(`[^`\n]+`)/g)
+  for (const part of segments) {
+    if (!part) continue
+    if (part.startsWith("`") && part.endsWith("`") && part.length >= 2) {
+      const code = document.createElement("code")
+      code.className = "discord-embed-code"
+      code.textContent = part.slice(1, -1)
+      container.appendChild(code)
+      continue
+    }
+    const boldRe = /\*\*(.+?)\*\*/g
+    let last = 0
+    let bm
+    while ((bm = boldRe.exec(part)) !== null) {
+      if (bm.index > last) {
+        container.appendChild(
+          document.createTextNode(part.slice(last, bm.index))
+        )
+      }
+      const strong = document.createElement("strong")
+      strong.textContent = bm[1]
+      container.appendChild(strong)
+      last = bm.lastIndex
+    }
+    if (last < part.length) {
+      container.appendChild(document.createTextNode(part.slice(last)))
+    }
+  }
+}
+
+function appendRichDiscordText(container, raw) {
+  if (raw == null || raw === "") return
+  const str = String(raw)
+  let i = 0
+  while (i < str.length) {
+    const openB = str.indexOf("[", i)
+    if (openB === -1) {
+      appendInlineFormattedDiscord(container, str.slice(i))
+      break
+    }
+    appendInlineFormattedDiscord(container, str.slice(i, openB))
+    const closeB = str.indexOf("]", openB + 1)
+    if (closeB === -1) {
+      appendInlineFormattedDiscord(container, str.slice(openB))
+      break
+    }
+    if (str[closeB + 1] !== "(") {
+      appendInlineFormattedDiscord(container, str.slice(openB, closeB + 1))
+      i = closeB + 1
+      continue
+    }
+    const urlStart = closeB + 2
+    const closeP = findMarkdownLinkUrlEnd(str, urlStart)
+    if (closeP === -1) {
+      appendInlineFormattedDiscord(container, str.slice(openB))
+      break
+    }
+    const label = str.slice(openB + 1, closeB)
+    const url = str.slice(urlStart, closeP).trim()
+    if (/^https?:\/\//i.test(url)) {
+      const a = document.createElement("a")
+      a.href = url
+      a.textContent = label
+      a.target = "_blank"
+      a.rel = "noopener noreferrer"
+      a.className = "discord-embed-link"
+      container.appendChild(a)
+      i = closeP + 1
+    } else {
+      appendInlineFormattedDiscord(container, str.slice(openB, closeP + 1))
+      i = closeP + 1
+    }
+  }
+}
+
+function extractMarkdownLinks(str) {
+  const out = []
+  const s = String(str)
+  let i = 0
+  while (i < s.length) {
+    const openB = s.indexOf("[", i)
+    if (openB === -1) break
+    const closeB = s.indexOf("]", openB + 1)
+    if (closeB === -1) break
+    if (s[closeB + 1] !== "(") {
+      i = openB + 1
+      continue
+    }
+    const urlStart = closeB + 2
+    const closeP = findMarkdownLinkUrlEnd(s, urlStart)
+    if (closeP === -1) {
+      i = openB + 1
+      continue
+    }
+    const label = s.slice(openB + 1, closeB)
+    const url = s.slice(urlStart, closeP).trim()
+    if (/^https?:\/\//i.test(url)) {
+      out.push({ label, url })
+    }
+    i = closeP + 1
+  }
+  return out
+}
+
+function isLineOnlyMarkdownLink(line) {
+  const t = line.trim()
+  if (!t.startsWith("[") || !t.endsWith(")")) return false
+  const closeB = t.indexOf("]", 1)
+  if (closeB < 1 || t[closeB + 1] !== "(") return false
+  const closeP = findMarkdownLinkUrlEnd(t, closeB + 2)
+  return closeP === t.length - 1
+}
+
+function fieldDetailBody(value) {
+  const lines = String(value).split("\n")
+  const kept = []
+  for (const line of lines) {
+    if (isLineOnlyMarkdownLink(line)) continue
+    kept.push(line)
+  }
+  return kept.join("\n").trim()
+}
+
+function parseDescriptionMeta(description) {
+  const out = { region: "", realmID: "", realmNames: "" }
+  if (!description) return out
+  const s = String(description)
+  const pick = (re) => {
+    const m = s.match(re)
+    return m ? m[1].trim() : ""
+  }
+  out.region =
+    pick(/^\s*\*\*region:\*\*\s*(.+)$/im) || pick(/^\s*region:\s*(.+)$/im)
+  out.realmID =
+    pick(/^\s*\*\*realmID:\*\*\s*(.+)$/im) || pick(/^\s*realmID:\s*(.+)$/im)
+  out.realmNames =
+    pick(/^\s*\*\*realmNames:\*\*\s*(.+)$/im) ||
+    pick(/^\s*realmNames:\s*(.+)$/im)
+  return out
+}
+
+function isDescriptionMetaLine(line) {
+  const t = String(line).trim()
+  return (
+    /^\*\*region:\*\*/i.test(t) ||
+    /^\*\*realmID:\*\*/i.test(t) ||
+    /^\*\*realmNames:\*\*/i.test(t) ||
+    /^region:/i.test(t) ||
+    /^realmID:/i.test(t) ||
+    /^realmNames:/i.test(t)
+  )
+}
+
+/** Drop leading region / realmID / realmNames lines (Discord embed header). */
+function removeDescriptionMetaLines(description) {
+  if (!description) return ""
+  const lines = String(description).split(/\r?\n/)
+  const rest = []
+  let atHead = true
+  for (const line of lines) {
+    const empty = line.trim() === ""
+    if (atHead) {
+      if (empty) continue
+      if (isDescriptionMetaLine(line)) continue
+      atHead = false
+    }
+    rest.push(line)
+  }
+  return rest.join("\n").trim()
+}
+
+function descriptionMetaHasValues(meta) {
+  return Boolean(
+    String(meta?.region || "").trim() ||
+      String(meta?.realmID || "").trim() ||
+      String(meta?.realmNames || "").trim()
+  )
+}
+
+/** Structured realm/region lines + remaining description (Discord + Details cards). */
+function appendParsedDescriptionMeta(host, rawDescription, descClassName) {
+  if (rawDescription == null || rawDescription === "") return
+  const metaObj = parseDescriptionMeta(rawDescription)
+  const hasMeta = descriptionMetaHasValues(metaObj)
+  if (hasMeta) {
+    const block = document.createElement("div")
+    block.className = "alert-embed-meta-block"
+    const defs = [
+      ["region", "region"],
+      ["realmID", "realmID"],
+      ["realmNames", "realmNames"],
+    ]
+    for (const [key, label] of defs) {
+      const v = String(metaObj[key] || "").trim()
+      if (!v) continue
+      const row = document.createElement("div")
+      row.className = "alert-embed-meta-row"
+      const kEl = document.createElement("span")
+      kEl.className = "alert-embed-meta-key"
+      kEl.textContent = `${label}: `
+      const vEl = document.createElement("span")
+      vEl.className = "alert-embed-meta-val"
+      vEl.textContent = v
+      row.appendChild(kEl)
+      row.appendChild(vEl)
+      block.appendChild(row)
+    }
+    host.appendChild(block)
+  }
+  const remainder = hasMeta
+    ? removeDescriptionMetaLines(rawDescription)
+    : String(rawDescription)
+  if (remainder.trim()) {
+    const desc = document.createElement("div")
+    desc.className = descClassName
+    appendRichDiscordText(desc, remainder.trim())
+    host.appendChild(desc)
+  }
+}
+
+const LINK_LABEL_TO_COL = {
+  "Shopping List": "link_shopping_list",
+  "Where to Sell": "link_where_to_sell",
+  "Wowhead link": "link_wowhead",
+  "Undermine link": "link_undermine",
+  "Saddlebag link": "link_saddlebag",
+}
+
+function linkLabelToColumnKey(label) {
+  if (LINK_LABEL_TO_COL[label]) return LINK_LABEL_TO_COL[label]
+  const slug = String(label)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "")
+  return slug ? `link_${slug}` : ""
+}
+
+/** Discord-style link column → table header / anchor text (matches in-app alerts). */
+const LINK_COLUMN_DISPLAY = {
+  link_shopping_list: "Shopping List",
+  link_where_to_sell: "Where to Sell",
+  link_where_to_search: "Where to Sell",
+  link_wowhead: "Wowhead link",
+  link_undermine: "Undermine link",
+  link_saddlebag: "Saddlebag link",
+}
+
+function stripLeadingColonSpace(val) {
+  if (val == null) return ""
+  let s = String(val).trimStart()
+  s = s.replace(/^(?:\s*:\s*)+/, "")
+  return s.trimStart()
+}
+
+function getSheetColumnHeaderLabel(col) {
+  if (col === "time") return "Time"
+  if (LINK_COLUMN_DISPLAY[col]) return LINK_COLUMN_DISPLAY[col]
+  if (col.startsWith("link_")) {
+    const slug = col.slice(5)
+    return slug
+      .split("_")
+      .map((p) =>
+        p ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : ""
+      )
+      .filter(Boolean)
+      .join(" ")
+  }
+  return col
+}
+
+function appendSheetTableCell(td, col, rawVal) {
+  td.replaceChildren()
+  const cleaned = stripLeadingColonSpace(
+    rawVal !== undefined && rawVal !== null ? rawVal : ""
+  )
+  const trimmed = cleaned.trim()
+  if (col.startsWith("link_") && /^https?:\/\//i.test(trimmed)) {
+    const a = document.createElement("a")
+    a.href = trimmed
+    a.textContent =
+      LINK_COLUMN_DISPLAY[col] || getSheetColumnHeaderLabel(col) || "Link"
+    a.target = "_blank"
+    a.rel = "noopener noreferrer"
+    a.className = "discord-embed-link alert-sheet-cell-link"
+    td.appendChild(a)
+    return
+  }
+  if (col === "time") {
+    if (!trimmed) {
+      delete td.dataset.sheetTimeIso
+      td.textContent = ""
+      return
+    }
+    const d = new Date(trimmed)
+    if (!Number.isNaN(d.getTime())) {
+      td.dataset.sheetTimeIso = d.toISOString()
+      td.textContent = d.toLocaleString()
+    } else {
+      delete td.dataset.sheetTimeIso
+      td.textContent = cleaned
+    }
+    return
+  }
+  td.textContent = cleaned
+}
+
+function parseFieldKeyValues(text) {
+  const o = {}
+  for (const line of String(text).split("\n")) {
+    if (isLineOnlyMarkdownLink(line)) continue
+    const t = line.trim()
+    if (!t) continue
+    const tick = t.match(/^`([^`]+)`\s*(.*)$/)
+    if (tick) {
+      const k = tick[1].replace(/:\s*$/, "").trim()
+      if (k) o[k] = stripLeadingColonSpace(tick[2].trim())
+      continue
+    }
+    const colon = t.indexOf(":")
+    if (colon > 0) {
+      const k = t
+        .slice(0, colon)
+        .trim()
+        .replace(/^`+|`+$/g, "")
+      const v = stripLeadingColonSpace(t.slice(colon + 1).trim())
+      if (k) o[k] = v
+    }
+  }
+  return o
+}
+
+const SHEET_COL_ORDER = [
+  "item",
+  "buyout_prices",
+  "realmNames",
+  "time",
+  "region",
+  "realmID",
+  "itemID",
+  "petID",
+  "ilvl",
+  "tertiary_stats",
+  "required_lvl",
+  "bonus_ids",
+  "target_price",
+  "Below_Target",
+  "bid_prices",
+  "link_shopping_list",
+  "link_where_to_sell",
+  "link_wowhead",
+  "link_undermine",
+  "link_saddlebag",
+  "title",
+  "message",
+]
+
+function collectSheetColumns(rows) {
+  const set = new Set()
+  for (const r of rows) {
+    Object.keys(r).forEach((k) => {
+      if (!k.startsWith("__")) set.add(k)
+    })
+  }
+  const ordered = []
+  for (const c of SHEET_COL_ORDER) {
+    if (set.has(c)) ordered.push(c)
+  }
+  const rest = [...set].filter((c) => !ordered.includes(c)).sort()
+  return [...ordered, ...rest]
+}
+
+function parseSheetCellNumber(val) {
+  if (val == null || val === "") return null
+  const s = String(stripLeadingColonSpace(val)).replace(/,/g, "").trim()
+  const pct = s.match(/([\d.]+)\s*%/)
+  if (pct) {
+    const n = parseFloat(pct[1])
+    return Number.isFinite(n) ? n : null
+  }
+  const m = s.match(/-?[\d.]+(?:e[+-]?\d+)?/)
+  if (!m) return null
+  const n = parseFloat(m[0])
+  return Number.isFinite(n) ? n : null
+}
+
+/** Min/max for time column filters: ISO-8601, epoch ms/s, or other Date.parse-accepted strings. */
+function parseSheetTimeFilterBound(raw) {
+  const s = String(raw ?? "").trim()
+  if (s === "") return null
+  const fromDate = Date.parse(s)
+  if (!Number.isNaN(fromDate)) return fromDate
+  const n = Number(String(s).replace(/,/g, ""))
+  if (!Number.isFinite(n)) return null
+  if (n > 1e11 && n < 1e14) return Math.round(n)
+  if (n > 1e9 && n < 1e11) return Math.round(n * 1000)
+  return null
+}
+
+function compareSheetRows(a, b, col, dir) {
+  const mul = dir === "desc" ? -1 : 1
+  if (col === "time") {
+    return ((a.__ts || 0) - (b.__ts || 0)) * mul
+  }
+  const va = stripLeadingColonSpace(a[col])
+  const vb = stripLeadingColonSpace(b[col])
+  const na = parseSheetCellNumber(va)
+  const nb = parseSheetCellNumber(vb)
+  if (na !== null && nb !== null && na !== nb) {
+    return (na - nb) * mul
+  }
+  return (
+    String(va ?? "")
+      .toLowerCase()
+      .localeCompare(String(vb ?? "").toLowerCase()) * mul
+  )
+}
+
+function rowMatchesSheetSearch(row, q) {
+  if (!q) return true
+  const ql = q.toLowerCase()
+  for (const [k, v] of Object.entries(row)) {
+    if (k.startsWith("__")) continue
+    const s = stripLeadingColonSpace(v).toLowerCase()
+    if (s.includes(ql)) return true
+  }
+  return false
+}
+
+function rowPassesNumericFilters(row, filters) {
+  for (const f of filters) {
+    if (!f || !f.column) continue
+    const minS = f.min
+    const maxS = f.max
+    const minActive = minS !== "" && minS != null && String(minS).trim() !== ""
+    const maxActive = maxS !== "" && maxS != null && String(maxS).trim() !== ""
+    if (f.column === "time") {
+      if (!minActive && !maxActive) continue
+      const ts = row.__ts
+      if (!ts || Number.isNaN(ts)) return false
+      if (minActive) {
+        const minMs = parseSheetTimeFilterBound(minS)
+        if (minMs != null && ts < minMs) return false
+      }
+      if (maxActive) {
+        const maxMs = parseSheetTimeFilterBound(maxS)
+        if (maxMs != null && ts > maxMs) return false
+      }
+      continue
+    }
+    const n = parseSheetCellNumber(row[f.column])
+    if (n === null) return false
+    if (minActive) {
+      const min = parseFloat(String(minS).replace(/,/g, ""))
+      if (Number.isFinite(min) && n < min) return false
+    }
+    if (maxActive) {
+      const max = parseFloat(String(maxS).replace(/,/g, ""))
+      if (Number.isFinite(max) && n > max) return false
+    }
+  }
+  return true
+}
+
+function getNumericColumnCandidates(rows, cols) {
+  return cols.filter((col) => {
+    if (col === "time") {
+      return rows.some(
+        (r) =>
+          (Number(r.__ts) > 0 && !Number.isNaN(Number(r.__ts))) ||
+          (r.time != null && String(r.time).trim() !== "")
+      )
+    }
+    if (col.startsWith("link_")) return false
+    let num = 0
+    let tot = 0
+    for (const r of rows) {
+      const v = r[col]
+      if (v === undefined || v === null || String(v).trim() === "") continue
+      tot++
+      if (parseSheetCellNumber(v) !== null) num++
+    }
+    return tot > 0 && num >= Math.min(2, tot)
+  })
+}
+
+function ensureSheetColumnVisibility(cols) {
+  for (const c of cols) {
+    if (unifiedSheetState.columnVisible[c] === undefined) {
+      unifiedSheetState.columnVisible[c] = true
+    }
+  }
+}
+
+function visibleSheetColumns(allCols) {
+  return allCols.filter((c) => unifiedSheetState.columnVisible[c] !== false)
+}
+
+function buildSpreadsheetRowsForEmbed(embed) {
+  const fields = Array.isArray(embed.fields) ? embed.fields : []
+  const meta = parseDescriptionMeta(embed.description)
+  if (!fields.length) {
+    const row = { ...meta }
+    if (embed.title) row.title = embed.title
+    row.message = String(embed.description || "")
+      .replace(/\s*\n\s*/g, " ")
+      .trim()
+    return [row]
+  }
+  const rows = []
+  for (const f of fields) {
+    const row = { ...meta, item: f.name || "" }
+    Object.assign(row, parseFieldKeyValues(String(f.value || "")))
+    for (const { label, url } of extractMarkdownLinks(String(f.value || ""))) {
+      const col = linkLabelToColumnKey(label)
+      if (col) row[col] = url
+    }
+    rows.push(row)
+  }
+  return rows
+}
+
+/** ISO string for sheet/CSV data so time filters and exports round-trip reliably. */
+function embedTimestampToIso(iso) {
+  if (!iso) return ""
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? "" : d.toISOString()
+}
+
+/** Localized display for Discord-style footers and detail tables (not for sheet cell data). */
+function formatEmbedTimestampDisplay(iso) {
+  if (!iso) return ""
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleString()
+}
+
+/** WoW token price embeds (no item fields); keep out of sheet so columns stay auction-focused. */
+function isWowTokenAlertEmbed(embed) {
+  const t = embed && embed.title != null ? String(embed.title).trim() : ""
+  return /^WoW\s+Token\s+Alert\b/i.test(t)
+}
+
+function getAllUnifiedSheetRows() {
+  const rows = []
+  for (const { embed } of alertEmbedHistory) {
+    if (isWowTokenAlertEmbed(embed)) continue
+    const timeStr = embedTimestampToIso(embed.timestamp)
+    const tsNum =
+      embed.timestamp && !Number.isNaN(new Date(embed.timestamp).getTime())
+        ? new Date(embed.timestamp).getTime()
+        : 0
+    const per = buildSpreadsheetRowsForEmbed(embed)
+    for (const r of per) {
+      rows.push({
+        ...r,
+        time: timeStr,
+        __ts: tsNum,
+      })
+    }
+  }
+  return rows
+}
+
+function getAccentColor(embed) {
+  const colorNum = embed.color
+  return typeof colorNum === "number" && colorNum >= 0
+    ? `#${colorNum.toString(16).padStart(6, "0")}`
+    : "#5865f2"
+}
+
+function createDiscordFooterLine(iso) {
+  const ts = formatEmbedTimestampDisplay(iso)
+  if (!ts) return null
+  const foot = document.createElement("div")
+  foot.className = "discord-embed-footer"
+  foot.textContent = ts
+  return foot
+}
+
+/** One Discord-style card: title, description, field grid (like the Discord client). */
+function createDiscordFlatGroup(embed, fields) {
+  const wrap = document.createElement("div")
+  wrap.className = "alert-embed-group alert-embed-discord-flat"
+  const card = document.createElement("article")
+  card.className = "discord-embed-card discord-embed-flat"
+  card.style.setProperty("--embed-accent", getAccentColor(embed))
+  if (embed.title) {
+    const t = document.createElement("div")
+    t.className = "discord-embed-title"
+    appendRichDiscordText(t, embed.title)
+    card.appendChild(t)
+  }
+  if (embed.description) {
+    appendParsedDescriptionMeta(card, embed.description, "discord-embed-desc")
+  }
+  if (fields.length) {
+    const grid = document.createElement("div")
+    grid.className = "discord-embed-fields"
+    for (const f of fields) {
+      const fieldWrap = document.createElement("div")
+      fieldWrap.className = "discord-embed-field"
+      if (f.name) {
+        const nameEl = document.createElement("div")
+        nameEl.className = "discord-embed-field-name"
+        appendRichDiscordText(nameEl, f.name)
+        fieldWrap.appendChild(nameEl)
+      }
+      if (f.value != null && f.value !== "") {
+        const valEl = document.createElement("div")
+        valEl.className = "discord-embed-field-value"
+        appendRichDiscordText(valEl, String(f.value))
+        fieldWrap.appendChild(valEl)
+      }
+      grid.appendChild(fieldWrap)
+    }
+    card.appendChild(grid)
+  }
+  const foot = createDiscordFooterLine(embed.timestamp)
+  if (foot) card.appendChild(foot)
+  wrap.appendChild(card)
+  return wrap
+}
+
+function createAlertTableGroup(embed, fields) {
+  const group = document.createElement("div")
+  group.className = "alert-table-group"
+  const accent = getAccentColor(embed)
+  group.style.setProperty("--embed-accent", accent)
+
+  if (embed.title || embed.description) {
+    const meta = document.createElement("div")
+    meta.className = "alert-table-meta"
+    if (embed.title) {
+      const th = document.createElement("div")
+      th.className = "alert-table-title"
+      appendRichDiscordText(th, embed.title)
+      meta.appendChild(th)
+    }
+    if (embed.description) {
+      appendParsedDescriptionMeta(meta, embed.description, "alert-table-desc")
+    }
+    group.appendChild(meta)
+  }
+
+  if (!fields.length) {
+    if (!embed.title && !embed.description) {
+      const empty = document.createElement("div")
+      empty.className = "alert-table-empty"
+      empty.textContent = "No item rows in this alert."
+      group.appendChild(empty)
+    }
+  } else {
+    const table = document.createElement("table")
+    table.className = "alert-items-table"
+    const thead = document.createElement("thead")
+    const hr = document.createElement("tr")
+    for (const label of ["Item", "Details", "Links"]) {
+      const th = document.createElement("th")
+      th.textContent = label
+      hr.appendChild(th)
+    }
+    thead.appendChild(hr)
+    table.appendChild(thead)
+    const tbody = document.createElement("tbody")
+    for (const f of fields) {
+      const tr = document.createElement("tr")
+      const tdName = document.createElement("td")
+      tdName.className = "col-item"
+      if (f.name) appendRichDiscordText(tdName, f.name)
+      const tdDet = document.createElement("td")
+      tdDet.className = "col-details"
+      const det = fieldDetailBody(f.value || "")
+      if (det) {
+        const div = document.createElement("div")
+        div.className = "alert-table-details-text"
+        appendRichDiscordText(div, det)
+        tdDet.appendChild(div)
+      }
+      const tdLinks = document.createElement("td")
+      tdLinks.className = "col-links"
+      const links = extractMarkdownLinks(String(f.value || ""))
+      if (links.length) {
+        const ul = document.createElement("ul")
+        ul.className = "alert-link-list"
+        for (const { label, url } of links) {
+          const li = document.createElement("li")
+          const a = document.createElement("a")
+          a.href = url
+          a.textContent = label || url
+          a.target = "_blank"
+          a.rel = "noopener noreferrer"
+          a.className = "discord-embed-link"
+          li.appendChild(a)
+          ul.appendChild(li)
+        }
+        tdLinks.appendChild(ul)
+      }
+      tr.appendChild(tdName)
+      tr.appendChild(tdDet)
+      tr.appendChild(tdLinks)
+      tbody.appendChild(tr)
+    }
+    table.appendChild(tbody)
+    group.appendChild(table)
+  }
+
+  const ts = formatEmbedTimestampDisplay(embed.timestamp)
+  if (ts) {
+    const tf = document.createElement("div")
+    tf.className = "alert-table-ts"
+    tf.textContent = ts
+    group.appendChild(tf)
+  }
+  return group
+}
+
+function renderNumericFilterPanel(dash) {
+  const box = dash.querySelector(".alert-sheet-filter-list")
+  if (!box) return
+  box.replaceChildren()
+  const allRows = getAllUnifiedSheetRows()
+  const allCols = getSheetColumnsOrdered(allRows)
+  const numericCols = getNumericColumnCandidates(allRows, allCols)
+
+  for (const f of unifiedSheetState.numericFilters) {
+    const row = document.createElement("div")
+    row.className = "alert-sheet-filter-row"
+    row.dataset.filterId = String(f.id)
+
+    const head = document.createElement("div")
+    head.className = "alert-sheet-filter-row-head"
+    const summary = document.createElement("span")
+    summary.className = "alert-sheet-filter-summary"
+    const minL = f.min !== "" && f.min != null ? String(f.min) : "—"
+    const maxL = f.max !== "" && f.max != null ? String(f.max) : "—"
+    summary.textContent = `${getSheetColumnHeaderLabel(
+      f.column || "?"
+    )} ∈ [${minL}, ${maxL}]`
+    const rm = document.createElement("button")
+    rm.type = "button"
+    rm.className = "ghost alert-sheet-filter-remove"
+    rm.textContent = "Remove"
+    rm.addEventListener("click", () => {
+      unifiedSheetState.numericFilters =
+        unifiedSheetState.numericFilters.filter((x) => x.id !== f.id)
+      renderNumericFilterPanel(dash)
+      refreshUnifiedSheetTable(dash)
+    })
+    head.appendChild(summary)
+    head.appendChild(rm)
+    row.appendChild(head)
+
+    const grid = document.createElement("div")
+    grid.className = "alert-sheet-filter-grid"
+    const sel = document.createElement("select")
+    sel.className = "alert-sheet-select"
+    const opt0 = document.createElement("option")
+    opt0.value = ""
+    opt0.textContent = "Column"
+    sel.appendChild(opt0)
+    for (const c of numericCols) {
+      const opt = document.createElement("option")
+      opt.value = c
+      opt.textContent = getSheetColumnHeaderLabel(c)
+      if (f.column === c) opt.selected = true
+      sel.appendChild(opt)
+    }
+    const minIn = document.createElement("input")
+    minIn.type = "text"
+    minIn.className = "alert-sheet-filter-input"
+    minIn.value = f.min != null ? String(f.min) : ""
+    const maxIn = document.createElement("input")
+    maxIn.type = "text"
+    maxIn.className = "alert-sheet-filter-input"
+    maxIn.value = f.max != null ? String(f.max) : ""
+    const syncRangeFilterPlaceholders = () => {
+      if (f.column === "time") {
+        minIn.placeholder = "From (copy Time cell, ISO, or epoch ms)"
+        maxIn.placeholder = "To (optional)"
+      } else {
+        minIn.placeholder = "Min (optional)"
+        maxIn.placeholder = "Max (optional)"
+      }
+    }
+    syncRangeFilterPlaceholders()
+    sel.addEventListener("change", () => {
+      f.column = sel.value
+      syncRangeFilterPlaceholders()
+      summary.textContent = `${getSheetColumnHeaderLabel(f.column || "?")} ∈ [${
+        f.min !== "" && f.min != null ? String(f.min) : "—"
+      }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
+      refreshUnifiedSheetTable(dash)
+    })
+    minIn.addEventListener("input", () => {
+      f.min = minIn.value
+      summary.textContent = `${getSheetColumnHeaderLabel(f.column || "?")} ∈ [${
+        f.min !== "" && f.min != null ? String(f.min) : "—"
+      }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
+      refreshUnifiedSheetTable(dash)
+    })
+    maxIn.addEventListener("input", () => {
+      f.max = maxIn.value
+      summary.textContent = `${getSheetColumnHeaderLabel(f.column || "?")} ∈ [${
+        f.min !== "" && f.min != null ? String(f.min) : "—"
+      }, ${f.max !== "" && f.max != null ? String(f.max) : "—"}]`
+      refreshUnifiedSheetTable(dash)
+    })
+    grid.appendChild(sel)
+    grid.appendChild(minIn)
+    grid.appendChild(maxIn)
+    row.appendChild(grid)
+    box.appendChild(row)
+  }
+}
+
+function renderColumnControlPanel(dash) {
+  const box = dash.querySelector(".alert-sheet-col-checkboxes")
+  const pageLabel = dash.querySelector(".alert-sheet-col-page-label")
+  if (!box || !pageLabel) return
+  const allRows = getAllUnifiedSheetRows()
+  const allCols = getSheetColumnsOrdered(allRows)
+  ensureSheetColumnVisibility(allCols)
+  const totalPages = Math.max(
+    1,
+    Math.ceil(allCols.length / SHEET_COL_PAGE_SIZE)
+  )
+  if (unifiedSheetState.colPage >= totalPages) {
+    unifiedSheetState.colPage = totalPages - 1
+  }
+  const start = unifiedSheetState.colPage * SHEET_COL_PAGE_SIZE
+  const slice = allCols.slice(start, start + SHEET_COL_PAGE_SIZE)
+  box.replaceChildren()
+  for (const col of slice) {
+    const lab = document.createElement("label")
+    lab.className = "alert-sheet-col-check"
+    const cb = document.createElement("input")
+    cb.type = "checkbox"
+    cb.checked = unifiedSheetState.columnVisible[col] !== false
+    cb.addEventListener("change", () => {
+      unifiedSheetState.columnVisible[col] = cb.checked
+      refreshUnifiedSheetTable(dash)
+    })
+    lab.appendChild(cb)
+    lab.appendChild(
+      document.createTextNode(` ${getSheetColumnHeaderLabel(col)}`)
+    )
+    box.appendChild(lab)
+  }
+  pageLabel.textContent = `Page ${
+    unifiedSheetState.colPage + 1
+  } of ${totalPages}`
+}
+
+function computeUnifiedSheetDisplay() {
+  const allRows = getAllUnifiedSheetRows()
+  const allCols = getSheetColumnsOrdered(allRows)
+  ensureSheetColumnVisibility(allCols)
+  const q = unifiedSheetState.searchRaw.trim()
+  let working = allRows.filter((r) => rowMatchesSheetSearch(r, q))
+  working = working.filter((r) =>
+    rowPassesNumericFilters(r, unifiedSheetState.numericFilters)
+  )
+  working = working.filter((row) =>
+    Object.keys(row).some((k) => {
+      if (k.startsWith("__")) return false
+      const v = row[k]
+      if (v === undefined || v === null) return false
+      return String(v).trim() !== ""
+    })
+  )
+  const sortCol = unifiedSheetState.sortCol
+  const sortDir = unifiedSheetState.sortDir
+  if (sortCol && allCols.includes(sortCol)) {
+    working = [...working].sort((a, b) =>
+      compareSheetRows(a, b, sortCol, sortDir)
+    )
+  }
+  const cols = visibleSheetColumns(allCols)
+  return { allRows, allCols, working, cols }
+}
+
+function csvEscapeField(val) {
+  let s = String(val ?? "")
+  if (/^[\t\r ]*[=+\-@]/.test(s)) {
+    s = `'${s}`
+  }
+  if (/[",\r\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`
+  return s
+}
+
+function sheetCellPlainExport(col, rawVal) {
+  const cleaned = stripLeadingColonSpace(
+    rawVal !== undefined && rawVal != null ? rawVal : ""
+  )
+  const trimmed = cleaned.trim()
+  if (col.startsWith("link_") && /^https?:\/\//i.test(trimmed)) return trimmed
+  return cleaned
+}
+
+function downloadUnifiedSheetAsCsv() {
+  const { allRows, working, cols } = computeUnifiedSheetDisplay()
+  if (!cols.length) {
+    showToast(
+      "No columns to export — use Column controls or add alerts first.",
+      "error"
+    )
+    return
+  }
+  const headerLine = cols
+    .map((c) => csvEscapeField(getSheetColumnHeaderLabel(c)))
+    .join(",")
+  const lines = [headerLine]
+  for (const row of working) {
+    lines.push(
+      cols.map((c) => csvEscapeField(sheetCellPlainExport(c, row[c]))).join(",")
+    )
+  }
+  const blob = new Blob(["\ufeff", lines.join("\r\n")], {
+    type: "text/csv;charset=utf-8",
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `aaa-alerts-${new Date()
+    .toISOString()
+    .slice(0, 19)
+    .replace(/:/g, "-")}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function getLocalHourRangeMs() {
+  const now = new Date()
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    0,
+    0,
+    0
+  )
+  const end = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    59,
+    59,
+    999
+  )
+  return { startMs: start.getTime(), endMs: end.getTime() }
+}
+
+function syncSheetFilterPanelFromState(root) {
+  const filterPanel = root.querySelector(".alert-sheet-filter-panel")
+  const btnFilter = root.querySelector("#aaa-sheet-toggle-filter")
+  if (filterPanel) filterPanel.hidden = !unifiedSheetState.filterPanelOpen
+  if (btnFilter) {
+    btnFilter.textContent = unifiedSheetState.filterPanelOpen
+      ? "Hide range filter"
+      : "Show range filter"
+  }
+  if (unifiedSheetState.filterPanelOpen) {
+    renderNumericFilterPanel(root)
+  }
+  refreshUnifiedSheetTable(root)
+}
+
+function applyCurrentHourTimeFilter() {
+  const { startMs, endMs } = getLocalHourRangeMs()
+  unifiedSheetState.numericFilters = unifiedSheetState.numericFilters.filter(
+    (f) => f && f.column !== "time"
+  )
+  unifiedSheetState.numericFilters.push({
+    id: unifiedSheetState.nextFilterId++,
+    column: "time",
+    min: String(startMs),
+    max: String(endMs),
+  })
+  unifiedSheetState.filterPanelOpen = true
+  const needRedraw = alertsViewMode !== "sheet"
+  if (needRedraw) {
+    setAlertsViewMode("sheet")
+  }
+  const stream = getElement("alerts-stream")
+  const root = stream?.querySelector(".alert-sheet-dashboard")
+  if (root) syncSheetFilterPanelFromState(root)
+}
+
+function refreshUnifiedSheetTable(dash) {
+  const table = dash.querySelector(".alert-sheet-table.unified")
+  const thead = table?.querySelector("thead")
+  const tbody = table?.querySelector("tbody")
+  const footer = dash.querySelector(".alert-sheet-unified-footer")
+  if (!table || !thead || !tbody || !footer) return
+
+  const { allRows, working, cols } = computeUnifiedSheetDisplay()
+  thead.replaceChildren()
+  const hr = document.createElement("tr")
+  if (cols.length === 0) {
+    const th = document.createElement("th")
+    th.textContent = "—"
+    hr.appendChild(th)
+  } else {
+    for (const col of cols) {
+      const th = document.createElement("th")
+      th.dataset.col = col
+      th.className = "alert-sheet-th-sortable"
+      const grip = document.createElement("span")
+      grip.className = "alert-sheet-col-drag"
+      grip.textContent = "⋮⋮"
+      grip.draggable = true
+      grip.title = "Drag to reorder column"
+      grip.setAttribute("aria-hidden", "true")
+      grip.addEventListener("dragstart", (e) => {
+        e.stopPropagation()
+        e.dataTransfer.setData("text/plain", col)
+        e.dataTransfer.effectAllowed = "move"
+        th.classList.add("alert-sheet-th-dragging")
+      })
+      const label = document.createElement("span")
+      label.className = "alert-sheet-col-label"
+      label.textContent = getSheetColumnHeaderLabel(col)
+      label.title = "Click to sort"
+      label.addEventListener("click", (e) => {
+        e.stopPropagation()
+        if (unifiedSheetState.sortCol === col) {
+          unifiedSheetState.sortDir =
+            unifiedSheetState.sortDir === "asc" ? "desc" : "asc"
+        } else {
+          unifiedSheetState.sortCol = col
+          unifiedSheetState.sortDir = "asc"
+        }
+        refreshUnifiedSheetTable(dash)
+      })
+      th.appendChild(grip)
+      th.appendChild(label)
+      if (unifiedSheetState.sortCol === col) {
+        const ind = document.createElement("span")
+        ind.className = "alert-sheet-sort-ind"
+        ind.textContent = unifiedSheetState.sortDir === "desc" ? " ▼" : " ▲"
+        th.appendChild(ind)
+      }
+      th.addEventListener("dragover", (e) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = "move"
+        th.classList.add("alert-sheet-th-drop-target")
+      })
+      th.addEventListener("dragleave", (e) => {
+        if (!th.contains(e.relatedTarget)) {
+          th.classList.remove("alert-sheet-th-drop-target")
+        }
+      })
+      th.addEventListener("drop", (e) => {
+        e.preventDefault()
+        th.classList.remove("alert-sheet-th-drop-target")
+        const fromCol = e.dataTransfer.getData("text/plain")
+        if (fromCol && fromCol !== col) {
+          reorderSheetColumns(dash, fromCol, col)
+        }
+      })
+      hr.appendChild(th)
+    }
+  }
+  thead.appendChild(hr)
+
+  tbody.replaceChildren()
+  if (cols.length === 0) {
+    const tr = document.createElement("tr")
+    const td = document.createElement("td")
+    td.className = "alert-sheet-empty-msg"
+    td.textContent =
+      allRows.length === 0
+        ? "No alerts yet."
+        : "No columns visible — open Column controls or click Show all."
+    tr.appendChild(td)
+    tbody.appendChild(tr)
+  } else {
+    for (const row of working) {
+      const tr = document.createElement("tr")
+      for (const col of cols) {
+        const td = document.createElement("td")
+        appendSheetTableCell(td, col, row[col])
+        tr.appendChild(td)
+      }
+      tbody.appendChild(tr)
+    }
+  }
+
+  footer.textContent = `Showing ${working.length} of ${allRows.length} rows`
+}
+
+function reorderSheetColumns(dash, fromCol, toCol) {
+  const allRows = getAllUnifiedSheetRows()
+  const order = [...getSheetColumnsOrdered(allRows)]
+  const fi = order.indexOf(fromCol)
+  const ti = order.indexOf(toCol)
+  if (fi < 0 || ti < 0 || fromCol === toCol) return
+  const [moved] = order.splice(fi, 1)
+  order.splice(ti, 0, moved)
+  unifiedSheetState.sheetColumnOrder = order
+  saveSheetColumnOrder(order)
+  refreshUnifiedSheetTable(dash)
+  renderColumnControlPanel(dash)
+}
+
+function createUnifiedSheetDashboard() {
+  const root = document.createElement("div")
+  root.className = "alert-sheet-dashboard"
+
+  const toolbar = document.createElement("div")
+  toolbar.className = "alert-sheet-toolbar"
+
+  const search = document.createElement("input")
+  search.type = "search"
+  search.className = "alert-sheet-search"
+  search.placeholder = "Search all columns…"
+  search.autocomplete = "off"
+  search.value = unifiedSheetState.searchRaw
+  search.addEventListener("input", () => {
+    unifiedSheetState.searchRaw = search.value
+    if (sheetSearchDebounceTimer) clearTimeout(sheetSearchDebounceTimer)
+    sheetSearchDebounceTimer = setTimeout(() => {
+      sheetSearchDebounceTimer = null
+      refreshUnifiedSheetTable(root)
+    }, 120)
+  })
+
+  const btnFilter = document.createElement("button")
+  btnFilter.type = "button"
+  btnFilter.id = "aaa-sheet-toggle-filter"
+  btnFilter.className = "ghost alert-sheet-toggle"
+  btnFilter.textContent = unifiedSheetState.filterPanelOpen
+    ? "Hide range filter"
+    : "Show range filter"
+
+  const btnCol = document.createElement("button")
+  btnCol.type = "button"
+  btnCol.className = "ghost alert-sheet-toggle"
+  btnCol.textContent = unifiedSheetState.colPanelOpen
+    ? "Hide column controls"
+    : "Show column controls"
+
+  const btnColReset = document.createElement("button")
+  btnColReset.type = "button"
+  btnColReset.className = "ghost alert-sheet-toggle"
+  btnColReset.title =
+    "Restore default column order (item, buyout_prices, realmNames, time, …)"
+  btnColReset.textContent = "Reset column order"
+  btnColReset.addEventListener("click", () => {
+    unifiedSheetState.sheetColumnOrder = null
+    try {
+      localStorage.removeItem(SHEET_COLUMN_ORDER_STORAGE_KEY)
+    } catch {
+      // ignore
+    }
+    refreshUnifiedSheetTable(root)
+    renderColumnControlPanel(root)
+  })
+
+  const toolbarActions = document.createElement("div")
+  toolbarActions.className = "alert-sheet-toolbar-actions"
+  toolbarActions.appendChild(btnFilter)
+  toolbarActions.appendChild(btnCol)
+  toolbarActions.appendChild(btnColReset)
+  toolbar.appendChild(toolbarActions)
+  toolbar.appendChild(search)
+
+  const filterPanel = document.createElement("div")
+  filterPanel.className = "alert-sheet-panel alert-sheet-filter-panel"
+  filterPanel.hidden = !unifiedSheetState.filterPanelOpen
+  const filterTitle = document.createElement("div")
+  filterTitle.className = "alert-sheet-panel-title"
+  filterTitle.textContent = "Range filter"
+  const filterActions = document.createElement("div")
+  filterActions.className = "alert-sheet-panel-actions"
+  const addF = document.createElement("button")
+  addF.type = "button"
+  addF.className = "primary"
+  addF.textContent = "Add filter"
+  addF.addEventListener("click", () => {
+    unifiedSheetState.numericFilters.push({
+      id: unifiedSheetState.nextFilterId++,
+      column: "",
+      min: "",
+      max: "",
+    })
+    renderNumericFilterPanel(root)
+    refreshUnifiedSheetTable(root)
+  })
+  const clearF = document.createElement("button")
+  clearF.type = "button"
+  clearF.className = "danger"
+  clearF.textContent = "Clear all"
+  clearF.addEventListener("click", () => {
+    unifiedSheetState.numericFilters = []
+    renderNumericFilterPanel(root)
+    refreshUnifiedSheetTable(root)
+  })
+  filterActions.appendChild(addF)
+  filterActions.appendChild(clearF)
+  const filterList = document.createElement("div")
+  filterList.className = "alert-sheet-filter-list"
+  const filterHint = document.createElement("div")
+  filterHint.className = "alert-sheet-filter-hint"
+  const filterHintNumeric = document.createElement("p")
+  filterHintNumeric.textContent =
+    "For numeric columns, choose a column and optional min / max. Bounds use the numbers parsed from cells (prices, percentages, etc.); leave min or max empty for an open-ended range."
+  const filterHintTime = document.createElement("p")
+  filterHintTime.textContent =
+    "Time filters use each alert’s embed timestamp. The sheet shows local time; copying a Time cell puts ISO-8601 on the clipboard. You can also paste ISO-8601 or Unix ms."
+  filterHint.appendChild(filterHintNumeric)
+  filterHint.appendChild(filterHintTime)
+  filterPanel.appendChild(filterTitle)
+  filterPanel.appendChild(filterHint)
+  filterPanel.appendChild(filterActions)
+  filterPanel.appendChild(filterList)
+
+  const colPanel = document.createElement("div")
+  colPanel.className = "alert-sheet-panel alert-sheet-col-panel"
+  colPanel.hidden = !unifiedSheetState.colPanelOpen
+  const colTitle = document.createElement("div")
+  colTitle.className = "alert-sheet-panel-title"
+  colTitle.textContent = "Column controls"
+  const colNav = document.createElement("div")
+  colNav.className = "alert-sheet-col-nav"
+  const colChecks = document.createElement("div")
+  colChecks.className = "alert-sheet-col-checkboxes"
+  const colPageLabel = document.createElement("span")
+  colPageLabel.className = "alert-sheet-col-page-label"
+  const prevP = document.createElement("button")
+  prevP.type = "button"
+  prevP.className = "ghost"
+  prevP.textContent = "Previous"
+  const nextP = document.createElement("button")
+  nextP.type = "button"
+  nextP.className = "ghost"
+  nextP.textContent = "Next"
+  const showAll = document.createElement("button")
+  showAll.type = "button"
+  showAll.className = "success"
+  showAll.textContent = "Show all"
+  const hideAll = document.createElement("button")
+  hideAll.type = "button"
+  hideAll.className = "danger"
+  hideAll.textContent = "Hide all"
+  colNav.appendChild(prevP)
+  colNav.appendChild(colPageLabel)
+  colNav.appendChild(nextP)
+  const colFoot = document.createElement("div")
+  colFoot.className = "alert-sheet-col-foot"
+  colFoot.appendChild(showAll)
+  colFoot.appendChild(hideAll)
+  colPanel.appendChild(colTitle)
+  colPanel.appendChild(colChecks)
+  colPanel.appendChild(colNav)
+  colPanel.appendChild(colFoot)
+
+  prevP.addEventListener("click", () => {
+    if (unifiedSheetState.colPage > 0) {
+      unifiedSheetState.colPage--
+      renderColumnControlPanel(root)
+    }
+  })
+  nextP.addEventListener("click", () => {
+    const allRows = getAllUnifiedSheetRows()
+    const allCols = getSheetColumnsOrdered(allRows)
+    const totalPages = Math.max(
+      1,
+      Math.ceil(allCols.length / SHEET_COL_PAGE_SIZE)
+    )
+    if (unifiedSheetState.colPage < totalPages - 1) {
+      unifiedSheetState.colPage++
+      renderColumnControlPanel(root)
+    }
+  })
+  showAll.addEventListener("click", () => {
+    const allRows = getAllUnifiedSheetRows()
+    const allCols = getSheetColumnsOrdered(allRows)
+    for (const c of allCols) unifiedSheetState.columnVisible[c] = true
+    renderColumnControlPanel(root)
+    refreshUnifiedSheetTable(root)
+  })
+  hideAll.addEventListener("click", () => {
+    const allRows = getAllUnifiedSheetRows()
+    const allCols = getSheetColumnsOrdered(allRows)
+    for (const c of allCols) unifiedSheetState.columnVisible[c] = false
+    renderColumnControlPanel(root)
+    refreshUnifiedSheetTable(root)
+  })
+
+  btnFilter.addEventListener("click", () => {
+    unifiedSheetState.filterPanelOpen = !unifiedSheetState.filterPanelOpen
+    filterPanel.hidden = !unifiedSheetState.filterPanelOpen
+    btnFilter.textContent = unifiedSheetState.filterPanelOpen
+      ? "Hide range filter"
+      : "Show range filter"
+    if (unifiedSheetState.filterPanelOpen) {
+      renderNumericFilterPanel(root)
+    }
+  })
+  btnCol.addEventListener("click", () => {
+    unifiedSheetState.colPanelOpen = !unifiedSheetState.colPanelOpen
+    colPanel.hidden = !unifiedSheetState.colPanelOpen
+    btnCol.textContent = unifiedSheetState.colPanelOpen
+      ? "Hide column controls"
+      : "Show column controls"
+    if (unifiedSheetState.colPanelOpen) {
+      renderColumnControlPanel(root)
+    }
+  })
+
+  const scroll = document.createElement("div")
+  scroll.className = "alert-sheet-scroll unified"
+  const table = document.createElement("table")
+  table.className = "alert-sheet-table unified"
+  table.addEventListener("copy", (e) => {
+    const sel = window.getSelection()
+    if (!sel || sel.isCollapsed) return
+    let node = sel.anchorNode
+    if (!node) return
+    if (node.nodeType === Node.TEXT_NODE) node = node.parentElement
+    const td =
+      node && typeof node.closest === "function" ? node.closest("td") : null
+    if (
+      !td ||
+      td.dataset.sheetTimeIso == null ||
+      td.dataset.sheetTimeIso === ""
+    )
+      return
+    e.preventDefault()
+    e.clipboardData.setData("text/plain", td.dataset.sheetTimeIso)
+  })
+  const thead = document.createElement("thead")
+  const tbody = document.createElement("tbody")
+  table.appendChild(thead)
+  table.appendChild(tbody)
+  scroll.appendChild(table)
+
+  table.addEventListener("dragend", () => {
+    table.querySelectorAll("th").forEach((th) => {
+      th.classList.remove(
+        "alert-sheet-th-dragging",
+        "alert-sheet-th-drop-target"
+      )
+    })
+  })
+
+  const footer = document.createElement("div")
+  footer.className = "alert-sheet-unified-footer"
+
+  root.appendChild(toolbar)
+  root.appendChild(filterPanel)
+  root.appendChild(colPanel)
+  root.appendChild(scroll)
+  root.appendChild(footer)
+
+  renderNumericFilterPanel(root)
+  renderColumnControlPanel(root)
+  refreshUnifiedSheetTable(root)
+  return root
+}
+
+function redrawAlertsStream() {
+  const stream = getElement("alerts-stream")
+  if (!stream) return
+  stream.replaceChildren()
+  if (alertsViewMode === "sheet") {
+    stream.appendChild(createUnifiedSheetDashboard())
+    return
+  }
+  const frag = document.createDocumentFragment()
+  for (const { embed } of alertEmbedHistory) {
+    frag.appendChild(buildAlertElement(embed, alertsViewMode))
+  }
+  stream.appendChild(frag)
+}
+
+function buildAlertElement(embed, mode) {
+  const fields = Array.isArray(embed.fields) ? embed.fields : []
+  if (mode === "discord") {
+    return createDiscordFlatGroup(embed, fields)
+  }
+  if (mode === "details") {
+    return createAlertTableGroup(embed, fields)
+  }
+  return createDiscordFlatGroup(embed, fields)
+}
+
+function refreshAlertsViewToggleButtons() {
+  for (const m of ALERT_VIEW_MODES) {
+    const btn = document.getElementById(`alerts-view-${m}`)
+    if (!btn) continue
+    const on = alertsViewMode === m
+    btn.classList.toggle("alerts-view-btn-active", on)
+    btn.setAttribute("aria-pressed", on ? "true" : "false")
+  }
+}
+
+function setAlertsViewMode(mode) {
+  if (!ALERT_VIEW_MODES.includes(mode)) return
+  if (mode === alertsViewMode) return
+  alertsViewMode = mode
+  localStorage.setItem(ALERTS_VIEW_STORAGE_KEY, mode)
+  redrawAlertsStream()
+  refreshAlertsViewToggleButtons()
+}
+
+function appendAlertEmbed(embed) {
+  const stream = getElement("alerts-stream")
+  if (!stream || !embed || typeof embed !== "object") return
+  const nearBottom =
+    stream.scrollHeight - stream.scrollTop - stream.clientHeight < 140
+
+  alertEmbedHistory.push({ embed })
+
+  const cap = getMaxInAppAlerts()
+  if (alertsViewMode === "sheet") {
+    if (alertEmbedHistory.length > cap) {
+      alertEmbedHistory.shift()
+    }
+    let dash = stream.querySelector(".alert-sheet-dashboard")
+    if (!dash) {
+      redrawAlertsStream()
+      dash = stream.querySelector(".alert-sheet-dashboard")
+    }
+    if (dash) refreshUnifiedSheetTable(dash)
+  } else {
+    if (alertEmbedHistory.length > cap) {
+      alertEmbedHistory.shift()
+      if (stream.firstChild) {
+        stream.removeChild(stream.firstChild)
+      }
+    }
+    stream.appendChild(buildAlertElement(embed, alertsViewMode))
+  }
+  if (nearBottom) {
+    stream.scrollTop = stream.scrollHeight
+  }
+}
+
 // Helper function for fetch with timeout
 async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
   const controller = new AbortController()
@@ -41,7 +1594,7 @@ const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
 // Keep in sync with root package.json version (avoid IPC on every Saddlebag request — was causing UI jitter)
-const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.0.9"
+const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.1.0"
 
 function saddlebagFetchHeaders(base = {}) {
   return { ...base, "User-Agent": SADDLEBAG_USER_AGENT }
@@ -54,6 +1607,34 @@ const state = {
   petIlvlList: [],
   realmLists: {},
   processRunning: false,
+}
+
+function getMaxInAppAlerts() {
+  const raw = state.megaData?.MAX_IN_APP_ALERTS
+  const n = Number(raw)
+  if (!Number.isFinite(n) || !Number.isInteger(n)) {
+    return DEFAULT_MAX_IN_APP_ALERTS
+  }
+  return Math.min(MAX_IN_APP_ALERTS_HARD_CAP, Math.max(1, n))
+}
+
+/** Drop oldest alerts when history exceeds settings cap; refresh Alerts UI. */
+function trimAlertEmbedHistoryToLimit() {
+  const max = getMaxInAppAlerts()
+  let changed = false
+  while (alertEmbedHistory.length > max) {
+    alertEmbedHistory.shift()
+    changed = true
+  }
+  if (!changed) return
+  const stream = getElement("alerts-stream")
+  if (!stream) return
+  if (alertsViewMode === "sheet") {
+    const dash = stream.querySelector(".alert-sheet-dashboard")
+    if (dash) refreshUnifiedSheetTable(dash)
+  } else {
+    redrawAlertsStream()
+  }
 }
 
 const megaForm = getElement("mega-form")
@@ -270,6 +1851,10 @@ function showView(view) {
   navButtons.forEach((btn) =>
     btn.classList.toggle("active", btn.dataset.viewTarget === view)
   )
+  if (view === "alerts") {
+    redrawAlertsStream()
+    refreshAlertsViewToggleButtons()
+  }
   // Initialize exclude breeds dropdown when pet-ilvl view is shown
   if (view === "pet-ilvl") {
     // Use setTimeout to ensure DOM is ready
@@ -890,12 +2475,26 @@ function renderMegaForm(data) {
   for (const el of megaForm.elements) {
     if (!el.name) continue
     if (el.type === "checkbox") {
-      const defaultTrue = el.name === "USE_POST_MIDNIGHT_ILVL"
-      el.checked = defaultTrue
-        ? Boolean(data[el.name] ?? true)
-        : Boolean(data[el.name])
+      if (el.name === "USE_POST_MIDNIGHT_ILVL") {
+        el.checked = Boolean(data[el.name] ?? true)
+      } else if (el.name === "DISCORD_ALERTS_ENABLED") {
+        el.checked = Boolean(data[el.name] ?? true)
+      } else if (el.name === "IN_APP_ALERTS_ENABLED") {
+        el.checked = Boolean(data[el.name] ?? false)
+      } else {
+        el.checked = Boolean(data[el.name])
+      }
     } else if (el.type !== "submit" && el.type !== "button") {
-      el.value = data[el.name] ?? ""
+      if (el.name === "MAX_IN_APP_ALERTS") {
+        const v = data[el.name]
+        el.value = String(
+          v === undefined || v === null || v === ""
+            ? DEFAULT_MAX_IN_APP_ALERTS
+            : v
+        )
+      } else {
+        el.value = data[el.name] ?? ""
+      }
     }
   }
   // Handle extra alerts checkboxes separately
@@ -1431,6 +3030,8 @@ async function loadState() {
   fetchPetNames().then(() => {
     renderPetIlvlRules()
   })
+
+  trimAlertEmbedHistoryToLimit()
 }
 
 async function loadDataDir() {
@@ -1824,13 +3425,17 @@ async function saveMegaData(skipValidation = false) {
   const data = readMegaForm()
 
   if (!skipValidation) {
-    // Validate required string fields
-    const requiredFields = {
-      MEGA_WEBHOOK_URL: {
-        value: (data.MEGA_WEBHOOK_URL || "").trim(),
-        field: megaForm.MEGA_WEBHOOK_URL,
-        label: "Discord Webhook URL",
-      },
+    const discordOn = Boolean(data.DISCORD_ALERTS_ENABLED)
+    const inAppOn = Boolean(data.IN_APP_ALERTS_ENABLED)
+    if (!discordOn && !inAppOn) {
+      showToast(
+        "Enable at least one: Send alerts to Discord, or Show alerts in the app.",
+        "error"
+      )
+      return false
+    }
+
+    const requiredApiFields = {
       WOW_CLIENT_ID: {
         value: (data.WOW_CLIENT_ID || "").trim(),
         field: megaForm.WOW_CLIENT_ID,
@@ -1843,9 +3448,7 @@ async function saveMegaData(skipValidation = false) {
       },
     }
 
-    for (const [key, { value, field, label }] of Object.entries(
-      requiredFields
-    )) {
+    for (const { value, field, label } of Object.values(requiredApiFields)) {
       if (!value) {
         const errorMsg = `${label} cannot be empty.`
         showToast(errorMsg, "error")
@@ -1860,10 +3463,29 @@ async function saveMegaData(skipValidation = false) {
       }
     }
 
+    if (discordOn) {
+      const wh = (data.MEGA_WEBHOOK_URL || "").trim()
+      if (!wh) {
+        showToast(
+          "Discord Webhook URL cannot be empty when Discord alerts are enabled.",
+          "error"
+        )
+        megaForm.MEGA_WEBHOOK_URL?.focus()
+        return false
+      }
+      if (wh.length < 20) {
+        const errorMsg =
+          "Discord Webhook URL value is invalid. Contact the devs on discord."
+        showToast(errorMsg, "error")
+        megaForm.MEGA_WEBHOOK_URL?.focus()
+        return false
+      }
+    }
+
     // Validate that Client ID and Secret are not the same
     if (
-      requiredFields.WOW_CLIENT_ID.value ===
-      requiredFields.WOW_CLIENT_SECRET.value
+      requiredApiFields.WOW_CLIENT_ID.value ===
+      requiredApiFields.WOW_CLIENT_SECRET.value
     ) {
       const errorMsg =
         "Client ID and Secret cannot be the same value. Read the wiki:\n\nhttps://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Installation-Guide#4-go-to-httpsdevelopbattlenetaccessclients-and-create-a-client-get-the-blizzard-oauth-client-and-secret-ids--you-will-use-these-values-for-the-wow_client_id-and-wow_client_secret-later-on"
@@ -1916,6 +3538,11 @@ async function saveMegaData(skipValidation = false) {
         field: megaForm.TOKEN_PRICE,
         label: "Token alert min price",
       },
+      MAX_IN_APP_ALERTS: {
+        value: data.MAX_IN_APP_ALERTS,
+        field: megaForm.MAX_IN_APP_ALERTS,
+        label: "Max in-app alerts",
+      },
     }
 
     for (const [key, { value, field, label }] of Object.entries(
@@ -1946,6 +3573,16 @@ async function saveMegaData(skipValidation = false) {
       return false
     }
 
+    const maxInApp = Number(data.MAX_IN_APP_ALERTS)
+    if (maxInApp < 1 || maxInApp > MAX_IN_APP_ALERTS_HARD_CAP) {
+      showToast(
+        `Max in-app alerts must be an integer from 1 to ${MAX_IN_APP_ALERTS_HARD_CAP}.`,
+        "error"
+      )
+      megaForm.MAX_IN_APP_ALERTS?.focus()
+      return false
+    }
+
     // Validate authentication token
     const token = data.AUTHENTICATION_TOKEN || ""
     const tokenValidation = await validateToken(token)
@@ -1958,6 +3595,7 @@ async function saveMegaData(skipValidation = false) {
 
   state.megaData = await window.aaa.saveMegaData(data)
   renderMegaForm(state.megaData)
+  trimAlertEmbedHistoryToLimit()
   if (!skipValidation) {
     showToast("Settings saved successfully!", "success", 2000)
   }
@@ -2863,6 +4501,11 @@ copyPBSPetIlvlBtn?.addEventListener("click", () =>
 )
 
 window.aaa.onMegaLog((line) => appendLog(line))
+window.aaa.onMegaAlertEmbed((embed) => {
+  if (embed && typeof embed === "object") {
+    appendAlertEmbed(embed)
+  }
+})
 window.aaa.onMegaExit((code) => {
   appendLog(`\nProcess exited with code ${code}\n`)
   setRunning(false)
@@ -2910,7 +4553,28 @@ navButtons.forEach((btn) => {
   btn.addEventListener("click", () => showView(btn.dataset.viewTarget))
 })
 
+const clearAlertsBtn = getElement("clear-alerts-btn")
+clearAlertsBtn?.addEventListener("click", () => {
+  alertEmbedHistory.length = 0
+  redrawAlertsStream()
+})
+
+getElement("alerts-download-csv-btn")?.addEventListener("click", () => {
+  downloadUnifiedSheetAsCsv()
+})
+
+getElement("alerts-filter-hour-btn")?.addEventListener("click", () => {
+  applyCurrentHourTimeFilter()
+})
+
+for (const m of ALERT_VIEW_MODES) {
+  document.getElementById(`alerts-view-${m}`)?.addEventListener("click", () => {
+    setAlertsViewMode(m)
+  })
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
+  refreshAlertsViewToggleButtons()
   await loadState()
   showView("home")
   updateNavigationButtons()

@@ -15,6 +15,11 @@ contextBridge.exposeInMainWorld("aaa", {
     ipcRenderer.on("mega-log", handler)
     return () => ipcRenderer.removeListener("mega-log", handler)
   },
+  onMegaAlertEmbed: (callback) => {
+    const handler = (_event, embed) => callback(embed)
+    ipcRenderer.on("mega-alert-embed", handler)
+    return () => ipcRenderer.removeListener("mega-alert-embed", handler)
+  },
   onMegaExit: (callback) => {
     const handler = (_event, code) => callback(code)
     ipcRenderer.on("mega-exit", handler)

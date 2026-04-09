@@ -33,7 +33,7 @@
       <header class="topbar">
         <div>
           <div class="eyebrow">Azeroth Auction Assassin</div>
-          <div class="title">Version: 2.0.9</div>
+          <div class="title">Version: 2.1.0</div>
         </div>
         <div class="actions">
           <div class="nav-controls">
@@ -63,15 +63,20 @@
       </header>
 
       <div class="nav">
-        <button class="nav-btn active" data-view-target="home">Home</button>
-        <button class="nav-btn" data-view-target="settings">Settings</button>
-        <button class="nav-btn" data-view-target="items">Items</button>
-        <button class="nav-btn" data-view-target="ilvl">
-          BOE Ilvl Gear/Weapons
-        </button>
-        <button class="nav-btn" data-view-target="pet-ilvl">Pets</button>
-        <button class="nav-btn" data-view-target="realms">Realm Lists</button>
-        <button class="nav-btn" data-view-target="logs">Logs</button>
+        <div class="nav-row">
+          <button class="nav-btn active" data-view-target="home">Home</button>
+          <button class="nav-btn" data-view-target="settings">Settings</button>
+          <button class="nav-btn" data-view-target="realms">Realm Lists</button>
+          <button class="nav-btn" data-view-target="logs">Logs</button>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" data-view-target="alerts">Alerts</button>
+          <button class="nav-btn" data-view-target="items">Items</button>
+          <button class="nav-btn" data-view-target="ilvl">
+            BOE Ilvl Gear/Weapons
+          </button>
+          <button class="nav-btn" data-view-target="pet-ilvl">Pets</button>
+        </div>
       </div>
 
       <main class="grid">
@@ -401,7 +406,29 @@
                 </div>
               </div>
             </label>
+            <label
+              title="When the Alerts tab reaches this many entries, the oldest are removed as new ones arrive. 1–5000."
+            >
+              Max in-app alerts
+              <input
+                name="MAX_IN_APP_ALERTS"
+                type="number"
+                min="1"
+                max="5000"
+                step="1"
+              />
+            </label>
             <div class="toggles">
+              <label
+                title="Post auction alerts to your Discord webhook when mega alerts are running."
+                ><input type="checkbox" name="DISCORD_ALERTS_ENABLED" checked />
+                Send alerts to Discord</label
+              >
+              <label
+                title="Show the same alert embeds in the Alerts tab (Table / Discord / Details). Does not affect the Logs tab."
+                ><input type="checkbox" name="IN_APP_ALERTS_ENABLED" /> Show
+                alerts in the app</label
+              >
               <label
                 title="Show items with Bid prices below your price limit on Desired Items"
                 ><input type="checkbox" name="SHOW_BID_PRICES" /> Show bid
@@ -911,6 +938,79 @@
               <ul class="list" id="realm-list"></ul>
             </div>
           </div>
+        </section>
+
+        <section class="card span-2 view" data-view="alerts">
+          <div class="page-title alerts-page-head">
+            <div>
+              <h2>Alerts</h2>
+              <div class="muted alerts-page-desc">
+                <div>
+                  Discord embeds, a compact details layout, or one sortable
+                  spreadsheet for all alerts. Newest at the bottom.
+                </div>
+                <div>
+                  In Table view: filter by ranges (Show range filter), show or
+                  hide columns (Show column controls), sort by clicking a column
+                  name, and drag the ⋮⋮ handle on a header to reorder columns.
+                </div>
+              </div>
+            </div>
+            <div class="alerts-toolbar">
+              <button
+                type="button"
+                class="ghost alerts-toolbar-side"
+                id="alerts-download-csv-btn"
+                title="Export the Table view (respects search, range filters, and visible columns)"
+              >
+                Download CSV
+              </button>
+              <button
+                type="button"
+                class="ghost alerts-toolbar-side"
+                id="alerts-filter-hour-btn"
+                title="Open Table and add a time range for the current local hour"
+              >
+                Filter to current hour
+              </button>
+              <div class="alerts-toolbar-sep" aria-hidden="true"></div>
+              <fieldset class="alerts-view-toggle">
+                <legend class="visually-hidden">Alert layout</legend>
+                <button
+                  type="button"
+                  class="ghost alerts-view-btn"
+                  id="alerts-view-sheet"
+                  aria-pressed="true"
+                >
+                  Table
+                </button>
+                <button
+                  type="button"
+                  class="ghost alerts-view-btn"
+                  id="alerts-view-discord"
+                  aria-pressed="false"
+                >
+                  Discord
+                </button>
+                <button
+                  type="button"
+                  class="ghost alerts-view-btn"
+                  id="alerts-view-details"
+                  aria-pressed="false"
+                >
+                  Details
+                </button>
+              </fieldset>
+              <button type="button" class="ghost" id="clear-alerts-btn">
+                Clear
+              </button>
+            </div>
+          </div>
+          <div
+            id="alerts-stream"
+            class="alerts-stream"
+            aria-live="polite"
+          ></div>
         </section>
 
         <section class="card span-2 view" data-view="logs">
