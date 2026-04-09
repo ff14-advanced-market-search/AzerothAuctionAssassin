@@ -1649,6 +1649,45 @@ const state = {
   processRunning: false,
 }
 
+let alertAudioCtx = null
+let lastAlertSoundAt = 0
+
+function isAlertSoundEnabled() {
+  return Boolean(state.megaData?.ALERT_SOUND_ENABLED)
+}
+
+function playAlertSound() {
+  if (!isAlertSoundEnabled()) return
+  const now = Date.now()
+  if (now - lastAlertSoundAt < 120) return
+  lastAlertSoundAt = now
+  try {
+    if (!alertAudioCtx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext
+      if (!AudioCtx) return
+      alertAudioCtx = new AudioCtx()
+    }
+    if (alertAudioCtx.state === "suspended") {
+      alertAudioCtx.resume().catch(() => {})
+    }
+    const t0 = alertAudioCtx.currentTime
+    const osc = alertAudioCtx.createOscillator()
+    const gain = alertAudioCtx.createGain()
+    osc.type = "triangle"
+    osc.frequency.setValueAtTime(880, t0)
+    osc.frequency.exponentialRampToValueAtTime(1320, t0 + 0.08)
+    gain.gain.setValueAtTime(0.0001, t0)
+    gain.gain.exponentialRampToValueAtTime(0.08, t0 + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12)
+    osc.connect(gain)
+    gain.connect(alertAudioCtx.destination)
+    osc.start(t0)
+    osc.stop(t0 + 0.13)
+  } catch {
+    // ignore audio errors so alerts continue normally
+  }
+}
+
 function getMaxInAppAlerts() {
   const raw = state.megaData?.MAX_IN_APP_ALERTS
   const n = Number(raw)
@@ -4543,7 +4582,10 @@ copyPBSPetIlvlBtn?.addEventListener("click", () =>
 window.aaa.onMegaLog((line) => appendLog(line))
 window.aaa.onMegaAlertEmbed((embed) => {
   if (embed && typeof embed === "object") {
-    appendAlertEmbed(embed)
+    if (Boolean(state.megaData?.IN_APP_ALERTS_ENABLED)) {
+      appendAlertEmbed(embed)
+    }
+    playAlertSound()
   }
 })
 window.aaa.onMegaExit((code) => {

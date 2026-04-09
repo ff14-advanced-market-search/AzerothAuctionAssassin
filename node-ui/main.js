@@ -237,6 +237,7 @@ function ensureDataFiles() {
       FACTION: "all",
       DISCORD_ALERTS_ENABLED: true,
       IN_APP_ALERTS_ENABLED: false,
+      ALERT_SOUND_ENABLED: false,
       MAX_IN_APP_ALERTS: 120,
     },
     [FILES.desiredItems]: {},
@@ -270,6 +271,7 @@ function normalizeMegaData(input) {
     "DEBUG",
     "DISCORD_ALERTS_ENABLED",
     "IN_APP_ALERTS_ENABLED",
+    "ALERT_SOUND_ENABLED",
   ])
   const intKeys = new Set([
     "MEGA_THREADS",
@@ -282,6 +284,7 @@ function normalizeMegaData(input) {
   const output = {
     DISCORD_ALERTS_ENABLED: true,
     IN_APP_ALERTS_ENABLED: false,
+    ALERT_SOUND_ENABLED: false,
     MAX_IN_APP_ALERTS: 120,
     ...(input || {}),
   }
@@ -611,6 +614,7 @@ function setupIpc() {
         FACTION: "all",
         DISCORD_ALERTS_ENABLED: true,
         IN_APP_ALERTS_ENABLED: false,
+        ALERT_SOUND_ENABLED: false,
         MAX_IN_APP_ALERTS: 120,
       }
     )

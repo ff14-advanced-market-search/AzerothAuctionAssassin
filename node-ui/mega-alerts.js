@@ -360,7 +360,7 @@ async function sendDiscordEmbed(webhook, embed, opts = {}) {
   const notifyApp = opts.notifyApp === true
   if (!postToDiscord && !notifyApp) return
   try {
-    if (notifyApp && alertEmbedCallback) {
+    if ((notifyApp || postToDiscord) && alertEmbedCallback) {
       try {
         alertEmbedCallback(JSON.parse(JSON.stringify(embed)))
       } catch (cbErr) {
