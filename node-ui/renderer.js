@@ -614,6 +614,46 @@ function visibleSheetColumns(allCols) {
   return allCols.filter((c) => unifiedSheetState.columnVisible[c] !== false)
 }
 
+function parseBracketValueList(raw) {
+  const s = String(raw ?? "").trim()
+  if (!s.startsWith("[") || !s.endsWith("]")) return null
+  const inner = s.slice(1, -1).trim()
+  if (!inner) return []
+  return inner
+    .split(",")
+    .map((x) => x.trim())
+    .filter((x) => x !== "")
+}
+
+function expandPriceArrayRows(row) {
+  const priceCols = ["buyout_prices", "bid_prices"]
+  const parsed = {}
+  let maxLen = 0
+  for (const col of priceCols) {
+    const list = parseBracketValueList(row[col])
+    if (!list || list.length === 0) continue
+    parsed[col] = list
+    maxLen = Math.max(maxLen, list.length)
+  }
+  if (maxLen <= 1) {
+    if (maxLen === 1) {
+      const one = { ...row }
+      for (const [col, list] of Object.entries(parsed)) one[col] = list[0]
+      return [one]
+    }
+    return [row]
+  }
+  const out = []
+  for (let i = 0; i < maxLen; i++) {
+    const next = { ...row }
+    for (const [col, list] of Object.entries(parsed)) {
+      next[col] = list[i] ?? ""
+    }
+    out.push(next)
+  }
+  return out
+}
+
 function buildSpreadsheetRowsForEmbed(embed) {
   const fields = Array.isArray(embed.fields) ? embed.fields : []
   const meta = parseDescriptionMeta(embed.description)
@@ -633,7 +673,7 @@ function buildSpreadsheetRowsForEmbed(embed) {
       const col = linkLabelToColumnKey(label)
       if (col) row[col] = url
     }
-    rows.push(row)
+    rows.push(...expandPriceArrayRows(row))
   }
   return rows
 }
