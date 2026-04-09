@@ -8,6 +8,7 @@ function escapeHtml(text) {
 const DEFAULT_MAX_IN_APP_ALERTS = 120
 const MAX_IN_APP_ALERTS_HARD_CAP = 5000
 const DEFAULT_ALERT_SOUND_VOLUME = 70
+const BUILTIN_ALERT_SOUND_GAIN_MULTIPLIER = 2
 const ALERTS_VIEW_STORAGE_KEY = "aaa-alerts-view-mode"
 
 const alertEmbedHistory = []
@@ -1687,7 +1688,13 @@ function playBuiltInAlertSound(volume) {
     osc.type = "triangle"
     osc.frequency.setValueAtTime(880, t0)
     osc.frequency.exponentialRampToValueAtTime(1320, t0 + 0.08)
-    const vol = Math.max(0.01, Math.min(1, Number(volume || 0) / 100))
+    const vol = Math.max(
+      0.01,
+      Math.min(
+        1,
+        (Number(volume || 0) / 100) * BUILTIN_ALERT_SOUND_GAIN_MULTIPLIER
+      )
+    )
     gain.gain.setValueAtTime(0.0001, t0)
     gain.gain.exponentialRampToValueAtTime(0.08 * vol, t0 + 0.01)
     gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12)
