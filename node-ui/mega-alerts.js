@@ -2245,12 +2245,61 @@ async function runAlerts(state, progress, runOnce = false) {
     const defaultRealm =
       realm_names && realm_names.length > 0 ? realm_names[0] : null
 
-    // Build lookup maps for O(1) target price lookups (performance optimization)
-    const ilvlTargetPriceMap = new Map()
-    for (const rule of state.desiredIlvlList) {
-      for (const itemID of rule.item_ids) {
-        ilvlTargetPriceMap.set(itemID, rule.buyout)
+    function matchesIlvlRuleForTargetPrice(auction, rule) {
+      const itemID = Number(auction.item_id)
+      if (!Array.isArray(rule.item_ids) || !rule.item_ids.includes(itemID)) {
+        return false
       }
+
+      const ilvl = Number(auction.ilvl)
+      if (!Number.isFinite(ilvl) || ilvl < Number(rule.ilvl || 0)) return false
+      if (ilvl > Number(rule.max_ilvl ?? 10000)) return false
+
+      const requiredLvl = Number(auction.required_lvl)
+      if (Number.isFinite(requiredLvl)) {
+        if (requiredLvl < Number(rule.required_min_lvl ?? 1)) return false
+        if (requiredLvl > Number(rule.required_max_lvl ?? 1000)) return false
+      }
+
+      const desiredStats = {
+        sockets: Boolean(rule.sockets),
+        leech: Boolean(rule.leech),
+        avoidance: Boolean(rule.avoidance),
+        speed: Boolean(rule.speed),
+      }
+      const auctionStats = auction.tertiary_stats || {}
+      for (const [stat, required] of Object.entries(desiredStats)) {
+        if (required && !auctionStats[stat]) return false
+      }
+
+      const ruleBonus = Array.isArray(rule.bonus_lists) ? rule.bonus_lists : []
+      const auctionBonusSet = new Set(
+        Array.from(auction.bonus_ids || []).map((id) => Number(id))
+      )
+      if (
+        ruleBonus.length > 0 &&
+        !(ruleBonus.length === 1 && ruleBonus[0] === -1) &&
+        (ruleBonus.length !== auctionBonusSet.size ||
+          ruleBonus.some((id) => !auctionBonusSet.has(Number(id))))
+      ) {
+        return false
+      }
+
+      return true
+    }
+
+    function getIlvlTargetPrice(auction) {
+      const matches = state.desiredIlvlList.filter((rule) =>
+        matchesIlvlRuleForTargetPrice(auction, rule)
+      )
+      if (!matches.length) return null
+
+      matches.sort((a, b) => {
+        const ilvlDiff = Number(b.ilvl || 0) - Number(a.ilvl || 0)
+        if (ilvlDiff !== 0) return ilvlDiff
+        return Number(a.buyout || 0) - Number(b.buyout || 0)
+      })
+      return Number(matches[0].buyout) || null
     }
 
     const petTargetPriceMap = new Map()
@@ -2282,8 +2331,7 @@ async function runAlerts(state, progress, runOnce = false) {
       const itemlink = defaultRealm
         ? create_oribos_exchange_item_link(defaultRealm, itemID, state.REGION)
         : null
-      // Fast O(1) lookup instead of O(n) search
-      const targetPrice = ilvlTargetPriceMap.get(itemID) || null
+      const targetPrice = getIlvlTargetPrice(auction)
       results.push(
         ilvl_results_dict(
           auction,
