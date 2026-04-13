@@ -2294,7 +2294,32 @@ async function runAlerts(state, progress, runOnce = false) {
       )
       if (!matches.length) return null
 
+      function specificityScore(rule) {
+        const requiredStatsCount = [
+          Boolean(rule.sockets),
+          Boolean(rule.leech),
+          Boolean(rule.avoidance),
+          Boolean(rule.speed),
+        ].filter(Boolean).length
+        const bonusList = Array.isArray(rule.bonus_lists)
+          ? rule.bonus_lists
+          : []
+        const exactBonusCount =
+          bonusList.length > 0 &&
+          !(bonusList.length === 1 && bonusList[0] === -1)
+            ? bonusList.length
+            : 0
+        const hasLevelBounds =
+          Number(rule.required_min_lvl ?? 1) > 1 ||
+          Number(rule.required_max_lvl ?? 1000) < 1000
+            ? 1
+            : 0
+        return requiredStatsCount * 100 + exactBonusCount * 10 + hasLevelBounds
+      }
+
       matches.sort((a, b) => {
+        const specificityDiff = specificityScore(b) - specificityScore(a)
+        if (specificityDiff !== 0) return specificityDiff
         const ilvlDiff = Number(b.ilvl || 0) - Number(a.ilvl || 0)
         if (ilvlDiff !== 0) return ilvlDiff
         return Number(a.buyout || 0) - Number(b.buyout || 0)
