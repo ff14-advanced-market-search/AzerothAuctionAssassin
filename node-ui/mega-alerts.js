@@ -2285,6 +2285,22 @@ async function runAlerts(state, progress, runOnce = false) {
         return false
       }
 
+      if (ruleBonus.length === 1 && ruleBonus[0] === -1) {
+        const temp = new Set(auctionBonusSet)
+        for (const bid of state.socket_ids) temp.delete(bid)
+        for (const bid of state.leech_ids) temp.delete(bid)
+        for (const bid of state.avoidance_ids) temp.delete(bid)
+        for (const bid of state.speed_ids) temp.delete(bid)
+        if (temp.size > 3) return false
+        const bad_ids = [224637]
+        if (bad_ids.includes(itemID)) return false
+      }
+
+      const rawBuyout = auction.buyout
+      if (rawBuyout == null) return false
+      const buyoutGold = Math.round((rawBuyout / 10000) * 100) / 100
+      if (buyoutGold > Number(rule.buyout ?? 0)) return false
+
       return true
     }
 

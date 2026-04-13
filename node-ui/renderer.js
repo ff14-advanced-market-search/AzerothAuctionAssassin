@@ -99,8 +99,12 @@ let alertsViewMode = loadStoredAlertsViewMode()
 let alertsStreamSearchRaw = ""
 
 function loadStoredAlertsSearchQuery() {
-  const v = localStorage.getItem(ALERTS_SEARCH_STORAGE_KEY)
-  return typeof v === "string" ? v : ""
+  try {
+    const v = localStorage.getItem(ALERTS_SEARCH_STORAGE_KEY)
+    return typeof v === "string" ? v : ""
+  } catch {
+    return ""
+  }
 }
 
 function setStoredAlertsSearchQuery(v) {
@@ -1635,6 +1639,9 @@ function appendAlertEmbed(embed) {
     const normalizedQuery = alertsStreamSearchRaw.trim().toLowerCase()
     const matchesSearch = embedMatchesAlertsSearch(embed, normalizedQuery)
     if (alertEmbedHistory.length > cap) {
+      while (alertEmbedHistory.length > cap) {
+        alertEmbedHistory.shift()
+      }
       redrawAlertsStream()
     } else if (matchesSearch) {
       stream.appendChild(buildAlertElement(embed, alertsViewMode))
