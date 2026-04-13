@@ -5,7 +5,7 @@ const path = require("path")
 const { setTimeout: delay } = require("timers/promises")
 const { fetch } = require("undici")
 
-const AAA_NODE_UI_VERSION = "2.1.1"
+const AAA_NODE_UI_VERSION = "2.1.2"
 
 function saddlebagFetchHeaders(base = {}) {
   return {
