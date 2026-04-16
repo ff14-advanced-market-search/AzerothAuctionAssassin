@@ -1183,6 +1183,15 @@ pre#log-panel::-webkit-scrollbar-button:single-button:vertical:increment {
   flex-shrink: 0;
 }
 
+.alerts-stream-search {
+  min-width: 220px;
+  width: min(360px, 100%);
+}
+
+.alerts-stream-search.filter-input {
+  max-width: min(360px, 100%);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

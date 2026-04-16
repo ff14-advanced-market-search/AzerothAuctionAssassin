@@ -10,6 +10,7 @@ const MAX_IN_APP_ALERTS_HARD_CAP = 5000
 const DEFAULT_ALERT_SOUND_VOLUME = 70
 const BUILTIN_ALERT_SOUND_GAIN_MULTIPLIER = 2
 const ALERTS_VIEW_STORAGE_KEY = "aaa-alerts-view-mode"
+const ALERTS_SEARCH_STORAGE_KEY = "aaa-alerts-search-query"
 
 const alertEmbedHistory = []
 
@@ -95,6 +96,24 @@ function loadStoredAlertsViewMode() {
 }
 
 let alertsViewMode = loadStoredAlertsViewMode()
+let alertsStreamSearchRaw = ""
+
+function loadStoredAlertsSearchQuery() {
+  try {
+    const v = localStorage.getItem(ALERTS_SEARCH_STORAGE_KEY)
+    return typeof v === "string" ? v : ""
+  } catch {
+    return ""
+  }
+}
+
+function setStoredAlertsSearchQuery(v) {
+  try {
+    localStorage.setItem(ALERTS_SEARCH_STORAGE_KEY, v)
+  } catch {
+    // ignore quota / private mode
+  }
+}
 
 /**
  * Closing `)` for `[label](url)` when the URL may contain balanced parentheses
@@ -1530,11 +1549,40 @@ function redrawAlertsStream() {
     stream.appendChild(createUnifiedSheetDashboard())
     return
   }
+  const query = alertsStreamSearchRaw.trim().toLowerCase()
   const frag = document.createDocumentFragment()
   for (const { embed } of alertEmbedHistory) {
+    if (!embedMatchesAlertsSearch(embed, query)) continue
     frag.appendChild(buildAlertElement(embed, alertsViewMode))
   }
   stream.appendChild(frag)
+}
+
+function embedMatchesAlertsSearch(embed, normalizedQuery) {
+  if (!normalizedQuery) return true
+  if (!embed || typeof embed !== "object") return false
+
+  const parts = []
+  if (embed.title) parts.push(String(embed.title))
+  if (embed.description) parts.push(String(embed.description))
+  if (embed.timestamp) parts.push(String(embed.timestamp))
+
+  const fields = Array.isArray(embed.fields) ? embed.fields : []
+  for (const f of fields) {
+    if (f && f.name) parts.push(String(f.name))
+    if (f && f.value) parts.push(String(f.value))
+  }
+
+  return parts.join("\n").toLowerCase().includes(normalizedQuery)
+}
+
+function refreshAlertsSearchUi() {
+  const input = getElement("alerts-stream-search-input")
+  if (!input) return
+  input.value = alertsStreamSearchRaw
+  input.disabled = alertsViewMode === "sheet"
+  input.placeholder =
+    alertsViewMode === "sheet" ? "" : "Search Discord/Details..."
 }
 
 function buildAlertElement(embed, mode) {
@@ -1565,6 +1613,7 @@ function setAlertsViewMode(mode) {
   localStorage.setItem(ALERTS_VIEW_STORAGE_KEY, mode)
   redrawAlertsStream()
   refreshAlertsViewToggleButtons()
+  refreshAlertsSearchUi()
 }
 
 function appendAlertEmbed(embed) {
@@ -1587,13 +1636,16 @@ function appendAlertEmbed(embed) {
     }
     if (dash) refreshUnifiedSheetTable(dash)
   } else {
+    const normalizedQuery = alertsStreamSearchRaw.trim().toLowerCase()
+    const matchesSearch = embedMatchesAlertsSearch(embed, normalizedQuery)
     if (alertEmbedHistory.length > cap) {
-      alertEmbedHistory.shift()
-      if (stream.firstChild) {
-        stream.removeChild(stream.firstChild)
+      while (alertEmbedHistory.length > cap) {
+        alertEmbedHistory.shift()
       }
+      redrawAlertsStream()
+    } else if (matchesSearch) {
+      stream.appendChild(buildAlertElement(embed, alertsViewMode))
     }
-    stream.appendChild(buildAlertElement(embed, alertsViewMode))
   }
   if (nearBottom) {
     stream.scrollTop = stream.scrollHeight
@@ -1636,7 +1688,7 @@ const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
 // Keep in sync with root package.json version (avoid IPC on every Saddlebag request — was causing UI jitter)
-const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.1.1"
+const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.1.2"
 
 function saddlebagFetchHeaders(base = {}) {
   return { ...base, "User-Agent": SADDLEBAG_USER_AGENT }
@@ -4770,6 +4822,17 @@ clearAlertsBtn?.addEventListener("click", () => {
   redrawAlertsStream()
 })
 
+const alertsStreamSearchInput = getElement("alerts-stream-search-input")
+alertsStreamSearchRaw = loadStoredAlertsSearchQuery()
+if (alertsStreamSearchInput) {
+  alertsStreamSearchInput.value = alertsStreamSearchRaw
+  alertsStreamSearchInput.addEventListener("input", () => {
+    alertsStreamSearchRaw = alertsStreamSearchInput.value
+    setStoredAlertsSearchQuery(alertsStreamSearchRaw)
+    redrawAlertsStream()
+  })
+}
+
 getElement("alerts-download-csv-btn")?.addEventListener("click", () => {
   downloadUnifiedSheetAsCsv()
 })
@@ -4786,6 +4849,7 @@ for (const m of ALERT_VIEW_MODES) {
 
 window.addEventListener("DOMContentLoaded", async () => {
   refreshAlertsViewToggleButtons()
+  refreshAlertsSearchUi()
   await loadState()
   showView("home")
   updateNavigationButtons()
