@@ -580,6 +580,10 @@ class MegaData {
           speed: Boolean(entry.speed),
           leech: Boolean(entry.leech),
           avoidance: Boolean(entry.avoidance),
+          crit: Boolean(entry.crit),
+          haste: Boolean(entry.haste),
+          mastery: Boolean(entry.mastery),
+          versatility: Boolean(entry.versatility),
           item_ids:
             entry.item_ids && entry.item_ids.length ? entry.item_ids : itemIds,
           required_min_lvl: entry.required_min_lvl ?? 1,
