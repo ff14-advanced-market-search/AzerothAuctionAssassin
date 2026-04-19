@@ -1598,6 +1598,12 @@ async function runAlerts(state, progress, runOnce = false) {
           if (auction.tertiary_stats) {
             id_msg += "`tertiary_stats:` " + auction.tertiary_stats + "\n"
           }
+          if (
+            Array.isArray(auction.secondary_stats) &&
+            auction.secondary_stats.length
+          ) {
+            id_msg += "`secondary_stats:` " + auction.secondary_stats + "\n"
+          }
           if ("required_lvl" in auction && auction.required_lvl !== null) {
             id_msg += "`required_lvl:` " + auction.required_lvl + "\n"
           }
@@ -1786,6 +1792,7 @@ async function runAlerts(state, progress, runOnce = false) {
       targetPrice,
       [`${priceType}_prices`]: priceInGold,
       tertiary_stats,
+      secondary_stats: auction.secondary_stats,
       bonus_ids: auction.bonus_ids,
       ilvl: auction.ilvl,
       required_lvl: auction.required_lvl,
@@ -1995,6 +2002,63 @@ async function runAlerts(state, progress, runOnce = false) {
     return itemLevel
   }
 
+  function normalizeSecondaryStatName(rawName) {
+    const s = String(rawName || "")
+      .trim()
+      .toLowerCase()
+    if (!s) return null
+    if (s === "crit" || s === "criticalstrike" || s === "critical strike") {
+      return "crit"
+    }
+    if (s === "haste") return "haste"
+    if (s === "mastery") return "mastery"
+    if (s === "vers" || s === "versatility") return "versatility"
+    return null
+  }
+
+  function normalizeSecondaryStatId(rawId) {
+    const id = Number(rawId)
+    if (!Number.isFinite(id)) return null
+    if (id === 32) return "crit"
+    if (id === 36) return "haste"
+    if (id === 40) return "versatility"
+    if (id === 49) return "mastery"
+    return null
+  }
+
+  function getSecondaryStatsFromBonusIds(bonusIds) {
+    if (!bonusIds || !state.bonuses_by_id) return []
+    const labels = []
+    const seen = new Set()
+    for (const bid of bonusIds) {
+      const bonus = state.bonuses_by_id[Number(bid)]
+      const rawStats =
+        bonus && Array.isArray(bonus.rawStats) ? bonus.rawStats : []
+      for (const one of rawStats) {
+        const normalized = normalizeSecondaryStatName(one?.name)
+        if (!normalized || seen.has(normalized)) continue
+        seen.add(normalized)
+        labels.push(normalized)
+      }
+    }
+    return labels
+  }
+
+  function getSecondaryStatsFromModifiers(modifiers) {
+    if (!Array.isArray(modifiers) || modifiers.length === 0) return []
+    const labels = []
+    const seen = new Set()
+    for (const mod of modifiers) {
+      const t = Number(mod?.type)
+      if (t !== 29 && t !== 30) continue
+      const label = normalizeSecondaryStatId(mod?.value)
+      if (!label || seen.has(label)) continue
+      seen.add(label)
+      labels.push(label)
+    }
+    return labels
+  }
+
   /**
    * Check if an auction matches the ilvl rule criteria
    * Validates tertiary stats (sockets, leech, avoidance, speed), ilvl, required level, bonus lists, and price
@@ -2009,6 +2073,13 @@ async function runAlerts(state, progress, runOnce = false) {
     const required_lvl =
       auction.item.modifiers?.find((m) => m.type === 9)?.value ??
       rule.base_required_levels[auction.item.id]
+    const secondaryFromBonus = getSecondaryStatsFromBonusIds(item_bonus_ids)
+    const secondaryFromModifiers = getSecondaryStatsFromModifiers(
+      auction.item?.modifiers
+    )
+    const secondary_stats = Array.from(
+      new Set([...secondaryFromBonus, ...secondaryFromModifiers])
+    )
 
     // Check for intersection of bonus_ids with socket/speed/leech/avoidance IDs
     // Python: len(item_bonus_ids & socket_ids) != 0
@@ -2095,10 +2166,29 @@ async function runAlerts(state, progress, runOnce = false) {
     const buyoutValue = Math.round((buyout / 10000) * 100) / 100
     if (buyoutValue > rule.buyout) return false
 
+    const apiModifiers = Array.isArray(auction.item?.modifiers)
+      ? auction.item.modifiers
+          .map((m) => ({
+            type: m?.type,
+            value: m?.value,
+          }))
+          .filter((m) => m.type !== undefined || m.value !== undefined)
+      : []
+    log(
+      `[MATCH MODIFIERS] item=${auction.item.id} modifiers=${JSON.stringify(
+        apiModifiers
+      )} secondary_from_modifiers=${JSON.stringify(
+        secondaryFromModifiers
+      )} secondary_from_bonus_ids=${JSON.stringify(
+        secondaryFromBonus
+      )} secondary_final=${JSON.stringify(secondary_stats)}`
+    )
+
     return {
       item_id: auction.item.id,
       buyout,
       tertiary_stats,
+      secondary_stats,
       bonus_ids: item_bonus_ids,
       ilvl,
       required_lvl,

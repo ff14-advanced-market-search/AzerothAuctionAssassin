@@ -479,6 +479,7 @@ const SHEET_COL_ORDER = [
   "itemID",
   "petID",
   "ilvl",
+  "secondary_stats",
   "tertiary_stats",
   "required_lvl",
   "bonus_ids",
