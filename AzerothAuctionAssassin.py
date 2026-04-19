@@ -1671,7 +1671,7 @@ class App(QMainWindow):
             key, value = part.split(":", 1)
             fields[key.strip()] = value.strip()
 
-        item_ids = fields.get("IDs", "")
+        item_ids = fields.get("IDs", fields.get("Item ID", ""))
         self.ilvl_item_input.setText(item_ids if item_ids != "All" else "")
         self.ilvl_price_input.setText(fields.get("Price", ""))
         self.ilvl_input.setText(fields.get("ILvl", ""))
