@@ -2191,7 +2191,9 @@ async function runAlerts(state, progress, runOnce = false) {
           .filter((m) => m.type !== undefined || m.value !== undefined)
       : []
     log(
-      `[MATCH MODIFIERS] item=${auction.item.id} modifiers=${JSON.stringify(
+      `[MATCH] item=${auction.item.id} bonus_ids=${JSON.stringify(
+        Array.from(item_bonus_ids)
+      )} modifiers=${JSON.stringify(
         apiModifiers
       )} secondary_from_modifiers=${JSON.stringify(
         secondaryFromModifiers
