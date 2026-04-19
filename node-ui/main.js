@@ -331,6 +331,10 @@ function normalizeIlvlRules(list) {
       speed: Boolean(rule.speed),
       leech: Boolean(rule.leech),
       avoidance: Boolean(rule.avoidance),
+      crit: Boolean(rule.crit),
+      haste: Boolean(rule.haste),
+      mastery: Boolean(rule.mastery),
+      versatility: Boolean(rule.versatility),
       item_ids: Array.isArray(rule.item_ids)
         ? rule.item_ids.map((id) => Number(id)).filter((n) => !Number.isNaN(n))
         : [],

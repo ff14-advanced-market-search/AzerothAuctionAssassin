@@ -2096,6 +2096,12 @@ async function runAlerts(state, progress, runOnce = false) {
       avoidance: rule.avoidance,
       speed: rule.speed,
     }
+    const desiredSecondary = {
+      crit: Boolean(rule.crit),
+      haste: Boolean(rule.haste),
+      mastery: Boolean(rule.mastery),
+      versatility: Boolean(rule.versatility),
+    }
 
     // Python: if any(desired_tertiary_stats):
     //         for stat, desired in desired_tertiary_stats.items():
@@ -2105,6 +2111,12 @@ async function runAlerts(state, progress, runOnce = false) {
     if (Object.values(desired).some(Boolean)) {
       for (const [stat, want] of Object.entries(desired)) {
         if (want && !tertiary_stats[stat]) return false
+      }
+    }
+    if (Object.values(desiredSecondary).some(Boolean)) {
+      const presentSecondary = new Set(secondary_stats)
+      for (const [stat, want] of Object.entries(desiredSecondary)) {
+        if (want && !presentSecondary.has(stat)) return false
       }
     }
 
@@ -2357,9 +2369,21 @@ async function runAlerts(state, progress, runOnce = false) {
         avoidance: Boolean(rule.avoidance),
         speed: Boolean(rule.speed),
       }
+      const desiredSecondary = {
+        crit: Boolean(rule.crit),
+        haste: Boolean(rule.haste),
+        mastery: Boolean(rule.mastery),
+        versatility: Boolean(rule.versatility),
+      }
       const auctionStats = auction.tertiary_stats || {}
       for (const [stat, required] of Object.entries(desiredStats)) {
         if (required && !auctionStats[stat]) return false
+      }
+      const auctionSecondary = new Set(
+        Array.isArray(auction.secondary_stats) ? auction.secondary_stats : []
+      )
+      for (const [stat, required] of Object.entries(desiredSecondary)) {
+        if (required && !auctionSecondary.has(stat)) return false
       }
 
       const ruleBonus = Array.isArray(rule.bonus_lists) ? rule.bonus_lists : []
@@ -2407,6 +2431,12 @@ async function runAlerts(state, progress, runOnce = false) {
           Boolean(rule.avoidance),
           Boolean(rule.speed),
         ].filter(Boolean).length
+        const requiredSecondaryCount = [
+          Boolean(rule.crit),
+          Boolean(rule.haste),
+          Boolean(rule.mastery),
+          Boolean(rule.versatility),
+        ].filter(Boolean).length
         const bonusList = Array.isArray(rule.bonus_lists)
           ? rule.bonus_lists
           : []
@@ -2420,7 +2450,12 @@ async function runAlerts(state, progress, runOnce = false) {
           Number(rule.required_max_lvl ?? 1000) < 1000
             ? 1
             : 0
-        return requiredStatsCount * 100 + exactBonusCount * 10 + hasLevelBounds
+        return (
+          requiredStatsCount * 1000 +
+          requiredSecondaryCount * 100 +
+          exactBonusCount * 10 +
+          hasLevelBounds
+        )
       }
 
       matches.sort((a, b) => {

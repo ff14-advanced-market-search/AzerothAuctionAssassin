@@ -2590,6 +2590,10 @@ async function handlePastePBSIlvl(btn) {
           speed: false,
           leech: false,
           avoidance: false,
+          crit: false,
+          haste: false,
+          mastery: false,
+          versatility: false,
           item_ids,
           required_min_lvl: min_level,
           required_max_lvl: max_level,
@@ -2985,9 +2989,18 @@ function renderIlvlRules() {
     filteredRules = state.ilvlList.filter((rule) => {
       const itemIds = (rule.item_ids || []).map(String)
       const itemNames = itemIds.map((id) => getItemName(id))
+      const requiredStats = []
+      if (rule.sockets) requiredStats.push("sockets")
+      if (rule.speed) requiredStats.push("speed")
+      if (rule.leech) requiredStats.push("leech")
+      if (rule.avoidance) requiredStats.push("avoidance")
+      if (rule.crit) requiredStats.push("crit")
+      if (rule.haste) requiredStats.push("haste")
+      if (rule.mastery) requiredStats.push("mastery")
+      if (rule.versatility) requiredStats.push("versatility", "vers")
       const searchText = `${itemIds.join(" ")} ${itemNames.join(" ")} ${
         rule.bonus_lists?.join(" ") || ""
-      }`.toLowerCase()
+      } ${requiredStats.join(" ")}`.toLowerCase()
       return searchText.includes(filterTerm)
     })
   }
@@ -3071,6 +3084,13 @@ function renderIlvlRules() {
     } Leech:${rule.leech ? "Y" : "N"} Avoid:${rule.avoidance ? "Y" : "N"}`
     detailsDiv.appendChild(bonusesDiv3)
 
+    const bonusesDiv4 = document.createElement("div")
+    bonusesDiv4.className = "bonuses"
+    bonusesDiv4.textContent = `Crit:${rule.crit ? "Y" : "N"} Haste:${
+      rule.haste ? "Y" : "N"
+    } Mastery:${rule.mastery ? "Y" : "N"} Vers:${rule.versatility ? "Y" : "N"}`
+    detailsDiv.appendChild(bonusesDiv4)
+
     row.appendChild(detailsDiv)
     const button = document.createElement("button")
     button.textContent = "Remove"
@@ -3098,6 +3118,10 @@ function renderIlvlRules() {
         form.speed.checked = rule.speed || false
         form.leech.checked = rule.leech || false
         form.avoidance.checked = rule.avoidance || false
+        form.crit.checked = rule.crit || false
+        form.haste.checked = rule.haste || false
+        form.mastery.checked = rule.mastery || false
+        form.versatility.checked = rule.versatility || false
         const submitBtn = form.querySelector('button[type="submit"]')
         if (submitBtn) submitBtn.textContent = "Update rule"
         form.ilvl.focus()
@@ -4013,6 +4037,10 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     speed: form.speed.checked,
     leech: form.leech.checked,
     avoidance: form.avoidance.checked,
+    crit: form.crit.checked,
+    haste: form.haste.checked,
+    mastery: form.mastery.checked,
+    versatility: form.versatility.checked,
     item_ids: itemIds,
     bonus_lists: bonusLists,
     required_min_lvl: minLevel,
