@@ -589,6 +589,19 @@ class MegaData {
           required_min_lvl: entry.required_min_lvl ?? 1,
           required_max_lvl: entry.required_max_lvl ?? 1000,
           bonus_lists: entry.bonus_lists ?? [],
+          modifier_values: Array.isArray(entry.modifier_values)
+            ? entry.modifier_values
+            : [],
+          modifier_objects: Array.isArray(entry.modifier_objects)
+            ? entry.modifier_objects
+                .map((m) => ({
+                  type: Number(m?.type),
+                  value: Number(m?.value),
+                }))
+                .filter(
+                  (m) => Number.isFinite(m.type) && Number.isFinite(m.value)
+                )
+            : [],
           item_names: {},
           base_ilvls: {},
           base_required_levels: {},
@@ -2182,6 +2195,47 @@ async function runAlerts(state, progress, runOnce = false) {
       if (bad_ids.includes(auction.item.id)) return false
     }
 
+    const ruleModifierValues = Array.isArray(rule.modifier_values)
+      ? rule.modifier_values
+      : []
+    if (ruleModifierValues.length) {
+      const requiredModifierValues = new Set(ruleModifierValues.map(Number))
+      const auctionModifierValues = new Set(
+        (Array.isArray(auction.item?.modifiers) ? auction.item.modifiers : [])
+          .map((m) => Number(m?.value))
+          .filter((n) => Number.isFinite(n))
+      )
+      if (requiredModifierValues.size !== auctionModifierValues.size) {
+        return false
+      }
+      for (const requiredVal of requiredModifierValues) {
+        if (!auctionModifierValues.has(requiredVal)) {
+          return false
+        }
+      }
+    }
+    const ruleModifierObjects = Array.isArray(rule.modifier_objects)
+      ? rule.modifier_objects
+      : []
+    if (ruleModifierObjects.length) {
+      const requiredModifierPairs = new Set(
+        ruleModifierObjects
+          .map((m) => `${Number(m?.type)}:${Number(m?.value)}`)
+          .filter((k) => !k.includes("NaN"))
+      )
+      const auctionModifierPairs = new Set(
+        (Array.isArray(auction.item?.modifiers) ? auction.item.modifiers : [])
+          .map((m) => `${Number(m?.type)}:${Number(m?.value)}`)
+          .filter((k) => !k.includes("NaN"))
+      )
+      if (requiredModifierPairs.size !== auctionModifierPairs.size) {
+        return false
+      }
+      for (const pair of requiredModifierPairs) {
+        if (!auctionModifierPairs.has(pair)) return false
+      }
+    }
+
     const buyout = auction.buyout ?? auction.bid
     if (!buyout) return false
     const buyoutValue = Math.round((buyout / 10000) * 100) / 100
@@ -2422,6 +2476,49 @@ async function runAlerts(state, progress, runOnce = false) {
         if (bad_ids.includes(itemID)) return false
       }
 
+      const ruleModifierValues = Array.isArray(rule.modifier_values)
+        ? rule.modifier_values
+        : []
+      if (ruleModifierValues.length) {
+        const requiredModifierValues = new Set(
+          ruleModifierValues.map((id) => Number(id))
+        )
+        const auctionModifierValues = new Set(
+          (Array.isArray(auction.modifiers) ? auction.modifiers : [])
+            .map((m) => Number(m?.value))
+            .filter((n) => Number.isFinite(n))
+        )
+        if (requiredModifierValues.size !== auctionModifierValues.size) {
+          return false
+        }
+        for (const requiredVal of requiredModifierValues) {
+          if (!auctionModifierValues.has(requiredVal)) {
+            return false
+          }
+        }
+      }
+      const ruleModifierObjects = Array.isArray(rule.modifier_objects)
+        ? rule.modifier_objects
+        : []
+      if (ruleModifierObjects.length) {
+        const requiredModifierPairs = new Set(
+          ruleModifierObjects
+            .map((m) => `${Number(m?.type)}:${Number(m?.value)}`)
+            .filter((k) => !k.includes("NaN"))
+        )
+        const auctionModifierPairs = new Set(
+          (Array.isArray(auction.modifiers) ? auction.modifiers : [])
+            .map((m) => `${Number(m?.type)}:${Number(m?.value)}`)
+            .filter((k) => !k.includes("NaN"))
+        )
+        if (requiredModifierPairs.size !== auctionModifierPairs.size) {
+          return false
+        }
+        for (const pair of requiredModifierPairs) {
+          if (!auctionModifierPairs.has(pair)) return false
+        }
+      }
+
       const rawBuyout = auction.buyout
       if (rawBuyout == null) return false
       const buyoutGold = Math.round((rawBuyout / 10000) * 100) / 100
@@ -2452,6 +2549,14 @@ async function runAlerts(state, progress, runOnce = false) {
         const bonusList = Array.isArray(rule.bonus_lists)
           ? rule.bonus_lists
           : []
+        const requiredModifiersCount = Array.isArray(rule.modifier_values)
+          ? rule.modifier_values.length
+          : 0
+        const requiredModifierObjectsCount = Array.isArray(
+          rule.modifier_objects
+        )
+          ? rule.modifier_objects.length
+          : 0
         const exactBonusCount =
           bonusList.length > 0 &&
           !(bonusList.length === 1 && bonusList[0] === -1)
@@ -2465,7 +2570,8 @@ async function runAlerts(state, progress, runOnce = false) {
         return (
           requiredStatsCount * 1000 +
           requiredSecondaryCount * 100 +
-          exactBonusCount * 10 +
+          (requiredModifiersCount + requiredModifierObjectsCount) * 10 +
+          exactBonusCount * 5 +
           hasLevelBounds
         )
       }

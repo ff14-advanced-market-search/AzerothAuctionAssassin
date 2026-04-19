@@ -2115,6 +2115,41 @@ function parseNums(text) {
   return values
 }
 
+function parseModifierFilterInput(text) {
+  const trimmed = String(text || "").trim()
+  if (!trimmed) return { modifierValues: [], modifierObjects: [] }
+
+  if (!trimmed.startsWith("[") && !trimmed.startsWith("{")) {
+    throw new Error(
+      'Modifiers must be valid JSON. Example: [{"type":28,"value":3608}]'
+    )
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed)
+    const list = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed?.modifiers)
+      ? parsed.modifiers
+      : []
+    const normalized = list
+      .map((m) => ({
+        type: Number(m?.type),
+        value: Number(m?.value),
+      }))
+      .filter((m) => Number.isFinite(m.type) && Number.isFinite(m.value))
+    if (normalized.length === 0) {
+      throw new Error("No valid {type,value} modifiers found in JSON.")
+    }
+    return { modifierValues: [], modifierObjects: normalized }
+  } catch (err) {
+    throw new Error(
+      err?.message ||
+        "Invalid modifier JSON. Expected an array of objects with type/value."
+    )
+  }
+}
+
 function updateSuggestions(inputEl, suggestEl, cache) {
   const term = (inputEl.value || "").toLowerCase().trim()
   if (!cache || !cache.length) return
@@ -2598,6 +2633,8 @@ async function handlePastePBSIlvl(btn) {
           required_min_lvl: min_level,
           required_max_lvl: max_level,
           bonus_lists: [],
+          modifier_values: [],
+          modifier_objects: [],
           item_names: {},
           base_ilvls: {},
           base_required_levels: {},
@@ -3000,6 +3037,9 @@ function renderIlvlRules() {
       if (rule.versatility) requiredStats.push("versatility", "vers")
       const searchText = `${itemIds.join(" ")} ${itemNames.join(" ")} ${
         rule.bonus_lists?.join(" ") || ""
+      } ${rule.modifier_values?.join(" ") || ""} ${
+        rule.modifier_objects?.map((m) => `${m.type}:${m.value}`).join(" ") ||
+        ""
       } ${requiredStats.join(" ")}`.toLowerCase()
       return searchText.includes(filterTerm)
     })
@@ -3072,6 +3112,22 @@ function renderIlvlRules() {
     }`
     detailsDiv.appendChild(bonusesDiv1)
 
+    const modifiersDiv = document.createElement("div")
+    modifiersDiv.className = "bonuses"
+    const modifierObjectsLabel = Array.isArray(rule.modifier_objects)
+      ? rule.modifier_objects
+          .map((m) => `${m.type}:${m.value}`)
+          .map(escapeHtml)
+          .join(", ")
+      : ""
+    const modifierValuesLabel = Array.isArray(rule.modifier_values)
+      ? rule.modifier_values.map(String).map(escapeHtml).join(", ")
+      : ""
+    modifiersDiv.textContent = `Modifiers: ${
+      modifierObjectsLabel || modifierValuesLabel || "Any"
+    }`
+    detailsDiv.appendChild(modifiersDiv)
+
     const bonusesDiv2 = document.createElement("div")
     bonusesDiv2.className = "bonuses"
     bonusesDiv2.textContent = `Player lvl: ${rule.required_min_lvl}-${rule.required_max_lvl}`
@@ -3112,6 +3168,14 @@ function renderIlvlRules() {
         form.buyout.value = rule.buyout || 100000
         form.item_ids.value = (rule.item_ids || []).join(", ")
         form.bonus_lists.value = (rule.bonus_lists || []).join(", ")
+        if (
+          Array.isArray(rule.modifier_objects) &&
+          rule.modifier_objects.length
+        ) {
+          form.modifier_values.value = JSON.stringify(rule.modifier_objects)
+        } else {
+          form.modifier_values.value = (rule.modifier_values || []).join(", ")
+        }
         form.required_min_lvl.value = rule.required_min_lvl || 1
         form.required_max_lvl.value = rule.required_max_lvl || 1000
         form.sockets.checked = rule.sockets || false
@@ -4029,6 +4093,23 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     }
   }
 
+  // Validate modifier filter if provided
+  let modifierValues = []
+  let modifierObjects = []
+  const modifierValuesText = form.modifier_values.value.trim()
+  if (modifierValuesText) {
+    try {
+      const parsed = parseModifierFilterInput(modifierValuesText)
+      modifierValues = parsed.modifierValues
+      modifierObjects = parsed.modifierObjects
+    } catch (err) {
+      const errorMsg = err?.message || "Modifiers should be valid JSON."
+      showToast(errorMsg, "error")
+      form.modifier_values.focus()
+      return
+    }
+  }
+
   const rule = {
     ilvl: ilvl,
     max_ilvl: maxIlvl,
@@ -4043,6 +4124,8 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     versatility: form.versatility.checked,
     item_ids: itemIds,
     bonus_lists: bonusLists,
+    modifier_values: modifierValues,
+    modifier_objects: modifierObjects,
     required_min_lvl: minLevel,
     required_max_lvl: maxLevel,
   }
