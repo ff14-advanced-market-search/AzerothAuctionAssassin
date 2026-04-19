@@ -395,10 +395,16 @@ class MegaData:
         ilvl_info["required_max_lvl"] = ilvl_info.get("required_max_lvl", 1000)
         ilvl_info["max_ilvl"] = ilvl_info.get("max_ilvl", 10000)
         ilvl_info["bonus_lists"] = ilvl_info.get("bonus_lists", [])
+        ilvl_info["modifier_values"] = ilvl_info.get("modifier_values", [])
+        ilvl_info["modifier_objects"] = ilvl_info.get("modifier_objects", [])
         ilvl_info["sockets"] = ilvl_info.get("sockets", False)
         ilvl_info["speed"] = ilvl_info.get("speed", False)
         ilvl_info["leech"] = ilvl_info.get("leech", False)
         ilvl_info["avoidance"] = ilvl_info.get("avoidance", False)
+        ilvl_info["crit"] = ilvl_info.get("crit", False)
+        ilvl_info["haste"] = ilvl_info.get("haste", False)
+        ilvl_info["mastery"] = ilvl_info.get("mastery", False)
+        ilvl_info["versatility"] = ilvl_info.get("versatility", False)
 
         required_keys = {
             "ilvl",
@@ -408,10 +414,16 @@ class MegaData:
             "speed",
             "leech",
             "avoidance",
+            "crit",
+            "haste",
+            "mastery",
+            "versatility",
             "item_ids",
             "required_min_lvl",
             "required_max_lvl",
             "bonus_lists",
+            "modifier_values",
+            "modifier_objects",
         }
 
         # Check if all required keys are present
@@ -422,7 +434,16 @@ class MegaData:
             )
 
         snipe_info = {}
-        bool_vars = ["sockets", "speed", "leech", "avoidance"]
+        bool_vars = [
+            "sockets",
+            "speed",
+            "leech",
+            "avoidance",
+            "crit",
+            "haste",
+            "mastery",
+            "versatility",
+        ]
         int_vars = [
             "ilvl",
             "max_ilvl",
@@ -455,6 +476,24 @@ class MegaData:
             raise Exception(
                 "error in ilvl info 'bonus_lists' must contain only integers"
             )
+        if ilvl_info["modifier_values"] != [] and not all(
+            isinstance(x, int) for x in ilvl_info["modifier_values"]
+        ):
+            raise Exception(
+                "error in ilvl info 'modifier_values' must contain only integers"
+            )
+        if ilvl_info["modifier_objects"] != []:
+            if not all(isinstance(x, dict) for x in ilvl_info["modifier_objects"]):
+                raise Exception(
+                    "error in ilvl info 'modifier_objects' must contain only objects"
+                )
+            for obj in ilvl_info["modifier_objects"]:
+                if not isinstance(obj.get("type"), int) or not isinstance(
+                    obj.get("value"), int
+                ):
+                    raise Exception(
+                        "error in ilvl info 'modifier_objects' entries must include int 'type' and int 'value'"
+                    )
 
         if ilvl_info["item_ids"] == []:
             snipe_info["item_names"] = item_names
@@ -462,6 +501,8 @@ class MegaData:
             snipe_info["base_ilvls"] = {} if self.USE_POST_MIDNIGHT_ILVL else base_ilvls
             snipe_info["base_required_levels"] = base_required_levels
             snipe_info["bonus_lists"] = ilvl_info["bonus_lists"]
+            snipe_info["modifier_values"] = ilvl_info["modifier_values"]
+            snipe_info["modifier_objects"] = ilvl_info["modifier_objects"]
         else:
             snipe_info["item_names"] = {
                 item_id: item_names.get(item_id, "foobar")
@@ -480,6 +521,8 @@ class MegaData:
                 for item_id in ilvl_info["item_ids"]
             }
             snipe_info["bonus_lists"] = ilvl_info["bonus_lists"]
+            snipe_info["modifier_values"] = ilvl_info["modifier_values"]
+            snipe_info["modifier_objects"] = ilvl_info["modifier_objects"]
 
         return snipe_info, ilvl_info["ilvl"]
 

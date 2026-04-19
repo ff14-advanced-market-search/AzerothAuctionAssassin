@@ -114,6 +114,10 @@ class Alerts(QThread):
                         id_msg += f"`ilvl:` {auction['ilvl']}\n"
                         if auction["tertiary_stats"]:
                             id_msg += f"`tertiary_stats:` {auction['tertiary_stats']}\n"
+                        if auction.get("secondary_stats"):
+                            id_msg += (
+                                f"`secondary_stats:` {auction['secondary_stats']}\n"
+                            )
                     elif auction["itemID"] in mega_data.ITEM_NAMES:
                         item_name = mega_data.ITEM_NAMES[auction["itemID"]]
                         # old method
@@ -130,6 +134,7 @@ class Alerts(QThread):
                         id_msg += f"`required_lvl:` {auction['required_lvl']}\n"
                     if "tertiary_stats" in auction:
                         id_msg += f"`bonus_ids:` {list(auction['bonus_ids'])}\n"
+                        id_msg += f"`modifiers:` {auction.get('modifiers', [])}\n"
                 else:
                     id_msg = f"`petID:` {auction['petID']}\n"
                     saddlebag_link_id = auction["petID"]
@@ -364,6 +369,15 @@ class Alerts(QThread):
             if "bonus_lists" not in auction["item"]:
                 return False
 
+            def secondary_name_from_modifier_value(value):
+                mapping = {
+                    32: "crit",
+                    36: "haste",
+                    40: "versatility",
+                    49: "mastery",
+                }
+                return mapping.get(int(value)) if isinstance(value, int) else None
+
             # Check for a modifier with type 9 and get its value (modifier 9 value equals required playerLevel)
             required_lvl = None
             for modifier in auction["item"].get("modifiers", []):
@@ -378,6 +392,13 @@ class Alerts(QThread):
                 ]
 
             item_bonus_ids = set(auction["item"]["bonus_lists"])
+            item_modifiers = auction["item"].get("modifiers", [])
+            secondary_stats = []
+            for modifier in item_modifiers:
+                if modifier.get("type") in (29, 30):
+                    name = secondary_name_from_modifier_value(modifier.get("value"))
+                    if name and name not in secondary_stats:
+                        secondary_stats.append(name)
             # look for intersection of bonus_ids and any other lists
             tertiary_stats = {
                 "sockets": len(item_bonus_ids & socket_ids) != 0,
@@ -392,6 +413,12 @@ class Alerts(QThread):
                 "avoidance": DESIRED_ILVL_ITEMS["avoidance"],
                 "speed": DESIRED_ILVL_ITEMS["speed"],
             }
+            desired_secondary_stats = {
+                "crit": DESIRED_ILVL_ITEMS.get("crit", False),
+                "haste": DESIRED_ILVL_ITEMS.get("haste", False),
+                "mastery": DESIRED_ILVL_ITEMS.get("mastery", False),
+                "versatility": DESIRED_ILVL_ITEMS.get("versatility", False),
+            }
 
             # if we're looking for sockets, leech, avoidance, or speed, skip if none of those are present
             # Check if any of the desired stats are True
@@ -399,6 +426,11 @@ class Alerts(QThread):
                 # Check if all the desired stats are present in the tertiary_stats
                 for stat, desired in desired_tertiary_stats.items():
                     if desired and not tertiary_stats.get(stat, False):
+                        return False
+            if any(desired_secondary_stats.values()):
+                present_secondary = set(secondary_stats)
+                for stat, desired in desired_secondary_stats.items():
+                    if desired and stat not in present_secondary:
                         return False
 
             # get ilvl: legacy (Saddlebag base + ilvl_addition) or post-midnight (resolver)
@@ -475,6 +507,35 @@ class Alerts(QThread):
                 if auction["item"]["id"] in bad_ids:
                     return False
 
+            modifier_values = DESIRED_ILVL_ITEMS.get("modifier_values", [])
+            if modifier_values:
+                required_modifier_values = set(modifier_values)
+                auction_modifier_values = set()
+                for modifier in item_modifiers:
+                    if "value" in modifier and isinstance(modifier["value"], int):
+                        auction_modifier_values.add(modifier["value"])
+                if required_modifier_values != auction_modifier_values:
+                    return False
+
+            modifier_objects = DESIRED_ILVL_ITEMS.get("modifier_objects", [])
+            if modifier_objects:
+                required_modifier_pairs = {
+                    (int(mod["type"]), int(mod["value"]))
+                    for mod in modifier_objects
+                    if isinstance(mod, dict)
+                    and isinstance(mod.get("type"), int)
+                    and isinstance(mod.get("value"), int)
+                }
+                auction_modifier_pairs = {
+                    (int(mod["type"]), int(mod["value"]))
+                    for mod in item_modifiers
+                    if isinstance(mod, dict)
+                    and isinstance(mod.get("type"), int)
+                    and isinstance(mod.get("value"), int)
+                }
+                if required_modifier_pairs != auction_modifier_pairs:
+                    return False
+
             # if no buyout, use bid
             if "buyout" not in auction and "bid" in auction:
                 auction["buyout"] = auction["bid"]
@@ -484,10 +545,16 @@ class Alerts(QThread):
             if buyout > DESIRED_ILVL_ITEMS["buyout"]:
                 return False
             else:
+                print(
+                    f"[MATCH MODIFIERS] item={auction['item']['id']} bonus_ids={sorted(list(item_bonus_ids))} "
+                    f"modifiers={item_modifiers} secondary_final={secondary_stats}"
+                )
                 return {
                     "item_id": auction["item"]["id"],
                     "buyout": buyout,
                     "tertiary_stats": tertiary_stats,
+                    "secondary_stats": secondary_stats,
+                    "modifiers": item_modifiers,
                     "bonus_ids": item_bonus_ids,
                     "ilvl": ilvl,
                     "required_lvl": required_lvl,
@@ -643,6 +710,8 @@ class Alerts(QThread):
                 "minPrice": auction[priceType],
                 f"{priceType}_prices": auction[priceType],
                 "tertiary_stats": tertiary_stats,
+                "secondary_stats": auction.get("secondary_stats", []),
+                "modifiers": auction.get("modifiers", []),
                 "bonus_ids": auction["bonus_ids"],
                 "ilvl": auction["ilvl"],
                 "required_lvl": auction["required_lvl"],
