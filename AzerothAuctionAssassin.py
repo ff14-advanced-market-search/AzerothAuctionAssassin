@@ -909,19 +909,19 @@ class App(QMainWindow):
 
         self.ilvl_crit = QCheckBox("Crit", ilvl_page)
         self.ilvl_crit.setToolTip("Require Crit as a secondary stat")
-        self.ilvl_page_layout.addWidget(self.ilvl_crit, 8, 1, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_crit, 18, 0, 1, 1)
 
         self.ilvl_haste = QCheckBox("Haste", ilvl_page)
         self.ilvl_haste.setToolTip("Require Haste as a secondary stat")
-        self.ilvl_page_layout.addWidget(self.ilvl_haste, 9, 1, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_haste, 19, 0, 1, 1)
 
         self.ilvl_mastery = QCheckBox("Mastery", ilvl_page)
         self.ilvl_mastery.setToolTip("Require Mastery as a secondary stat")
-        self.ilvl_page_layout.addWidget(self.ilvl_mastery, 10, 1, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_mastery, 20, 0, 1, 1)
 
         self.ilvl_versatility = QCheckBox("Versatility", ilvl_page)
         self.ilvl_versatility.setToolTip("Require Versatility as a secondary stat")
-        self.ilvl_page_layout.addWidget(self.ilvl_versatility, 11, 1, 1, 1)
+        self.ilvl_page_layout.addWidget(self.ilvl_versatility, 21, 0, 1, 1)
 
         self.ilvl_min_required_lvl_input = QLineEdit(ilvl_page)
         self.ilvl_min_required_lvl_input_label = QLabel("Min Player Level", ilvl_page)
@@ -954,26 +954,26 @@ class App(QMainWindow):
         self.add_ilvl_button = QPushButton("Add/Update Item", ilvl_page)
         self.add_ilvl_button.setToolTip("Add/Update item to your snipe list.")
         self.add_ilvl_button.clicked.connect(self.add_ilvl_to_list)
-        self.ilvl_page_layout.addWidget(self.add_ilvl_button, 11, 1, 1, 1)
+        self.ilvl_page_layout.addWidget(self.add_ilvl_button, 12, 1, 1, 1)
 
         self.remove_ilvl_button = QPushButton("Remove Item", ilvl_page)
         self.remove_ilvl_button.setToolTip("Remove item from your snipe list.")
         self.remove_ilvl_button.clicked.connect(self.remove_ilvl_to_list)
-        self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 12, 1, 1, 1)
+        self.ilvl_page_layout.addWidget(self.remove_ilvl_button, 13, 1, 1, 1)
 
         self.import_ilvl_data_button = QPushButton("Import ILVL Data")
         self.import_ilvl_data_button.setToolTip(
             "Import your desired_ilvl_list.json config"
         )
         self.import_ilvl_data_button.clicked.connect(self.import_ilvl_data)
-        self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 13, 1, 1, 1)
+        self.ilvl_page_layout.addWidget(self.import_ilvl_data_button, 14, 1, 1, 1)
 
         self.erase_ilvl_data_button = QPushButton("Erase ILvl Data")
         self.erase_ilvl_data_button.setToolTip(
             "Erase your desired_ilvl_list.json config"
         )
         self.erase_ilvl_data_button.clicked.connect(self.erase_ilvl_data)
-        self.ilvl_page_layout.addWidget(self.erase_ilvl_data_button, 14, 1, 1, 1)
+        self.ilvl_page_layout.addWidget(self.erase_ilvl_data_button, 15, 1, 1, 1)
 
         # Add search box above the ilvl_list_display
         self.ilvl_search_box = QLineEdit(ilvl_page)
@@ -1577,60 +1577,9 @@ class App(QMainWindow):
             with open(self.path_to_desired_ilvl_list) as file:
                 self.ilvl_list = json.load(file)
             # Process each item level data dictionary
+            self.ilvl_list = [self.normalize_ilvl_rule(x) for x in self.ilvl_list]
             for ilvl_dict_data in self.ilvl_list:
-                # Add missing keys if not present
-                if "item_ids" not in ilvl_dict_data:
-                    ilvl_dict_data["item_ids"] = []
-                if "required_min_lvl" not in ilvl_dict_data:
-                    ilvl_dict_data["required_min_lvl"] = 1
-                if "required_max_lvl" not in ilvl_dict_data:
-                    ilvl_dict_data["required_max_lvl"] = 999
-                if "max_ilvl" not in ilvl_dict_data:
-                    ilvl_dict_data["max_ilvl"] = 10000
-                if "bonus_lists" not in ilvl_dict_data:
-                    ilvl_dict_data["bonus_lists"] = []
-                if "modifier_values" not in ilvl_dict_data:
-                    ilvl_dict_data["modifier_values"] = []
-                if "modifier_objects" not in ilvl_dict_data:
-                    ilvl_dict_data["modifier_objects"] = []
-                if "crit" not in ilvl_dict_data:
-                    ilvl_dict_data["crit"] = False
-                if "haste" not in ilvl_dict_data:
-                    ilvl_dict_data["haste"] = False
-                if "mastery" not in ilvl_dict_data:
-                    ilvl_dict_data["mastery"] = False
-                if "versatility" not in ilvl_dict_data:
-                    ilvl_dict_data["versatility"] = False
-
-                # Create a formatted string with the item data
-                item_ids = ",".join(map(str, ilvl_dict_data["item_ids"]))
-                item_names = self.get_item_names_from_ids(ilvl_dict_data["item_ids"])
-                item_names_str = (
-                    "All"
-                    if not ilvl_dict_data["item_ids"]
-                    else f"[{', '.join(item_names)}]"
-                )
-                display_string = (
-                    f"Item(s): {item_names_str}; "
-                    f"IDs: {item_ids}; "
-                    f"Price: {ilvl_dict_data['buyout']}; "
-                    f"ILvl: {ilvl_dict_data['ilvl']}; "
-                    f"Sockets: {ilvl_dict_data['sockets']}; "
-                    f"Speed: {ilvl_dict_data['speed']}; "
-                    f"Leech: {ilvl_dict_data['leech']}; "
-                    f"Avoidance: {ilvl_dict_data['avoidance']}; "
-                    f"Crit: {ilvl_dict_data['crit']}; "
-                    f"Haste: {ilvl_dict_data['haste']}; "
-                    f"Mastery: {ilvl_dict_data['mastery']}; "
-                    f"Versatility: {ilvl_dict_data['versatility']}; "
-                    f"MinLevel: {ilvl_dict_data['required_min_lvl']}; "
-                    f"MaxLevel: {ilvl_dict_data['required_max_lvl']}; "
-                    f"Max ILvl: {ilvl_dict_data['max_ilvl']}; "
-                    f"Bonus Lists: {ilvl_dict_data['bonus_lists']}; "
-                    f"Modifier Values: {ilvl_dict_data['modifier_values']}; "
-                    f"Modifier Objects: {ilvl_dict_data['modifier_objects']}"
-                )
-                # Insert the string into the display list
+                display_string = self.build_ilvl_display_string(ilvl_dict_data)
                 self.ilvl_list_display.insertItem(
                     self.ilvl_list_display.count(), display_string
                 )
@@ -1655,36 +1604,59 @@ class App(QMainWindow):
             names.append(str(name))
         return names if names else ["All"]
 
+    def normalize_ilvl_rule(self, rule):
+        """
+        Normalize ilvl rule schema across load/import/edit flows.
+        """
+        normalized = dict(rule or {})
+        normalized["item_ids"] = normalized.get("item_ids", [])
+        normalized["required_min_lvl"] = normalized.get("required_min_lvl", 1)
+        normalized["required_max_lvl"] = normalized.get("required_max_lvl", 999)
+        normalized["max_ilvl"] = normalized.get("max_ilvl", 10000)
+        normalized["bonus_lists"] = normalized.get("bonus_lists", [])
+        normalized["modifier_values"] = normalized.get("modifier_values", [])
+        normalized["modifier_objects"] = normalized.get("modifier_objects", [])
+        normalized["crit"] = normalized.get("crit", False)
+        normalized["haste"] = normalized.get("haste", False)
+        normalized["mastery"] = normalized.get("mastery", False)
+        normalized["versatility"] = normalized.get("versatility", False)
+        return normalized
+
+    def build_ilvl_display_string(self, entry):
+        item_ids = entry["item_ids"]
+        item_names = self.get_item_names_from_ids(item_ids)
+        item_names_str = "All" if not item_ids else f"[{', '.join(item_names)}]"
+        modifier_objects_json = json.dumps(
+            entry.get("modifier_objects", []), separators=(",", ":")
+        )
+        return (
+            f"Item(s): {item_names_str}; "
+            f"IDs: {','.join(map(str, item_ids))}; "
+            f"Price: {entry['buyout']}; "
+            f"ILvl: {entry['ilvl']}; "
+            f"Sockets: {entry['sockets']}; "
+            f"Speed: {entry['speed']}; "
+            f"Leech: {entry['leech']}; "
+            f"Avoidance: {entry['avoidance']}; "
+            f"Crit: {entry.get('crit', False)}; "
+            f"Haste: {entry.get('haste', False)}; "
+            f"Mastery: {entry.get('mastery', False)}; "
+            f"Versatility: {entry.get('versatility', False)}; "
+            f"MinLevel: {entry['required_min_lvl']}; "
+            f"MaxLevel: {entry['required_max_lvl']}; "
+            f"Max ILvl: {entry['max_ilvl']}; "
+            f"Bonus Lists: {entry['bonus_lists']}; "
+            f"Modifier Values: {entry.get('modifier_values', [])}; "
+            f"Modifier Objects: {modifier_objects_json}"
+        )
+
     def refresh_ilvl_list_display_with_names(self):
         """
         Rebuilds the ilvl_list_display using the latest item_statistics for names.
         """
         self.ilvl_list_display.clear()
         for entry in self.ilvl_list:
-            item_ids = entry["item_ids"]
-            item_names = self.get_item_names_from_ids(item_ids)
-            item_names_str = "All" if not item_ids else f"[{', '.join(item_names)}]"
-            display_string = (
-                f"Item(s): {item_names_str}; "
-                f"IDs: {','.join(map(str, item_ids))}; "
-                f"Price: {entry['buyout']}; "
-                f"ILvl: {entry['ilvl']}; "
-                f"Sockets: {entry['sockets']}; "
-                f"Speed: {entry['speed']}; "
-                f"Leech: {entry['leech']}; "
-                f"Avoidance: {entry['avoidance']}; "
-                f"Crit: {entry.get('crit', False)}; "
-                f"Haste: {entry.get('haste', False)}; "
-                f"Mastery: {entry.get('mastery', False)}; "
-                f"Versatility: {entry.get('versatility', False)}; "
-                f"MinLevel: {entry['required_min_lvl']}; "
-                f"MaxLevel: {entry['required_max_lvl']}; "
-                f"Max ILvl: {entry['max_ilvl']}; "
-                f"Bonus Lists: {entry['bonus_lists']}; "
-                f"Modifier Values: {entry.get('modifier_values', [])}; "
-                f"Modifier Objects: {entry.get('modifier_objects', [])}"
-            )
-            self.ilvl_list_display.addItem(display_string)
+            self.ilvl_list_display.addItem(self.build_ilvl_display_string(entry))
 
     def ilvl_list_double_clicked(self, item):
         """
@@ -1973,30 +1945,7 @@ class App(QMainWindow):
         # Clear and rebuild display
         self.ilvl_list_display.clear()
         for entry in self.ilvl_list:
-            item_ids = entry["item_ids"]
-            item_names = self.get_item_names_from_ids(item_ids)
-            item_names_str = "All" if not item_ids else f"[{', '.join(item_names)}]"
-            display_string = (
-                f"Item(s): {item_names_str}; "
-                f"IDs: {','.join(map(str, item_ids))}; "
-                f"Price: {entry['buyout']}; "
-                f"ILvl: {entry['ilvl']}; "
-                f"Sockets: {entry['sockets']}; "
-                f"Speed: {entry['speed']}; "
-                f"Leech: {entry['leech']}; "
-                f"Avoidance: {entry['avoidance']}; "
-                f"Crit: {entry.get('crit', False)}; "
-                f"Haste: {entry.get('haste', False)}; "
-                f"Mastery: {entry.get('mastery', False)}; "
-                f"Versatility: {entry.get('versatility', False)}; "
-                f"MinLevel: {entry['required_min_lvl']}; "
-                f"MaxLevel: {entry['required_max_lvl']}; "
-                f"Max ILvl: {entry['max_ilvl']}; "
-                f"Bonus Lists: {entry['bonus_lists']}; "
-                f"Modifier Values: {entry.get('modifier_values', [])}; "
-                f"Modifier Objects: {entry.get('modifier_objects', [])}"
-            )
-            self.ilvl_list_display.addItem(display_string)
+            self.ilvl_list_display.addItem(self.build_ilvl_display_string(entry))
 
         # Log contents after changes
         self.log_list_widget_contents(self.ilvl_list_display, "AFTER add/update")
@@ -2090,30 +2039,7 @@ class App(QMainWindow):
         # Clear and rebuild display
         self.ilvl_list_display.clear()
         for entry in self.ilvl_list:
-            item_ids = entry["item_ids"]
-            item_names = self.get_item_names_from_ids(item_ids)
-            item_names_str = "All" if not item_ids else f"[{', '.join(item_names)}]"
-            display_string = (
-                f"Item(s): {item_names_str}; "
-                f"IDs: {','.join(map(str, item_ids))}; "
-                f"Price: {entry['buyout']}; "
-                f"ILvl: {entry['ilvl']}; "
-                f"Sockets: {entry['sockets']}; "
-                f"Speed: {entry['speed']}; "
-                f"Leech: {entry['leech']}; "
-                f"Avoidance: {entry['avoidance']}; "
-                f"Crit: {entry.get('crit', False)}; "
-                f"Haste: {entry.get('haste', False)}; "
-                f"Mastery: {entry.get('mastery', False)}; "
-                f"Versatility: {entry.get('versatility', False)}; "
-                f"MinLevel: {entry['required_min_lvl']}; "
-                f"MaxLevel: {entry['required_max_lvl']}; "
-                f"Max ILvl: {entry['max_ilvl']}; "
-                f"Bonus Lists: {entry['bonus_lists']}; "
-                f"Modifier Values: {entry.get('modifier_values', [])}; "
-                f"Modifier Objects: {entry.get('modifier_objects', [])}"
-            )
-            self.ilvl_list_display.addItem(display_string)
+            self.ilvl_list_display.addItem(self.build_ilvl_display_string(entry))
 
         # Log contents after removal
         self.log_list_widget_contents(self.ilvl_list_display, "AFTER remove")
@@ -2182,7 +2108,13 @@ class App(QMainWindow):
 
         try:
             with open(pathname) as file:
-                self.ilvl_list += json.load(file)
+                imported_rules = json.load(file)
+            if not isinstance(imported_rules, list):
+                raise ValueError(
+                    "Invalid JSON file.\nFile should contain a list of Desired Ilvl Objects."
+                )
+            normalized_rules = [self.normalize_ilvl_rule(x) for x in imported_rules]
+            self.ilvl_list += normalized_rules
             if not isinstance(self.ilvl_list, list):
                 raise ValueError(
                     "Invalid JSON file.\nFile should contain a list of Desired Ilvl Objects."
@@ -2190,6 +2122,7 @@ class App(QMainWindow):
             # clear display before inserting new data
             self.ilvl_list_display.clear()
             for ilvl_dict_data in self.ilvl_list:
+                ilvl_dict_data = self.normalize_ilvl_rule(ilvl_dict_data)
                 item_ids = ilvl_dict_data.get("item_ids", [])
                 item_names = self.get_item_names_from_ids(item_ids)
                 item_names_str = "All" if not item_ids else f"[{', '.join(item_names)}]"
@@ -2253,21 +2186,7 @@ class App(QMainWindow):
                     raise ValueError(
                         "Sockets, speed, leech, and avoidance should be boolean values."
                     )
-
-                string_with_data = (
-                    f"Item(s): {item_names_str}; "
-                    f"IDs: {','.join(map(str, item_ids))}; "
-                    f"Price: {buyout_price}; "
-                    f"ILvl: {ilvl}; "
-                    f"Sockets: {sockets}; "
-                    f"Speed: {speed}; "
-                    f"Leech: {leech}; "
-                    f"Avoidance: {avoidance}; "
-                    f"MinLevel: {required_min_lvl}; "
-                    f"MaxLevel: {required_max_lvl}; "
-                    f"Max ILvl: {ilvl_max}; "
-                    f"Bonus Lists: {bonus_lists}"
-                )
+                string_with_data = self.build_ilvl_display_string(ilvl_dict_data)
                 self.ilvl_list_display.insertItem(
                     self.ilvl_list_display.count(), string_with_data
                 )
