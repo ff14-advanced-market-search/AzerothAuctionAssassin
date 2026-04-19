@@ -1617,6 +1617,10 @@ async function runAlerts(state, progress, runOnce = false) {
               JSON.stringify(Array.from(auction.bonus_ids)) +
               "\n"
           }
+          if ("modifiers" in auction) {
+            id_msg +=
+              "`modifiers:` " + JSON.stringify(auction.modifiers || []) + "\n"
+          }
         } else if (state.ITEM_NAMES[auction.itemID]) {
           embed_name = state.ITEM_NAMES[auction.itemID]
           id_msg += "`itemID:` " + auction.itemID + "\n"
@@ -1797,6 +1801,7 @@ async function runAlerts(state, progress, runOnce = false) {
       [`${priceType}_prices`]: priceInGold,
       tertiary_stats,
       secondary_stats: auction.secondary_stats,
+      modifiers: auction.modifiers,
       bonus_ids: auction.bonus_ids,
       ilvl: auction.ilvl,
       required_lvl: auction.required_lvl,
@@ -2207,6 +2212,7 @@ async function runAlerts(state, progress, runOnce = false) {
       buyout,
       tertiary_stats,
       secondary_stats,
+      modifiers: apiModifiers,
       bonus_ids: item_bonus_ids,
       ilvl,
       required_lvl,
