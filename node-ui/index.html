@@ -33,7 +33,7 @@
       <header class="topbar">
         <div>
           <div class="eyebrow">Azeroth Auction Assassin</div>
-          <div class="title">Version: 2.1.2</div>
+          <div class="title">Version: 2.2.0</div>
         </div>
         <div class="actions">
           <div class="nav-controls">
@@ -697,6 +697,12 @@
                   <input name="bonus_lists" type="text" />
                 </label>
                 <label
+                  title='Optional exact modifier match. Paste JSON modifiers like [{"type":28,"value":3608},{"type":29,"value":49},{"type":30,"value":40}]. Leave empty to match any modifiers.'
+                >
+                  Modifiers (JSON exact match)
+                  <input name="modifier_values" type="text" />
+                </label>
+                <label
                   title="Set the minimum required character level to use gear. Ex: required level 80 for TWW items, 70 for DF items, etc."
                 >
                   Min player level
@@ -720,6 +726,19 @@
                   >
                   <label title="Do you want the item to have Avoidance?"
                     ><input type="checkbox" name="avoidance" /> Avoidance</label
+                  >
+                  <label title="Require Crit as a secondary stat"
+                    ><input type="checkbox" name="crit" /> Crit</label
+                  >
+                  <label title="Require Haste as a secondary stat"
+                    ><input type="checkbox" name="haste" /> Haste</label
+                  >
+                  <label title="Require Mastery as a secondary stat"
+                    ><input type="checkbox" name="mastery" /> Mastery</label
+                  >
+                  <label title="Require Versatility as a secondary stat"
+                    ><input type="checkbox" name="versatility" />
+                    Versatility</label
                   >
                 </div>
                 <button

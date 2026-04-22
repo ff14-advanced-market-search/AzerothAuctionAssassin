@@ -479,6 +479,7 @@ const SHEET_COL_ORDER = [
   "itemID",
   "petID",
   "ilvl",
+  "secondary_stats",
   "tertiary_stats",
   "required_lvl",
   "bonus_ids",
@@ -1688,7 +1689,7 @@ const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
 // Keep in sync with root package.json version (avoid IPC on every Saddlebag request — was causing UI jitter)
-const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.1.2"
+const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.2.0"
 
 function saddlebagFetchHeaders(base = {}) {
   return { ...base, "User-Agent": SADDLEBAG_USER_AGENT }
@@ -2112,6 +2113,41 @@ function parseNums(text) {
     )
   }
   return values
+}
+
+function parseModifierFilterInput(text) {
+  const trimmed = String(text || "").trim()
+  if (!trimmed) return { modifierValues: [], modifierObjects: [] }
+
+  if (!trimmed.startsWith("[") && !trimmed.startsWith("{")) {
+    throw new Error(
+      'Modifiers must be valid JSON. Example: [{"type":28,"value":3608}]'
+    )
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed)
+    const list = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed?.modifiers)
+      ? parsed.modifiers
+      : []
+    const normalized = list
+      .map((m) => ({
+        type: Number(m?.type),
+        value: Number(m?.value),
+      }))
+      .filter((m) => Number.isFinite(m.type) && Number.isFinite(m.value))
+    if (normalized.length === 0) {
+      throw new Error("No valid {type,value} modifiers found in JSON.")
+    }
+    return { modifierValues: [], modifierObjects: normalized }
+  } catch (err) {
+    throw new Error(
+      err?.message ||
+        "Invalid modifier JSON. Expected an array of objects with type/value."
+    )
+  }
 }
 
 function updateSuggestions(inputEl, suggestEl, cache) {
@@ -2589,10 +2625,16 @@ async function handlePastePBSIlvl(btn) {
           speed: false,
           leech: false,
           avoidance: false,
+          crit: false,
+          haste: false,
+          mastery: false,
+          versatility: false,
           item_ids,
           required_min_lvl: min_level,
           required_max_lvl: max_level,
           bonus_lists: [],
+          modifier_values: [],
+          modifier_objects: [],
           item_names: {},
           base_ilvls: {},
           base_required_levels: {},
@@ -2984,9 +3026,21 @@ function renderIlvlRules() {
     filteredRules = state.ilvlList.filter((rule) => {
       const itemIds = (rule.item_ids || []).map(String)
       const itemNames = itemIds.map((id) => getItemName(id))
+      const requiredStats = []
+      if (rule.sockets) requiredStats.push("sockets")
+      if (rule.speed) requiredStats.push("speed")
+      if (rule.leech) requiredStats.push("leech")
+      if (rule.avoidance) requiredStats.push("avoidance")
+      if (rule.crit) requiredStats.push("crit")
+      if (rule.haste) requiredStats.push("haste")
+      if (rule.mastery) requiredStats.push("mastery")
+      if (rule.versatility) requiredStats.push("versatility", "vers")
       const searchText = `${itemIds.join(" ")} ${itemNames.join(" ")} ${
         rule.bonus_lists?.join(" ") || ""
-      }`.toLowerCase()
+      } ${rule.modifier_values?.join(" ") || ""} ${
+        rule.modifier_objects?.map((m) => `${m.type}:${m.value}`).join(" ") ||
+        ""
+      } ${requiredStats.join(" ")}`.toLowerCase()
       return searchText.includes(filterTerm)
     })
   }
@@ -3058,6 +3112,22 @@ function renderIlvlRules() {
     }`
     detailsDiv.appendChild(bonusesDiv1)
 
+    const modifiersDiv = document.createElement("div")
+    modifiersDiv.className = "bonuses"
+    const modifierObjectsLabel = Array.isArray(rule.modifier_objects)
+      ? rule.modifier_objects
+          .map((m) => `${m.type}:${m.value}`)
+          .map(escapeHtml)
+          .join(", ")
+      : ""
+    const modifierValuesLabel = Array.isArray(rule.modifier_values)
+      ? rule.modifier_values.map(String).map(escapeHtml).join(", ")
+      : ""
+    modifiersDiv.textContent = `Modifiers: ${
+      modifierObjectsLabel || modifierValuesLabel || "Any"
+    }`
+    detailsDiv.appendChild(modifiersDiv)
+
     const bonusesDiv2 = document.createElement("div")
     bonusesDiv2.className = "bonuses"
     bonusesDiv2.textContent = `Player lvl: ${rule.required_min_lvl}-${rule.required_max_lvl}`
@@ -3069,6 +3139,13 @@ function renderIlvlRules() {
       rule.speed ? "Y" : "N"
     } Leech:${rule.leech ? "Y" : "N"} Avoid:${rule.avoidance ? "Y" : "N"}`
     detailsDiv.appendChild(bonusesDiv3)
+
+    const bonusesDiv4 = document.createElement("div")
+    bonusesDiv4.className = "bonuses"
+    bonusesDiv4.textContent = `Crit:${rule.crit ? "Y" : "N"} Haste:${
+      rule.haste ? "Y" : "N"
+    } Mastery:${rule.mastery ? "Y" : "N"} Vers:${rule.versatility ? "Y" : "N"}`
+    detailsDiv.appendChild(bonusesDiv4)
 
     row.appendChild(detailsDiv)
     const button = document.createElement("button")
@@ -3091,12 +3168,24 @@ function renderIlvlRules() {
         form.buyout.value = rule.buyout || 100000
         form.item_ids.value = (rule.item_ids || []).join(", ")
         form.bonus_lists.value = (rule.bonus_lists || []).join(", ")
+        if (
+          Array.isArray(rule.modifier_objects) &&
+          rule.modifier_objects.length
+        ) {
+          form.modifier_values.value = JSON.stringify(rule.modifier_objects)
+        } else {
+          form.modifier_values.value = (rule.modifier_values || []).join(", ")
+        }
         form.required_min_lvl.value = rule.required_min_lvl || 1
         form.required_max_lvl.value = rule.required_max_lvl || 1000
         form.sockets.checked = rule.sockets || false
         form.speed.checked = rule.speed || false
         form.leech.checked = rule.leech || false
         form.avoidance.checked = rule.avoidance || false
+        form.crit.checked = rule.crit || false
+        form.haste.checked = rule.haste || false
+        form.mastery.checked = rule.mastery || false
+        form.versatility.checked = rule.versatility || false
         const submitBtn = form.querySelector('button[type="submit"]')
         if (submitBtn) submitBtn.textContent = "Update rule"
         form.ilvl.focus()
@@ -4004,6 +4093,23 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     }
   }
 
+  // Validate modifier filter if provided
+  let modifierValues = []
+  let modifierObjects = []
+  const modifierValuesText = form.modifier_values.value.trim()
+  if (modifierValuesText) {
+    try {
+      const parsed = parseModifierFilterInput(modifierValuesText)
+      modifierValues = parsed.modifierValues
+      modifierObjects = parsed.modifierObjects
+    } catch (err) {
+      const errorMsg = err?.message || "Modifiers should be valid JSON."
+      showToast(errorMsg, "error")
+      form.modifier_values.focus()
+      return
+    }
+  }
+
   const rule = {
     ilvl: ilvl,
     max_ilvl: maxIlvl,
@@ -4012,8 +4118,14 @@ document.getElementById("ilvl-form").addEventListener("submit", async (e) => {
     speed: form.speed.checked,
     leech: form.leech.checked,
     avoidance: form.avoidance.checked,
+    crit: form.crit.checked,
+    haste: form.haste.checked,
+    mastery: form.mastery.checked,
+    versatility: form.versatility.checked,
     item_ids: itemIds,
     bonus_lists: bonusLists,
+    modifier_values: modifierValues,
+    modifier_objects: modifierObjects,
     required_min_lvl: minLevel,
     required_max_lvl: maxLevel,
   }

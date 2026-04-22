@@ -331,6 +331,10 @@ function normalizeIlvlRules(list) {
       speed: Boolean(rule.speed),
       leech: Boolean(rule.leech),
       avoidance: Boolean(rule.avoidance),
+      crit: Boolean(rule.crit),
+      haste: Boolean(rule.haste),
+      mastery: Boolean(rule.mastery),
+      versatility: Boolean(rule.versatility),
       item_ids: Array.isArray(rule.item_ids)
         ? rule.item_ids.map((id) => Number(id)).filter((n) => !Number.isNaN(n))
         : [],
@@ -340,6 +344,19 @@ function normalizeIlvlRules(list) {
         ? rule.bonus_lists
             .map((id) => Number(id))
             .filter((n) => !Number.isNaN(n))
+        : [],
+      modifier_values: Array.isArray(rule.modifier_values)
+        ? rule.modifier_values
+            .map((id) => Number(id))
+            .filter((n) => !Number.isNaN(n))
+        : [],
+      modifier_objects: Array.isArray(rule.modifier_objects)
+        ? rule.modifier_objects
+            .map((m) => ({
+              type: Number(m?.type),
+              value: Number(m?.value),
+            }))
+            .filter((m) => Number.isFinite(m.type) && Number.isFinite(m.value))
         : [],
     }))
     .filter((rule) => rule.buyout > 0)
