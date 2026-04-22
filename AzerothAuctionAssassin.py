@@ -21,7 +21,7 @@ except Exception as ex:
 try:
     from utils.version import AAA_VERSION
 except ImportError:
-    AAA_VERSION = "1.6.6"
+    AAA_VERSION = "1.6.7"
 
 from utils.api_requests import saddlebag_request_headers
 

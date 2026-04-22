@@ -856,11 +856,19 @@ class Alerts(QThread):
 
                 else:
                     self.progress.emit(
-                        f"The updates will come\non min {mega_data.get_upload_time_minutes()}\nof each hour."
+                        f"The updates will come\non min {mega_data.format_upload_time_minutes()}\nof each hour."
                     )
+                    up_mins = mega_data.get_upload_time_minutes()
+                    wrap_note = ""
+                    if 0 in up_mins:
+                        wrap_note = (
+                            " Note: an upload minute of 0 wraps the scan window (SCAN_TIME_MIN=-1) "
+                            "to include minutes 59, 0, 1, 2, 3."
+                        )
                     print(
-                        f"Blizzard API data only updates 1 time per hour. The updates will come on minute {mega_data.get_upload_time_minutes()} of each hour. "
-                        + f"{datetime.now()} is not the update time. "
+                        "Blizzard API data only updates 1 time per hour. "
+                        f"The updates will come on minute {mega_data.format_upload_time_minutes()} of each hour. "
+                        f"{datetime.now()} is outside those upload minutes (local clock).{wrap_note}"
                     )
                     time.sleep(20)
 
@@ -906,8 +914,8 @@ class Alerts(QThread):
         # show details on run
         print(
             f"Blizzard API data only updates 1 time per hour.\n"
-            + f"The updates for region '{mega_data.REGION}' for '{mega_data.FACTION}' faction AH will come on minute {mega_data.get_upload_time_minutes()} of each hour.\n"
-            + f"{datetime.now()} may not the update time. "
+            + f"The updates for region '{mega_data.REGION}' for '{mega_data.FACTION}' faction AH will come on minute {mega_data.format_upload_time_minutes()} of each hour.\n"
+            + f"{datetime.now()} may not be an upload minute (local clock). "
             + "But we will run once to get the current data so no one asks me about the waiting time.\n"
             + "After the first run we will trigger once per hour when the new data updates.\n"
             + f"Running {mega_data.THREADS} concurrent api calls\n"
