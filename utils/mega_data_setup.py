@@ -626,7 +626,19 @@ class MegaData:
         return list(self.upload_timers.values())
 
     def get_upload_time_minutes(self):
-        return set(realm["lastUploadMinute"] for realm in self.get_upload_time_list())
+        """Sorted unique minutes parsed from Last-Modified (empty until at least one AH pull)."""
+        seen = {
+            realm["lastUploadMinute"]
+            for realm in self.get_upload_time_list()
+            if realm.get("lastUploadMinute") is not None
+        }
+        return sorted(seen)
+
+    def format_upload_time_minutes(self):
+        mins = self.get_upload_time_minutes()
+        if not mins:
+            return "none yet (no Last-Modified collected — run one AH scan first)"
+        return ", ".join(str(m) for m in mins)
 
     def get_realm_names(self, connectedRealmId):
         # Match JSON int/str realm IDs to API numeric connected realm IDs
@@ -730,28 +742,37 @@ class MegaData:
             time.sleep(1)
             raise Exception(error_message)
 
-        if "Last-Modified" in dict(req.headers):
+        # Use req.headers directly — CaseInsensitiveDict; dict(req.headers) keeps wire casing
+        # so "Last-Modified" in dict(...) misses Blizzard's "last-modified".
+        last_upload_time_raw = req.headers.get("Last-Modified")
+        if last_upload_time_raw:
             try:
-                lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
                 # If unchanged, data has not updated yet; skip processing
                 if (
                     self.upload_timers.get(connectedRealmId, {}).get(
                         "lastUploadTimeRaw"
                     )
-                    == lastUploadTimeRaw
+                    == last_upload_time_raw
                 ):
                     print(
-                        f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (Last-Modified unchanged: {lastUploadTimeRaw})"
+                        f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (Last-Modified unchanged: {last_upload_time_raw})"
                     )
                     return {"auctions": [], "skipped": True}
-                self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
+                self.update_local_timers(
+                    connectedRealmId, last_upload_time_raw, req.headers
+                )
             except Exception as ex:
                 print(f"The exception was:", ex)
+        else:
+            print(
+                "No Last-Modified header found in response. Headers received: "
+                f"{dict(req.headers)}"
+            )
 
         auction_info = req.json()
         return auction_info
 
-    def update_local_timers(self, dataSetID, lastUploadTimeRaw):
+    def update_local_timers(self, dataSetID, lastUploadTimeRaw, response_headers=None):
         if dataSetID == -1:
             tableName = f"{self.REGION}_retail_commodityListings"
             dataSetName = [f"{self.REGION} Commodities"]
@@ -775,6 +796,15 @@ class MegaData:
             "region": self.REGION,
             "tableName": tableName,
         }
+        if response_headers is not None:
+            hdr_dump = dict(sorted((k, v) for k, v in response_headers.items()))
+            new_realm_time["last_http_headers"] = hdr_dump
+            print(
+                f"AH timer update dataSetID={dataSetID} Last-Modified={lastUploadTimeRaw!r} "
+                f"parsed_minute={lastUploadMinute}\n"
+                f"Full response headers ({len(hdr_dump)} keys):\n"
+                f"{json.dumps(hdr_dump, indent=2)}"
+            )
         self.upload_timers[dataSetID] = new_realm_time
 
     @retry(
@@ -808,23 +838,30 @@ class MegaData:
             time.sleep(1)
             raise Exception(error_message)
 
-        if "Last-Modified" in dict(req.headers):
+        last_upload_time_raw = req.headers.get("Last-Modified")
+        if last_upload_time_raw:
             try:
-                lastUploadTimeRaw = dict(req.headers)["Last-Modified"]
                 # If unchanged, data has not updated yet; skip processing
                 if (
                     self.upload_timers.get(connectedRealmId, {}).get(
                         "lastUploadTimeRaw"
                     )
-                    == lastUploadTimeRaw
+                    == last_upload_time_raw
                 ):
                     print(
-                        f"Skip {self.REGION} commodities: data has not updated yet (Last-Modified unchanged: {lastUploadTimeRaw})"
+                        f"Skip {self.REGION} commodities: data has not updated yet (Last-Modified unchanged: {last_upload_time_raw})"
                     )
                     return {"auctions": [], "skipped": True}
-                self.update_local_timers(connectedRealmId, lastUploadTimeRaw)
+                self.update_local_timers(
+                    connectedRealmId, last_upload_time_raw, req.headers
+                )
             except Exception as ex:
                 print(f"The exception was:", ex)
+        else:
+            print(
+                "No Last-Modified header found on commodities response. Headers received: "
+                f"{dict(req.headers)}"
+            )
 
         auction_info = req.json()
         return auction_info

@@ -5,7 +5,7 @@ const path = require("path")
 const { setTimeout: delay } = require("timers/promises")
 const { fetch } = require("undici")
 
-const AAA_NODE_UI_VERSION = "2.2.0"
+const AAA_NODE_UI_VERSION = "2.2.1"
 
 function saddlebagFetchHeaders(base = {}) {
   return {
@@ -41,6 +41,20 @@ function normalizeEquippableItems(data) {
     return out
   }
   return data
+}
+
+/**
+ * All HTTP response header names and values (stable key order) for debugging.
+ */
+function httpHeadersToSortedRecord(headers) {
+  if (!headers || typeof headers.forEach !== "function") return {}
+  const out = {}
+  headers.forEach((value, key) => {
+    out[key] = value
+  })
+  return Object.fromEntries(
+    Object.entries(out).sort(([a], [b]) => a.localeCompare(b))
+  )
 }
 
 // Stop flag and callbacks for Electron integration
@@ -831,7 +845,11 @@ class MegaData {
    * Get set of all upload time minutes (when data updates occur)
    */
   get_upload_time_minutes() {
-    return new Set(this.get_upload_time_list().map((r) => r.lastUploadMinute))
+    return new Set(
+      this.get_upload_time_list()
+        .map((r) => r.lastUploadMinute)
+        .filter((m) => Number.isInteger(m) && m >= 0 && m <= 59)
+    )
   }
 
   /**
@@ -920,7 +938,7 @@ class MegaData {
         return { auctions: [], skipped: true }
       }
       if (lastMod) {
-        this.update_local_timers(connectedRealmId, lastMod)
+        this.update_local_timers(connectedRealmId, lastMod, res)
       }
       return data
     } catch (error) {
@@ -1010,7 +1028,7 @@ class MegaData {
         )
         return { auctions: [], skipped: true }
       }
-      if (lastMod) this.update_local_timers(connectedId, lastMod)
+      if (lastMod) this.update_local_timers(connectedId, lastMod, res)
       return data
     } catch (error) {
       clearTimeout(timeoutId)
@@ -1037,7 +1055,7 @@ class MegaData {
    * Update local upload timers with data from API response
    * Parses last-modified header to determine when data was last updated
    */
-  update_local_timers(dataSetID, lastUploadTimeRaw) {
+  update_local_timers(dataSetID, lastUploadTimeRaw, res) {
     let tableName
     let dataSetName
     if (dataSetID === -1 || dataSetID === -2) {
@@ -1051,7 +1069,7 @@ class MegaData {
     const lastUploadUnix = Math.floor(
       new Date(lastUploadTimeRaw).getTime() / 1000
     )
-    this.upload_timers[dataSetID] = {
+    const newRealmTime = {
       dataSetID,
       dataSetName,
       lastUploadMinute,
@@ -1060,6 +1078,18 @@ class MegaData {
       region: this.REGION,
       tableName,
     }
+    if (res && res.headers) {
+      const hdrDump = httpHeadersToSortedRecord(res.headers)
+      newRealmTime.lastHttpHeaders = hdrDump
+      log(
+        `AH timer update dataSetID=${dataSetID} Last-Modified=${JSON.stringify(
+          lastUploadTimeRaw
+        )} parsed_minute=${lastUploadMinute}\n` +
+          `Full response headers (${Object.keys(hdrDump).length} keys):\n` +
+          JSON.stringify(hdrDump, null, 2)
+      )
+    }
+    this.upload_timers[dataSetID] = newRealmTime
   }
 
   /**
@@ -2863,12 +2893,17 @@ async function runAlerts(state, progress, runOnce = false) {
           ","
         )} of each hour. Scans trigger on min ${scanTriggerMinutes.join(",")}.`
       )
+      if (uploadMinutes.includes(0)) {
+        log(
+          "Note: upload minute 0 means Last-Modified fell on xx:00; with default SCAN_TIME_MIN=-1 the scan window wraps and includes minutes 59, 0, 1, 2, 3."
+        )
+      }
       log(
         `Blizzard API data only updates 1 time per hour. The updates will come on minute ${uploadMinutes.join(
           ", "
         )} of each hour. Scans will trigger on minutes ${scanTriggerMinutes.join(
           ", "
-        )}. ${new Date().toISOString()} is not the update time.`
+        )}. Local clock now (UTC): ${new Date().toISOString()} — outside those scan windows (not a Blizzard header).`
       )
       await delay(20000) // Wait 20 seconds before checking again
     }
