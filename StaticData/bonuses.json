@@ -14611,7 +14611,7 @@
   },
   "3455": {
     "id": 3455,
-    "serverside": true
+    "applyBonusId": 3530
   },
   "3457": {
     "id": 3457,
@@ -41373,7 +41373,8 @@
       "amount": 72,
       "priority": 0,
       "squishEra": 0
-    }
+    },
+    "tag": "Heroic"
   },
   "7755": {
     "id": 7755,
@@ -41381,7 +41382,8 @@
       "amount": 73,
       "priority": 0,
       "squishEra": 0
-    }
+    },
+    "tag": "Mythic"
   },
   "7756": {
     "id": 7756,
@@ -56673,28 +56675,23 @@
       "amount": 71,
       "priority": 0,
       "squishEra": 0
-    },
-    "quality": 4
+    }
   },
   "9120": {
     "id": 9120,
-    "tag": "Heroic",
     "itemLevel": {
       "amount": 72,
       "priority": 0,
       "squishEra": 0
-    },
-    "quality": 4
+    }
   },
   "9121": {
     "id": 9121,
-    "tag": "Mythic",
     "itemLevel": {
       "amount": 73,
       "priority": 0,
       "squishEra": 0
-    },
-    "quality": 4
+    }
   },
   "9122": {
     "id": 9122,
@@ -97314,6 +97311,53 @@
     },
     "quality": 3
   },
+  "13651": {
+    "id": 13651,
+    "itemLevel": {
+      "amount": 246,
+      "priority": 0,
+      "squishEra": 2
+    }
+  },
+  "13652": {
+    "id": 13652,
+    "itemLevel": {
+      "amount": 259,
+      "priority": 0,
+      "squishEra": 2
+    }
+  },
+  "13653": {
+    "id": 13653,
+    "itemLevel": {
+      "amount": 285,
+      "priority": 0,
+      "squishEra": 2
+    },
+    "quality": 4,
+    "tag": "Ascendant Voidforged: Hero"
+  },
+  "13654": {
+    "id": 13654,
+    "itemLevel": {
+      "amount": 298,
+      "priority": 0,
+      "squishEra": 2
+    },
+    "quality": 4,
+    "tag": "Ascendant Voidforged: Myth"
+  },
+  "13655": {
+    "id": 13655,
+    "levelOffsetSecondary": {
+      "amount": 10
+    },
+    "tag": "Ascendant Voidforged"
+  },
+  "13656": {
+    "id": 13656,
+    "tag": "Galactic Void-Charged"
+  },
   "13667": {
     "id": 13667,
     "serverside": true
@@ -97326,12 +97370,8 @@
     "id": 13669,
     "itemLevel": {
       "amount": 220,
-      "priority": 1,
+      "priority": 100,
       "squishEra": 2
-    },
-    "requiredLevelCurve": {
-      "curve": 70596,
-      "val": 0
     }
   },
   "13670": {
@@ -97346,6 +97386,15 @@
       "val": 0
     },
     "quality": 4
+  },
+  "13689": {
+    "id": 13689,
+    "quality": 3,
+    "itemLevel": {
+      "amount": 49,
+      "priority": 0,
+      "squishEra": 0
+    }
   },
   "13729": {
     "id": 13729,
@@ -97373,5 +97422,9 @@
       "squishEra": 2
     },
     "quality": 3
+  },
+  "13760": {
+    "id": 13760,
+    "serverside": true
   }
 }
