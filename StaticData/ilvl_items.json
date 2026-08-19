@@ -13222,5 +13222,113 @@
     "sell_price": 36315,
     "ilvl": 447,
     "is_stackable": 0
+  },
+  "271434": {
+    "itemID": 271434,
+    "itemName": "Venom Rite Mantle",
+    "itemQuality": 4,
+    "required_level": 90,
+    "item_class": 4,
+    "item_subclass": 1,
+    "purchase_price": 2024753,
+    "sell_price": 404950,
+    "ilvl": 219,
+    "is_stackable": 0
+  },
+  "271435": {
+    "itemID": 271435,
+    "itemName": "Slippers of the Hissing Cult",
+    "itemQuality": 4,
+    "required_level": 90,
+    "item_class": 4,
+    "item_subclass": 1,
+    "purchase_price": 2190105,
+    "sell_price": 438021,
+    "ilvl": 219,
+    "is_stackable": 0
+  },
+  "271436": {
+    "itemID": 271436,
+    "itemName": "Slitherscale Girdle",
+    "itemQuality": 4,
+    "required_level": 90,
+    "item_class": 4,
+    "item_subclass": 2,
+    "purchase_price": 1476491,
+    "sell_price": 295298,
+    "ilvl": 219,
+    "is_stackable": 0
+  },
+  "271438": {
+    "itemID": 271438,
+    "itemName": "Temple Delver's Mystic Helm",
+    "itemQuality": 4,
+    "required_level": 90,
+    "item_class": 4,
+    "item_subclass": 2,
+    "purchase_price": 2165695,
+    "sell_price": 433139,
+    "ilvl": 219,
+    "is_stackable": 0
+  },
+  "271440": {
+    "itemID": 271440,
+    "itemName": "Greaves of the Noxious Depths",
+    "itemQuality": 4,
+    "required_level": 90,
+    "item_class": 4,
+    "item_subclass": 3,
+    "purchase_price": 2213453,
+    "sell_price": 442690,
+    "ilvl": 219,
+    "is_stackable": 0
+  },
+  "271441": {
+    "itemID": 271441,
+    "itemName": "Crushing Coiler Coif",
+    "itemQuality": 4,
+    "required_level": 90,
+    "item_class": 4,
+    "item_subclass": 3,
+    "purchase_price": 2095224,
+    "sell_price": 419044,
+    "ilvl": 219,
+    "is_stackable": 0
+  },
+  "271444": {
+    "itemID": 271444,
+    "itemName": "Pauldrons of the Forgotten Sacrifice",
+    "itemQuality": 4,
+    "required_level": 90,
+    "item_class": 4,
+    "item_subclass": 4,
+    "purchase_price": 2064022,
+    "sell_price": 412804,
+    "ilvl": 219,
+    "is_stackable": 0
+  },
+  "271445": {
+    "itemID": 271445,
+    "itemName": "Fanged Brute's Greatbelt",
+    "itemQuality": 4,
+    "required_level": 90,
+    "item_class": 4,
+    "item_subclass": 4,
+    "purchase_price": 1375824,
+    "sell_price": 275164,
+    "ilvl": 219,
+    "is_stackable": 0
+  },
+  "271638": {
+    "itemID": 271638,
+    "itemName": "Bound Serpent's Jade Eye",
+    "itemQuality": 4,
+    "required_level": 90,
+    "item_class": 4,
+    "item_subclass": 0,
+    "purchase_price": 1199312,
+    "sell_price": 239862,
+    "ilvl": 219,
+    "is_stackable": 0
   }
 }

@@ -94852,8 +94852,12 @@
   },
   "13611": {
     "id": 13611,
-    "ilevel": "120 @plvl 80 - 201 @plvl 201",
-    "curveId": 92772,
+    "dropLevelCurve": {
+      "curveId": 92772,
+      "offset": 0,
+      "priority": 0,
+      "squishEra": 2
+    },
     "requiredLevelCurve": {
       "curve": 70856,
       "val": 3322
@@ -96816,7 +96820,7 @@
   "13901": {
     "id": 13901,
     "requiredLevelCurve": {
-      "curve": 101224,
+      "curve": 115477,
       "val": 0
     },
     "dropLevelCurve": {
@@ -96856,5 +96860,18 @@
       "squishEra": 2
     },
     "quality": 3
+  },
+  "13987": {
+    "id": 13987,
+    "tag": "Venomcursed",
+    "effect": {
+      "id": 237622,
+      "index": 0,
+      "spell": {
+        "id": 1317036,
+        "name": "Venomcursed Critical Strike",
+        "icon": "inv_ability_poison_debuff"
+      }
+    }
   }
 }
