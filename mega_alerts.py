@@ -848,7 +848,8 @@ class Alerts(QThread):
                 if matching_realms != []:
                     self.progress.emit("Sending alerts!")
                     pool = ThreadPoolExecutor(max_workers=mega_data.THREADS)
-                    for connected_id in matching_realms:
+                    # Classic faction timers can select the same realm more than once.
+                    for connected_id in dict.fromkeys(matching_realms):
                         pool.submit(pull_single_realm_data, connected_id)
                     pool.shutdown(wait=True)
                     # Short sleep between cycles; skipping processing speeds things up but may lead to more 429s
