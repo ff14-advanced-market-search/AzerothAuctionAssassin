@@ -688,6 +688,7 @@ class MegaData:
             )
 
         all_auctions = []
+        skipped_endpoints = 0
         if "CLASSIC" in self.REGION:
             if self.FACTION == "alliance":
                 endpoints = ["/2"]
@@ -703,17 +704,20 @@ class MegaData:
         for endpoint in endpoints:
             url = self.construct_api_url(connectedRealmId, endpoint)
 
-            auction_info = self.make_ah_api_request(url, connectedRealmId)
+            auction_info = self.make_ah_api_request(url, connectedRealmId, endpoint)
             if auction_info is None or "auctions" not in auction_info:
                 print(
                     f"{self.REGION} {str(connectedRealmId)} realm data, no auctions found"
                 )
                 continue
             if auction_info.get("skipped"):
-                return None
+                skipped_endpoints += 1
+                continue
             # merge all the auctions
             all_auctions.extend(auction_info["auctions"])
 
+        if skipped_endpoints == len(endpoints):
+            return None
         return all_auctions
 
     def construct_api_url(self, connectedRealmId, endpoint):
@@ -739,55 +743,58 @@ class MegaData:
         retry=retry_if_exception_type(requests.RequestException),
         retry_error_callback=lambda retry_state: {"auctions": []},
     )
-    def make_ah_api_request(self, url, connectedRealmId):
-        req = self.get_if_modified(url, connectedRealmId)
-        if req.status_code == 304:
-            print(
-                f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (304 Not Modified)"
-            )
-            return {"auctions": [], "skipped": True}
-
-        # check for api errors
-        if req.status_code == 429:
-            error_message = f"{req} BLIZZARD too many requests error on {self.REGION} {str(connectedRealmId)} realm data, skipping"
-            print(error_message)
-            time.sleep(3)
-            raise Exception(error_message)
-        elif req.status_code != 200:
-            error_message = f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
-            print(error_message)
-            time.sleep(1)
-            raise Exception(error_message)
-
-        # Use req.headers directly — CaseInsensitiveDict; dict(req.headers) keeps wire casing
-        # so "Last-Modified" in dict(...) misses Blizzard's "last-modified".
-        last_upload_time_raw = req.headers.get("Last-Modified")
-        if last_upload_time_raw:
-            try:
-                # If unchanged, data has not updated yet; skip processing
-                if (
-                    self.upload_timers.get(connectedRealmId, {}).get(
-                        "lastUploadTimeRaw"
-                    )
-                    == last_upload_time_raw
-                ):
-                    print(
-                        f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (Last-Modified unchanged: {last_upload_time_raw})"
-                    )
-                    req.close()
-                    return {"auctions": [], "skipped": True}
-                self.update_local_timers(
-                    connectedRealmId, last_upload_time_raw, req.headers
+    def make_ah_api_request(self, url, connectedRealmId, endpoint=""):
+        timer_key = (connectedRealmId, endpoint) if endpoint else connectedRealmId
+        with self.get_if_modified(url, timer_key) as req:
+            if req.status_code == 304:
+                print(
+                    f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (304 Not Modified)"
                 )
-            except Exception as ex:
-                print(f"The exception was:", ex)
-        else:
-            print(
-                "No Last-Modified header found in response. Headers received: "
-                f"{dict(req.headers)}"
-            )
+                return {"auctions": [], "skipped": True}
 
-        return self.parse_dump(req)
+            # check for api errors
+            if req.status_code == 429:
+                error_message = f"{req} BLIZZARD too many requests error on {self.REGION} {str(connectedRealmId)} realm data, skipping"
+                print(error_message)
+                time.sleep(3)
+                raise Exception(error_message)
+            elif req.status_code != 200:
+                error_message = f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
+                print(error_message)
+                time.sleep(1)
+                raise Exception(error_message)
+
+            # Use req.headers directly — CaseInsensitiveDict; dict(req.headers) keeps wire casing
+            # so "Last-Modified" in dict(...) misses Blizzard's "last-modified".
+            last_upload_time_raw = req.headers.get("Last-Modified")
+            if last_upload_time_raw:
+                try:
+                    # If unchanged, data has not updated yet; skip processing
+                    if (
+                        self.upload_timers.get(timer_key, {}).get("lastUploadTimeRaw")
+                        == last_upload_time_raw
+                    ):
+                        print(
+                            f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (Last-Modified unchanged: {last_upload_time_raw})"
+                        )
+                        return {"auctions": [], "skipped": True}
+                except Exception as ex:
+                    print(f"The exception was:", ex)
+            else:
+                print(
+                    "No Last-Modified header found in response. Headers received: "
+                    f"{dict(req.headers)}"
+                )
+
+            auction_info = self.parse_dump(req)
+            if last_upload_time_raw:
+                try:
+                    self.update_local_timers(
+                        connectedRealmId, last_upload_time_raw, req.headers, endpoint
+                    )
+                except Exception as ex:
+                    print(f"The exception was:", ex)
+            return auction_info
 
     @staticmethod
     def parse_dump(req):
@@ -823,7 +830,9 @@ class MegaData:
             req.content  # drain the empty body so the connection is reused
         return req
 
-    def update_local_timers(self, dataSetID, lastUploadTimeRaw, response_headers=None):
+    def update_local_timers(
+        self, dataSetID, lastUploadTimeRaw, response_headers=None, endpoint=""
+    ):
         if dataSetID == -1:
             tableName = f"{self.REGION}_retail_commodityListings"
             dataSetName = [f"{self.REGION} Commodities"]
@@ -856,7 +865,9 @@ class MegaData:
                 f"Full response headers ({len(hdr_dump)} keys):\n"
                 f"{json.dumps(hdr_dump, indent=2)}"
             )
-        self.upload_timers[dataSetID] = new_realm_time
+        # Keep the realm ID in the record for scheduling; faction timestamps are independent.
+        timer_key = (dataSetID, endpoint) if endpoint else dataSetID
+        self.upload_timers[timer_key] = new_realm_time
 
     @retry(
         stop=stop_after_attempt(10),
@@ -874,52 +885,56 @@ class MegaData:
             raise Exception(
                 f"invalid region {self.REGION} passed to get_raw_commodity_listings()"
             )
-        req = self.get_if_modified(url, connectedRealmId)
-        if req.status_code == 304:
-            print(
-                f"Skip {self.REGION} commodities: data has not updated yet (304 Not Modified)"
-            )
-            return {"auctions": [], "skipped": True}
-
-        # check for api errors
-        if req.status_code == 429:
-            error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, skipping"
-            print(error_message)
-            time.sleep(3)
-            raise Exception(error_message)
-        elif req.status_code != 200:
-            error_message = f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
-            print(error_message)
-            time.sleep(1)
-            raise Exception(error_message)
-
-        last_upload_time_raw = req.headers.get("Last-Modified")
-        if last_upload_time_raw:
-            try:
-                # If unchanged, data has not updated yet; skip processing
-                if (
-                    self.upload_timers.get(connectedRealmId, {}).get(
-                        "lastUploadTimeRaw"
-                    )
-                    == last_upload_time_raw
-                ):
-                    print(
-                        f"Skip {self.REGION} commodities: data has not updated yet (Last-Modified unchanged: {last_upload_time_raw})"
-                    )
-                    req.close()
-                    return {"auctions": [], "skipped": True}
-                self.update_local_timers(
-                    connectedRealmId, last_upload_time_raw, req.headers
+        with self.get_if_modified(url, connectedRealmId) as req:
+            if req.status_code == 304:
+                print(
+                    f"Skip {self.REGION} commodities: data has not updated yet (304 Not Modified)"
                 )
-            except Exception as ex:
-                print(f"The exception was:", ex)
-        else:
-            print(
-                "No Last-Modified header found on commodities response. Headers received: "
-                f"{dict(req.headers)}"
-            )
+                return {"auctions": [], "skipped": True}
 
-        return self.parse_dump(req)
+            # check for api errors
+            if req.status_code == 429:
+                error_message = f"{req} BLIZZARD too many requests error on {self.REGION} commodities data, skipping"
+                print(error_message)
+                time.sleep(3)
+                raise Exception(error_message)
+            elif req.status_code != 200:
+                error_message = f"{req} BLIZZARD error getting {self.REGION} {str(connectedRealmId)} realm data"
+                print(error_message)
+                time.sleep(1)
+                raise Exception(error_message)
+
+            last_upload_time_raw = req.headers.get("Last-Modified")
+            if last_upload_time_raw:
+                try:
+                    # If unchanged, data has not updated yet; skip processing
+                    if (
+                        self.upload_timers.get(connectedRealmId, {}).get(
+                            "lastUploadTimeRaw"
+                        )
+                        == last_upload_time_raw
+                    ):
+                        print(
+                            f"Skip {self.REGION} commodities: data has not updated yet (Last-Modified unchanged: {last_upload_time_raw})"
+                        )
+                        return {"auctions": [], "skipped": True}
+                except Exception as ex:
+                    print(f"The exception was:", ex)
+            else:
+                print(
+                    "No Last-Modified header found on commodities response. Headers received: "
+                    f"{dict(req.headers)}"
+                )
+
+            auction_info = self.parse_dump(req)
+            if last_upload_time_raw:
+                try:
+                    self.update_local_timers(
+                        connectedRealmId, last_upload_time_raw, req.headers
+                    )
+                except Exception as ex:
+                    print(f"The exception was:", ex)
+            return auction_info
 
     @retry(
         stop=stop_after_attempt(10),
