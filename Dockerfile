@@ -12,7 +12,7 @@ RUN apt-get update \
         g++ \
         libglib2.0-0 \
         python3-dev \
-    && pip3 install tenacity requests PyQt5 \
+    && pip3 install tenacity requests orjson PyQt5 \
     && apt-get remove -y gcc g++ python3-dev \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*

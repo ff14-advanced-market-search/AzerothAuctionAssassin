@@ -8,6 +8,7 @@
 certifi
 charset-normalizer
 idna
+orjson
 PyQt5
 PyQt5-Qt5
 PyQt5-sip

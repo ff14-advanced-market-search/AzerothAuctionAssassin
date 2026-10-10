@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 from __future__ import print_function
-import json, requests, os, time
+import json, requests, os, threading, time
+import orjson
+from requests.adapters import HTTPAdapter
 from datetime import datetime
 from tenacity import retry, stop_after_attempt, retry_if_exception_type
 from utils.api_requests import (
@@ -137,6 +139,17 @@ class MegaData:
 
         # get upload times once from api and then we get it dynamically from each scan
         self.upload_timers = {}
+        # one keep-alive pool for every scan thread: a fresh requests.get pays a
+        # TLS handshake and CA-bundle load per poll
+        self.session = requests.Session()
+        pool = max(int(self.THREADS or 0), 10) + 4
+        adapter = HTTPAdapter(pool_connections=4, pool_maxsize=pool)
+        self.session.mount("https://", adapter)
+        # Blizzard allows 100 requests/s per client and 429s bursts below that;
+        # keep-alive polls from 48 threads arrive in bursts, so pace well under it
+        self.request_interval = 1 / 50
+        self.next_request_at = 0.0
+        self.rate_lock = threading.Lock()
         # # no longer need this it works better without using upload timers from the api
         # self.upload_timers = get_update_timers_backup(self.REGION, self.NO_RUSSIAN_REALMS)
 
@@ -727,8 +740,12 @@ class MegaData:
         retry_error_callback=lambda retry_state: {"auctions": []},
     )
     def make_ah_api_request(self, url, connectedRealmId):
-        headers = {"Authorization": f"Bearer {self.check_access_token()}"}
-        req = requests.get(url, headers=headers, timeout=20)
+        req = self.get_if_modified(url, connectedRealmId)
+        if req.status_code == 304:
+            print(
+                f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (304 Not Modified)"
+            )
+            return {"auctions": [], "skipped": True}
 
         # check for api errors
         if req.status_code == 429:
@@ -757,6 +774,7 @@ class MegaData:
                     print(
                         f"Skip realm {connectedRealmId} ({self.REGION}): data has not updated yet (Last-Modified unchanged: {last_upload_time_raw})"
                     )
+                    req.close()
                     return {"auctions": [], "skipped": True}
                 self.update_local_timers(
                     connectedRealmId, last_upload_time_raw, req.headers
@@ -769,8 +787,41 @@ class MegaData:
                 f"{dict(req.headers)}"
             )
 
-        auction_info = req.json()
-        return auction_info
+        return self.parse_dump(req)
+
+    @staticmethod
+    def parse_dump(req):
+        try:
+            return orjson.loads(req.content)
+        except orjson.JSONDecodeError as ex:
+            # a RequestException, so @retry refetches a truncated dump
+            raise requests.exceptions.JSONDecodeError(
+                f"bad JSON from {req.url}: {ex}", ex.doc, ex.pos
+            ) from ex
+
+    def wait_for_rate_limit(self):
+        with self.rate_lock:
+            now = time.monotonic()
+            start = max(now, self.next_request_at)
+            self.next_request_at = start + self.request_interval
+        time.sleep(start - now)
+
+    def get_if_modified(self, url, dataSetID):
+        """GET a dump conditionally on the Last-Modified we last processed.
+
+        An unchanged dump answers 304 with no body, so the keep-alive connection
+        goes straight back to the pool. stream=True keeps a server that ignores
+        If-Modified-Since from making us download a dump the caller skips.
+        """
+        headers = {"Authorization": f"Bearer {self.check_access_token()}"}
+        last_seen = self.upload_timers.get(dataSetID, {}).get("lastUploadTimeRaw")
+        if last_seen:
+            headers["If-Modified-Since"] = last_seen
+        self.wait_for_rate_limit()
+        req = self.session.get(url, headers=headers, timeout=20, stream=True)
+        if req.status_code == 304:
+            req.content  # drain the empty body so the connection is reused
+        return req
 
     def update_local_timers(self, dataSetID, lastUploadTimeRaw, response_headers=None):
         if dataSetID == -1:
@@ -823,8 +874,12 @@ class MegaData:
             raise Exception(
                 f"invalid region {self.REGION} passed to get_raw_commodity_listings()"
             )
-        headers = {"Authorization": f"Bearer {self.check_access_token()}"}
-        req = requests.get(url, headers=headers, timeout=20)
+        req = self.get_if_modified(url, connectedRealmId)
+        if req.status_code == 304:
+            print(
+                f"Skip {self.REGION} commodities: data has not updated yet (304 Not Modified)"
+            )
+            return {"auctions": [], "skipped": True}
 
         # check for api errors
         if req.status_code == 429:
@@ -851,6 +906,7 @@ class MegaData:
                     print(
                         f"Skip {self.REGION} commodities: data has not updated yet (Last-Modified unchanged: {last_upload_time_raw})"
                     )
+                    req.close()
                     return {"auctions": [], "skipped": True}
                 self.update_local_timers(
                     connectedRealmId, last_upload_time_raw, req.headers
@@ -863,8 +919,7 @@ class MegaData:
                 f"{dict(req.headers)}"
             )
 
-        auction_info = req.json()
-        return auction_info
+        return self.parse_dump(req)
 
     @retry(
         stop=stop_after_attempt(10),
@@ -887,7 +942,7 @@ class MegaData:
             return None
 
         headers = {"Authorization": f"Bearer {self.check_access_token()}"}
-        req = requests.get(url, headers=headers, timeout=20)
+        req = self.session.get(url, headers=headers, timeout=20)
 
         # check for api errors
         if req.status_code == 429:

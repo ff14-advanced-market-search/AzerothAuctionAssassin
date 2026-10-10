@@ -8,6 +8,7 @@
 certifi==2023.11.17
 charset-normalizer==3.3.2
 idna==3.6
+orjson==3.11.5
 PyQt5==5.15.10
 PyQt5-Qt5==5.15.2
 PyQt5-sip==12.13.0
