@@ -251615,9 +251615,6 @@
   "187821": {
     "baseItemLevel": 220
   },
-  "187914": {
-    "baseItemLevel": 1
-  },
   "188006": {
     "baseItemLevel": 226
   },
@@ -330461,6 +330458,63 @@
   "277810": {
     "baseItemLevel": 279
   },
+  "277876": {
+    "baseItemLevel": 219
+  },
+  "277879": {
+    "baseItemLevel": 219
+  },
+  "277880": {
+    "baseItemLevel": 219
+  },
+  "277881": {
+    "baseItemLevel": 219
+  },
+  "277882": {
+    "baseItemLevel": 219
+  },
+  "277883": {
+    "baseItemLevel": 219
+  },
+  "277885": {
+    "baseItemLevel": 219
+  },
+  "277886": {
+    "baseItemLevel": 219
+  },
+  "277888": {
+    "baseItemLevel": 219
+  },
+  "277889": {
+    "baseItemLevel": 219
+  },
+  "277890": {
+    "baseItemLevel": 219
+  },
+  "277891": {
+    "baseItemLevel": 219
+  },
+  "277893": {
+    "baseItemLevel": 219
+  },
+  "277894": {
+    "baseItemLevel": 219
+  },
+  "277895": {
+    "baseItemLevel": 219
+  },
+  "277896": {
+    "baseItemLevel": 219
+  },
+  "277897": {
+    "baseItemLevel": 219
+  },
+  "277898": {
+    "baseItemLevel": 219
+  },
+  "277899": {
+    "baseItemLevel": 219
+  },
   "277951": {
     "baseItemLevel": 259
   },
@@ -331193,6 +331247,24 @@
   "279819": {
     "baseItemLevel": 1
   },
+  "280033": {
+    "baseItemLevel": 219
+  },
+  "280035": {
+    "baseItemLevel": 219
+  },
+  "280036": {
+    "baseItemLevel": 219
+  },
+  "280038": {
+    "baseItemLevel": 219
+  },
+  "280039": {
+    "baseItemLevel": 219
+  },
+  "280040": {
+    "baseItemLevel": 219
+  },
   "280047": {
     "baseItemLevel": 197
   },
@@ -331222,6 +331294,9 @@
   },
   "280377": {
     "baseItemLevel": 250
+  },
+  "280617": {
+    "baseItemLevel": 219
   },
   "280689": {
     "baseItemLevel": 259
@@ -331295,11 +331370,146 @@
   "280718": {
     "baseItemLevel": 259
   },
+  "280799": {
+    "baseItemLevel": 219
+  },
+  "280835": {
+    "baseItemLevel": 219
+  },
   "280842": {
     "baseItemLevel": 1
   },
+  "281029": {
+    "baseItemLevel": 219
+  },
+  "281056": {
+    "baseItemLevel": 219
+  },
+  "281169": {
+    "baseItemLevel": 1
+  },
+  "281170": {
+    "baseItemLevel": 1
+  },
+  "281171": {
+    "baseItemLevel": 1
+  },
+  "281172": {
+    "baseItemLevel": 1
+  },
+  "281173": {
+    "baseItemLevel": 1
+  },
+  "281174": {
+    "baseItemLevel": 1
+  },
+  "281175": {
+    "baseItemLevel": 1
+  },
+  "281176": {
+    "baseItemLevel": 1
+  },
+  "281177": {
+    "baseItemLevel": 1
+  },
+  "281178": {
+    "baseItemLevel": 1
+  },
+  "281179": {
+    "baseItemLevel": 1
+  },
+  "281180": {
+    "baseItemLevel": 1
+  },
+  "281181": {
+    "baseItemLevel": 1
+  },
+  "281182": {
+    "baseItemLevel": 1
+  },
+  "281183": {
+    "baseItemLevel": 1
+  },
+  "281184": {
+    "baseItemLevel": 1
+  },
+  "281185": {
+    "baseItemLevel": 1
+  },
+  "281186": {
+    "baseItemLevel": 1
+  },
+  "281187": {
+    "baseItemLevel": 1
+  },
+  "281188": {
+    "baseItemLevel": 1
+  },
+  "281189": {
+    "baseItemLevel": 1
+  },
+  "281192": {
+    "baseItemLevel": 1
+  },
+  "281193": {
+    "baseItemLevel": 1
+  },
+  "281194": {
+    "baseItemLevel": 1
+  },
+  "281195": {
+    "baseItemLevel": 1
+  },
+  "281196": {
+    "baseItemLevel": 1
+  },
+  "281197": {
+    "baseItemLevel": 1
+  },
+  "281198": {
+    "baseItemLevel": 1
+  },
+  "281199": {
+    "baseItemLevel": 1
+  },
+  "281200": {
+    "baseItemLevel": 1
+  },
+  "281201": {
+    "baseItemLevel": 1
+  },
+  "281202": {
+    "baseItemLevel": 1
+  },
+  "281203": {
+    "baseItemLevel": 1
+  },
+  "281204": {
+    "baseItemLevel": 1
+  },
+  "281205": {
+    "baseItemLevel": 1
+  },
+  "281206": {
+    "baseItemLevel": 1
+  },
+  "281215": {
+    "baseItemLevel": 219
+  },
   "281227": {
     "baseItemLevel": 1
+  },
+  "281235": {
+    "baseItemLevel": 219
+  },
+  "281236": {
+    "baseItemLevel": 219
+  },
+  "281238": {
+    "baseItemLevel": 219
+  },
+  "281239": {
+    "baseItemLevel": 219
   },
   "281244": {
     "baseItemLevel": 1
@@ -331343,16 +331553,289 @@
   "281571": {
     "baseItemLevel": 1
   },
+  "282273": {
+    "baseItemLevel": 1
+  },
+  "282275": {
+    "baseItemLevel": 1
+  },
+  "282276": {
+    "baseItemLevel": 1
+  },
+  "282277": {
+    "baseItemLevel": 1
+  },
   "282425": {
     "baseItemLevel": 197
   },
   "282426": {
     "baseItemLevel": 197
   },
+  "282563": {
+    "baseItemLevel": 1
+  },
+  "282564": {
+    "baseItemLevel": 1
+  },
+  "282565": {
+    "baseItemLevel": 1
+  },
+  "282566": {
+    "baseItemLevel": 1
+  },
+  "282567": {
+    "baseItemLevel": 1
+  },
+  "282569": {
+    "baseItemLevel": 1
+  },
+  "282570": {
+    "baseItemLevel": 1
+  },
+  "282571": {
+    "baseItemLevel": 1
+  },
+  "282641": {
+    "baseItemLevel": 1
+  },
+  "282643": {
+    "baseItemLevel": 1
+  },
+  "282644": {
+    "baseItemLevel": 1
+  },
+  "282645": {
+    "baseItemLevel": 1
+  },
+  "282659": {
+    "baseItemLevel": 1
+  },
+  "282660": {
+    "baseItemLevel": 1
+  },
+  "283472": {
+    "baseItemLevel": 1
+  },
+  "283481": {
+    "baseItemLevel": 1
+  },
+  "283483": {
+    "baseItemLevel": 1
+  },
+  "283484": {
+    "baseItemLevel": 1
+  },
+  "283485": {
+    "baseItemLevel": 1
+  },
+  "283988": {
+    "baseItemLevel": 1
+  },
+  "283989": {
+    "baseItemLevel": 1
+  },
+  "283990": {
+    "baseItemLevel": 1
+  },
+  "283991": {
+    "baseItemLevel": 1
+  },
+  "283992": {
+    "baseItemLevel": 1
+  },
+  "283993": {
+    "baseItemLevel": 1
+  },
+  "283994": {
+    "baseItemLevel": 1
+  },
+  "283995": {
+    "baseItemLevel": 1
+  },
+  "283999": {
+    "baseItemLevel": 1
+  },
+  "284000": {
+    "baseItemLevel": 1
+  },
+  "284001": {
+    "baseItemLevel": 1
+  },
+  "284002": {
+    "baseItemLevel": 1
+  },
+  "284003": {
+    "baseItemLevel": 1
+  },
+  "284004": {
+    "baseItemLevel": 1
+  },
+  "284005": {
+    "baseItemLevel": 1
+  },
+  "284006": {
+    "baseItemLevel": 1
+  },
+  "284008": {
+    "baseItemLevel": 1
+  },
+  "284009": {
+    "baseItemLevel": 1
+  },
+  "284010": {
+    "baseItemLevel": 1
+  },
+  "284011": {
+    "baseItemLevel": 1
+  },
+  "284012": {
+    "baseItemLevel": 1
+  },
+  "284013": {
+    "baseItemLevel": 1
+  },
+  "284014": {
+    "baseItemLevel": 1
+  },
+  "284015": {
+    "baseItemLevel": 1
+  },
+  "284017": {
+    "baseItemLevel": 1
+  },
+  "284018": {
+    "baseItemLevel": 1
+  },
+  "284019": {
+    "baseItemLevel": 1
+  },
+  "284020": {
+    "baseItemLevel": 1
+  },
+  "284021": {
+    "baseItemLevel": 1
+  },
+  "284022": {
+    "baseItemLevel": 1
+  },
+  "284023": {
+    "baseItemLevel": 1
+  },
+  "284024": {
+    "baseItemLevel": 1
+  },
+  "284026": {
+    "baseItemLevel": 1
+  },
+  "284027": {
+    "baseItemLevel": 1
+  },
+  "284028": {
+    "baseItemLevel": 1
+  },
+  "284029": {
+    "baseItemLevel": 1
+  },
+  "284030": {
+    "baseItemLevel": 1
+  },
+  "284031": {
+    "baseItemLevel": 1
+  },
+  "284032": {
+    "baseItemLevel": 1
+  },
+  "284033": {
+    "baseItemLevel": 1
+  },
+  "284051": {
+    "baseItemLevel": 1
+  },
+  "284052": {
+    "baseItemLevel": 1
+  },
+  "284054": {
+    "baseItemLevel": 1
+  },
+  "284055": {
+    "baseItemLevel": 1
+  },
+  "284056": {
+    "baseItemLevel": 1
+  },
+  "284057": {
+    "baseItemLevel": 1
+  },
+  "284180": {
+    "baseItemLevel": 1
+  },
+  "284181": {
+    "baseItemLevel": 1
+  },
+  "284182": {
+    "baseItemLevel": 1
+  },
+  "284219": {
+    "baseItemLevel": 219
+  },
+  "284233": {
+    "baseItemLevel": 1
+  },
+  "284234": {
+    "baseItemLevel": 1
+  },
+  "284235": {
+    "baseItemLevel": 1
+  },
+  "284236": {
+    "baseItemLevel": 1
+  },
+  "284237": {
+    "baseItemLevel": 1
+  },
   "284846": {
     "baseItemLevel": 298
   },
   "284862": {
+    "baseItemLevel": 1
+  },
+  "285221": {
+    "baseItemLevel": 1
+  },
+  "285222": {
+    "baseItemLevel": 1
+  },
+  "285223": {
+    "baseItemLevel": 1
+  },
+  "285224": {
+    "baseItemLevel": 1
+  },
+  "285225": {
+    "baseItemLevel": 1
+  },
+  "285333": {
+    "baseItemLevel": 1
+  },
+  "285334": {
+    "baseItemLevel": 1
+  },
+  "285335": {
+    "baseItemLevel": 1
+  },
+  "285336": {
+    "baseItemLevel": 1
+  },
+  "285956": {
+    "baseItemLevel": 1
+  },
+  "285957": {
+    "baseItemLevel": 1
+  },
+  "285958": {
+    "baseItemLevel": 1
+  },
+  "285959": {
     "baseItemLevel": 1
   }
 }

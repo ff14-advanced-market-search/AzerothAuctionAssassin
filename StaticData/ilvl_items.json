@@ -5243,6 +5243,18 @@
     "ilvl": 441,
     "is_stackable": 0
   },
+  "210362": {
+    "itemID": 210362,
+    "itemName": "Winter Forager's Legguards",
+    "itemQuality": 4,
+    "required_level": 70,
+    "item_class": 4,
+    "item_subclass": 3,
+    "purchase_price": 2838986,
+    "sell_price": 567797,
+    "ilvl": 441,
+    "is_stackable": 0
+  },
   "210363": {
     "itemID": 210363,
     "itemName": "Crystalline Tender's Trousers",
