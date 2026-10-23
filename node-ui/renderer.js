@@ -1689,7 +1689,7 @@ const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
 // Keep in sync with root package.json version (avoid IPC on every Saddlebag request — was causing UI jitter)
-const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.2.1"
+const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.2.2"
 
 function saddlebagFetchHeaders(base = {}) {
   return { ...base, "User-Agent": SADDLEBAG_USER_AGENT }
@@ -1927,7 +1927,7 @@ function syncAlertSoundControlsFromData(data) {
 }
 
 let itemSearchCache = null
-let itemSearchLoading = false
+let itemSearchPromise = null
 let petSearchCache = null
 let petSearchLoading = false
 
@@ -2527,42 +2527,71 @@ function discountPercent() {
 
 async function handlePastePBSItems(btn) {
   showPasteModal(
-    "Import PBS items",
-    'Example: Snipe?"Item";;0;0;0;0;0;0;0;50000;;#;;',
+    "Import Auctionator/PBS items",
+    'Example: My list^Worn Shortsword^"Footpad\'s Shoes";;0;0;0;0;0;0;0;50000;;#;;',
     async (text) => {
-      await fetchItemNames()
-      const pbs_data = text.replace(/\r|\n/g, "").split("^")
-      const pbs_prices = {}
-      for (const entry of pbs_data) {
-        const parts = entry.split(";;")
-        if (!parts[0]) continue
-        let item_name = parts[0].trim()
-        if (item_name.startsWith('"') && item_name.endsWith('"')) {
-          item_name = item_name.slice(1, -1)
+      try {
+        const items = await fetchItemNames()
+        if (!items.length) {
+          throw new Error(
+            "Item data could not be loaded. Check your connection and try importing again."
+          )
         }
-        const price_parts = (parts[1] || "").split(";")
-        const last = price_parts[price_parts.length - 1]
-        const price = last && !Number.isNaN(Number(last)) ? Number(last) : null
-        pbs_prices[item_name.toLowerCase()] = price
-      }
-      const tempItems = { ...state.desiredItems }
-      for (const row of itemSearchCache || []) {
-        const lower = row.itemName.toLowerCase()
-        if (Object.hasOwn(pbs_prices, lower)) {
-          const price = pbs_prices[lower]
-          if (price !== null) {
-            tempItems[String(row.itemID)] = price
-          } else {
-            const pct = discountPercent() / 100
-            tempItems[String(row.itemID)] = Math.round(
-              Number(row.desiredPrice || 0) * pct
-            )
+        const pbs_data = text.replace(/\r|\n/g, "").split("^")
+        // Auctionator/PBS exports start with a list title, not an item.
+        if (pbs_data.length > 1) pbs_data.shift()
+        const pbs_prices = new Map()
+        for (const entry of pbs_data) {
+          const parts = entry.split(";;")
+          let item_name = parts[0].trim()
+          if (item_name.startsWith('"') && item_name.endsWith('"')) {
+            item_name = item_name.slice(1, -1)
+          }
+          if (!item_name) continue
+          const price_parts = (parts[1] || "").split(";")
+          const last = price_parts[price_parts.length - 1]
+          const price =
+            last && !Number.isNaN(Number(last)) ? Number(last) : null
+          pbs_prices.set(item_name.toLowerCase(), price)
+        }
+        const tempItems = { ...state.desiredItems }
+        const unmatchedNames = new Set(pbs_prices.keys())
+        let importedCount = 0
+        for (const row of items) {
+          const lower = row.itemName.toLowerCase()
+          if (pbs_prices.has(lower)) {
+            const price = pbs_prices.get(lower)
+            if (price !== null) {
+              tempItems[String(row.itemID)] = price
+            } else {
+              const pct = discountPercent() / 100
+              tempItems[String(row.itemID)] = Math.round(
+                Number(row.desiredPrice || 0) * pct
+              )
+            }
+            unmatchedNames.delete(lower)
+            importedCount++
           }
         }
+        if (!importedCount) {
+          throw new Error(
+            "No matching items found. Check the item names in your Auctionator/PBS list."
+          )
+        }
+        state.desiredItems = await window.aaa.saveItems(tempItems)
+        await loadState()
+        const message = `Imported ${importedCount} item(s). ${unmatchedNames.size} name(s) not found.`
+        appendLog(`${message}\n`)
+        if (unmatchedNames.size) {
+          appendLog(`Unmatched item names: ${[...unmatchedNames].join(", ")}\n`)
+        }
+        showToast(message, "success", 5000)
+        flashButton(btn, "Imported!")
+      } catch (err) {
+        const message = `Import error: ${err.message || err}`
+        appendLog(`${message}\n`)
+        showToast(message, "error", 5000)
       }
-      state.desiredItems = await window.aaa.saveItems(tempItems)
-      await loadState()
-      flashButton(btn, "Imported!")
     }
   )
 }
@@ -3371,48 +3400,59 @@ async function loadZoomLevel() {
 }
 
 async function fetchItemNames() {
-  if (itemSearchLoading) return itemSearchCache
+  if (itemSearchPromise) return itemSearchPromise
   if (itemSearchCache) return itemSearchCache
 
-  itemSearchLoading = true
   itemSearchStatus.textContent = "Loading item names…"
   const region = state.megaData?.WOW_REGION || "EU"
-  try {
-    const resp = await fetchWithTimeout(
-      "https://api.saddlebagexchange.com/api/wow/megaitemnames",
-      {
-        method: "POST",
-        headers: saddlebagFetchHeaders({
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        }),
-        body: JSON.stringify({
-          discord_consent: WOW_DISCORD_CONSENT,
-          region,
-          discount: 1,
-        }),
-      },
-      30000
-    )
-    const data = await resp.json()
-    itemSearchCache = Array.isArray(data) ? data : []
-    itemNameMap = {}
-    itemSearchCache.forEach((row) => {
-      if (row?.itemID && row?.itemName) {
-        itemNameMap[String(row.itemID)] = row.itemName
+  // All callers must await the same lookup, including imports during startup.
+  itemSearchPromise = (async () => {
+    try {
+      const resp = await fetchWithTimeout(
+        "https://api.saddlebagexchange.com/api/wow/megaitemnames",
+        {
+          method: "POST",
+          headers: saddlebagFetchHeaders({
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          }),
+          body: JSON.stringify({
+            discord_consent: WOW_DISCORD_CONSENT,
+            region,
+            discount: 1,
+          }),
+        },
+        30000
+      )
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+      const data = await resp.json()
+      if (!Array.isArray(data) || !data.length) {
+        throw new Error("No item data returned")
       }
-    })
-    itemSearchStatus.textContent = `Loaded ${itemSearchCache.length} entries for ${region}`
-    updateSuggestions(itemSearchInput, itemSearchSuggest, itemSearchCache)
-    updateSuggestions(ilvlSearchInput, ilvlSearchSuggest, itemSearchCache)
-  } catch (err) {
-    console.error("Item search fetch failed", err)
-    itemSearchStatus.textContent = "Failed to load items (check connection)"
-    itemSearchCache = []
+      itemSearchCache = data
+      itemNameMap = {}
+      itemSearchCache.forEach((row) => {
+        if (row?.itemID && row?.itemName) {
+          itemNameMap[String(row.itemID)] = row.itemName
+        }
+      })
+      itemSearchStatus.textContent = `Loaded ${itemSearchCache.length} entries for ${region}`
+      updateSuggestions(itemSearchInput, itemSearchSuggest, itemSearchCache)
+      updateSuggestions(ilvlSearchInput, ilvlSearchSuggest, itemSearchCache)
+      return itemSearchCache
+    } catch (err) {
+      console.error("Item search fetch failed", err)
+      itemSearchStatus.textContent = "Failed to load items (check connection)"
+      // Leave failures uncached so the next search or import can retry.
+      itemSearchCache = null
+      return []
+    }
+  })()
+  try {
+    return await itemSearchPromise
   } finally {
-    itemSearchLoading = false
+    itemSearchPromise = null
   }
-  return itemSearchCache
 }
 
 function renderItemSearchResults(results) {
