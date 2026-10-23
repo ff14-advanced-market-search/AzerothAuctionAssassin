@@ -2528,7 +2528,7 @@ function discountPercent() {
 async function handlePastePBSItems(btn) {
   showPasteModal(
     "Import Auctionator/PBS items",
-    'Examples: My list^Worn Shortsword^Footpad\'s Shoes\nMy list?"Worn Shortsword";;0;0;0;0;0;0;0;50000;;#;;',
+    'Example: Snipe?"Item";;0;0;0;0;0;0;0;50000;;#;;',
     async (text) => {
       try {
         const items = await fetchItemNames()
