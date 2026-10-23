@@ -2552,9 +2552,12 @@ async function handlePastePBSItems(btn) {
           }
           if (!item_name) continue
           const price_parts = (parts[1] || "").split(";")
-          const last = price_parts[price_parts.length - 1]
+          const last = price_parts[price_parts.length - 1].trim()
+          const numericPrice = Number(last)
           const price =
-            last && !Number.isNaN(Number(last)) ? Number(last) : null
+            last && Number.isFinite(numericPrice) && numericPrice >= 0
+              ? numericPrice
+              : null
           pbs_prices.set(item_name.toLowerCase(), price)
         }
         const tempItems = { ...state.desiredItems }
@@ -3429,10 +3432,18 @@ async function fetchItemNames() {
       )
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
       const data = await resp.json()
-      if (!Array.isArray(data) || !data.length) {
+      const rows = Array.isArray(data)
+        ? data.filter(
+            (row) =>
+              row?.itemID &&
+              typeof row.itemName === "string" &&
+              row.itemName.trim().length > 0
+          )
+        : []
+      if (!rows.length) {
         throw new Error("No item data returned")
       }
-      itemSearchCache = data
+      itemSearchCache = rows
       itemNameMap = {}
       itemSearchCache.forEach((row) => {
         if (row?.itemID && row?.itemName) {

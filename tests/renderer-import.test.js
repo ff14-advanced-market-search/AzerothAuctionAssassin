@@ -146,6 +146,43 @@ test("imports a single PBS item after a question-mark list separator", async () 
   assert.match(app.calls.toasts[0].message, /1 item\(s\).*0 name\(s\)/)
 })
 
+for (const price of ["Infinity", "-Infinity", "1e309", "-1", "NaN", " "]) {
+  test(`uses the discounted default for invalid PBS price ${JSON.stringify(
+    price
+  )}`, async () => {
+    const app = setup()
+    await app.importItems(`boe?"Worn Shortsword";;0;0;0;0;0;0;0;${price};;#;;`)
+    assert.deepEqual(app.calls.saves, [{ 999: 42, 25: 200 }])
+  })
+}
+
+test("preserves an explicit zero PBS price", async () => {
+  const app = setup()
+  await app.importItems('boe?"Worn Shortsword";;0;0;0;0;0;0;0;0;;#;;')
+  assert.deepEqual(app.calls.saves, [{ 999: 42, 25: 0 }])
+})
+
+const invalidMarketItems = [
+  null,
+  {},
+  { itemID: 101 },
+  { itemID: 102, itemName: 123 },
+  { itemID: 103, itemName: "" },
+  { itemID: 104, itemName: " " },
+  { itemName: "Missing ID" },
+]
+
+test("filters malformed item rows and reuses only valid cached rows", async () => {
+  const app = setup(async () =>
+    response([...invalidMarketItems, ...marketItems])
+  )
+  const rows = await app.loadItems()
+  assert.deepEqual(rows, marketItems)
+  await app.importItems()
+  assertReportedListImported(app.calls)
+  assert.equal(app.calls.fetches, 1)
+})
+
 test("supports a single item without a list title and reuses loaded names", async () => {
   const app = setup()
   await app.loadItems()
@@ -167,6 +204,7 @@ for (const failure of [
   "HTTP",
   "invalid JSON shape",
   "empty data",
+  "invalid item rows",
   "invalid JSON",
 ]) {
   test(`failed ${failure} lookup can be retried without restarting`, async () => {
@@ -176,6 +214,7 @@ for (const failure of [
       if (failure === "network") throw new Error("offline")
       if (failure === "HTTP") return response({ detail: "unavailable" }, 503)
       if (failure === "empty data") return response([])
+      if (failure === "invalid item rows") return response(invalidMarketItems)
       if (failure === "invalid JSON") {
         return {
           ok: true,
