@@ -2528,7 +2528,7 @@ function discountPercent() {
 async function handlePastePBSItems(btn) {
   showPasteModal(
     "Import Auctionator/PBS items",
-    'Example: My list^Worn Shortsword^"Footpad\'s Shoes";;0;0;0;0;0;0;0;50000;;#;;',
+    'Examples: My list^Worn Shortsword^Footpad\'s Shoes\nMy list?"Worn Shortsword";;0;0;0;0;0;0;0;50000;;#;;',
     async (text) => {
       try {
         const items = await fetchItemNames()
@@ -2537,9 +2537,12 @@ async function handlePastePBSItems(btn) {
             "Item data could not be loaded. Check your connection and try importing again."
           )
         }
-        const pbs_data = text.replace(/\r|\n/g, "").split("^")
-        // Auctionator/PBS exports start with a list title, not an item.
-        if (pbs_data.length > 1) pbs_data.shift()
+        const listText = text.replace(/\r|\n/g, "")
+        // The list title ends at ? or ^; subsequent items are separated by ^.
+        const titleEnd = listText.search(/[?^]/)
+        const pbs_data = (
+          titleEnd >= 0 ? listText.slice(titleEnd + 1) : listText
+        ).split("^")
         const pbs_prices = new Map()
         for (const entry of pbs_data) {
           const parts = entry.split(";;")

@@ -121,12 +121,29 @@ test("import waits for item names already loading at startup", async () => {
   assertReportedListImported(app.calls)
 })
 
-test("preserves PBS prices, quotes, case-insensitive names, and list titles", async () => {
+test("imports every reported item with a question-mark list separator", async () => {
   const app = setup()
-  await app.importItems(
-    'Bound Serpent\'s Jade Eye^"FOOTPAD\'S SHOES";;0;0;0;0;0;0;0;50000;;#;;^"Worn Shortsword";;0;0;0;0;0;0;0;75000;;#;;'
-  )
-  assert.deepEqual(app.calls.saves, [{ 999: 42, 47: 50000, 25: 75000 }])
+  await app.importItems(auctionatorList.replace("boe^", "boe?"))
+  assertReportedListImported(app.calls)
+  assert.match(app.calls.toasts[0].message, /11.*6/)
+})
+
+for (const separator of ["^", "?"]) {
+  test(`preserves PBS prices and ignores the list title with ${separator}`, async () => {
+    const app = setup()
+    await app.importItems(
+      `Bound Serpent's Jade Eye${separator}"FOOTPAD'S SHOES";;0;0;0;0;0;0;0;50000;;#;;^"Worn Shortsword";;0;0;0;0;0;0;0;75000;;#;;`
+    )
+    assert.deepEqual(app.calls.saves, [{ 999: 42, 47: 50000, 25: 75000 }])
+    assert.match(app.calls.toasts[0].message, /2 item\(s\).*0 name\(s\)/)
+  })
+}
+
+test("imports a single PBS item after a question-mark list separator", async () => {
+  const app = setup()
+  await app.importItems('boe?"Worn Shortsword";;0;0;0;0;0;0;0;75000;;#;;')
+  assert.deepEqual(app.calls.saves, [{ 999: 42, 25: 75000 }])
+  assert.match(app.calls.toasts[0].message, /1 item\(s\).*0 name\(s\)/)
 })
 
 test("supports a single item without a list title and reuses loaded names", async () => {
