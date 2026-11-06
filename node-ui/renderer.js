@@ -1689,7 +1689,7 @@ const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
 // Keep in sync with root package.json version (avoid IPC on every Saddlebag request — was causing UI jitter)
-const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.2.2"
+const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.3.0"
 
 function saddlebagFetchHeaders(base = {}) {
   return { ...base, "User-Agent": SADDLEBAG_USER_AGENT }
@@ -1926,6 +1926,8 @@ function syncAlertSoundControlsFromData(data) {
   }
 }
 
+let itemSearchGeneration = 0
+let itemSearchRegion = null
 let itemSearchCache = null
 let itemSearchPromise = null
 let petSearchCache = null
@@ -2059,6 +2061,11 @@ function setRunning(running) {
 }
 
 function showView(view) {
+  if (
+    ["NAFOREVER", "EUFOREVER"].includes(state.megaData?.WOW_REGION) &&
+    ["ilvl", "pet-ilvl"].includes(view)
+  )
+    view = "items"
   document
     .querySelectorAll(".view")
     .forEach((node) =>
@@ -3343,9 +3350,23 @@ function appendLog(line) {
   }
 }
 
+function applyForeverMode() {
+  const forever = ["NAFOREVER", "EUFOREVER"].includes(
+    state.megaData?.WOW_REGION
+  )
+  document
+    .querySelectorAll(
+      '[data-view-target="ilvl"], [data-view-target="pet-ilvl"]'
+    )
+    .forEach((button) => {
+      button.hidden = forever
+    })
+}
+
 async function loadState() {
   const payload = await window.aaa.loadState()
   state.megaData = payload.megaData || {}
+  applyForeverMode()
   state.desiredItems = payload.desiredItems || {}
   state.ilvlList = payload.ilvlList || []
   state.petIlvlList = payload.petIlvlList || []
@@ -3406,16 +3427,27 @@ async function loadZoomLevel() {
 }
 
 async function fetchItemNames() {
+  const selectedRegion = state.megaData?.WOW_REGION || "EU"
+  if (itemSearchRegion !== selectedRegion) {
+    itemSearchGeneration++
+    itemSearchRegion = selectedRegion
+    itemSearchCache = null
+    itemSearchPromise = null
+    itemNameMap = {}
+  }
   if (itemSearchPromise) return itemSearchPromise
   if (itemSearchCache) return itemSearchCache
 
+  const generation = itemSearchGeneration
   itemSearchStatus.textContent = "Loading item names…"
   const region = state.megaData?.WOW_REGION || "EU"
   // All callers must await the same lookup, including imports during startup.
   itemSearchPromise = (async () => {
     try {
       const resp = await fetchWithTimeout(
-        "https://api.saddlebagexchange.com/api/wow/megaitemnames",
+        `https://api.saddlebagexchange.com/api/wow/${
+          ["NAFOREVER", "EUFOREVER"].includes(region) ? "forever/" : ""
+        }megaitemnames`,
         {
           method: "POST",
           headers: saddlebagFetchHeaders({
@@ -3424,7 +3456,7 @@ async function fetchItemNames() {
           }),
           body: JSON.stringify({
             discord_consent: WOW_DISCORD_CONSENT,
-            region,
+            region: region.replace("FOREVER", ""),
             discount: 1,
           }),
         },
@@ -3443,6 +3475,7 @@ async function fetchItemNames() {
       if (!rows.length) {
         throw new Error("No item data returned")
       }
+      if (generation !== itemSearchGeneration) return []
       itemSearchCache = rows
       itemNameMap = {}
       itemSearchCache.forEach((row) => {
@@ -3455,6 +3488,7 @@ async function fetchItemNames() {
       updateSuggestions(ilvlSearchInput, ilvlSearchSuggest, itemSearchCache)
       return itemSearchCache
     } catch (err) {
+      if (generation !== itemSearchGeneration) return []
       console.error("Item search fetch failed", err)
       itemSearchStatus.textContent = "Failed to load items (check connection)"
       // Leave failures uncached so the next search or import can retry.
@@ -3465,7 +3499,7 @@ async function fetchItemNames() {
   try {
     return await itemSearchPromise
   } finally {
-    itemSearchPromise = null
+    if (generation === itemSearchGeneration) itemSearchPromise = null
   }
 }
 
@@ -3608,6 +3642,11 @@ async function handleIlvlSearch() {
 }
 
 async function fetchPetNames() {
+  if (["NAFOREVER", "EUFOREVER"].includes(state.megaData?.WOW_REGION)) {
+    petSearchCache = null
+    petNameMap = {}
+    return []
+  }
   if (petSearchLoading) return petSearchCache
   if (petSearchCache) return petSearchCache
 
@@ -3863,10 +3902,12 @@ async function saveMegaData(skipValidation = false) {
       "NACLASSIC",
       "NASODCLASSIC",
       "EUSODCLASSIC",
+      "NAFOREVER",
+      "EUFOREVER",
     ]
     const region = (data.WOW_REGION || "").trim()
     if (!validRegions.includes(region)) {
-      const errorMsg = `WOW region must be either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'EUSODCLASSIC' or 'NASODCLASSIC'.`
+      const errorMsg = `WOW region must be one of: ${validRegions.join(", ")}.`
       showToast(errorMsg, "error")
       megaForm.WOW_REGION.focus()
       return false
@@ -3968,6 +4009,9 @@ async function saveMegaData(skipValidation = false) {
 
   state.megaData = await window.aaa.saveMegaData(data)
   renderMegaForm(state.megaData)
+  applyForeverMode()
+  await fetchItemNames()
+  renderItemList()
   trimAlertEmbedHistoryToLimit()
   if (!skipValidation) {
     showToast("Settings saved successfully!", "success", 2000)

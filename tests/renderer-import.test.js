@@ -79,6 +79,11 @@ function setup(fetch = async () => response(), saveError = null) {
   )
   return {
     calls,
+    setRegion: (region) =>
+      vm.runInContext(
+        `state.megaData.WOW_REGION = ${JSON.stringify(region)}`,
+        context
+      ),
     loadItems: () => vm.runInContext("fetchItemNames()", context),
     importItems: async (text = auctionatorList) => {
       await vm.runInContext("handlePastePBSItems({})", context)
@@ -241,4 +246,52 @@ test("save failures show an error without success feedback", async () => {
   await app.importItems()
   assert.equal(app.calls.flashes.length, 0)
   assert.match(app.calls.toasts[0].message, /disk full/)
+})
+
+test("switches item catalogs between Retail and Forever without reusing cached names", async () => {
+  const requests = []
+  const ui = setup(async (url, options) => {
+    requests.push({ url, payload: JSON.parse(options.body) })
+    return response([
+      {
+        itemID: 3048,
+        itemName: url.includes("/forever/") ? "Forever name" : "Retail name",
+        desiredPrice: 1,
+      },
+    ])
+  })
+  ui.setRegion("NA")
+  assert.equal((await ui.loadItems())[0].itemName, "Retail name")
+  ui.setRegion("EUFOREVER")
+  assert.equal((await ui.loadItems())[0].itemName, "Forever name")
+  assert.match(requests[1].url, /\/wow\/forever\/megaitemnames$/)
+  assert.equal(requests[1].payload.region, "EU")
+  ui.setRegion("NA")
+  assert.equal((await ui.loadItems())[0].itemName, "Retail name")
+  assert.equal(requests.length, 3)
+})
+
+test("a stale Retail response cannot replace a newer Forever catalog", async () => {
+  let finishOld
+  let count = 0
+  const ui = setup(async () => {
+    count++
+    if (count === 1)
+      return new Promise((resolve) => {
+        finishOld = resolve
+      })
+    return response([
+      { itemID: 3048, itemName: "Forever name", desiredPrice: 1 },
+    ])
+  })
+  ui.setRegion("NA")
+  const old = ui.loadItems()
+  ui.setRegion("NAFOREVER")
+  await ui.loadItems()
+  finishOld(
+    response([{ itemID: 3048, itemName: "Retail name", desiredPrice: 1 }])
+  )
+  await old
+  assert.equal((await ui.loadItems())[0].itemName, "Forever name")
+  assert.equal(count, 2)
 })

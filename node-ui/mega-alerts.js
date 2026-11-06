@@ -1,11 +1,13 @@
 /* eslint-env node, es6 */
 /* global require, __dirname, console, Buffer, URLSearchParams, module, AbortController, setTimeout, clearTimeout */
 const fs = require("fs")
+const Forever = require("./forever")
+const { getRealmListByRegion } = require("./realm-data")
 const path = require("path")
 const { setTimeout: delay } = require("timers/promises")
 const { fetch } = require("undici")
 
-const AAA_NODE_UI_VERSION = "2.2.2"
+const AAA_NODE_UI_VERSION = "2.3.0"
 
 function saddlebagFetchHeaders(base = {}) {
   return {
@@ -441,6 +443,7 @@ class MegaData {
     this.cfg = readJson(path.join(DATA_DIR, "mega_data.json"), {})
     this.WEBHOOK_URL = this.cfg.MEGA_WEBHOOK_URL
     this.REGION = this.cfg.WOW_REGION
+    this.IS_FOREVER = Forever.isRegion(this.REGION)
     this.DISCORD_ALERTS_ENABLED = Boolean(
       this.cfg.DISCORD_ALERTS_ENABLED ?? true
     )
@@ -468,7 +471,7 @@ class MegaData {
 
     // Classic regions don't have undermine exchange, so use wowhead links
     // Classic also needs faction selection (all, horde, alliance, booty bay)
-    if (String(this.REGION).includes("CLASSIC")) {
+    if (this.IS_FOREVER || String(this.REGION).includes("CLASSIC")) {
       this.WOWHEAD_LINK = true
       this.FACTION = this.cfg.FACTION ?? "all"
     } else {
@@ -478,7 +481,9 @@ class MegaData {
 
     // Setup items to snipe (synchronous parts)
     this.desiredItems = this.loadDesiredItems()
-    this.desiredPetIlvlList = this.loadDesiredPetIlvlList()
+    this.desiredPetIlvlList = this.IS_FOREVER
+      ? []
+      : this.loadDesiredPetIlvlList()
     // desiredIlvlList will be loaded in initialize() since it needs async getIlvlItems()
     this.desiredIlvlList = []
 
@@ -505,6 +510,15 @@ class MegaData {
    * Must be called after construction before using the instance
    */
   async initialize() {
+    if (this.IS_FOREVER) {
+      this.validateSnipeLists()
+      this.ITEM_NAMES = await this.loadItemNames()
+      this.upload_timers = {}
+      this.access_token = ""
+      this.access_token_creation_unix_time = 0
+      this._tokenRefreshPromise = null
+      return
+    }
     // Get static lists of ALL bonus id values from raidbots
     // This is the index for all ilvl gear (sockets, leech, avoidance, speed, ilvl additions)
     await this.setBonusIds()
@@ -692,7 +706,12 @@ class MegaData {
       DATA_DIR,
       `${String(this.REGION).toLowerCase()}-wow-connected-realm-ids.json`
     )
-    let realmNames = readJson(file, {})
+    let realmNames = readJson(
+      file,
+      this.IS_FOREVER ? getRealmListByRegion(this.REGION) : {}
+    )
+    if (this.IS_FOREVER) return Forever.filter(realmNames, this.FACTION)
+
     if (this.NO_RUSSIAN_REALMS) {
       const russian = new Set(getRussianRealmIds())
       realmNames = Object.fromEntries(
@@ -1058,7 +1077,12 @@ class MegaData {
   update_local_timers(dataSetID, lastUploadTimeRaw, res) {
     let tableName
     let dataSetName
-    if (dataSetID === -1 || dataSetID === -2) {
+    if (this.IS_FOREVER) {
+      tableName = `${Forever.region(this.REGION)}_forever_${Math.abs(
+        dataSetID
+      )}_${dataSetID < 0 ? "commodityListings" : "singleMinPrices"}`
+      dataSetName = this.get_realm_names(dataSetID)
+    } else if (dataSetID === -1 || dataSetID === -2) {
       tableName = `${this.REGION}_retail_commodityListings`
       dataSetName = [`${this.REGION} Commodities`]
     } else {
@@ -1097,6 +1121,7 @@ class MegaData {
    * Handles different regions (NA/EU) and game types (Retail/Classic/SoD)
    */
   construct_api_url(connectedRealmId, endpoint) {
+    if (this.IS_FOREVER) return Forever.url(this.REGION, connectedRealmId)
     const base_url = this.REGION.includes("NA")
       ? "https://us.api.blizzard.com"
       : "https://eu.api.blizzard.com"
@@ -1116,6 +1141,13 @@ class MegaData {
    * For Classic realms, handles faction-specific endpoints
    */
   async get_listings_single(connectedRealmId) {
+    if (this.IS_FOREVER) {
+      const data = await this.makeAhRequest(
+        Forever.url(this.REGION, connectedRealmId),
+        connectedRealmId
+      )
+      return data?.skipped ? null : data?.auctions || []
+    }
     if (connectedRealmId === -1 || connectedRealmId === -2) {
       try {
         const commodity = await this.makeCommodityRequest()
@@ -1202,6 +1234,32 @@ class MegaData {
    * Only loads names for items in desiredItems list to limit data
    */
   async loadItemNames() {
+    if (this.IS_FOREVER) {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 15000)
+      try {
+        const response = await fetch(
+          `${SADDLEBAG_URL}/api/wow/forever/itemnames`,
+          {
+            method: "POST",
+            signal: controller.signal,
+            headers: saddlebagFetchHeaders({
+              "Content-Type": "application/json",
+            }),
+            body: JSON.stringify({
+              item_ids: Object.keys(this.desiredItems).map(Number),
+            }),
+          }
+        )
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        return await response.json()
+      } catch (error) {
+        logError("Forever names unavailable; alerts will use item IDs", error)
+        return {}
+      } finally {
+        clearTimeout(timeout)
+      }
+    }
     try {
       const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemnames`, {
         method: "POST",
@@ -1692,9 +1750,13 @@ async function runAlerts(state, progress, runOnce = false) {
           : "Undermine link"
       const link_url =
         state.WOWHEAD_LINK && "itemID" in auction
-          ? `https://www.wowhead.com/item=${auction.itemID}`
+          ? `https://www.wowhead.com/${
+              state.IS_FOREVER ? "forever/" : ""
+            }item=${auction.itemID}`
           : auction.itemlink
-      if (!state.NO_LINKS) {
+      if (!state.NO_LINKS && state.IS_FOREVER)
+        message += `[Wowhead link](${link_url})\n`
+      if (!state.NO_LINKS && !state.IS_FOREVER) {
         // Uses ilvl searches for ilvl items, regular searches for others
         // use saddlebag_link_id for non ilvl items, as that corrects for pet ids
         const shoppingListLink =
@@ -1769,7 +1831,7 @@ async function runAlerts(state, progress, runOnce = false) {
    */
   async function check_token_price() {
     try {
-      if (state.TOKEN_PRICE) {
+      if (state.TOKEN_PRICE && !state.IS_FOREVER) {
         const token_price = await state.get_wow_token_price()
         if (token_price && token_price < state.TOKEN_PRICE) {
           // Only alert if the price has changed from the last known price
@@ -1811,7 +1873,9 @@ async function runAlerts(state, progress, runOnce = false) {
       realmID: connected_id,
       realmNames: realm_names,
       [idType]: id,
-      itemlink,
+      itemlink: state.IS_FOREVER
+        ? `https://www.wowhead.com/forever/item=${id}`
+        : itemlink,
       minPrice,
       targetPrice,
       [`${priceType}_prices`]: JSON.stringify(auction),
@@ -2364,6 +2428,7 @@ async function runAlerts(state, progress, runOnce = false) {
      * Filters out prices that exceed maxPrice if provided
      */
     const add_price_to_dict = (price, item_id, price_dict, maxPrice = null) => {
+      if (state.IS_FOREVER && (!Number.isFinite(price) || price <= 0)) return
       const gold = price / 10000
       // Filter out prices that exceed the maximum desired price
       if (maxPrice !== null && gold > maxPrice) {
@@ -2383,12 +2448,29 @@ async function runAlerts(state, progress, runOnce = false) {
       if (item_id in state.desiredItems && item_id !== 82800) {
         const maxPrice = state.desiredItems[item_id]
         if ("bid" in item && state.SHOW_BIDPRICES) {
-          add_price_to_dict(item.bid, item_id, all_ah_bids, maxPrice)
+          add_price_to_dict(
+            state.IS_FOREVER ? Forever.unitPrice(item, "bid") : item.bid,
+            item_id,
+            all_ah_bids,
+            maxPrice
+          )
         }
         if ("buyout" in item)
-          add_price_to_dict(item.buyout, item_id, all_ah_buyouts, maxPrice)
+          add_price_to_dict(
+            state.IS_FOREVER ? Forever.unitPrice(item, "buyout") : item.buyout,
+            item_id,
+            all_ah_buyouts,
+            maxPrice
+          )
         if ("unit_price" in item)
-          add_price_to_dict(item.unit_price, item_id, all_ah_buyouts, maxPrice)
+          add_price_to_dict(
+            state.IS_FOREVER
+              ? Forever.unitPrice(item, "unit_price")
+              : item.unit_price,
+            item_id,
+            all_ah_buyouts,
+            maxPrice
+          )
       } else if (item_id === 82800) {
         if (state.desiredPetIlvlList.length) {
           const info = check_pet_ilvl_stats(item, state.desiredPetIlvlList)
@@ -2726,7 +2808,7 @@ async function runAlerts(state, progress, runOnce = false) {
   // Include commodity endpoint for current region if TOKEN_PRICE is configured
   // -1 for NA, -2 for EU (only scan the one for current region)
   // Only add if not already in the list to avoid duplicate scans
-  if (state.TOKEN_PRICE) {
+  if (state.TOKEN_PRICE && !state.IS_FOREVER) {
     const commodityId = state.REGION === "EU" ? -2 : -1
     if (!initialRealms.includes(commodityId)) {
       initialRealms.push(commodityId)

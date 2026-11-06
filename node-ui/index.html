@@ -33,7 +33,7 @@
       <header class="topbar">
         <div>
           <div class="eyebrow">Azeroth Auction Assassin</div>
-          <div class="title">Version: 2.2.2</div>
+          <div class="title">Version: 2.3.0</div>
         </div>
         <div class="actions">
           <div class="nav-controls">
@@ -333,12 +333,14 @@
               </div>
             </label>
             <label
-              title="Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic."
+              title="Pick your region and game edition, including NA Forever and EU Forever."
             >
               Region
               <select name="WOW_REGION">
                 <option value="EU">EU</option>
                 <option value="NA">NA</option>
+                <option value="NAFOREVER">NA Forever</option>
+                <option value="EUFOREVER">EU Forever</option>
                 <option value="EUCLASSIC">EUCLASSIC</option>
                 <option value="NACLASSIC">NACLASSIC</option>
                 <option value="NASODCLASSIC">NASODCLASSIC</option>
@@ -376,7 +378,7 @@
             <label
               title="Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
             >
-              Faction (classic)
+              Faction (Classic / Forever)
               <select name="FACTION">
                 <option value="all">all</option>
                 <option value="alliance">alliance</option>
@@ -963,6 +965,8 @@
                   <select name="region" id="realm-region-select">
                     <option value="EU">EU</option>
                     <option value="NA">NA</option>
+                    <option value="NAFOREVER">NA Forever</option>
+                    <option value="EUFOREVER">EU Forever</option>
                     <option value="EUCLASSIC">EUCLASSIC</option>
                     <option value="NACLASSIC">NACLASSIC</option>
                     <option value="NASODCLASSIC">NASODCLASSIC</option>

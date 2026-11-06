@@ -114,6 +114,8 @@ let FILES = {
 }
 
 let REALM_FILES = {
+  NAFOREVER: path.join(DATA_DIR, "naforever-wow-connected-realm-ids.json"),
+  EUFOREVER: path.join(DATA_DIR, "euforever-wow-connected-realm-ids.json"),
   EU: path.join(DATA_DIR, "eu-wow-connected-realm-ids.json"),
   NA: path.join(DATA_DIR, "na-wow-connected-realm-ids.json"),
   EUCLASSIC: path.join(DATA_DIR, "euclassic-wow-connected-realm-ids.json"),
@@ -524,6 +526,8 @@ function setupIpc() {
     }
 
     REALM_FILES = {
+      NAFOREVER: path.join(DATA_DIR, "naforever-wow-connected-realm-ids.json"),
+      EUFOREVER: path.join(DATA_DIR, "euforever-wow-connected-realm-ids.json"),
       EU: path.join(DATA_DIR, "eu-wow-connected-realm-ids.json"),
       NA: path.join(DATA_DIR, "na-wow-connected-realm-ids.json"),
       EUCLASSIC: path.join(DATA_DIR, "euclassic-wow-connected-realm-ids.json"),

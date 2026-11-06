@@ -13,6 +13,7 @@ from utils.helpers import (
 from utils.ilvl_resolver import resolve_post_midnight_ilvl
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
+from utils import forever
 
 
 # Add at the beginning of the file, after imports
@@ -168,12 +169,13 @@ class Alerts(QThread):
                     else "Undermine link"
                 )
                 link_url = (
-                    f"https://www.wowhead.com/item={auction['itemID']}"
+                    f"https://www.wowhead.com/{'forever/' if forever.is_forever(mega_data.REGION) else ''}item={auction['itemID']}"
                     if mega_data.WOWHEAD_LINK and "itemID" in auction
                     else auction["itemlink"]
                 )
                 if not mega_data.NO_LINKS:
                     message += f"[{link_label}]({link_url})\n"
+                if not mega_data.NO_LINKS and not forever.is_forever(mega_data.REGION):
                     message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{saddlebag_link_id})\n"
                     message += f"[Where to Sell](https://saddlebagexchange.com/wow/export-search?itemId={saddlebag_link_id})\n"
                 # Add price info, if available
@@ -240,6 +242,10 @@ class Alerts(QThread):
                 return
 
             def add_price_to_dict(price, item_id, price_dict, is_pet=False):
+                if forever.is_forever(mega_data.REGION) and (
+                    price is None or price <= 0
+                ):
+                    return
                 if is_pet:
                     if price < mega_data.DESIRED_PETS[item_id] * 10000:
                         if item_id not in price_dict:
@@ -260,15 +266,27 @@ class Alerts(QThread):
                     price = 10000000 * 10000
 
                     if "bid" in item and mega_data.SHOW_BIDPRICES == "true":
-                        price = item["bid"]
+                        price = (
+                            forever.unit_price(item, "bid")
+                            if forever.is_forever(mega_data.REGION)
+                            else item["bid"]
+                        )
                         add_price_to_dict(price, item_id, all_ah_bids)
 
                     if "buyout" in item:
-                        price = item["buyout"]
+                        price = (
+                            forever.unit_price(item, "buyout")
+                            if forever.is_forever(mega_data.REGION)
+                            else item["buyout"]
+                        )
                         add_price_to_dict(price, item_id, all_ah_buyouts)
 
                     if "unit_price" in item:
-                        price = item["unit_price"]
+                        price = (
+                            forever.unit_price(item, "unit_price")
+                            if forever.is_forever(mega_data.REGION)
+                            else item["unit_price"]
+                        )
                         add_price_to_dict(price, item_id, all_ah_buyouts)
 
                 # all caged battle pets have item id 82800
@@ -690,7 +708,11 @@ class Alerts(QThread):
                 "realmID": connected_id,
                 "realmNames": realm_names,
                 f"{idType}": id,
-                "itemlink": itemlink,
+                "itemlink": (
+                    f"https://www.wowhead.com/forever/item={id}"
+                    if forever.is_forever(mega_data.REGION)
+                    else itemlink
+                ),
                 "minPrice": minPrice,
                 f"{priceType}_prices": json.dumps(auction),
             }

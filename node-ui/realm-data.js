@@ -598,9 +598,40 @@ const EUSODCLASSIC_CONNECTED_REALMS_IDS = {
   "Shadowstrike (RU)": 5830,
 }
 
+// Forever uses signed feed keys: positive item house IDs, negative commodity house IDs.
+const FOREVER_MARKETS = {
+  "Alliance Auction House 110 \u2014 Items": 110,
+  "Alliance Auction House 110 \u2014 Commodities": -110,
+  "Alliance Auction House 111 \u2014 Items": 111,
+  "Alliance Auction House 111 \u2014 Commodities": -111,
+  "Horde Auction House 113 \u2014 Items": 113,
+  "Horde Auction House 113 \u2014 Commodities": -113,
+  "Horde Auction House 114 \u2014 Items": 114,
+  "Horde Auction House 114 \u2014 Commodities": -114,
+  "Blackwater Auction House 116 \u2014 Items": 116,
+  "Blackwater Auction House 116 \u2014 Commodities": -116,
+  "Blackwater Auction House 117 \u2014 Items": 117,
+  "Blackwater Auction House 117 \u2014 Commodities": -117,
+  "Alliance Auction House 119 \u2014 Items": 119,
+  "Alliance Auction House 119 \u2014 Commodities": -119,
+  "Horde Auction House 120 \u2014 Items": 120,
+  "Horde Auction House 120 \u2014 Commodities": -120,
+  "Blackwater Auction House 121 \u2014 Items": 121,
+  "Blackwater Auction House 121 \u2014 Commodities": -121,
+  "Alliance Auction House 123 \u2014 Items": 123,
+  "Alliance Auction House 123 \u2014 Commodities": -123,
+  "Horde Auction House 124 \u2014 Items": 124,
+  "Horde Auction House 124 \u2014 Commodities": -124,
+  "Blackwater Auction House 125 \u2014 Items": 125,
+  "Blackwater Auction House 125 \u2014 Commodities": -125,
+}
+
 // Helper function to get realm list by region
 function getRealmListByRegion(region) {
   switch (region) {
+    case "NAFOREVER":
+    case "EUFOREVER":
+      return { ...FOREVER_MARKETS }
     case "EU":
       return EU_CONNECTED_REALMS_IDS
     case "NA":
@@ -620,7 +651,7 @@ function getRealmListByRegion(region) {
 }
 
 // Make available globally
-window.REALM_DATA = {
+const REALM_DATA = {
   EU_CONNECTED_REALMS_IDS,
   NA_CONNECTED_REALMS_IDS,
   EUCLASSIC_CONNECTED_REALMS_IDS,
@@ -629,3 +660,6 @@ window.REALM_DATA = {
   EUSODCLASSIC_CONNECTED_REALMS_IDS,
   getRealmListByRegion,
 }
+
+if (typeof window !== "undefined") window.REALM_DATA = REALM_DATA
+if (typeof module !== "undefined") module.exports = REALM_DATA

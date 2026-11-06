@@ -21,8 +21,9 @@ except Exception as ex:
 try:
     from utils.version import AAA_VERSION
 except ImportError:
-    AAA_VERSION = "1.6.7"
+    AAA_VERSION = "1.7.0"
 
+from utils import forever
 from utils.api_requests import saddlebag_request_headers
 
 import breeze_resources
@@ -98,14 +99,35 @@ class Item_And_Pet_Statistics(QThread):
         super(Item_And_Pet_Statistics, self).__init__(parent)
         self.parent = parent
         self.region = "EU"  # Default to EU
+        self.pending_region = "EU"
 
     def set_region(self, region):
         """Update region and refresh statistics"""
-        if region in ["NA", "EU"]:
-            self.region = region
-            self.start()  # Refresh the statistics with new region
+        if region in ["NA", "EU", "NAFOREVER", "EUFOREVER"]:
+            self.pending_region = region
+            if not self.isRunning():
+                self.region = region
+                self.start()  # Refresh the statistics with new region
 
     def run(self):
+        if forever.is_forever(self.region):
+            response = requests.post(
+                "https://api.saddlebagexchange.com/api/wow/forever/megaitemnames",
+                headers=saddlebag_request_headers(),
+                json={"region": self.region.replace("FOREVER", ""), "discount": 1},
+                timeout=30,
+            )
+            response.raise_for_status()
+            self.completed.emit(
+                pd.DataFrame(
+                    columns=["itemID", "itemName", "desiredPrice", "salesPerDay"]
+                ),
+                pd.DataFrame(
+                    response.json(),
+                    columns=["itemID", "itemName", "desiredPrice", "salesPerDay"],
+                ),
+            )
+            return
         item_statistics = pd.DataFrame(
             data=requests.post(
                 f"https://api.saddlebagexchange.com/api/wow/megaitemnames",
@@ -360,6 +382,8 @@ class App(QMainWindow):
                 "NACLASSIC",
                 "NASODCLASSIC",
                 "EUSODCLASSIC",
+                "NAFOREVER",
+                "EUFOREVER",
             ]
         )
         self.realm_region.currentIndexChanged.connect(self.on_combo_box_region_changed)
@@ -581,13 +605,22 @@ class App(QMainWindow):
 
         self.wow_region = QComboBox(settings_page)
         self.wow_region.addItems(
-            ["EU", "NA", "EUCLASSIC", "NACLASSIC", "NASODCLASSIC", "EUSODCLASSIC"]
+            [
+                "EU",
+                "NA",
+                "EUCLASSIC",
+                "NACLASSIC",
+                "NASODCLASSIC",
+                "EUSODCLASSIC",
+                "NAFOREVER",
+                "EUFOREVER",
+            ]
         )
         # Add handler for region changes
         self.wow_region.currentTextChanged.connect(self.on_region_changed)
         self.wow_region_label = QLabel("Auction Assassin Token", settings_page)
         self.wow_region_label.setToolTip(
-            "Pick your region, currently supporting: EU, NA, EU-Classic, NA-Classic, EU-SoD-Classic and NA-SoD-Classic."
+            "Pick your region and game edition, including NAFOREVER and EUFOREVER."
         )
         self.settings_page_layout.addWidget(self.wow_region_label, 8, 0, 1, 1)
         self.settings_page_layout.addWidget(self.wow_region, 9, 0, 1, 1)
@@ -688,7 +721,7 @@ class App(QMainWindow):
         self.faction.addItems(["all", "horde", "alliance", "booty bay"])
         self.faction_label = QLabel("Faction AH", settings_page)
         self.faction_label.setToolTip(
-            "Pick your faction for classic or pick 'all' to see all auctionhouses, Retail uses 'all' by default for cross faction AH."
+            "Pick your faction for Classic or Forever, or 'all' to scan every selected market. Retail uses 'all'."
         )
         self.settings_page_layout.addWidget(self.faction_label, 17, 0, 1, 1)
         self.settings_page_layout.addWidget(self.faction, 18, 0, 1, 1)
@@ -700,8 +733,12 @@ class App(QMainWindow):
         self.settings_page_layout.addWidget(self.import_config_button, 19, 0, 1, 1)
 
     def on_region_changed(self, new_region):
-        """Handle region changes and refresh statistics if needed"""
-        if new_region in ["NA", "EU"]:
+        """Refresh edition-specific statistics and supported controls."""
+        for name in ("go_to_pet_button", "go_to_ilvl_button", "go_to_pet_ilvl_button"):
+            button = getattr(self, name, None)
+            if button is not None:
+                button.setEnabled(not forever.is_forever(new_region))
+        if new_region in ["NA", "EU", "NAFOREVER", "EUFOREVER"]:
             self.api_data_thread.set_region(new_region)
 
     def make_pet_page(self, pet_page):
@@ -1055,8 +1092,18 @@ class App(QMainWindow):
         self.stacked_widget.setCurrentIndex(6)
 
     def api_data_received(self, pet_statistics, item_statistics):
+        requested = self.api_data_thread.pending_region
+        if self.api_data_thread.region != requested:
+            self.api_data_thread.wait()
+            self.api_data_thread.region = requested
+            self.api_data_thread.start()
+            return
         self.pet_statistics = pet_statistics
         self.item_statistics = item_statistics
+
+        self.item_name_input.clear()
+        self.pet_name_input.clear()
+        self.pet_ilvl_name_input.clear()
 
         # Populate both pet name dropdowns
         pet_names = self.pet_statistics.sort_values(by="itemName")["itemName"].tolist()
@@ -1098,6 +1145,8 @@ class App(QMainWindow):
         selected_item_stats = self.item_statistics[
             self.item_statistics["itemName"] == selected_item
         ]
+        if selected_item_stats.empty:
+            return
         selected_item_id = selected_item_stats["itemID"].iloc[0]
         if str(selected_item_id) in self.items_list.keys():
             selected_item_price = self.items_list[str(selected_item_id)]
@@ -1131,6 +1180,8 @@ class App(QMainWindow):
         selected_pet_stats = self.pet_statistics[
             self.pet_statistics["itemName"] == selected_pet
         ]
+        if selected_pet_stats.empty:
+            return
         selected_pet_id = selected_pet_stats["itemID"].iloc[0]
         if str(selected_pet_id) in self.pet_list.keys():
             selected_pet_price = self.pet_list[str(selected_pet_id)]
@@ -1160,6 +1211,13 @@ class App(QMainWindow):
         self.realm_name_combobox.clear()
         selected_realm = self.realm_region.currentText()
         match selected_realm:
+            case "NAFOREVER" | "EUFOREVER":
+                realm_list = forever.FOREVER_MARKETS.copy()
+                data_to_insert = os.path.join(
+                    os.getcwd(),
+                    "AzerothAuctionAssassinData",
+                    f"{selected_realm.lower()}-wow-connected-realm-ids.json",
+                )
             case "EU":
                 from utils.realm_data import EU_CONNECTED_REALMS_IDS as realm_list
 
@@ -1230,6 +1288,13 @@ class App(QMainWindow):
             return 0
         selected_realm = self.realm_region.currentText()
         match selected_realm:
+            case "NAFOREVER" | "EUFOREVER":
+                realm_list = forever.FOREVER_MARKETS.copy()
+                data_to_insert = os.path.join(
+                    os.getcwd(),
+                    "AzerothAuctionAssassinData",
+                    f"{selected_realm.lower()}-wow-connected-realm-ids.json",
+                )
             case "EU":
                 from utils.realm_data import EU_CONNECTED_REALMS_IDS as realm_list
 
@@ -1269,6 +1334,12 @@ class App(QMainWindow):
 
         selected_realm = self.realm_region.currentText()
         match selected_realm:
+            case "NAFOREVER" | "EUFOREVER":
+                data_to_insert = os.path.join(
+                    os.getcwd(),
+                    "AzerothAuctionAssassinData",
+                    f"{selected_realm.lower()}-wow-connected-realm-ids.json",
+                )
             case "EU":
                 data_to_insert = self.eu_connected_realms
 
@@ -1311,6 +1382,12 @@ class App(QMainWindow):
 
         selected_realm = self.realm_region.currentText()
         match selected_realm:
+            case "NAFOREVER" | "EUFOREVER":
+                data_to_insert = os.path.join(
+                    os.getcwd(),
+                    "AzerothAuctionAssassinData",
+                    f"{selected_realm.lower()}-wow-connected-realm-ids.json",
+                )
             case "EU":
                 data_to_insert = self.eu_connected_realms
 
@@ -1362,6 +1439,13 @@ class App(QMainWindow):
     def reset_realm_list(self):
         selected_realm = self.realm_region.currentText()
         match selected_realm:
+            case "NAFOREVER" | "EUFOREVER":
+                realm_list = forever.FOREVER_MARKETS.copy()
+                data_to_insert = os.path.join(
+                    os.getcwd(),
+                    "AzerothAuctionAssassinData",
+                    f"{selected_realm.lower()}-wow-connected-realm-ids.json",
+                )
             case "EU":
                 from utils.realm_data import EU_CONNECTED_REALMS_IDS as realm_list
 
@@ -1510,6 +1594,14 @@ class App(QMainWindow):
         if not os.path.exists(backup_data_folder):
             os.makedirs(backup_data_folder)
 
+        for region in ("naforever", "euforever"):
+            file_path = os.path.join(
+                data_folder, f"{region}-wow-connected-realm-ids.json"
+            )
+            if not os.path.exists(file_path):
+                with open(file_path, "w") as target:
+                    json.dump(forever.FOREVER_MARKETS, target, indent=4)
+
         if not os.path.exists(self.eu_connected_realms):
             from utils.realm_data import EU_CONNECTED_REALMS_IDS
 
@@ -1551,7 +1643,7 @@ class App(QMainWindow):
             # After loading config, update region if needed
             if hasattr(self, "wow_region"):
                 selected_region = self.wow_region.currentText()
-                if selected_region in ["NA", "EU"]:
+                if selected_region in ["NA", "EU", "NAFOREVER", "EUFOREVER"]:
                     self.api_data_thread.set_region(selected_region)
         else:
             # If no config exists, start with default EU region
@@ -2678,11 +2770,13 @@ class App(QMainWindow):
                 "EUCLASSIC",
                 "NASODCLASSIC",
                 "EUSODCLASSIC",
+                "NAFOREVER",
+                "EUFOREVER",
             ]:
                 QMessageBox.critical(
                     self,
                     "Invalid Region",
-                    "WOW region must be either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'EUSODCLASSIC or 'NASODCLASSIC'.",
+                    "WOW region must be NA, EU, NAFOREVER, EUFOREVER, NACLASSIC, EUCLASSIC, EUSODCLASSIC or NASODCLASSIC.",
                 )
                 return False
 
@@ -3412,6 +3506,8 @@ class App(QMainWindow):
         selected_pet_stats = self.pet_statistics[
             self.pet_statistics["itemName"] == selected_pet
         ]
+        if selected_pet_stats.empty:
+            return
         selected_pet_id = selected_pet_stats["itemID"].iloc[0]
 
         # Set the pet ID input

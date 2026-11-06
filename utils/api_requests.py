@@ -143,6 +143,17 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
     return server_update_times
 
 
+def get_forever_itemnames(item_ids):
+    response = requests.post(
+        f"{SADDLEBAG_URL}/api/wow/forever/itemnames",
+        json={"item_ids": item_ids},
+        headers=saddlebag_request_headers(),
+        timeout=15,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
 def get_itemnames():
     """Get item names from a specified API or fallback to a GitHub backup.
     Returns:

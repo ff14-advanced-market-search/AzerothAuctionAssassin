@@ -18,5 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: npm ci
+      - name: Test scanner and item imports (offline)
+        run: node --test tests/*.test.js
       - name: Check Prettier formatting
         run: npm run lint
