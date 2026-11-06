@@ -3,6 +3,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron")
 const path = require("path")
 const fs = require("fs")
+const Forever = require("./forever")
 const https = require("https")
 
 // Get current app version
@@ -1083,7 +1084,9 @@ function setupIpc() {
   ipcMain.handle("load-realm-lists", () => {
     const lists = {}
     for (const [region, filePath] of Object.entries(REALM_FILES)) {
-      lists[region] = readJson(filePath, {})
+      lists[region] = Forever.isRegion(region)
+        ? Forever.rename(readJson(filePath, {}))
+        : readJson(filePath, {})
     }
     return lists
   })

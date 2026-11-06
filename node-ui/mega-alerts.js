@@ -1754,8 +1754,14 @@ async function runAlerts(state, progress, runOnce = false) {
               state.IS_FOREVER ? "forever/" : ""
             }item=${auction.itemID}`
           : auction.itemlink
-      if (!state.NO_LINKS && state.IS_FOREVER)
+      if (!state.NO_LINKS && state.IS_FOREVER) {
+        message += `[Undermine link](${Forever.undermine(
+          state.REGION,
+          connected_id,
+          auction.itemID
+        )})\n`
         message += `[Wowhead link](${link_url})\n`
+      }
       if (!state.NO_LINKS && !state.IS_FOREVER) {
         // Uses ilvl searches for ilvl items, regular searches for others
         // use saddlebag_link_id for non ilvl items, as that corrects for pet ids
@@ -1874,7 +1880,7 @@ async function runAlerts(state, progress, runOnce = false) {
       realmNames: realm_names,
       [idType]: id,
       itemlink: state.IS_FOREVER
-        ? `https://www.wowhead.com/forever/item=${id}`
+        ? Forever.undermine(state.REGION, connected_id, id)
         : itemlink,
       minPrice,
       targetPrice,

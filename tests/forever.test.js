@@ -103,7 +103,11 @@ test("full Forever scan emits item alerts without pets, Raidbots, Retail names o
   )
   fs.writeFileSync(
     path.join(dir, "naforever-wow-connected-realm-ids.json"),
-    JSON.stringify({ Items: 110, Commodities: -110, Horde: 113 })
+    JSON.stringify({
+      "Alliance Auction House 110 — Items": 110,
+      "Alliance Auction House 110 — Commodities": -110,
+      Horde: 113,
+    })
   )
   const urls = [],
     embeds = []
@@ -135,8 +139,11 @@ test("full Forever scan emits item alerts without pets, Raidbots, Retail names o
   assert.equal(embeds.length, 2)
   const text = JSON.stringify(embeds)
   assert.match(text, /Lambent Scale Legguards/)
+  assert.match(text, /PvP Alliance — Items/)
+  assert.doesNotMatch(text, /Alliance Auction House 110/)
   assert.match(text, /wowhead.com\/forever\/item=3048/)
-  assert.doesNotMatch(text, /saddlebagexchange.com\/wow\/|undermine.exchange/)
+  assert.doesNotMatch(text, /saddlebagexchange.com\/wow\//)
+  assert.match(text, /undermine.exchange\/#usf-pvp-alliance\/3048/)
   assert.match(text, /\[10\]/)
   assert.match(text, /\[11\]/)
 })
@@ -167,4 +174,48 @@ test("individual and commodity update timers are independent even with equal Las
     data.upload_timers[-110].tableName,
     /EU_forever_110_commodityListings/
   )
+})
+
+test("Forever market labels and Undermine links use the verified ruleset and faction", () => {
+  const expected = {
+    110: "pvp-alliance",
+    111: "pve-alliance",
+    113: "pvp-horde",
+    114: "pve-horde",
+    116: "pvp-neutral",
+    117: "pve-neutral",
+    119: "rp-alliance",
+    120: "rp-horde",
+    121: "rp-neutral",
+    123: "rppvp-alliance",
+    124: "rppvp-horde",
+    125: "rppvp-neutral",
+  }
+  for (const [id, slug] of Object.entries(expected)) {
+    for (const sign of [1, -1]) {
+      assert.equal(
+        Forever.undermine("EUFOREVER", Number(id) * sign, 2912),
+        `https://undermine.exchange/#euf-${slug}/2912`
+      )
+      assert.equal(
+        Forever.undermine("NAFOREVER", Number(id) * sign, 2912),
+        `https://undermine.exchange/#usf-${slug}/2912`
+      )
+    }
+  }
+  assert.equal(Forever.name(111), "Normal Alliance — Items")
+  assert.equal(Forever.name(-111), "Normal Alliance — Commodities")
+  assert.deepEqual(
+    Forever.rename({
+      "Alliance Auction House 111 — Items": 111,
+      "Blackwater Auction House 125 — Commodities": -125,
+    }),
+    {
+      "Normal Alliance — Items": 111,
+      "Roleplay PvP Neutral — Commodities": -125,
+    }
+  )
+  assert.deepEqual(Forever.rename({ "My selected market": 111 }), {
+    "My selected market": 111,
+  })
 })

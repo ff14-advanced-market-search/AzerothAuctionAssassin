@@ -1598,9 +1598,13 @@ class App(QMainWindow):
             file_path = os.path.join(
                 data_folder, f"{region}-wow-connected-realm-ids.json"
             )
-            if not os.path.exists(file_path):
-                with open(file_path, "w") as target:
-                    json.dump(forever.FOREVER_MARKETS, target, indent=4)
+            if os.path.exists(file_path):
+                with open(file_path) as source:
+                    markets = forever.rename_markets(json.load(source))
+            else:
+                markets = forever.FOREVER_MARKETS
+            with open(file_path, "w") as target:
+                json.dump(markets, target, indent=4)
 
         if not os.path.exists(self.eu_connected_realms):
             from utils.realm_data import EU_CONNECTED_REALMS_IDS

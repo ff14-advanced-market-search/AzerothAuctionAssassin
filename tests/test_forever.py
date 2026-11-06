@@ -28,6 +28,28 @@ class ForeverTests(unittest.TestCase):
                 len(forever.filter_markets(forever.FOREVER_MARKETS, faction)), 8
             )
 
+    def test_undermine_links_and_existing_list_names(self):
+        self.assertEqual(
+            forever.undermine_link("EUFOREVER", 111, 2912),
+            "https://undermine.exchange/#euf-pve-alliance/2912",
+        )
+        self.assertEqual(
+            forever.undermine_link("NAFOREVER", -125, 2912),
+            "https://undermine.exchange/#usf-rppvp-neutral/2912",
+        )
+        original = {
+            "Alliance Auction House 111 — Items": 111,
+            "Blackwater Auction House 125 — Commodities": -125,
+        }
+        self.assertEqual(
+            forever.rename_markets(original),
+            {
+                "Normal Alliance — Items": 111,
+                "Roleplay PvP Neutral — Commodities": -125,
+            },
+        )
+        self.assertEqual(forever.rename_markets({"Custom": 111}), {"Custom": 111})
+
     def test_urls_and_unit_prices(self):
         self.assertIn(
             "us.api.blizzard.com/data/wow/ruleset/1/auctions/110?",

@@ -173,6 +173,8 @@ class Alerts(QThread):
                     if mega_data.WOWHEAD_LINK and "itemID" in auction
                     else auction["itemlink"]
                 )
+                if not mega_data.NO_LINKS and forever.is_forever(mega_data.REGION):
+                    message += f"[Undermine link]({forever.undermine_link(mega_data.REGION, connected_id, auction['itemID'])})\n"
                 if not mega_data.NO_LINKS:
                     message += f"[{link_label}]({link_url})\n"
                 if not mega_data.NO_LINKS and not forever.is_forever(mega_data.REGION):
@@ -709,7 +711,7 @@ class Alerts(QThread):
                 "realmNames": realm_names,
                 f"{idType}": id,
                 "itemlink": (
-                    f"https://www.wowhead.com/forever/item={id}"
+                    forever.undermine_link(mega_data.REGION, connected_id, id)
                     if forever.is_forever(mega_data.REGION)
                     else itemlink
                 ),
