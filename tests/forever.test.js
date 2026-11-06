@@ -219,3 +219,33 @@ test("Forever market labels and Undermine links use the verified ruleset and fac
     "My selected market": 111,
   })
 })
+
+test("Forever scanner uses public GitHub names when Saddlebag is down", async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aaa-forever-backup-"))
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }))
+  fs.writeFileSync(
+    path.join(dir, "mega_data.json"),
+    JSON.stringify({ WOW_REGION: "NAFOREVER" })
+  )
+  fs.writeFileSync(
+    path.join(dir, "desired_items.json"),
+    JSON.stringify({ 3048: 10 })
+  )
+  const urls = []
+  const api = scanner(async (url) => {
+    urls.push(url)
+    if (url.includes("api.saddlebagexchange.com"))
+      return { ok: false, status: 503 }
+    assert.match(
+      url,
+      /raw.githubusercontent.com\/.*\/main\/StaticData\/forever_item_names.json$/
+    )
+    return response({ 3048: "Lambent Scale Legguards", 720: "Brawler Gloves" })
+  })
+  api.setPaths(dir, dir)
+  const data = new api.MegaData()
+  await data.initialize()
+  assert.equal(data.ITEM_NAMES[3048], "Lambent Scale Legguards")
+  assert.equal(data.ITEM_NAMES[720], undefined)
+  assert.equal(urls.length, 2)
+})

@@ -1235,31 +1235,59 @@ class MegaData {
    */
   async loadItemNames() {
     if (this.IS_FOREVER) {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 15000)
-      try {
-        const response = await fetch(
+      const sources = [
+        [
           `${SADDLEBAG_URL}/api/wow/forever/itemnames`,
           {
             method: "POST",
-            signal: controller.signal,
             headers: saddlebagFetchHeaders({
               "Content-Type": "application/json",
             }),
             body: JSON.stringify({
               item_ids: Object.keys(this.desiredItems).map(Number),
             }),
-          }
-        )
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return await response.json()
-      } catch (error) {
-        logError("Forever names unavailable; alerts will use item IDs", error)
-        return {}
-      } finally {
-        clearTimeout(timeout)
+          },
+        ],
+        [`${RAW_GITHUB_BACKUP_PATH}/forever_item_names.json`, {}],
+      ]
+      for (const [url, options] of sources) {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 15000)
+        try {
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+          })
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          const names = await response.json()
+          if (
+            !names ||
+            Array.isArray(names) ||
+            typeof names !== "object" ||
+            !Object.keys(names).length ||
+            Object.entries(names).some(
+              ([id, name]) =>
+                !/^\d+$/.test(id) || typeof name !== "string" || !name.trim()
+            )
+          )
+            throw new Error("Invalid Forever names response")
+          return Object.fromEntries(
+            Object.entries(names).filter(
+              ([id]) => this.desiredItems[id] !== undefined
+            )
+          )
+        } catch (error) {
+          logError(`Forever names unavailable from ${url}`, error)
+        } finally {
+          clearTimeout(timeout)
+        }
       }
+      logError(
+        "Forever names and GitHub backup unavailable; alerts will use item IDs"
+      )
+      return {}
     }
+
     try {
       const response = await fetch(`${SADDLEBAG_URL}/api/wow/itemnames`, {
         method: "POST",

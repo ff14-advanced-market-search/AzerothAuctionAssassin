@@ -313,7 +313,7 @@ class MegaData:
         if self.IS_FOREVER:
             try:
                 item_names = get_forever_itemnames(list(self.DESIRED_ITEMS))
-            except requests.RequestException as error:
+            except (requests.RequestException, ValueError) as error:
                 print(f"Forever names unavailable; alerts will use item IDs: {error}")
                 item_names = {}
         else:

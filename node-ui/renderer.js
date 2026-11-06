@@ -3426,6 +3426,51 @@ async function loadZoomLevel() {
   }
 }
 
+async function fetchForeverStatistics(region) {
+  const baseRegion = region.replace("FOREVER", "")
+  const sources = [
+    [
+      "https://api.saddlebagexchange.com/api/wow/forever/megaitemnames",
+      {
+        method: "POST",
+        headers: saddlebagFetchHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ region: baseRegion, discount: 1 }),
+      },
+    ],
+    [
+      `https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData/forever_${baseRegion.toLowerCase()}_item_stats.json`,
+      {},
+    ],
+  ]
+  let lastError
+  for (const [url, options] of sources) {
+    try {
+      const response = await fetchWithTimeout(url, options, 15000)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const data = await response.json()
+      if (
+        !Array.isArray(data) ||
+        !data.length ||
+        data.some(
+          (row) =>
+            !row ||
+            !Number.isInteger(row.itemID) ||
+            typeof row.itemName !== "string" ||
+            !row.itemName.trim() ||
+            [row.desiredPrice, row.salesPerDay].some(
+              (value) => !Number.isFinite(value) || value < 0
+            )
+        )
+      )
+        throw new Error("Invalid Forever statistics response")
+      return data
+    } catch (error) {
+      lastError = error
+    }
+  }
+  throw lastError
+}
+
 async function fetchItemNames() {
   const selectedRegion = state.megaData?.WOW_REGION || "EU"
   if (itemSearchRegion !== selectedRegion) {
@@ -3444,26 +3489,29 @@ async function fetchItemNames() {
   // All callers must await the same lookup, including imports during startup.
   itemSearchPromise = (async () => {
     try {
-      const resp = await fetchWithTimeout(
-        `https://api.saddlebagexchange.com/api/wow/${
-          ["NAFOREVER", "EUFOREVER"].includes(region) ? "forever/" : ""
-        }megaitemnames`,
-        {
-          method: "POST",
-          headers: saddlebagFetchHeaders({
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          }),
-          body: JSON.stringify({
-            discord_consent: WOW_DISCORD_CONSENT,
-            region: region.replace("FOREVER", ""),
-            discount: 1,
-          }),
-        },
-        30000
-      )
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-      const data = await resp.json()
+      let data
+      if (["NAFOREVER", "EUFOREVER"].includes(region)) {
+        data = await fetchForeverStatistics(region)
+      } else {
+        const resp = await fetchWithTimeout(
+          "https://api.saddlebagexchange.com/api/wow/megaitemnames",
+          {
+            method: "POST",
+            headers: saddlebagFetchHeaders({
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            }),
+            body: JSON.stringify({
+              discord_consent: WOW_DISCORD_CONSENT,
+              region,
+              discount: 1,
+            }),
+          },
+          30000
+        )
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+        data = await resp.json()
+      }
       const rows = Array.isArray(data)
         ? data.filter(
             (row) =>

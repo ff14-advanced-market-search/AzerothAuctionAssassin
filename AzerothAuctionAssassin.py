@@ -24,7 +24,7 @@ except ImportError:
     AAA_VERSION = "1.7.0"
 
 from utils import forever
-from utils.api_requests import saddlebag_request_headers
+from utils.api_requests import saddlebag_request_headers, get_forever_item_statistics
 
 import breeze_resources
 import ctypes
@@ -111,19 +111,13 @@ class Item_And_Pet_Statistics(QThread):
 
     def run(self):
         if forever.is_forever(self.region):
-            response = requests.post(
-                "https://api.saddlebagexchange.com/api/wow/forever/megaitemnames",
-                headers=saddlebag_request_headers(),
-                json={"region": self.region.replace("FOREVER", ""), "discount": 1},
-                timeout=30,
-            )
-            response.raise_for_status()
+            statistics = get_forever_item_statistics(self.region.replace("FOREVER", ""))
             self.completed.emit(
                 pd.DataFrame(
                     columns=["itemID", "itemName", "desiredPrice", "salesPerDay"]
                 ),
                 pd.DataFrame(
-                    response.json(),
+                    statistics,
                     columns=["itemID", "itemName", "desiredPrice", "salesPerDay"],
                 ),
             )

@@ -119,3 +119,38 @@ def unit_price(auction, field):
     if not isinstance(quantity, int) or quantity <= 0:
         return None
     return price if field == "unit_price" else price / quantity
+
+
+def validate_names(data):
+    if (
+        not isinstance(data, dict)
+        or not data
+        or any(
+            not str(item_id).isdigit() or not isinstance(name, str) or not name.strip()
+            for item_id, name in data.items()
+        )
+    ):
+        raise ValueError("Invalid or empty Forever names response")
+    return data
+
+
+def validate_statistics(data):
+    if not isinstance(data, list) or not data:
+        raise ValueError("Invalid or empty Forever statistics response")
+    for row in data:
+        if (
+            not isinstance(row, dict)
+            or not isinstance(row.get("itemID"), int)
+            or not isinstance(row.get("itemName"), str)
+            or not row["itemName"].strip()
+        ):
+            raise ValueError("Invalid Forever statistics row")
+        for field in ("desiredPrice", "salesPerDay"):
+            value = row.get(field)
+            if (
+                not isinstance(value, (int, float))
+                or not math.isfinite(value)
+                or value < 0
+            ):
+                raise ValueError(f"Invalid Forever statistics {field}")
+    return data

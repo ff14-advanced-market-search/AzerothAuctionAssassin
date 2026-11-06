@@ -257,6 +257,7 @@ test("switches item catalogs between Retail and Forever without reusing cached n
         itemID: 3048,
         itemName: url.includes("/forever/") ? "Forever name" : "Retail name",
         desiredPrice: 1,
+        salesPerDay: 0,
       },
     ])
   })
@@ -281,7 +282,12 @@ test("a stale Retail response cannot replace a newer Forever catalog", async () 
         finishOld = resolve
       })
     return response([
-      { itemID: 3048, itemName: "Forever name", desiredPrice: 1 },
+      {
+        itemID: 3048,
+        itemName: "Forever name",
+        desiredPrice: 1,
+        salesPerDay: 0,
+      },
     ])
   })
   ui.setRegion("NA")
@@ -295,3 +301,34 @@ test("a stale Retail response cannot replace a newer Forever catalog", async () 
   assert.equal((await ui.loadItems())[0].itemName, "Forever name")
   assert.equal(count, 2)
 })
+
+for (const region of ["NAFOREVER", "EUFOREVER"]) {
+  test(`loads public ${region} item prices when the API is unavailable`, async () => {
+    const urls = []
+    const ui = setup(async (url) => {
+      urls.push(url)
+      if (url.includes("api.saddlebagexchange.com")) return response({}, 503)
+      assert.ok(
+        url.endsWith(
+          `/StaticData/forever_${
+            region.startsWith("NA") ? "na" : "eu"
+          }_item_stats.json`
+        )
+      )
+      return response([
+        {
+          itemID: 3048,
+          itemName: "Backup Forever name",
+          desiredPrice: 5,
+          salesPerDay: 1.25,
+        },
+      ])
+    })
+    ui.setRegion(region)
+    const items = await ui.loadItems()
+    assert.equal(items[0].itemName, "Backup Forever name")
+    assert.equal(items[0].desiredPrice, 5)
+    assert.equal(items[0].salesPerDay, 1.25)
+    assert.equal(urls.length, 2)
+  })
+}

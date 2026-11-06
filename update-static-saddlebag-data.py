@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 import json, requests
+from pathlib import Path
 from utils.api_requests import (
     WOW_DISCORD_CONSENT,
+    get_forever_itemnames,
+    get_forever_item_statistics,
     get_itemnames,
     get_ilvl_items,
     get_raidbots_bonus_ids,
@@ -11,6 +14,37 @@ from utils.api_requests import (
     get_pet_names_backup,
     saddlebag_request_headers,
 )
+
+
+def update_forever_static_data(output_dir="StaticData"):
+    # Fetch and validate every response before replacing any published snapshot.
+    # Disable runtime fallback here so an outage cannot republish stale backups.
+    snapshots = {
+        "forever_item_names.json": get_forever_itemnames([], use_backup=False),
+        "forever_na_item_stats.json": get_forever_item_statistics(
+            "NA", use_backup=False
+        ),
+        "forever_eu_item_stats.json": get_forever_item_statistics(
+            "EU", use_backup=False
+        ),
+    }
+    destination = Path(output_dir)
+    destination.mkdir(parents=True, exist_ok=True)
+    for filename, data in snapshots.items():
+        path = destination / filename
+        temporary = path.with_suffix(".json.tmp")
+        temporary.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        temporary.replace(path)
+    print("Forever static names and regional statistics updated successfully!")
+
+
+try:
+    update_forever_static_data()
+except (requests.RequestException, ValueError) as error:
+    print(f"Forever static update failed; retaining existing backups: {error}")
+
 
 # get the upload timers
 upload_timers = requests.post(
