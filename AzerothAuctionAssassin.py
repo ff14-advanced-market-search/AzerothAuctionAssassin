@@ -614,7 +614,7 @@ class App(QMainWindow):
         self.wow_region.currentTextChanged.connect(self.on_region_changed)
         self.wow_region_label = QLabel("Auction Assassin Token", settings_page)
         self.wow_region_label.setToolTip(
-            "Pick your region and game edition, including NAFOREVER and EUFOREVER."
+            "Pick your region and game edition: Retail, Classic, SoD, or Forever, in NA or EU."
         )
         self.settings_page_layout.addWidget(self.wow_region_label, 8, 0, 1, 1)
         self.settings_page_layout.addWidget(self.wow_region, 9, 0, 1, 1)
