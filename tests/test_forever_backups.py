@@ -40,9 +40,13 @@ class ForeverBackupTests(unittest.TestCase):
     @patch("utils.api_requests.requests.post")
     def test_bad_api_response_uses_matching_region_backup(self, post, get):
         post.return_value = response({"exception": "Unavailable"})
-        get.return_value = response(STATS)
-        self.assertEqual(get_forever_item_statistics("EU"), STATS)
-        self.assertTrue(get.call_args.args[0].endswith("/forever_eu_item_stats.json"))
+        get.return_value = response(NAMES)
+        rows = get_forever_item_statistics("EU")
+        self.assertEqual(rows[0]["itemName"], NAMES["3048"])
+        self.assertTrue(
+            all(row["desiredPrice"] == row["salesPerDay"] == 0 for row in rows)
+        )
+        self.assertTrue(get.call_args.args[0].endswith("/forever_item_names.json"))
 
     @patch("utils.api_requests.requests.get")
     @patch("utils.api_requests.requests.post")
@@ -81,14 +85,14 @@ class ForeverBackupTests(unittest.TestCase):
             path = Path(directory) / "forever_item_names.json"
             path.write_text("existing snapshot")
             update = self.load_updater(
-                Mock(return_value=NAMES), Mock(side_effect=requests.HTTPError("down"))
+                Mock(side_effect=requests.HTTPError("down")), Mock()
             )
             with self.assertRaises(requests.HTTPError):
                 update(directory)
             self.assertEqual(path.read_text(), "existing snapshot")
             self.assertEqual(len(list(Path(directory).iterdir())), 1)
 
-    def test_refresh_writes_all_three_valid_snapshots(self):
+    def test_refresh_writes_only_names(self):
         names, statistics = Mock(return_value=NAMES), Mock(return_value=STATS)
         with tempfile.TemporaryDirectory() as directory:
             self.load_updater(names, statistics)(directory)
@@ -97,15 +101,8 @@ class ForeverBackupTests(unittest.TestCase):
                 json.loads((Path(directory) / "forever_item_names.json").read_text()),
                 NAMES,
             )
-            for region in ("na", "eu"):
-                self.assertEqual(
-                    json.loads(
-                        (
-                            Path(directory) / f"forever_{region}_item_stats.json"
-                        ).read_text()
-                    ),
-                    STATS,
-                )
+            self.assertEqual(len(list(Path(directory).iterdir())), 1)
+            statistics.assert_not_called()
 
 
 if __name__ == "__main__":

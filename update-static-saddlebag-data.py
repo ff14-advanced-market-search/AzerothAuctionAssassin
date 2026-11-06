@@ -4,7 +4,6 @@ from pathlib import Path
 from utils.api_requests import (
     WOW_DISCORD_CONSENT,
     get_forever_itemnames,
-    get_forever_item_statistics,
     get_itemnames,
     get_ilvl_items,
     get_raidbots_bonus_ids,
@@ -17,16 +16,10 @@ from utils.api_requests import (
 
 
 def update_forever_static_data(output_dir="StaticData"):
-    # Fetch and validate every response before replacing any published snapshot.
+    # Fetch and validate fresh names before replacing the published snapshot.
     # Disable runtime fallback here so an outage cannot republish stale backups.
     snapshots = {
         "forever_item_names.json": get_forever_itemnames([], use_backup=False),
-        "forever_na_item_stats.json": get_forever_item_statistics(
-            "NA", use_backup=False
-        ),
-        "forever_eu_item_stats.json": get_forever_item_statistics(
-            "EU", use_backup=False
-        ),
     }
     destination = Path(output_dir)
     destination.mkdir(parents=True, exist_ok=True)
@@ -37,7 +30,7 @@ def update_forever_static_data(output_dir="StaticData"):
             json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
         temporary.replace(path)
-    print("Forever static names and regional statistics updated successfully!")
+    print("Forever static names updated successfully!")
 
 
 try:

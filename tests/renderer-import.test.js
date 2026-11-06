@@ -303,32 +303,19 @@ test("a stale Retail response cannot replace a newer Forever catalog", async () 
 })
 
 for (const region of ["NAFOREVER", "EUFOREVER"]) {
-  test(`loads public ${region} item prices when the API is unavailable`, async () => {
+  test(`keeps ${region} names with zero suggestions during a price API outage`, async () => {
     const urls = []
     const ui = setup(async (url) => {
       urls.push(url)
       if (url.includes("api.saddlebagexchange.com")) return response({}, 503)
-      assert.ok(
-        url.endsWith(
-          `/StaticData/forever_${
-            region.startsWith("NA") ? "na" : "eu"
-          }_item_stats.json`
-        )
-      )
-      return response([
-        {
-          itemID: 3048,
-          itemName: "Backup Forever name",
-          desiredPrice: 5,
-          salesPerDay: 1.25,
-        },
-      ])
+      assert.ok(url.endsWith("/StaticData/forever_item_names.json"))
+      return response({ 3048: "Backup Forever name" })
     })
     ui.setRegion(region)
     const items = await ui.loadItems()
     assert.equal(items[0].itemName, "Backup Forever name")
-    assert.equal(items[0].desiredPrice, 5)
-    assert.equal(items[0].salesPerDay, 1.25)
-    assert.equal(urls.length, 2)
+    assert.equal(items[0].desiredPrice, 0)
+    assert.equal(items[0].salesPerDay, 0)
+    assert.equal(urls.length, 3)
   })
 }

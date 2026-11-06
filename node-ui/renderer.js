@@ -3427,48 +3427,84 @@ async function loadZoomLevel() {
 }
 
 async function fetchForeverStatistics(region) {
-  const baseRegion = region.replace("FOREVER", "")
-  const sources = [
-    [
+  try {
+    const response = await fetchWithTimeout(
       "https://api.saddlebagexchange.com/api/wow/forever/megaitemnames",
       {
         method: "POST",
         headers: saddlebagFetchHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ region: baseRegion, discount: 1 }),
+        body: JSON.stringify({
+          region: region.replace("FOREVER", ""),
+          discount: 1,
+        }),
       },
-    ],
-    [
-      `https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData/forever_${baseRegion.toLowerCase()}_item_stats.json`,
-      {},
-    ],
-  ]
-  let lastError
-  for (const [url, options] of sources) {
-    try {
-      const response = await fetchWithTimeout(url, options, 15000)
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      const data = await response.json()
-      if (
-        !Array.isArray(data) ||
-        !data.length ||
-        data.some(
-          (row) =>
-            !row ||
-            !Number.isInteger(row.itemID) ||
-            typeof row.itemName !== "string" ||
-            !row.itemName.trim() ||
-            [row.desiredPrice, row.salesPerDay].some(
-              (value) => !Number.isFinite(value) || value < 0
-            )
-        )
+      15000
+    )
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    const data = await response.json()
+    if (
+      !Array.isArray(data) ||
+      !data.length ||
+      data.some(
+        (row) =>
+          !row ||
+          !Number.isInteger(row.itemID) ||
+          typeof row.itemName !== "string" ||
+          !row.itemName.trim() ||
+          [row.desiredPrice, row.salesPerDay].some(
+            (value) => !Number.isFinite(value) || value < 0
+          )
       )
-        throw new Error("Invalid Forever statistics response")
-      return data
-    } catch (error) {
-      lastError = error
+    )
+      throw new Error("Invalid Forever statistics response")
+    return data
+  } catch (error) {
+    // Names remain usable when pricing is unavailable; never suggest stale prices.
+    const sources = [
+      [
+        "https://api.saddlebagexchange.com/api/wow/forever/itemnames",
+        {
+          method: "POST",
+          headers: saddlebagFetchHeaders({
+            "Content-Type": "application/json",
+          }),
+          body: JSON.stringify({ item_ids: [] }),
+        },
+      ],
+      [
+        "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData/forever_item_names.json",
+        {},
+      ],
+    ]
+    let lastError = error
+    for (const [url, options] of sources) {
+      try {
+        const response = await fetchWithTimeout(url, options, 15000)
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const names = await response.json()
+        if (
+          !names ||
+          typeof names !== "object" ||
+          Array.isArray(names) ||
+          !Object.keys(names).length ||
+          Object.entries(names).some(
+            ([id, name]) =>
+              !/^\d+$/.test(id) || typeof name !== "string" || !name.trim()
+          )
+        )
+          throw new Error("Invalid Forever names response")
+        return Object.entries(names).map(([id, name]) => ({
+          itemID: Number(id),
+          itemName: name,
+          desiredPrice: 0,
+          salesPerDay: 0,
+        }))
+      } catch (failure) {
+        lastError = failure
+      }
     }
+    throw lastError
   }
-  throw lastError
 }
 
 async function fetchItemNames() {

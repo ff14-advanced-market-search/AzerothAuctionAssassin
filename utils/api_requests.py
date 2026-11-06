@@ -181,13 +181,27 @@ def get_forever_itemnames(item_ids, use_backup=True):
 def get_forever_item_statistics(region, use_backup=True):
     if region not in ("NA", "EU"):
         raise ValueError("Forever region must be NA or EU")
-    return get_forever_data(
-        "megaitemnames",
-        {"region": region, "discount": 1},
-        f"forever_{region.lower()}_item_stats.json",
-        forever.validate_statistics,
-        use_backup,
-    )
+    try:
+        return get_forever_data(
+            "megaitemnames",
+            {"region": region, "discount": 1},
+            "",
+            forever.validate_statistics,
+            use_backup=False,
+        )
+    except (requests.RequestException, ValueError):
+        if not use_backup:
+            raise
+        names = get_forever_itemnames([])
+        return [
+            {
+                "itemID": int(item_id),
+                "itemName": name,
+                "desiredPrice": 0,
+                "salesPerDay": 0,
+            }
+            for item_id, name in names.items()
+        ]
 
 
 def get_itemnames():
