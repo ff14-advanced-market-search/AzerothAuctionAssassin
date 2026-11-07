@@ -85,6 +85,28 @@ jobs:
             if (releases.some((release) => release.tag_name === tag)) {
               throw new Error(`Release ${tag} already exists; bump AAA_VERSION before building.`);
             }
+            let existingRef;
+            try {
+              const response = await github.rest.git.getRef({
+                ...context.repo, ref: `tags/${tag}`,
+              });
+              existingRef = response.data;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            if (existingRef) {
+              let target = existingRef.object;
+              while (target.type === "tag") {
+                const { data: annotated } = await github.rest.git.getTag({
+                  ...context.repo, tag_sha: target.sha,
+                });
+                target = annotated.object;
+              }
+              if (target.type !== "commit" || target.sha !== context.sha) {
+                throw new Error(`Existing tag ${tag} does not match build commit ${context.sha}`);
+              }
+              throw new Error(`Tag ${tag} already exists; bump AAA_VERSION before building.`);
+            }
 
       - name: Build EXE
         run: |

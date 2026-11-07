@@ -159,6 +159,27 @@ function writeJson(filePath, data) {
   }
 }
 
+function writeRealmList(filePath, data) {
+  const dir = path.dirname(filePath)
+  const temporary = path.join(dir, `.${path.basename(filePath)}.tmp`)
+  try {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    fs.writeFileSync(temporary, JSON.stringify(data, null, 2))
+    fs.renameSync(temporary, filePath)
+    return { success: true }
+  } catch (error) {
+    try {
+      fs.rmSync(temporary, { force: true })
+    } catch {
+      // The destination is still the previous complete file.
+    }
+    console.error(`Failed to write JSON file: ${filePath}`, error)
+    return { success: false, error: error.message }
+  }
+}
+
 function getTimestampInt() {
   const now = new Date()
   return (
@@ -1126,7 +1147,7 @@ function setupIpc() {
     const logMsg = `[SAVE] Saving realm list for ${region} to: ${filePath}\n`
     console.log(logMsg.trim())
     sendToLogPanel(logMsg)
-    if (invalidForeverRegions.has(region) && !options.replaceInvalid) {
+    if (invalidForeverRegions.has(region) && options?.replaceInvalid !== true) {
       const message = `The saved ${region} realm list is invalid and was not changed. Reset the list to replace it.`
       console.log(message)
       sendToLogPanel(`${message}\n`)
@@ -1143,7 +1164,7 @@ function setupIpc() {
       sendToLogPanel(`${message}\n`)
       return { error: message }
     }
-    const written = writeJson(filePath, normalized)
+    const written = writeRealmList(filePath, normalized)
     if (!written?.success) {
       return { error: written?.error || "Could not save realm list" }
     }

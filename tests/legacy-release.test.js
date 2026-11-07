@@ -202,9 +202,12 @@ test("legacy preflight refuses draft releases and propagates list errors", async
     "Check release version is unused",
     "release script not found in windows-exe-build.yml"
   )
-  const run = (releases) =>
+  const run = (releases, git = {}) =>
     new vm.Script(`(async () => {${preflight}})()`).runInNewContext({
-      context: { repo: { owner: "owner", repo: "repo" } },
+      context: {
+        repo: { owner: "owner", repo: "repo" },
+        sha: "build-commit",
+      },
       process: { env: { AAA_VERSION: "1.7.0" } },
       github: {
         paginate: async (method, args) => {
@@ -215,17 +218,57 @@ test("legacy preflight refuses draft releases and propagates list errors", async
           if (releases instanceof Error) throw releases
           return releases
         },
-        rest: { repos: { listReleases: "listReleases" } },
+        rest: {
+          repos: { listReleases: "listReleases" },
+          git: {
+            getRef: async (options) => {
+              assert.equal(options.ref, "tags/v1.7.0")
+              if (git.getRef) return git.getRef(options)
+              throw Object.assign(new Error("missing"), { status: 404 })
+            },
+            getTag: async (options) => {
+              if (git.getTag) return git.getTag(options)
+              throw new Error("unexpected getTag")
+            },
+          },
+        },
       },
     })
   await assert.rejects(
     run([{ tag_name: "v1.7.0", draft: true }]),
-    /already exists/
+    /Release v1\.7\.0 already exists/
   )
   await run([{ tag_name: "v1.6.0", draft: false }])
   await assert.rejects(
     run(Object.assign(new Error("denied"), { status: 403 })),
     /denied/
+  )
+  await assert.rejects(
+    run([], {
+      getRef: async () => ({
+        data: { object: { type: "commit", sha: "other" } },
+      }),
+    }),
+    /does not match build commit/
+  )
+  await assert.rejects(
+    run([], {
+      getRef: async () => ({
+        data: { object: { type: "tag", sha: "annotated" } },
+      }),
+      getTag: async () => ({
+        data: { object: { type: "commit", sha: "build-commit" } },
+      }),
+    }),
+    /Tag v1\.7\.0 already exists/
+  )
+  await assert.rejects(
+    run([], {
+      getRef: async () => {
+        throw Object.assign(new Error("tag lookup failed"), { status: 500 })
+      },
+    }),
+    /tag lookup failed/
   )
 })
 

@@ -1,4 +1,4 @@
-requests==2.31.0
+requests==2.33.0
 orjson==3.11.5
 tenacity==8.2.3
 certifi==2023.11.17
