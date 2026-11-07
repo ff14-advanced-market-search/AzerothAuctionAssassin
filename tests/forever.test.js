@@ -230,6 +230,17 @@ test("Forever market labels and Undermine links use the verified ruleset and fac
     assert.equal(loaded["Normal Alliance — Items"], 111)
     assert.match(warnings.join("\n"), /using defaults/)
     assert.deepEqual(Forever.load({}), {})
+    assert.deepEqual(
+      Forever.savedIds("NAFOREVER", {
+        "Normal Alliance — Items": 111,
+        Custom: 112,
+      }),
+      { normalized: { "Normal Alliance — Items": 111 }, rejected: [112] }
+    )
+    assert.deepEqual(Forever.savedIds("EU", { "Area 52": 112 }), {
+      normalized: { "Area 52": 112 },
+      rejected: [],
+    })
   } finally {
     console.warn = originalWarn
   }

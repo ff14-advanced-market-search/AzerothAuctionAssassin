@@ -1097,13 +1097,15 @@ function setupIpc() {
     const logMsg = `[SAVE] Saving realm list for ${region} to: ${filePath}\n`
     console.log(logMsg.trim())
     sendToLogPanel(logMsg)
-    const normalized = {}
-    Object.entries(realms || {}).forEach(([k, v]) => {
-      const id = Number(v)
-      if (!Number.isNaN(id)) {
-        normalized[String(k)] = id
-      }
-    })
+    const { normalized, rejected } = Forever.savedIds(region, realms)
+    if (rejected.length) {
+      const message = `Rejected unknown Forever feed IDs: ${rejected.join(
+        ", "
+      )}`
+      console.log(message)
+      sendToLogPanel(`${message}\n`)
+      return { error: message }
+    }
     writeJson(filePath, normalized)
     const successMsg = `[SAVE] Successfully saved realm list for ${region}\n`
     console.log(successMsg.trim())

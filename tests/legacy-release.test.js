@@ -150,6 +150,42 @@ test("release script extraction rejects a folded block", () => {
   )
 })
 
+test("legacy preflight runs before the Windows build", () => {
+  const preflight = workflow.indexOf("- name: Check release version is unused")
+  const build = workflow.indexOf("- name: Build EXE")
+  const job = workflow.indexOf("  build-windows:")
+  assert.notEqual(preflight, -1)
+  assert.notEqual(build, -1)
+  assert.ok(preflight < build, "release preflight must run before Build EXE")
+  assert.match(workflow.slice(job, preflight), /permissions:\s+contents: write/)
+})
+
+test("a legacy release propagates non-404 tag lookup errors", async () => {
+  await assert.rejects(
+    release(async () => {
+      throw Object.assign(new Error("server error"), { status: 500 })
+    }),
+    /server error/
+  )
+})
+
+test("nested annotated tags are dereferenced to the build commit", async () => {
+  const calls = await release(
+    async () => ({ data: { object: { type: "tag", sha: "outer" } } }),
+    async ({ tag_sha }) => {
+      if (tag_sha === "outer") {
+        return { data: { object: { type: "tag", sha: "inner" } } }
+      }
+      return { data: { object: { type: "commit", sha: "build-commit" } } }
+    }
+  )
+  assert.equal(calls.length, 1)
+  assert.deepEqual(
+    calls.tags.map((call) => call.tag_sha),
+    ["outer", "inner"]
+  )
+})
+
 test("legacy preflight refuses existing releases and propagates authorization errors", async () => {
   const preflight = workflowScript(
     workflow,

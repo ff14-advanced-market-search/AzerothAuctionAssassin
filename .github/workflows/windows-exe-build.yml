@@ -12,6 +12,8 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     outputs:
       upload_url_base64: ${{ steps.b64encode_upload_url.outputs.upload_url_base64 }}
 

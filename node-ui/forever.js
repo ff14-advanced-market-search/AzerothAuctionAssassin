@@ -61,6 +61,23 @@ const Forever = {
       ? `${market.name} — ${Number(id) < 0 ? "Commodities" : "Items"}`
       : null
   },
+  savedIds(region, realms) {
+    const normalized = {}
+    const rejected = []
+    if (!realms || typeof realms !== "object" || Array.isArray(realms)) {
+      return { normalized, rejected }
+    }
+    for (const [name, value] of Object.entries(realms)) {
+      const id = Number(value)
+      if (Number.isNaN(id)) continue
+      if (this.isRegion(region) && !this.faction(id)) {
+        rejected.push(id)
+        continue
+      }
+      normalized[String(name)] = id
+    }
+    return { normalized, rejected }
+  },
   load(markets) {
     const invalid =
       !markets ||

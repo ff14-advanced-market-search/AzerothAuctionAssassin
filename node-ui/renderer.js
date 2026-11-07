@@ -4903,9 +4903,13 @@ async function loadRealmLists() {
 async function saveRealmList(region) {
   try {
     const realms = state.realmLists[region] || {}
-    await window.aaa.saveRealmList(region, realms)
+    const saved = await window.aaa.saveRealmList(region, realms)
+    if (saved?.error) showToast(saved.error, "error")
+    return saved
   } catch (err) {
     console.error("Failed to save realm list:", err)
+    showToast("Failed to save realm list.", "error")
+    return { error: err.message }
   }
 }
 
@@ -4914,8 +4918,16 @@ async function addRealm(region, name, id) {
   if (!state.realmLists[region]) {
     state.realmLists[region] = {}
   }
+  const previous = Object.hasOwn(state.realmLists[region], name)
+    ? state.realmLists[region][name]
+    : undefined
   state.realmLists[region][name] = Number(id)
-  await saveRealmList(region)
+  const saved = await saveRealmList(region)
+  if (saved?.error) {
+    if (previous === undefined) delete state.realmLists[region][name]
+    else state.realmLists[region][name] = previous
+    return
+  }
   renderRealmList()
   realmNameInput.value = ""
   realmIdInput.value = ""
