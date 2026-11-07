@@ -464,6 +464,11 @@ select:focus {
   background: #28a745;
 }
 
+.toast.warning {
+  background: #ffc107;
+  color: #212529;
+}
+
 @keyframes toastSlideIn {
   from {
     opacity: 0;

@@ -91,6 +91,26 @@ class ForeverBackupTests(unittest.TestCase):
         exec(compile(ast.Module(body=[func], type_ignores=[]), str(path), "exec"), ns)
         return ns[func.name]
 
+    def test_partial_names_update_keeps_the_snapshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "forever_item_names.json"
+            path.write_text(json.dumps({"1": "One", "2": "Two"}), encoding="utf-8")
+            update = self.load_updater(Mock(return_value={"1": "One"}), Mock())
+            with self.assertRaises(ValueError):
+                update(directory)
+            self.assertEqual(
+                json.loads(path.read_text(encoding="utf-8")),
+                {"1": "One", "2": "Two"},
+            )
+            update = self.load_updater(
+                Mock(return_value={"1": "One", "2": "Two", "3": "Three"}), Mock()
+            )
+            update(directory)
+            self.assertEqual(
+                json.loads(path.read_text(encoding="utf-8")),
+                {"1": "One", "2": "Two", "3": "Three"},
+            )
+
     def test_failed_refresh_preserves_existing_backups(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "forever_item_names.json"

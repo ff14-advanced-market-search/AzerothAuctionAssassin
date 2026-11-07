@@ -1085,7 +1085,7 @@ function setupIpc() {
     const lists = {}
     for (const [region, filePath] of Object.entries(REALM_FILES)) {
       lists[region] = Forever.isRegion(region)
-        ? Forever.rename(readJson(filePath, {}))
+        ? Forever.load(readJson(filePath, {}))
         : readJson(filePath, {})
     }
     return lists

@@ -218,6 +218,21 @@ test("Forever market labels and Undermine links use the verified ruleset and fac
   assert.deepEqual(Forever.rename({ "My selected market": 111 }), {
     "My selected market": 111,
   })
+  const warnings = []
+  const originalWarn = console.warn
+  console.warn = (message) => warnings.push(message)
+  try {
+    const loaded = Forever.load({
+      Custom: 112,
+      "Normal Alliance — Items": 111,
+    })
+    assert.equal(Object.keys(loaded).length, 24)
+    assert.equal(loaded["Normal Alliance — Items"], 111)
+    assert.match(warnings.join("\n"), /using defaults/)
+    assert.deepEqual(Forever.load({}), {})
+  } finally {
+    console.warn = originalWarn
+  }
 })
 
 test("Forever scanner uses public GitHub names when Saddlebag is down", async (t) => {

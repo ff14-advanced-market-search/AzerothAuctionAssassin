@@ -1,6 +1,8 @@
 """Run the real worker/GUI coordination methods without a desktop session."""
 
 import ast
+import json
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -70,6 +72,7 @@ def classes():
         "on_combo_box_item_changed",
         "import_pbs_data",
         "isfloat",
+        "read_realm_file",
     }
     app.body = [
         n for n in app.body if isinstance(n, ast.FunctionDef) and n.name in keep
@@ -80,6 +83,7 @@ def classes():
         "pyqtSignal": lambda *args: Signal(),
         "pd": SimpleNamespace(DataFrame=Frame),
         "QMessageBox": Mock(),
+        "json": json,
         "QComboBox": SimpleNamespace(NoInsert=0),
         "forever": forever,
     }
@@ -226,6 +230,15 @@ class StatisticsTests(unittest.TestCase):
         self.assertEqual(self.app.items_list, {"3048": 15, "25": 0.4})
         self.ns["QMessageBox"].warning.assert_called_once()
         self.assertIn("Missing", self.ns["QMessageBox"].warning.call_args.args[2])
+
+    def test_invalid_realm_file_is_rejected_before_use(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "realms.json"
+            path.write_text("null", encoding="utf-8")
+            self.assertIsNone(self.app.read_realm_file(path))
+            self.ns["QMessageBox"].critical.assert_called()
+            path.write_text('{"Valid": 110}', encoding="utf-8")
+            self.assertEqual(self.app.read_realm_file(path), {"Valid": 110})
 
     def test_unavailable_saved_price_is_not_discounted_when_input_is_empty(self):
         stats = MagicMock()

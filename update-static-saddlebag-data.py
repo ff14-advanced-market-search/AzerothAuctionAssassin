@@ -25,6 +25,19 @@ def update_forever_static_data(output_dir="StaticData"):
     destination.mkdir(parents=True, exist_ok=True)
     for filename, data in snapshots.items():
         path = destination / filename
+        # Any existing item ID missing from the new map is a partial catalog.
+        # Keep the published snapshot instead of guessing a shrinkage percentage.
+        if path.exists():
+            try:
+                current = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                current = None
+            if isinstance(current, dict):
+                missing = [item_id for item_id in current if item_id not in data]
+                if missing:
+                    raise ValueError(
+                        f"{filename} update drops {len(missing)} existing item id(s); keeping the current snapshot"
+                    )
         temporary = path.with_suffix(".json.tmp")
         temporary.write_text(
             json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

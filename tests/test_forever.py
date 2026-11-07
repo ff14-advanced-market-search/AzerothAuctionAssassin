@@ -124,16 +124,16 @@ class ForeverTests(unittest.TestCase):
                 '{"Alliance Auction House 111 — Items":"bad"}',
                 '{"Custom":"bad"}',
             ):
-                path.write_text(content)
+                path.write_text(content, encoding="utf-8")
                 with redirect_stdout(io.StringIO()):
                     self.assertEqual(
                         forever.load_markets(path, migrate=True),
                         forever.FOREVER_MARKETS,
                     )
-                self.assertEqual(path.read_text(), content)
-            path.write_text("{}")
+                self.assertEqual(path.read_text(encoding="utf-8"), content)
+            path.write_text("{}", encoding="utf-8")
             self.assertEqual(forever.load_markets(path, migrate=True), {})
-            self.assertEqual(path.read_text(), "{}")
+            self.assertEqual(path.read_text(encoding="utf-8"), "{}")
 
     def test_forever_uses_one_attempt_then_backoff_and_resets_on_success(self):
         data = MegaData.__new__(MegaData)

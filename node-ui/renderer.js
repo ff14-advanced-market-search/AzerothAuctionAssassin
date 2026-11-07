@@ -2202,7 +2202,7 @@ function flashButton(btn, label = "Done") {
 /**
  * Show a toast notification message
  * @param {string} message - The message to display
- * @param {string} type - 'error' or 'success' (default: 'error')
+ * @param {string} type - 'error', 'warning', or 'success' (default: 'error')
  * @param {number} duration - Duration in milliseconds (default: 3000)
  */
 function showToast(message, type = "error", duration = 3000) {
@@ -2211,7 +2211,7 @@ function showToast(message, type = "error", duration = 3000) {
   if (existing) existing.remove()
 
   const toast = document.createElement("div")
-  toast.className = `toast ${type === "success" ? "success" : ""}`
+  toast.className = `toast ${type || ""}`.trim()
   toast.textContent = message
   document.body.appendChild(toast)
 

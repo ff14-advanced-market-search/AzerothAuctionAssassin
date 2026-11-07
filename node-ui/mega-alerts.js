@@ -712,7 +712,8 @@ class MegaData {
       file,
       this.IS_FOREVER ? getRealmListByRegion(this.REGION) : {}
     )
-    if (this.IS_FOREVER) return Forever.filter(realmNames, this.FACTION)
+    if (this.IS_FOREVER)
+      return Forever.filter(Forever.load(realmNames), this.FACTION)
 
     if (this.NO_RUSSIAN_REALMS) {
       const russian = new Set(getRussianRealmIds())
@@ -2536,10 +2537,14 @@ async function runAlerts(state, progress, runOnce = false) {
       if (maxPrice !== null && gold > maxPrice) {
         return
       }
+      const displayGold = state.IS_FOREVER
+        ? Math.round(gold * 10000) / 10000
+        : gold
       if (price_dict[item_id]) {
-        if (!price_dict[item_id].includes(gold)) price_dict[item_id].push(gold)
+        if (!price_dict[item_id].includes(displayGold))
+          price_dict[item_id].push(displayGold)
       } else {
-        price_dict[item_id] = [gold]
+        price_dict[item_id] = [displayGold]
       }
     }
 

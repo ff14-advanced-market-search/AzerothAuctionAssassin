@@ -61,6 +61,20 @@ const Forever = {
       ? `${market.name} — ${Number(id) < 0 ? "Commodities" : "Items"}`
       : null
   },
+  load(markets) {
+    const invalid =
+      !markets ||
+      typeof markets !== "object" ||
+      Array.isArray(markets) ||
+      Object.values(markets).some(
+        (id) => !/^-?\d+$/.test(String(id)) || !this.faction(id)
+      )
+    if (!invalid) return this.rename(markets)
+    // Match Python load_markets: one bad feed rejects the file and the
+    // caller keeps using the default houses.
+    console.warn("Invalid Forever market file; using defaults")
+    return this.rename(null)
+  },
   rename(markets) {
     if (!markets || typeof markets !== "object" || Array.isArray(markets))
       return Object.fromEntries(

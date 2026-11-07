@@ -1323,9 +1323,22 @@ class App(QMainWindow):
 
         self.pet_id_input.setText(str(selected_pet_id))
 
+    def read_realm_file(self, path):
+        try:
+            with open(path, "r", encoding="utf-8") as handle:
+                data = json.load(handle)
+            if not isinstance(data, dict):
+                raise ValueError("expected a JSON object")
+        except (OSError, ValueError) as error:
+            QMessageBox.critical(
+                self,
+                "Invalid realm list",
+                f"Could not read {path}: {error}",
+            )
+            return None
+        return data
+
     def on_combo_box_region_changed(self, index):
-        self.realm_list_display.clear()
-        self.realm_name_combobox.clear()
         selected_realm = self.realm_region.currentText()
         match selected_realm:
             case "NAFOREVER" | "EUFOREVER":
@@ -1377,9 +1390,12 @@ class App(QMainWindow):
                 QMessageBox.critical(self, "Region List", "Select valid region.")
                 return False
 
-        with open(data_to_insert, "r") as f:
-            data = json.load(f)
+        data = self.read_realm_file(data_to_insert)
+        if data is None:
+            return False
 
+        self.realm_list_display.clear()
+        self.realm_name_combobox.clear()
         self.realm_name_combobox.addItems(list(realm_list.keys()))
         self.realm_name_combobox.setEditable(True)
         self.realm_name_combobox.setInsertPolicy(QComboBox.NoInsert)
@@ -1479,8 +1495,9 @@ class App(QMainWindow):
                 QMessageBox.critical(self, "Region List", "Select valid region.")
                 return False
 
-        with open(data_to_insert, "r") as f:
-            data = json.load(f)
+        data = self.read_realm_file(data_to_insert)
+        if data is None:
+            return False
 
         if forever.is_forever(selected_realm):
             try:
@@ -1541,8 +1558,9 @@ class App(QMainWindow):
                 QMessageBox.critical(self, "Region List", "Select valid region.")
                 return False
 
-        with open(data_to_insert, "r") as f:
-            data = json.load(f)
+        data = self.read_realm_file(data_to_insert)
+        if data is None:
+            return False
 
         try:
             del data[self.realm_name_input.text()]

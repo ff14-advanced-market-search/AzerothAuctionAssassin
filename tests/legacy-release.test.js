@@ -13,12 +13,17 @@ function workflowScript(text, stepName, missingMessage) {
   const escaped = stepName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
   const match = text.match(
     new RegExp(
-      `^[ \\t]*- name: ${escaped}\\b[\\s\\S]*?^[ \\t]*script:\\s*[|>][+-]?\\n([\\s\\S]*?)(?=\\n[ \\t]*- name:)`,
+      `^[ \\t]*- name: ${escaped}\\b[\\s\\S]*?^[ \\t]*script:\\s*([|>])[+-]?\\n([\\s\\S]*?)(?=\\n[ \\t]*- name:)`,
       "m"
     )
   )
   assert.ok(match, missingMessage)
-  const lines = match[1].split("\n")
+  assert.notEqual(
+    match[1],
+    ">",
+    "folded YAML block scalars are not extracted; use script: |"
+  )
+  const lines = match[2].split("\n")
   const indent = lines.reduce((min, line) => {
     if (!line.trim()) return min
     return Math.min(min, line.match(/^[ \t]*/)[0].length)
@@ -116,11 +121,11 @@ test("a missing annotated object is not mistaken for a missing tag reference", a
   )
 })
 
-test("release script extraction ignores indentation and block style", () => {
+test("release script extraction ignores literal block indentation", () => {
   const sample = [
     "    - name: Create Release",
     "      with:",
-    "        script: >",
+    "        script: |",
     "          const tag = 1",
     "          return tag",
     "    - name: Upload",
@@ -128,6 +133,20 @@ test("release script extraction ignores indentation and block style", () => {
   assert.equal(
     workflowScript(sample, "Create Release", "missing"),
     "const tag = 1\nreturn tag"
+  )
+})
+
+test("release script extraction rejects a folded block", () => {
+  const sample = [
+    "    - name: Create Release",
+    "      with:",
+    "        script: >",
+    "          const tag = 1",
+    "    - name: Upload",
+  ].join("\n")
+  assert.throws(
+    () => workflowScript(sample, "Create Release", "missing"),
+    /folded YAML block scalars are not extracted/
   )
 })
 
