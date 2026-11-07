@@ -277,11 +277,11 @@ function ensureDataFiles() {
     }
   }
 
-  // Initialize realm list files if they don't exist (empty objects)
-  // They will be populated by the reset function using hardcoded data
-  for (const filePath of Object.values(REALM_FILES)) {
+  // Missing Forever files start with the default houses. An existing empty
+  // file stays empty because that is an intentional selection.
+  for (const [region, filePath] of Object.entries(REALM_FILES)) {
     if (!fs.existsSync(filePath)) {
-      writeJson(filePath, {})
+      writeJson(filePath, Forever.isRegion(region) ? Forever.rename(null) : {})
     }
   }
 }

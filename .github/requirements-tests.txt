@@ -4,4 +4,4 @@ tenacity==8.2.3
 certifi==2023.11.17
 charset-normalizer==3.3.2
 idna==3.6
-urllib3==2.1.0
+urllib3==2.8.0

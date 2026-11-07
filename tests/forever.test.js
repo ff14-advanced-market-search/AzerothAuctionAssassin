@@ -43,6 +43,7 @@ function response(data, minute = 0) {
 test("Forever markets expose both feeds, exclude empty houses and filter factions", () => {
   for (const region of ["NAFOREVER", "EUFOREVER"]) {
     const markets = getRealmListByRegion(region)
+    assert.deepEqual(Forever.rename(null), markets)
     assert.equal(Object.keys(markets).length, 24)
     assert.equal(new Set(Object.values(markets)).size, 24)
     for (const faction of ["alliance", "horde", "booty bay"])
