@@ -8,9 +8,11 @@ const workflow = fs.readFileSync(
   path.join(__dirname, "../.github/workflows/windows-exe-build.yml"),
   "utf8"
 )
-const source = workflow
-  .match(/          script: \|\n([\s\S]*?)(?=\n      - name:)/)[1]
-  .replace(/^ {12}/gm, "")
+const scriptMatch = workflow.match(
+  /      - name: Create Release[\s\S]*?          script: \|\n([\s\S]*?)(?=\n      - name:)/
+)
+assert.ok(scriptMatch, "release script not found in windows-exe-build.yml")
+const source = scriptMatch[1].replace(/^ {12}/gm, "")
 async function release(
   getRef,
   getTag = async () => ({
@@ -18,13 +20,25 @@ async function release(
   })
 ) {
   const calls = []
+  calls.refs = []
+  calls.tags = []
+  calls.outputs = []
   const context = {
     context: { repo: { owner: "owner", repo: "repo" }, sha: "build-commit" },
     process: { env: { AAA_VERSION: "1.7.0" } },
-    core: { setOutput() {} },
+    core: { setOutput: (...args) => calls.outputs.push(args) },
     github: {
       rest: {
-        git: { getRef, getTag },
+        git: {
+          getRef: (options) => {
+            calls.refs.push(options)
+            return getRef(options)
+          },
+          getTag: (options) => {
+            calls.tags.push(options)
+            return getTag(options)
+          },
+        },
         repos: {
           createRelease: async (options) => {
             calls.push(options)
@@ -44,6 +58,14 @@ test("a new legacy release tags the exact build commit and stays non-latest", as
   })
   assert.equal(calls[0].target_commitish, "build-commit")
   assert.equal(calls[0].make_latest, "false")
+  assert.equal(calls[0].name, "Release v1.7.0")
+  assert.equal(calls[0].tag_name, "v1.7.0")
+  assert.equal(calls[0].draft, false)
+  assert.equal(calls[0].prerelease, false)
+  assert.equal(calls.refs[0].ref, "tags/v1.7.0")
+  assert.equal(calls.refs[0].owner, "owner")
+  assert.equal(calls.refs[0].repo, "repo")
+  assert.deepEqual(calls.outputs[0], ["upload_url", "upload-url"])
 })
 
 test("a legacy release refuses a tag pointing to a different commit", async () => {
@@ -60,6 +82,7 @@ test("matching annotated tags are dereferenced before release creation", async (
     data: { object: { type: "tag", sha: "annotated" } },
   }))
   assert.equal(calls.length, 1)
+  assert.equal(calls.tags[0].tag_sha, "annotated")
 })
 
 test("a missing annotated object is not mistaken for a missing tag reference", async () => {
@@ -71,5 +94,36 @@ test("a missing annotated object is not mistaken for a missing tag reference", a
       }
     ),
     /missing tag object/
+  )
+})
+
+test("legacy preflight refuses existing releases and propagates authorization errors", async () => {
+  const match = workflow.match(
+    /      - name: Check release version is unused[\s\S]*?          script: \|\n([\s\S]*?)(?=\n      - name:)/
+  )
+  assert.ok(match)
+  const run = (getReleaseByTag) =>
+    new vm.Script(
+      `(async () => {${match[1].replace(/^ {12}/gm, "")}})()`
+    ).runInNewContext({
+      context: { repo: { owner: "owner", repo: "repo" } },
+      process: { env: { AAA_VERSION: "1.7.0" } },
+      github: { rest: { repos: { getReleaseByTag } } },
+    })
+  await assert.rejects(
+    run(async (args) => {
+      assert.equal(args.tag, "v1.7.0")
+      return { data: {} }
+    }),
+    /already exists/
+  )
+  await run(async () => {
+    throw Object.assign(new Error("missing"), { status: 404 })
+  })
+  await assert.rejects(
+    run(async () => {
+      throw Object.assign(new Error("denied"), { status: 403 })
+    }),
+    /denied/
   )
 })

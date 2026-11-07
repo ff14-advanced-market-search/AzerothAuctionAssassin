@@ -445,6 +445,7 @@ class MegaData {
     this.REGION = this.cfg.WOW_REGION
     this.IS_FOREVER = Forever.isRegion(this.REGION)
     this.feedFailures = {}
+    this.feedLastAttempt = {}
     this.DISCORD_ALERTS_ENABLED = Boolean(
       this.cfg.DISCORD_ALERTS_ENABLED ?? true
     )
@@ -862,7 +863,8 @@ class MegaData {
     return [...new Set(Object.values(this.WOW_SERVER_NAMES))].filter(
       (id) =>
         !this.upload_timers[id] &&
-        !(this.feedFailures[id]?.nextRetryAt > Date.now())
+        !(this.feedFailures[id]?.nextRetryAt > Date.now()) &&
+        !(this.feedLastAttempt[id] > Date.now() - 60000)
     )
   }
 
@@ -1170,8 +1172,24 @@ class MegaData {
    */
   async get_listings_single(connectedRealmId) {
     if (this.IS_FOREVER) {
-      if (this.feedFailures[connectedRealmId]?.nextRetryAt > Date.now())
+      const failure = this.feedFailures[connectedRealmId]
+      if (failure?.nextRetryAt > Date.now()) {
+        const timer = this.upload_timers[connectedRealmId]
+        if (timer && !failure.windowWarningLogged) {
+          const now = new Date()
+          const elapsed = (now.getMinutes() - timer.lastUploadMinute + 60) % 60
+          const remainingMs =
+            (this.SCAN_TIME_MAX - elapsed + 1) * 60000 - now.getSeconds() * 1000
+          if (failure.nextRetryAt - Date.now() >= remainingMs) {
+            log(
+              `Forever feed ${connectedRealmId}: retry backoff extends beyond this scan window; alerts may be delayed.`
+            )
+            failure.windowWarningLogged = true
+          }
+        }
         return null
+      }
+      this.feedLastAttempt[connectedRealmId] = Date.now()
       try {
         const data = await this.makeAhRequest(
           Forever.url(this.REGION, connectedRealmId),

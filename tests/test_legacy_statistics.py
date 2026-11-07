@@ -4,7 +4,7 @@ import ast
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
 from utils import forever
 
@@ -67,6 +67,7 @@ def classes():
         "api_data_received",
         "on_region_changed",
         "validate_item_lists",
+        "on_combo_box_item_changed",
     }
     app.body = [
         n for n in app.body if isinstance(n, ast.FunctionDef) and n.name in keep
@@ -156,6 +157,42 @@ class StatisticsTests(unittest.TestCase):
         self.app.items_list = {"3048": 10}
         self.assertTrue(self.app.validate_item_lists())
         self.assertEqual(self.app.ilvl_list, [{"invalid": "not active"}])
+
+    def test_unavailable_saved_price_is_not_discounted_when_input_is_empty(self):
+        stats = MagicMock()
+        stats.empty = False
+        stats.__contains__.return_value = True
+        values = {"itemID": 3048, "priceAvailable": False, "desiredPrice": 0}
+        stats.__getitem__.side_effect = lambda key: SimpleNamespace(iloc=[values[key]])
+        self.app.item_statistics = MagicMock()
+        self.app.item_statistics.__getitem__.side_effect = lambda key: stats
+        self.app.item_name_input.currentText.return_value = "Item"
+        self.app.items_list = {"3048": 100}
+        self.app.item_price_input = Mock()
+        self.app.item_price_input.text.return_value = ""
+        self.app.item_id_input = Mock()
+        self.app.discount_percent = Mock()
+        self.app.on_combo_box_item_changed(0)
+        self.app.item_price_input.setText.assert_called_once_with("100")
+        self.app.discount_percent.text.assert_not_called()
+
+    def test_population_failure_unblocks_all_selectors(self):
+        self.worker.pending_region = "EU"
+        broken = Mock()
+        broken.sort_values.side_effect = ValueError("bad catalog")
+        with self.assertRaisesRegex(ValueError, "bad catalog"):
+            self.app.api_data_received("EU", broken, Frame())
+        for name in ("item_name_input", "pet_name_input", "pet_ilvl_name_input"):
+            self.assertEqual(
+                getattr(self.app, name).blockSignals.call_args.args, (False,)
+            )
+
+    def test_forever_rejects_non_ascii_item_ids_without_crashing(self):
+        self.app.wow_region = Mock()
+        self.app.wow_region.currentText.return_value = "NAFOREVER"
+        for value in ("²", "１２３", "0", "500001"):
+            self.app.items_list = {value: 10}
+            self.assertFalse(self.app.validate_item_lists())
 
 
 if __name__ == "__main__":

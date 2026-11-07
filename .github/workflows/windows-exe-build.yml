@@ -66,6 +66,19 @@ jobs:
           echo $env:AAA_VERSION > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
         shell: pwsh
 
+      - name: Check release version is unused
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = `v${process.env.AAA_VERSION}`;
+            let existingRelease;
+            try {
+              existingRelease = await github.rest.repos.getReleaseByTag({ ...context.repo, tag });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            if (existingRelease) throw new Error(`Release ${tag} already exists; bump AAA_VERSION before building.`);
+
       - name: Build EXE
         run: |
           msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln -restore -t:Publish /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"

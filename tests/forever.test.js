@@ -323,6 +323,7 @@ test("one failed feed does not reject scanning and remains eligible until recove
   assert.equal(data.getUntrackedForeverFeeds().length, 0)
   assert.equal(await data.get_listings_single(110), null)
   data.feedFailures[110].nextRetryAt = 0
+  data.feedLastAttempt[110] = Date.now() - 60001
   assert.deepEqual(Array.from(data.getUntrackedForeverFeeds()), [110])
   offline = false
   assert.equal((await data.get_listings_single(110)).length, 1)
@@ -359,4 +360,29 @@ test("Forever feed failures back off to five minutes and reset after success", a
   offline = false
   await data.get_listings_single(110)
   assert.equal(data.feedFailures[110], undefined)
+})
+
+test("Forever feeds without Last-Modified wait a minute before recovery polling", async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aaa-no-header-"))
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }))
+  fs.writeFileSync(
+    path.join(dir, "mega_data.json"),
+    JSON.stringify({ WOW_REGION: "NAFOREVER" })
+  )
+  fs.writeFileSync(
+    path.join(dir, "naforever-wow-connected-realm-ids.json"),
+    JSON.stringify({ Items: 110 })
+  )
+  const api = scanner(async () => ({
+    ...response({ auctions: [] }),
+    headers: new Headers(),
+  }))
+  api.setPaths(dir, dir)
+  const data = new api.MegaData()
+  data.upload_timers = {}
+  data.fetchAccessToken = async () => "test"
+  await data.get_listings_single(110)
+  assert.equal(data.getUntrackedForeverFeeds().length, 0)
+  data.feedLastAttempt[110] = Date.now() - 60001
+  assert.deepEqual(Array.from(data.getUntrackedForeverFeeds()), [110])
 })

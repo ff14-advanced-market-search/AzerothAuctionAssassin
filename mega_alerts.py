@@ -255,10 +255,16 @@ class Alerts(QThread):
                         elif price / 10000 not in price_dict[item_id]:
                             price_dict[item_id].append(price / 10000)
                 elif price < mega_data.DESIRED_ITEMS[item_id] * 10000:
+                    # Keep copper precision in Forever display prices, after matching.
+                    display_price = (
+                        round(price / 10000, 4)
+                        if forever.is_forever(mega_data.REGION)
+                        else price / 10000
+                    )
                     if item_id not in price_dict:
-                        price_dict[item_id] = [price / 10000]
-                    elif price / 10000 not in price_dict[item_id]:
-                        price_dict[item_id].append(price / 10000)
+                        price_dict[item_id] = [display_price]
+                    elif display_price not in price_dict[item_id]:
+                        price_dict[item_id].append(display_price)
 
             for item in auctions:
                 item_id = item["item"]["id"]

@@ -1173,43 +1173,47 @@ class App(QMainWindow):
             selector.blockSignals(True)
             selector.clear()
 
-        # Populate both pet name dropdowns
-        pet_names = self.pet_statistics.sort_values(by="itemName")["itemName"].tolist()
+        try:
+            # Populate both pet name dropdowns
+            pet_names = self.pet_statistics.sort_values(by="itemName")[
+                "itemName"
+            ].tolist()
 
-        self.pet_name_input.addItems(pet_names)
-        self.pet_name_input.setEditable(True)
-        self.pet_name_input.setInsertPolicy(QComboBox.NoInsert)
-        self.pet_name_input.completer()
+            self.pet_name_input.addItems(pet_names)
+            self.pet_name_input.setEditable(True)
+            self.pet_name_input.setInsertPolicy(QComboBox.NoInsert)
+            self.pet_name_input.completer()
 
-        self.pet_ilvl_name_input.addItems(pet_names)
-        self.pet_ilvl_name_input.setEnabled(True)
+            self.pet_ilvl_name_input.addItems(pet_names)
+            self.pet_ilvl_name_input.setEnabled(True)
 
-        self.item_name_input.addItems(
-            self.item_statistics.sort_values(by="itemName")["itemName"].tolist()
-        )
-        self.item_name_input.setEditable(True)
-        self.item_name_input.setInsertPolicy(QComboBox.NoInsert)
-        self.item_name_input.completer()
+            self.item_name_input.addItems(
+                self.item_statistics.sort_values(by="itemName")["itemName"].tolist()
+            )
+            self.item_name_input.setEditable(True)
+            self.item_name_input.setInsertPolicy(QComboBox.NoInsert)
+            self.item_name_input.completer()
 
-        self.item_name_input.setEnabled(True)
-        self.item_name_input.setStyleSheet(
-            "QComboBox { background-color: #1D2023; color: white; }"
-            "QComboBox::editable { background: #1D2023; color: white; }"
-            "QComboBox::drop-down { border: 0px; }"
-        )
-        self.pet_name_input.setEnabled(True)
-        self.pet_name_input.setStyleSheet(
-            "QComboBox { background-color: #1D2023; color: white; }"
-            "QComboBox::editable { background: #1D2023; color: white; }"
-            "QComboBox::drop-down { border: 0px; }"
-        )
+            self.item_name_input.setEnabled(True)
+            self.item_name_input.setStyleSheet(
+                "QComboBox { background-color: #1D2023; color: white; }"
+                "QComboBox::editable { background: #1D2023; color: white; }"
+                "QComboBox::drop-down { border: 0px; }"
+            )
+            self.pet_name_input.setEnabled(True)
+            self.pet_name_input.setStyleSheet(
+                "QComboBox { background-color: #1D2023; color: white; }"
+                "QComboBox::editable { background: #1D2023; color: white; }"
+                "QComboBox::drop-down { border: 0px; }"
+            )
 
-        for selector in (
-            self.item_name_input,
-            self.pet_name_input,
-            self.pet_ilvl_name_input,
-        ):
-            selector.blockSignals(False)
+        finally:
+            for selector in (
+                self.item_name_input,
+                self.pet_name_input,
+                self.pet_ilvl_name_input,
+            ):
+                selector.blockSignals(False)
         if not getattr(self, "_statistics_handlers_connected", False):
             self.pet_name_input.currentIndexChanged.connect(
                 self.on_combo_box_pet_changed
@@ -1247,6 +1251,15 @@ class App(QMainWindow):
             self.item_price_input.setPlaceholderText(
                 "Price unavailable — enter a price"
             )
+            return
+
+        if (
+            "priceAvailable" in selected_item_stats
+            and selected_item_stats["priceAvailable"].iloc[0] == False
+            and str(selected_item_id) in self.items_list
+        ):
+            self.item_id_input.setText(str(selected_item_id))
+            self.item_price_input.setText(str(selected_item_price))
             return
 
         # if the user has not set a price for the item, set the price from TSM stats
@@ -1461,7 +1474,21 @@ class App(QMainWindow):
         with open(data_to_insert, "r") as f:
             data = json.load(f)
 
-        data[self.realm_name_input.text()] = int(self.realm_id_input.text())
+        if forever.is_forever(selected_realm):
+            try:
+                feed_id = int(self.realm_id_input.text())
+                if forever.faction(feed_id) is None:
+                    raise ValueError("unknown feed")
+            except (ValueError, TypeError):
+                QMessageBox.critical(
+                    self,
+                    "Invalid Forever feed",
+                    "Select a valid Forever auction feed ID.",
+                )
+                return False
+        else:
+            feed_id = int(self.realm_id_input.text())
+        data[self.realm_name_input.text()] = feed_id
 
         self.realm_list_display.clear()
 
@@ -2987,7 +3014,7 @@ class App(QMainWindow):
                 )
                 return False
             if not all(
-                str(key).isdigit() and 1 <= int(key) <= 500000
+                str(key).isascii() and str(key).isdigit() and 1 <= int(key) <= 500000
                 for key in self.items_list
             ):
                 QMessageBox.critical(
