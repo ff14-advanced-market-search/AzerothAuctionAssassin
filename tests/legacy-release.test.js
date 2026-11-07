@@ -4,10 +4,12 @@ const fs = require("node:fs")
 const path = require("node:path")
 const vm = require("node:vm")
 
-const workflow = fs.readFileSync(
-  path.join(__dirname, "../.github/workflows/windows-exe-build.yml"),
-  "utf8"
-)
+const workflow = fs
+  .readFileSync(
+    path.join(__dirname, "../.github/workflows/windows-exe-build.yml"),
+    "utf8"
+  )
+  .replace(/\r\n/g, "\n")
 
 function workflowScript(text, stepName, missingMessage) {
   const escaped = stepName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")

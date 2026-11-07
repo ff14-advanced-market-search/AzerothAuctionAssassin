@@ -12,6 +12,8 @@ This tool enables you to quickly find the most amazing deals **across all realms
 
 If the EXE doesnt install right try the [Installation with python](https://github.com/ff14-advanced-market-search/AzerothAuctionAssassin/wiki/Install-with-Python).
 
+Python 3.10 or later is required. `requests` 2.33.0 and `urllib3` 2.8.0 do not install on Python 3.9.
+
 # Video Guides
 
 #### How to Install

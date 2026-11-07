@@ -333,7 +333,12 @@ for (const region of ["NAFOREVER", "EUFOREVER"]) {
     assert.equal(items[0].itemName, "Backup Forever name")
     assert.equal(items[0].desiredPrice, 0)
     assert.equal(items[0].salesPerDay, 0)
-    assert.equal(urls.length, 3)
+    assert.ok(
+      urls.includes(
+        "https://api.saddlebagexchange.com/api/wow/forever/megaitemnames"
+      )
+    )
+    assert.ok(urls.at(-1).endsWith("/StaticData/forever_item_names.json"))
   })
 }
 

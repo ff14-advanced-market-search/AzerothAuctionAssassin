@@ -188,7 +188,7 @@ class Alerts(QThread):
                 message += f"`{price_type}`: {auction[price_type]}\n"
 
                 # send alerts
-                if auction not in self.alert_record:
+                if auction not in self.alert_record and auction not in pending_alerts:
                     # # old method one message per item
                     # mega_data.send_discord_message(message)
                     embed_fields.append(
