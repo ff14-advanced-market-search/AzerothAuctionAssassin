@@ -44,6 +44,7 @@ class Thread:
 class Frame:
     def __init__(self, rows=None, columns=None):
         self.rows = rows or []
+        self.columns = list(columns or [])
         self.empty = not self.rows
 
     def sort_values(self, by):
@@ -54,7 +55,8 @@ class Frame:
 
 
 def classes():
-    tree = ast.parse(Path("AzerothAuctionAssassin.py").read_text(encoding="utf-8"))
+    root = Path(__file__).resolve().parents[1]
+    tree = ast.parse((root / "AzerothAuctionAssassin.py").read_text(encoding="utf-8"))
     worker = next(
         n
         for n in tree.body
@@ -104,6 +106,38 @@ class StatisticsTests(unittest.TestCase):
             setattr(self.app, name, Mock())
         self.worker.failed.connect(self.app.statistics_request_failed)
         self.worker.finished.connect(self.app.statistics_request_finished)
+
+    def test_forever_statistics_keep_region_and_columns(self):
+        rows = [
+            {
+                "itemID": 1,
+                "itemName": "A",
+                "desiredPrice": 1,
+                "salesPerDay": 0,
+                "priceAvailable": True,
+            }
+        ]
+        stats = Mock(return_value=rows)
+        self.ns["get_forever_item_statistics"] = stats
+        columns = [
+            "itemID",
+            "itemName",
+            "desiredPrice",
+            "salesPerDay",
+            "priceAvailable",
+        ]
+        heard = []
+        self.worker.completed.connect(lambda *args: heard.append(args))
+        for region, api_region in (("NAFOREVER", "NA"), ("EUFOREVER", "EU")):
+            self.worker.region = region
+            self.worker.load_statistics()
+            stats.assert_called_with(api_region)
+        region, pets, items = heard[-1]
+        self.assertEqual(region, "EUFOREVER")
+        self.assertEqual(pets.columns, columns)
+        self.assertEqual(pets.rows, [])
+        self.assertEqual(items.columns, columns)
+        self.assertEqual(items.rows, rows)
 
     def test_request_failure_still_starts_pending_region(self):
         self.worker.set_region("NA")

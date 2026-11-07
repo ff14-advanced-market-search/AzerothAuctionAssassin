@@ -4789,9 +4789,9 @@ startBtn.addEventListener("click", async () => {
       console.error(`No default list for region: ${region}`)
       return
     }
+    const previous = { ...(state.realmLists[region] || {}) }
     state.realmLists[region] = { ...defaultList }
-    await saveRealmList(region)
-    renderRealmList()
+    await commitRealmList(region, previous)
   }
 
   await window.aaa.runMega()
@@ -4892,18 +4892,28 @@ function renderRealmList() {
 
 async function loadRealmLists() {
   try {
-    const lists = await window.aaa.loadRealmLists()
-    state.realmLists = lists || {}
+    const result = await window.aaa.loadRealmLists()
+    state.realmLists = result?.lists || {}
+    const invalidRegions = result?.invalidRegions || []
+    if (invalidRegions.length) {
+      showToast(
+        `Saved realm list for ${invalidRegions.join(
+          ", "
+        )} is invalid. Showing defaults without replacing the file. Reset that list to overwrite it.`,
+        "warning",
+        6000
+      )
+    }
     renderRealmList()
   } catch (err) {
     console.error("Failed to load realm lists:", err)
   }
 }
 
-async function saveRealmList(region) {
+async function saveRealmList(region, options) {
   try {
     const realms = state.realmLists[region] || {}
-    const saved = await window.aaa.saveRealmList(region, realms)
+    const saved = await window.aaa.saveRealmList(region, realms, options)
     if (saved?.error) showToast(saved.error, "error")
     return saved
   } catch (err) {
@@ -4911,6 +4921,17 @@ async function saveRealmList(region) {
     showToast("Failed to save realm list.", "error")
     return { error: err.message }
   }
+}
+
+async function commitRealmList(region, previous, options) {
+  const saved = await saveRealmList(region, options)
+  if (saved?.error) {
+    state.realmLists[region] = previous
+    renderRealmList()
+    return false
+  }
+  renderRealmList()
+  return true
 }
 
 async function addRealm(region, name, id) {
@@ -4936,16 +4957,16 @@ async function addRealm(region, name, id) {
 async function removeRealm(name, id) {
   const region = realmRegionSelect?.value || "EU"
   if (!state.realmLists[region]) return
+  const previous = { ...state.realmLists[region] }
   delete state.realmLists[region][name]
-  await saveRealmList(region)
-  renderRealmList()
+  await commitRealmList(region, previous)
 }
 
 async function removeAllRealms() {
   const region = realmRegionSelect?.value || "EU"
+  const previous = { ...(state.realmLists[region] || {}) }
   state.realmLists[region] = {}
-  await saveRealmList(region)
-  renderRealmList()
+  await commitRealmList(region, previous)
 }
 
 async function resetRealmList() {
@@ -4959,9 +4980,9 @@ async function resetRealmList() {
     console.error(`No default list for region: ${region}`)
     return
   }
+  const previous = { ...(state.realmLists[region] || {}) }
   state.realmLists[region] = { ...defaultList }
-  await saveRealmList(region)
-  renderRealmList()
+  await commitRealmList(region, previous, { replaceInvalid: true })
 }
 
 realmForm?.addEventListener("submit", async (e) => {

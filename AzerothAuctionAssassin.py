@@ -1392,6 +1392,9 @@ class App(QMainWindow):
 
         data = self.read_realm_file(data_to_insert)
         if data is None:
+            self.realm_list_display.clear()
+            self.realm_name_combobox.clear()
+            self.realm_name_combobox.setEnabled(False)
             return False
 
         self.realm_list_display.clear()

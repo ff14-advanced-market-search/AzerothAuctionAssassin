@@ -27,6 +27,9 @@ def update_forever_static_data(output_dir="StaticData"):
         path = destination / filename
         # Any existing item ID missing from the new map is a partial catalog.
         # Keep the published snapshot instead of guessing a shrinkage percentage.
+        # Names added after that point stay unpublished until the snapshot can
+        # be replaced. To accept a retired item ID, delete
+        # StaticData/forever_item_names.json and run this script again.
         if path.exists():
             try:
                 current = json.loads(path.read_text(encoding="utf-8"))

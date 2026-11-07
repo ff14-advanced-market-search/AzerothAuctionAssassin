@@ -241,6 +241,17 @@ test("Forever market labels and Undermine links use the verified ruleset and fac
       normalized: { "Area 52": 112 },
       rejected: [],
     })
+    assert.deepEqual(
+      Forever.savedIds("EU", { Bad: null, Flag: true, Blank: "  ", List: [] }),
+      { normalized: {}, rejected: [] }
+    )
+    const described = Forever.describe({
+      Custom: 112,
+      "Normal Alliance — Items": 111,
+    })
+    assert.equal(described.fallback, true)
+    assert.equal(Object.keys(described.markets).length, 24)
+    assert.equal(Forever.describe({}).fallback, false)
   } finally {
     console.warn = originalWarn
   }

@@ -68,6 +68,8 @@ const Forever = {
       return { normalized, rejected }
     }
     for (const [name, value] of Object.entries(realms)) {
+      if (typeof value !== "number" && typeof value !== "string") continue
+      if (typeof value === "string" && value.trim() === "") continue
       const id = Number(value)
       if (Number.isNaN(id)) continue
       if (this.isRegion(region) && !this.faction(id)) {
@@ -78,19 +80,30 @@ const Forever = {
     }
     return { normalized, rejected }
   },
-  load(markets) {
-    const invalid =
+  invalidMarketFile(markets) {
+    return (
       !markets ||
       typeof markets !== "object" ||
       Array.isArray(markets) ||
       Object.values(markets).some(
         (id) => !/^-?\d+$/.test(String(id)) || !this.faction(id)
       )
-    if (!invalid) return this.rename(markets)
+    )
+  },
+  describe(markets) {
+    const fallback = this.invalidMarketFile(markets)
+    return {
+      markets: fallback ? this.rename(null) : this.rename(markets),
+      fallback,
+    }
+  },
+  load(markets) {
+    const described = this.describe(markets)
+    if (!described.fallback) return described.markets
     // Match Python load_markets: one bad feed rejects the file and the
     // caller keeps using the default houses.
     console.warn("Invalid Forever market file; using defaults")
-    return this.rename(null)
+    return described.markets
   },
   rename(markets) {
     if (!markets || typeof markets !== "object" || Array.isArray(markets))

@@ -73,13 +73,13 @@ jobs:
         with:
           script: |
             const tag = `v${process.env.AAA_VERSION}`;
-            let existingRelease;
-            try {
-              existingRelease = await github.rest.repos.getReleaseByTag({ ...context.repo, tag });
-            } catch (error) {
-              if (error.status !== 404) throw error;
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              ...context.repo,
+              per_page: 100,
+            });
+            if (releases.some((release) => release.tag_name === tag)) {
+              throw new Error(`Release ${tag} already exists; bump AAA_VERSION before building.`);
             }
-            if (existingRelease) throw new Error(`Release ${tag} already exists; bump AAA_VERSION before building.`);
 
       - name: Build EXE
         run: |

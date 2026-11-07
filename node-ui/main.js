@@ -1080,23 +1080,58 @@ function setupIpc() {
     return { stopped: true }
   })
 
-  // Realm list handlers
+  // Realm list handlers. An invalid Forever file is shown as the default
+  // houses, but ordinary saves must not replace that file.
+  const invalidForeverRegions = new Set()
+
+  function readForeverRealmFile(filePath) {
+    if (!fs.existsSync(filePath)) return { data: {}, missing: true }
+    try {
+      return {
+        data: JSON.parse(fs.readFileSync(filePath, "utf8")),
+        missing: false,
+      }
+    } catch {
+      return { data: null, missing: false }
+    }
+  }
+
   ipcMain.handle("load-realm-lists", () => {
     const lists = {}
+    const invalidRegions = []
     for (const [region, filePath] of Object.entries(REALM_FILES)) {
-      lists[region] = Forever.isRegion(region)
-        ? Forever.load(readJson(filePath, {}))
-        : readJson(filePath, {})
+      if (!Forever.isRegion(region)) {
+        lists[region] = readJson(filePath, {})
+        continue
+      }
+      const file = readForeverRealmFile(filePath)
+      const described = Forever.describe(file.data)
+      lists[region] = described.markets
+      if (!file.missing && described.fallback) {
+        invalidForeverRegions.add(region)
+        invalidRegions.push(region)
+        const message = `Invalid Forever realm list for ${region}; showing defaults without replacing the file\n`
+        console.warn(message.trim())
+        sendToLogPanel(message)
+      } else {
+        invalidForeverRegions.delete(region)
+      }
     }
-    return lists
+    return { lists, invalidRegions }
   })
 
-  ipcMain.handle("save-realm-list", (_event, region, realms) => {
+  ipcMain.handle("save-realm-list", (_event, region, realms, options = {}) => {
     const filePath = REALM_FILES[region]
     if (!filePath) return { error: "Unknown region" }
     const logMsg = `[SAVE] Saving realm list for ${region} to: ${filePath}\n`
     console.log(logMsg.trim())
     sendToLogPanel(logMsg)
+    if (invalidForeverRegions.has(region) && !options.replaceInvalid) {
+      const message = `The saved ${region} realm list is invalid and was not changed. Reset the list to replace it.`
+      console.log(message)
+      sendToLogPanel(`${message}\n`)
+      return { error: message }
+    }
     const { normalized, rejected } = Forever.savedIds(region, realms)
     if (rejected.length) {
       const message = `Rejected unknown Forever feed IDs: ${rejected.join(
@@ -1106,7 +1141,11 @@ function setupIpc() {
       sendToLogPanel(`${message}\n`)
       return { error: message }
     }
-    writeJson(filePath, normalized)
+    const written = writeJson(filePath, normalized)
+    if (!written?.success) {
+      return { error: written?.error || "Could not save realm list" }
+    }
+    invalidForeverRegions.delete(region)
     const successMsg = `[SAVE] Successfully saved realm list for ${region}\n`
     console.log(successMsg.trim())
     sendToLogPanel(successMsg)
