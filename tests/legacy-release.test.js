@@ -162,6 +162,7 @@ test("legacy preflight runs before the Windows build", () => {
   assert.match(workflow.slice(job, preflight), /permissions:\s+contents: write/)
   assert.match(workflow, /^permissions:\n {2}contents: read\n/m)
   assert.equal(workflow.match(/persist-credentials: false/g).length, 2)
+  assert.equal(workflow.match(/uses: actions\/checkout@v4/g).length, 2)
   const mac = workflow.indexOf("  build-mac:")
   assert.match(
     workflow.slice(mac, mac + 180),

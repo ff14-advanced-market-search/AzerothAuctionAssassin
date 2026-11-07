@@ -653,6 +653,11 @@ class MegaData:
         return realm_names
 
     def __validate_snipe_lists(self):
+        if self.IS_FOREVER and not self.WOW_SERVER_NAMES:
+            raise Exception(
+                f"No Forever feeds are selected for {self.REGION} and faction "
+                f"{self.FACTION}. Add feeds in Realm Lists."
+            )
         if (
             len(self.DESIRED_ITEMS) == 0
             and len(self.DESIRED_PETS) == 0

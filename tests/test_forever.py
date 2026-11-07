@@ -60,6 +60,29 @@ class ForeverTests(unittest.TestCase):
             self.assertEqual(json.loads(path.read_text()), {"Selected": 110})
             self.assertEqual(len(list(Path(directory).iterdir())), 1)
 
+    def test_empty_forever_feed_list_rejects_startup(self):
+        data = MegaData.__new__(MegaData)
+        data.IS_FOREVER = True
+        data.REGION = "NAFOREVER"
+        data.FACTION = "horde"
+        data.WOW_SERVER_NAMES = {}
+        data.DESIRED_ITEMS = {"3048": 12}
+        data.DESIRED_PETS = {}
+        data.DESIRED_ILVL_ITEMS = {}
+        data.DESIRED_ILVL_LIST = []
+        data.DESIRED_PET_ILVL_LIST = []
+        with self.assertRaises(Exception) as caught:
+            data._MegaData__validate_snipe_lists()
+        self.assertIn(
+            "No Forever feeds are selected for NAFOREVER", str(caught.exception)
+        )
+        data.WOW_SERVER_NAMES = {"Normal Horde — Items": 113}
+        data._MegaData__validate_snipe_lists()
+        data.DESIRED_ITEMS = {}
+        with self.assertRaises(Exception) as caught:
+            data._MegaData__validate_snipe_lists()
+        self.assertIn("no snipe data found", str(caught.exception))
+
     def test_untracked_feeds_remain_eligible_until_first_success(self):
         data = MegaData.__new__(MegaData)
         data.REGION = "NAFOREVER"
