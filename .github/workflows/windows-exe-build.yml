@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          persist-credentials: false
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2 #using Microsoft's setup-msbuild action
@@ -167,6 +169,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v2
