@@ -237,10 +237,14 @@ test("Forever market labels and Undermine links use the verified ruleset and fac
       }),
       { normalized: { "Normal Alliance — Items": 111 }, rejected: [112] }
     )
-    assert.deepEqual(Forever.savedIds("EU", { "Area 52": 112 }), {
-      normalized: { "Area 52": 112 },
+    assert.deepEqual(Forever.savedIds("EU", { "Area 52": 112, Sci: "1e3" }), {
+      normalized: { "Area 52": 112, Sci: 1000 },
       rejected: [],
     })
+    assert.deepEqual(
+      Forever.savedIds("EU", { Fraction: "1.5", Infinite: "Infinity" }),
+      { normalized: {}, rejected: [1.5, Infinity] }
+    )
     assert.deepEqual(
       Forever.savedIds("EU", { Bad: null, Flag: true, Blank: "  ", List: [] }),
       { normalized: {}, rejected: [] }
@@ -422,4 +426,28 @@ test("Forever feeds without Last-Modified wait a minute before recovery polling"
   assert.equal(data.getUntrackedForeverFeeds().length, 0)
   data.feedLastAttempt[110] = Date.now() - 60001
   assert.deepEqual(Array.from(data.getUntrackedForeverFeeds()), [110])
+})
+
+test("Forever scan fails when the selected faction has no feeds", (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aaa-no-feeds-"))
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }))
+  fs.writeFileSync(
+    path.join(dir, "mega_data.json"),
+    JSON.stringify({ WOW_REGION: "NAFOREVER", FACTION: "horde" })
+  )
+  fs.writeFileSync(
+    path.join(dir, "desired_items.json"),
+    JSON.stringify({ 3048: 12 })
+  )
+  fs.writeFileSync(
+    path.join(dir, "naforever-wow-connected-realm-ids.json"),
+    JSON.stringify({ "Normal Alliance — Items": 111 })
+  )
+  const api = scanner(async () => response({}))
+  api.setPaths(dir, dir)
+  const data = new api.MegaData()
+  assert.throws(
+    () => data.validateSnipeLists(),
+    /No Forever feeds are selected for NAFOREVER/
+  )
 })

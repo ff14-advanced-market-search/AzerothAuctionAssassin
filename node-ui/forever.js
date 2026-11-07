@@ -72,7 +72,9 @@ const Forever = {
       if (typeof value === "string" && value.trim() === "") continue
       const id = Number(value)
       if (Number.isNaN(id)) continue
-      if (this.isRegion(region) && !this.faction(id)) {
+      if (
+        this.isRegion(region) ? !this.faction(id) : !Number.isSafeInteger(id)
+      ) {
         rejected.push(id)
         continue
       }

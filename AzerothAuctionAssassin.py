@@ -1525,7 +1525,10 @@ class App(QMainWindow):
                 self.realm_list_display.count(), f"Name: {key}; ID: {value};"
             )
 
-        self.save_json_file(data_to_insert, data)
+        if forever.is_forever(selected_realm):
+            forever.save_markets(data_to_insert, data)
+        else:
+            self.save_json_file(data_to_insert, data)
 
     def remove_realm_to_list(self):
         if self.realm_name_input.text() == "":
@@ -1586,7 +1589,10 @@ class App(QMainWindow):
         self.realm_name_input.setText("")
         self.realm_id_input.setText("")
 
-        self.save_json_file(data_to_insert, data)
+        if forever.is_forever(selected_realm):
+            forever.save_markets(data_to_insert, data)
+        else:
+            self.save_json_file(data_to_insert, data)
 
     def reset_realm_list(self):
         selected_realm = self.realm_region.currentText()
@@ -1640,8 +1646,11 @@ class App(QMainWindow):
                 QMessageBox.critical(self, "Region List", "Select valid region.")
                 return False
 
-        with open(data_to_insert, "w") as json_file:
-            json.dump(realm_list, json_file, indent=4)
+        if forever.is_forever(selected_realm):
+            forever.save_markets(data_to_insert, realm_list)
+        else:
+            with open(data_to_insert, "w") as json_file:
+                json.dump(realm_list, json_file, indent=4)
 
         self.realm_list_display.clear()
 
@@ -1750,7 +1759,10 @@ class App(QMainWindow):
             file_path = os.path.join(
                 data_folder, f"{region}-wow-connected-realm-ids.json"
             )
-            forever.load_markets(file_path, migrate=True)
+            try:
+                forever.load_markets(file_path, migrate=True)
+            except OSError as error:
+                print(f"Could not migrate Forever market file {file_path}: {error}")
 
         if not os.path.exists(self.eu_connected_realms):
             from utils.realm_data import EU_CONNECTED_REALMS_IDS

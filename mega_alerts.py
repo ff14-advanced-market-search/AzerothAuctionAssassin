@@ -101,6 +101,7 @@ class Alerts(QThread):
 
             # add details on each snipe to the message
             embed_fields = []
+            pending_alerts = []
             for auction in clean_auctions:
                 if not self.running:
                     break
@@ -197,11 +198,12 @@ class Alerts(QThread):
                             "inline": True,
                         }
                     )
-                    self.alert_record.append(auction)
+                    pending_alerts.append(auction)
                 else:
                     print(f"Already sent this alert {auction}")
 
-            if len(embed_fields) != 0:
+            sent = 0
+            if self.running and len(embed_fields) != 0:
                 # new embed method one message per realm
                 desc = f"**region:** {mega_data.REGION}\n"
                 desc += (
@@ -211,17 +213,25 @@ class Alerts(QThread):
 
                 # split it up so message is not too long
                 for chunk in split_list(embed_fields, 10):
+                    if not self.running:
+                        break
                     item_embed = create_embed(
                         f"{mega_data.REGION} SNIPE FOUND!", desc, chunk
                     )
                     mega_data.send_discord_embed(item_embed)
+                    sent += len(chunk)
+            self.alert_record.extend(pending_alerts[:sent])
 
         def check_token_price():
             try:
                 # check if token price is below threshold durring commodity run
                 if mega_data.TOKEN_PRICE:
                     token_price = mega_data.get_wow_token_price()
-                    if token_price and token_price < mega_data.TOKEN_PRICE:
+                    if (
+                        self.running
+                        and token_price
+                        and token_price < mega_data.TOKEN_PRICE
+                    ):
                         token_embed = create_embed(
                             f"WoW Token Alert - {mega_data.REGION}",
                             f"**Token Price:** {token_price:,} gold\n**Threshold:** {mega_data.TOKEN_PRICE:,} gold\n**Region:** {mega_data.REGION}",

@@ -1134,9 +1134,11 @@ function setupIpc() {
     }
     const { normalized, rejected } = Forever.savedIds(region, realms)
     if (rejected.length) {
-      const message = `Rejected unknown Forever feed IDs: ${rejected.join(
-        ", "
-      )}`
+      const message = `${
+        Forever.isRegion(region)
+          ? "Rejected unknown Forever feed IDs"
+          : "Rejected invalid realm IDs"
+      }: ${rejected.join(", ")}`
       console.log(message)
       sendToLogPanel(`${message}\n`)
       return { error: message }

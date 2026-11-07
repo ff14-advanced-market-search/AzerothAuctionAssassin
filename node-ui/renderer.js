@@ -2164,9 +2164,13 @@ function updateSuggestions(inputEl, suggestEl, cache) {
   const matches = cache
     .filter((row) => row.itemName && row.itemName.toLowerCase().includes(term))
     .slice(0, 12)
-  suggestEl.innerHTML = matches
-    .map((row) => `<option value="${escapeHtml(row.itemName)}"></option>`)
-    .join("")
+  suggestEl.replaceChildren(
+    ...matches.map((row) => {
+      const option = document.createElement("option")
+      option.value = row.itemName
+      return option
+    })
+  )
 }
 
 async function handleImport(target, btn) {

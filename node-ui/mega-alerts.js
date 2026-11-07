@@ -729,6 +729,11 @@ class MegaData {
    * Throws error if all lists are empty
    */
   validateSnipeLists() {
+    if (this.IS_FOREVER && Object.keys(this.WOW_SERVER_NAMES).length === 0) {
+      throw new Error(
+        `No Forever feeds are selected for ${this.REGION}. Add feeds in Realm Lists.`
+      )
+    }
     if (
       Object.keys(this.desiredItems).length === 0 &&
       this.desiredIlvlList.length === 0 &&
