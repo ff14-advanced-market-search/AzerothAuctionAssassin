@@ -455,6 +455,22 @@ test("Use applies a real recommendation instead of an old saved target", () => {
   assert.equal(ui.run("form.price.value"), 20)
 })
 
+test("Forever Use keeps a sub-gold recommendation", () => {
+  const ui = setup()
+  ui.setRegion("NAFOREVER")
+  ui.run(`globalThis.cards = []
+    document.createElement = () => ({children: [], appendChild(child) { this.children.push(child) }})
+    itemSearchResults.appendChild = (card) => cards.push(card)
+    globalThis.form = { id: {value: ""}, price: {value: ""} }
+    document.getElementById = () => form
+    showView = () => {}
+    ensureItemName = () => {}
+    renderItemSearchResults([{ itemID: 999, itemName: "Item", desiredPrice: 2, salesPerDay: 1 }])
+    cards[0].children[1].onclick()`)
+  assert.equal(ui.run("form.price.value"), 0.4)
+  assert.match(ui.run("cards[0].children[0].children[1].textContent"), /0\.4/)
+})
+
 test("Save refreshes pet and ilvl rule names after leaving Forever", async () => {
   const ui = setup()
   ui.run(`globalThis.draws = []

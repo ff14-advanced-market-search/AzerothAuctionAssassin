@@ -69,6 +69,49 @@ class ForeverTests(unittest.TestCase):
         data.upload_timers[110] = {"dataSetID": 110}
         self.assertEqual(data.get_untracked_forever_feeds(), [])
 
+    def test_statistics_reject_booleans(self):
+        row = {
+            "itemID": 3048,
+            "itemName": "Item",
+            "desiredPrice": 1,
+            "salesPerDay": 0.5,
+        }
+        self.assertEqual(forever.validate_statistics([row]), [row])
+        for field, value in (
+            ("itemID", True),
+            ("itemID", False),
+            ("desiredPrice", True),
+            ("salesPerDay", False),
+        ):
+            bad = dict(row)
+            bad[field] = value
+            with self.assertRaises(ValueError):
+                forever.validate_statistics([bad])
+
+    def test_untracked_forever_feed_without_last_modified_waits_a_minute(self):
+        data = MegaData.__new__(MegaData)
+        data.REGION = "NAFOREVER"
+        data.forever_failures = {}
+        data.WOW_SERVER_NAMES = {"Items": 110}
+        data.upload_timers = {}
+        data.session = Mock()
+        data.check_access_token = Mock(return_value="test")
+        data.wait_for_rate_limit = Mock()
+        response = requests.Response()
+        response.status_code = 200
+        response.url = "https://example.test"
+        response.raw = io.BytesIO(b'{"auctions":[]}')
+        data.session.get.return_value = response
+        with redirect_stdout(io.StringIO()), patch(
+            "utils.mega_data_setup.time.monotonic", return_value=1000
+        ):
+            self.assertEqual(data.get_listings_single(110), [])
+            self.assertEqual(data.upload_timers, {})
+            self.assertEqual(data.forever_last_attempt[110], 1000)
+            self.assertEqual(data.get_untracked_forever_feeds(), [])
+        with patch("utils.mega_data_setup.time.monotonic", return_value=1060):
+            self.assertEqual(data.get_untracked_forever_feeds(), [110])
+
     def test_invalid_market_files_recover_without_overwriting_and_empty_stays_empty(
         self,
     ):

@@ -66,6 +66,7 @@ class MegaData:
         self.REGION = self.__set_mega_vars("WOW_REGION", raw_mega_data, True)
         self.IS_FOREVER = forever.is_forever(self.REGION)
         self.forever_failures = {}
+        self.forever_last_attempt = {}
 
         # classic regions dont have undermine exchange
         if self.IS_FOREVER or "CLASSIC" in self.REGION:
@@ -672,11 +673,14 @@ class MegaData:
     def get_untracked_forever_feeds(self):
         if not forever.is_forever(self.REGION):
             return []
+        now = time.monotonic()
         return sorted(
             feed
             for feed in set(self.WOW_SERVER_NAMES.values()) - set(self.upload_timers)
             if getattr(self, "forever_failures", {}).get(feed, {}).get("next_retry", 0)
-            <= time.monotonic()
+            <= now
+            and getattr(self, "forever_last_attempt", {}).get(feed, float("-inf"))
+            <= now - 60
         )
 
     def get_upload_time_list(self):
@@ -725,6 +729,9 @@ class MegaData:
                 > time.monotonic()
             ):
                 return None
+            if not hasattr(self, "forever_last_attempt"):
+                self.forever_last_attempt = {}
+            self.forever_last_attempt[connectedRealmId] = time.monotonic()
             try:
                 data = self._make_ah_api_request(
                     forever.auction_url(self.REGION, connectedRealmId), connectedRealmId

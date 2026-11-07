@@ -144,6 +144,7 @@ def validate_statistics(data):
     for row in data:
         if (
             not isinstance(row, dict)
+            or isinstance(row.get("itemID"), bool)
             or not isinstance(row.get("itemID"), int)
             or not isinstance(row.get("itemName"), str)
             or not row["itemName"].strip()
@@ -152,7 +153,8 @@ def validate_statistics(data):
         for field in ("desiredPrice", "salesPerDay"):
             value = row.get(field)
             if (
-                not isinstance(value, (int, float))
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
                 or not math.isfinite(value)
                 or value < 0
             ):

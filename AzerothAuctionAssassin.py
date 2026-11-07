@@ -1267,16 +1267,24 @@ class App(QMainWindow):
             not self.item_price_input.text()
             or str(selected_item_id) not in self.items_list
         ):
+
+            def recommended_price(discount_percent):
+                discounted = float(selected_item_price) * discount_percent
+                region_box = getattr(self, "wow_region", None)
+                region = region_box.currentText() if region_box is not None else ""
+                # Forever alerts match fractional gold; Retail stays whole gold.
+                if forever.is_forever(region):
+                    text = f"{round(discounted, 4):.4f}".rstrip("0").rstrip(".")
+                    return text or "0"
+                return str(int(discounted))
+
             try:
-                discount_percent = int(self.discount_percent.text()) / 100
-                recommended_price = str(
-                    int(float(selected_item_price) * discount_percent)
+                self.item_price_input.setText(
+                    recommended_price(int(self.discount_percent.text()) / 100)
                 )
-                self.item_price_input.setText(recommended_price)
             except:
                 self.item_price_input.setText("10")
-                recommended_price = str(int(float(selected_item_price) * 0.1))
-                self.item_price_input.setText(recommended_price)
+                self.item_price_input.setText(recommended_price(0.1))
 
         else:
             self.item_price_input.setText(str(selected_item_price))

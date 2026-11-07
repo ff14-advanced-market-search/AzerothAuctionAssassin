@@ -572,7 +572,13 @@
                 </label>
                 <label title="Pick a price you want to buy at or under.">
                   Max price
-                  <input type="number" name="price" placeholder="Max price" />
+                  <input
+                    type="number"
+                    name="price"
+                    placeholder="Max price"
+                    min="0"
+                    step="any"
+                  />
                 </label>
                 <button
                   type="submit"

@@ -2533,6 +2533,14 @@ function discountPercent() {
   return val
 }
 
+function recommendedItemPrice(desiredPrice) {
+  const discounted = Number(desiredPrice || 0) * (discountPercent() / 100)
+  if (["NAFOREVER", "EUFOREVER"].includes(state.megaData?.WOW_REGION)) {
+    return Math.round(discounted * 10000) / 10000
+  }
+  return Math.round(discounted)
+}
+
 async function handlePastePBSItems(btn) {
   showPasteModal(
     "Import Auctionator/PBS items",
@@ -3664,9 +3672,9 @@ function renderItemSearchResults(results) {
     const div = document.createElement("div")
     div.className = "search-result"
 
-    // Apply discount percentage to the average price
-    const pct = discountPercent() / 100
-    const recommendedPrice = Math.round(Number(row.desiredPrice || 0) * pct)
+    // Apply discount percentage to the average price.
+    // Forever keeps copper (four decimal gold); Retail stays whole gold.
+    const recommendedPrice = recommendedItemPrice(row.desiredPrice)
 
     const innerDiv = document.createElement("div")
     const nameDiv = document.createElement("div")

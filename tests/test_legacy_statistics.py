@@ -158,6 +158,31 @@ class StatisticsTests(unittest.TestCase):
         self.assertTrue(self.app.validate_item_lists())
         self.assertEqual(self.app.ilvl_list, [{"invalid": "not active"}])
 
+    def test_forever_recommendation_keeps_fractional_gold(self):
+        stats = MagicMock()
+        stats.empty = False
+        stats.__contains__.return_value = False
+        values = {"itemID": 3048, "desiredPrice": 4}
+        stats.__getitem__.side_effect = lambda key: SimpleNamespace(iloc=[values[key]])
+        self.app.item_statistics = MagicMock()
+        self.app.item_statistics.__getitem__.side_effect = lambda key: stats
+        self.app.item_name_input.currentText.return_value = "Item"
+        self.app.items_list = {}
+        self.app.item_price_input = Mock()
+        self.app.item_price_input.text.return_value = ""
+        self.app.item_id_input = Mock()
+        self.app.discount_percent = Mock()
+        self.app.discount_percent.text.return_value = "10"
+        self.app.wow_region = Mock()
+        self.app.wow_region.currentText.return_value = "NAFOREVER"
+        self.app.on_combo_box_item_changed(0)
+        self.app.item_price_input.setText.assert_called_once_with("0.4")
+
+        self.app.item_price_input.setText.reset_mock()
+        self.app.wow_region.currentText.return_value = "EU"
+        self.app.on_combo_box_item_changed(0)
+        self.app.item_price_input.setText.assert_called_once_with("0")
+
     def test_unavailable_saved_price_is_not_discounted_when_input_is_empty(self):
         stats = MagicMock()
         stats.empty = False
