@@ -28,6 +28,14 @@ def response(data):
 class ForeverBackupTests(unittest.TestCase):
     @patch("utils.api_requests.requests.get")
     @patch("utils.api_requests.requests.post")
+    def test_nonconvertible_unicode_item_id_triggers_names_backup(self, post, get):
+        post.return_value = response({"²": "Invalid ID"})
+        get.return_value = response(NAMES)
+        self.assertEqual(get_forever_itemnames([3048]), {"3048": NAMES["3048"]})
+        get.assert_called_once()
+
+    @patch("utils.api_requests.requests.get")
+    @patch("utils.api_requests.requests.post")
     def test_names_fall_back_to_github_and_filter_requested_ids(self, post, get):
         post.side_effect = requests.ConnectionError("offline")
         get.return_value = response(NAMES)

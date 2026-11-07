@@ -127,15 +127,14 @@ def unit_price(auction, field):
 
 
 def validate_names(data):
-    if (
-        not isinstance(data, dict)
-        or not data
-        or any(
-            not str(item_id).isdigit() or not isinstance(name, str) or not name.strip()
-            for item_id, name in data.items()
-        )
-    ):
+    if not isinstance(data, dict) or not data:
         raise ValueError("Invalid or empty Forever names response")
+    for item_id, name in data.items():
+        # Validate conversion here so malformed API IDs trigger the backup path.
+        if not re.fullmatch(r"[0-9]+", str(item_id)):
+            raise ValueError("Invalid Forever item ID")
+        if int(item_id) <= 0 or not isinstance(name, str) or not name.strip():
+            raise ValueError("Invalid Forever names response")
     return data
 
 
