@@ -368,6 +368,8 @@ test(
     applyForeverMode = () => {}
     trimAlertEmbedHistoryToLimit = () => {}
     renderItemList = () => {}
+    renderIlvlRules = () => {}
+    renderPetIlvlRules = () => {}
     fetchItemNames = () => new Promise((resolve) => { globalThis.finishLookup = resolve })`)
     assert.equal(await ui.run("saveMegaData(true)"), true)
     ui.run("finishLookup([])")
@@ -399,4 +401,78 @@ test("a names-only result requests manual pricing instead of suggesting zero", (
     ui.run("cards[0].children[0].children[1].textContent"),
     /unavailable/
   )
+})
+
+test("a zero-price API row is unavailable and names-only cache retries after expiry", async () => {
+  let recovered = false
+  const ui = setup(async () =>
+    response([
+      {
+        itemID: 3048,
+        itemName: "Item",
+        desiredPrice: recovered ? 100 : 0,
+        salesPerDay: 0,
+      },
+    ])
+  )
+  ui.setRegion("NAFOREVER")
+  assert.equal((await ui.loadItems())[0].priceAvailable, false)
+  const firstCalls = ui.calls.fetches
+  await ui.loadItems()
+  assert.equal(ui.calls.fetches, firstCalls)
+  ui.run("itemSearchRetryAt = Date.now() - 1")
+  recovered = true
+  const rows = await ui.loadItems()
+  assert.equal(rows[0].desiredPrice, 100)
+  assert.equal(rows[0].priceAvailable, true)
+  assert.equal(ui.calls.fetches, firstCalls + 1)
+})
+
+test("an expired names cache stays usable if all refresh sources fail", async () => {
+  let offline = false
+  const ui = setup(async (url) => {
+    if (offline || url.includes("megaitemnames")) return response({}, 503)
+    return response({ 3048: "Retained name" })
+  })
+  ui.setRegion("NAFOREVER")
+  await ui.loadItems()
+  offline = true
+  ui.run("itemSearchRetryAt = Date.now() - 1")
+  assert.equal((await ui.loadItems())[0].itemName, "Retained name")
+})
+
+test("Use applies a real recommendation instead of an old saved target", () => {
+  const ui = setup()
+  ui.run(`globalThis.cards = []
+    document.createElement = () => ({children: [], appendChild(child) { this.children.push(child) }})
+    itemSearchResults.appendChild = (card) => cards.push(card)
+    globalThis.form = { id: {value: ""}, price: {value: ""} }
+    document.getElementById = () => form
+    showView = () => {}
+    ensureItemName = () => {}
+    renderItemSearchResults([{ itemID: 999, itemName: "Item", desiredPrice: 100, salesPerDay: 2 }])
+    cards[0].children[1].onclick()`)
+  assert.equal(ui.run("form.price.value"), 20)
+})
+
+test("Save refreshes pet and ilvl rule names after leaving Forever", async () => {
+  const ui = setup()
+  ui.run(`globalThis.draws = []
+    readMegaForm = () => ({ WOW_REGION: "EU" })
+    window.aaa.saveMegaData = async (data) => data
+    renderMegaForm = () => {}
+    applyForeverMode = () => {}
+    trimAlertEmbedHistoryToLimit = () => {}
+    renderItemList = () => draws.push("items")
+    renderIlvlRules = () => draws.push("ilvl")
+    renderPetIlvlRules = () => draws.push("pets")
+    fetchItemNames = async () => []
+    fetchPetNames = async () => []`)
+  await ui.run("saveMegaData(true)")
+  await Promise.resolve()
+  assert.deepEqual(Array.from(ui.run("draws")).sort(), [
+    "ilvl",
+    "items",
+    "pets",
+  ])
 })

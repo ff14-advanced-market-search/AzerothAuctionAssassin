@@ -251,8 +251,8 @@ test("Forever scanner uses public GitHub names when Saddlebag is down", async (t
 })
 
 test("null and array market files cannot break all-region loading", () => {
-  assert.deepEqual(Forever.rename(null), {})
-  assert.deepEqual(Forever.rename([]), {})
+  assert.equal(Object.keys(Forever.rename(null)).length, 24)
+  assert.equal(Object.keys(Forever.rename([])).length, 24)
 })
 
 test("Forever skips unchanged bodies and uses each signed feed's conditional header", async (t) => {
@@ -320,8 +320,43 @@ test("one failed feed does not reject scanning and remains eligible until recove
   data.fetchAccessToken = async () => "test"
   assert.equal((await data.get_listings_single(110)).length, 0)
   assert.equal((await data.get_listings_single(-110)).length, 1)
+  assert.equal(data.getUntrackedForeverFeeds().length, 0)
+  assert.equal(await data.get_listings_single(110), null)
+  data.feedFailures[110].nextRetryAt = 0
   assert.deepEqual(Array.from(data.getUntrackedForeverFeeds()), [110])
   offline = false
   assert.equal((await data.get_listings_single(110)).length, 1)
   assert.equal(data.getUntrackedForeverFeeds().length, 0)
+})
+
+test("Forever feed failures back off to five minutes and reset after success", async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aaa-backoff-"))
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }))
+  fs.writeFileSync(
+    path.join(dir, "mega_data.json"),
+    JSON.stringify({ WOW_REGION: "NAFOREVER" })
+  )
+  let offline = true,
+    requests = 0
+  const api = scanner(async () => {
+    requests++
+    if (offline) throw new Error("403")
+    return response({ auctions: [] })
+  })
+  api.setPaths(dir, dir)
+  const data = new api.MegaData()
+  data.upload_timers = {}
+  data.fetchAccessToken = async () => "test"
+  for (let attempt = 0; attempt < 10; attempt++) {
+    if (data.feedFailures[110]) data.feedFailures[110].nextRetryAt = 0
+    await data.get_listings_single(110)
+  }
+  const remaining = data.feedFailures[110].nextRetryAt - Date.now()
+  assert.ok(remaining > 299000 && remaining <= 300000)
+  await data.get_listings_single(110)
+  assert.equal(requests, 10)
+  data.feedFailures[110].nextRetryAt = 0
+  offline = false
+  await data.get_listings_single(110)
+  assert.equal(data.feedFailures[110], undefined)
 })

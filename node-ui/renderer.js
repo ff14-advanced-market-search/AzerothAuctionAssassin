@@ -1926,6 +1926,7 @@ function syncAlertSoundControlsFromData(data) {
   }
 }
 
+let itemSearchRetryAt = 0
 let itemSearchGeneration = 0
 let itemSearchRegion = null
 let itemSearchCache = null
@@ -3505,7 +3506,7 @@ async function fetchForeverStatistics(region) {
       )
     )
       throw new Error("Invalid Forever statistics response")
-    return data
+    return data.map((row) => ({ ...row, priceAvailable: row.desiredPrice > 0 }))
   } catch (error) {
     // Names remain usable when pricing is unavailable; never suggest stale prices.
     const sources = [
@@ -3564,12 +3565,15 @@ async function fetchItemNames() {
     itemSearchGeneration++
     itemSearchRegion = selectedRegion
     itemSearchCache = null
+    itemSearchRetryAt = 0
     itemSearchPromise = null
     itemNameMap = {}
   }
   if (itemSearchPromise) return itemSearchPromise
-  if (itemSearchCache) return itemSearchCache
+  if (itemSearchCache && (!itemSearchRetryAt || Date.now() < itemSearchRetryAt))
+    return itemSearchCache
 
+  const previousNames = itemSearchCache
   const generation = itemSearchGeneration
   itemSearchStatus.textContent = "Loading item names…"
   const region = state.megaData?.WOW_REGION || "EU"
@@ -3612,6 +3616,11 @@ async function fetchItemNames() {
       }
       if (generation !== itemSearchGeneration) return []
       itemSearchCache = rows
+      itemSearchRetryAt =
+        ["NAFOREVER", "EUFOREVER"].includes(region) &&
+        rows.every((row) => row.priceAvailable === false)
+          ? Date.now() + 60000
+          : 0
       itemNameMap = {}
       itemSearchCache.forEach((row) => {
         if (row?.itemID && row?.itemName) {
@@ -3624,6 +3633,15 @@ async function fetchItemNames() {
       return itemSearchCache
     } catch (err) {
       if (generation !== itemSearchGeneration) return []
+      if (
+        previousNames?.length &&
+        previousNames.every((row) => row.priceAvailable === false)
+      ) {
+        itemSearchCache = previousNames
+        itemSearchRetryAt = Date.now() + 60000
+        itemSearchStatus.textContent = "Names available; prices unavailable"
+        return previousNames
+      }
       console.error("Item search fetch failed", err)
       itemSearchStatus.textContent = "Failed to load items (check connection)"
       // Leave failures uncached so the next search or import can retry.
@@ -3679,8 +3697,9 @@ function renderItemSearchResults(results) {
       const form = document.getElementById("item-form")
       form.id.value = row.itemID
       form.price.value =
-        state.desiredItems[String(row.itemID)] ??
-        (row.priceAvailable === false ? "" : recommendedPrice)
+        row.priceAvailable === false
+          ? state.desiredItems[String(row.itemID)] ?? ""
+          : recommendedPrice
       ensureItemName(String(row.itemID), row.itemName)
       showView("items")
     }
@@ -4151,7 +4170,11 @@ async function saveMegaData(skipValidation = false) {
   state.megaData = await window.aaa.saveMegaData(data)
   renderMegaForm(state.megaData)
   applyForeverMode()
-  fetchItemNames().then(() => renderItemList())
+  fetchItemNames().then(() => {
+    renderItemList()
+    renderIlvlRules()
+  })
+  fetchPetNames().then(() => renderPetIlvlRules())
   trimAlertEmbedHistoryToLimit()
   if (!skipValidation) {
     showToast("Settings saved successfully!", "success", 2000)

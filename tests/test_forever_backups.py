@@ -60,7 +60,10 @@ class ForeverBackupTests(unittest.TestCase):
     @patch("utils.api_requests.requests.post")
     def test_healthy_api_does_not_request_backup(self, post, get):
         post.return_value = response(STATS)
-        self.assertEqual(get_forever_item_statistics("NA"), STATS)
+        self.assertEqual(
+            get_forever_item_statistics("NA"),
+            [{**row, "priceAvailable": True} for row in STATS],
+        )
         get.assert_not_called()
 
     @patch("utils.api_requests.requests.get")

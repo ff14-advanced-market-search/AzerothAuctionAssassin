@@ -65,6 +65,7 @@ class MegaData:
         self.WEBHOOK_URL = self.__set_mega_vars("MEGA_WEBHOOK_URL", raw_mega_data, True)
         self.REGION = self.__set_mega_vars("WOW_REGION", raw_mega_data, True)
         self.IS_FOREVER = forever.is_forever(self.REGION)
+        self.forever_failures = {}
 
         # classic regions dont have undermine exchange
         if self.IS_FOREVER or "CLASSIC" in self.REGION:
@@ -636,11 +637,7 @@ class MegaData:
     def __set_realm_names(self):
         if self.IS_FOREVER:
             file_path = f"AzerothAuctionAssassinData/{self.REGION.lower()}-wow-connected-realm-ids.json"
-            if os.path.exists(file_path):
-                with open(file_path) as source:
-                    markets = json.load(source)
-            else:
-                markets = forever.FOREVER_MARKETS
+            markets = forever.load_markets(file_path)
             return forever.filter_markets(markets, self.FACTION)
         realm_names = json.load(
             open(
@@ -675,7 +672,12 @@ class MegaData:
     def get_untracked_forever_feeds(self):
         if not forever.is_forever(self.REGION):
             return []
-        return sorted(set(self.WOW_SERVER_NAMES.values()) - set(self.upload_timers))
+        return sorted(
+            feed
+            for feed in set(self.WOW_SERVER_NAMES.values()) - set(self.upload_timers)
+            if getattr(self, "forever_failures", {}).get(feed, {}).get("next_retry", 0)
+            <= time.monotonic()
+        )
 
     def get_upload_time_list(self):
         return list(self.upload_timers.values())
@@ -717,12 +719,31 @@ class MegaData:
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
     def get_listings_single(self, connectedRealmId: int):
         if forever.is_forever(self.REGION):
-            data = self.make_ah_api_request(
-                forever.auction_url(self.REGION, connectedRealmId), connectedRealmId
-            )
-            if data is None:
+            failures = self.forever_failures
+            if (
+                failures.get(connectedRealmId, {}).get("next_retry", 0)
+                > time.monotonic()
+            ):
+                return None
+            try:
+                data = self._make_ah_api_request(
+                    forever.auction_url(self.REGION, connectedRealmId), connectedRealmId
+                )
+                failures.pop(connectedRealmId, None)
+                return None if data.get("skipped") else data.get("auctions", [])
+            except Exception as error:
+                attempts = min(
+                    failures.get(connectedRealmId, {}).get("attempts", 0) + 1, 7
+                )
+                wait = min(300, 5 * 2 ** (attempts - 1))
+                failures[connectedRealmId] = {
+                    "attempts": attempts,
+                    "next_retry": time.monotonic() + wait,
+                }
+                print(
+                    f"Forever feed {connectedRealmId} failed; retrying in {wait}s: {error}"
+                )
                 return []
-            return None if data.get("skipped") else data.get("auctions", [])
         if connectedRealmId in [-1, -2]:
             print(f"gather data from {self.REGION} commodities")
             auction_info = self.make_commodity_ah_api_request()
@@ -795,6 +816,9 @@ class MegaData:
         retry_error_callback=lambda retry_state: {"auctions": []},
     )
     def make_ah_api_request(self, url, connectedRealmId, endpoint=""):
+        return self._make_ah_api_request(url, connectedRealmId, endpoint)
+
+    def _make_ah_api_request(self, url, connectedRealmId, endpoint=""):
         timer_key = (connectedRealmId, endpoint) if endpoint else connectedRealmId
         with self.get_if_modified(url, timer_key) as req:
             if req.status_code == 304:

@@ -444,6 +444,7 @@ class MegaData {
     this.WEBHOOK_URL = this.cfg.MEGA_WEBHOOK_URL
     this.REGION = this.cfg.WOW_REGION
     this.IS_FOREVER = Forever.isRegion(this.REGION)
+    this.feedFailures = {}
     this.DISCORD_ALERTS_ENABLED = Boolean(
       this.cfg.DISCORD_ALERTS_ENABLED ?? true
     )
@@ -859,7 +860,9 @@ class MegaData {
   getUntrackedForeverFeeds() {
     if (!this.IS_FOREVER) return []
     return [...new Set(Object.values(this.WOW_SERVER_NAMES))].filter(
-      (id) => !this.upload_timers[id]
+      (id) =>
+        !this.upload_timers[id] &&
+        !(this.feedFailures[id]?.nextRetryAt > Date.now())
     )
   }
 
@@ -1167,14 +1170,31 @@ class MegaData {
    */
   async get_listings_single(connectedRealmId) {
     if (this.IS_FOREVER) {
+      if (this.feedFailures[connectedRealmId]?.nextRetryAt > Date.now())
+        return null
       try {
         const data = await this.makeAhRequest(
           Forever.url(this.REGION, connectedRealmId),
           connectedRealmId
         )
+        delete this.feedFailures[connectedRealmId]
         return data?.skipped ? null : data?.auctions || []
       } catch (error) {
-        logError(`Forever feed ${connectedRealmId} failed; will retry`, error)
+        const attempts = Math.min(
+          (this.feedFailures[connectedRealmId]?.attempts || 0) + 1,
+          7
+        )
+        const waitMs = Math.min(300000, 5000 * 2 ** (attempts - 1))
+        this.feedFailures[connectedRealmId] = {
+          attempts,
+          nextRetryAt: Date.now() + waitMs,
+        }
+        logError(
+          `Forever feed ${connectedRealmId} failed; retrying in ${
+            waitMs / 1000
+          }s`,
+          error
+        )
         return []
       }
     }

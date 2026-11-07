@@ -177,3 +177,25 @@ def save_markets(path, markets):
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
+
+
+def load_markets(path, migrate=False):
+    path = Path(path)
+    if not path.exists():
+        markets = FOREVER_MARKETS.copy()
+        if migrate:
+            save_markets(path, markets)
+        return markets
+    try:
+        original = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(original, dict):
+            raise ValueError("expected a market object")
+    except (OSError, ValueError) as error:
+        print(
+            f"Invalid Forever market file {path}; preserving file and using defaults: {error}"
+        )
+        return FOREVER_MARKETS.copy()
+    markets = rename_markets(original)
+    if migrate and markets != original:
+        save_markets(path, markets)
+    return markets

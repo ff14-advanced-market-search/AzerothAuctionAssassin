@@ -69,6 +69,40 @@ class ForeverTests(unittest.TestCase):
         data.upload_timers[110] = {"dataSetID": 110}
         self.assertEqual(data.get_untracked_forever_feeds(), [])
 
+    def test_invalid_market_files_recover_without_overwriting_and_empty_stays_empty(
+        self,
+    ):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "markets.json"
+            for content in ("null", "[]", "{broken"):
+                path.write_text(content)
+                with redirect_stdout(io.StringIO()):
+                    self.assertEqual(
+                        forever.load_markets(path, migrate=True),
+                        forever.FOREVER_MARKETS,
+                    )
+                self.assertEqual(path.read_text(), content)
+            path.write_text("{}")
+            self.assertEqual(forever.load_markets(path, migrate=True), {})
+            self.assertEqual(path.read_text(), "{}")
+
+    def test_forever_uses_one_attempt_then_backoff_and_resets_on_success(self):
+        data = MegaData.__new__(MegaData)
+        data.REGION = "NAFOREVER"
+        data.forever_failures = {}
+        data._make_ah_api_request = Mock(side_effect=requests.Timeout("offline"))
+        with redirect_stdout(io.StringIO()), patch(
+            "utils.mega_data_setup.time.monotonic", return_value=100
+        ):
+            self.assertEqual(data.get_listings_single(110), [])
+            self.assertIsNone(data.get_listings_single(110))
+            self.assertEqual(data._make_ah_api_request.call_count, 1)
+            data.forever_failures[110]["next_retry"] = 0
+            data._make_ah_api_request.side_effect = None
+            data._make_ah_api_request.return_value = {"auctions": []}
+            self.assertEqual(data.get_listings_single(110), [])
+        self.assertEqual(data.forever_failures, {})
+
     def test_urls_and_unit_prices(self):
         self.assertIn(
             "us.api.blizzard.com/data/wow/ruleset/1/auctions/110?",
@@ -142,6 +176,7 @@ class ForeverTests(unittest.TestCase):
     def test_each_feed_is_polled_and_skipped_independently(self):
         data = MegaData.__new__(MegaData)
         data.REGION = "EUFOREVER"
+        data.forever_failures = {}
         data.WOW_SERVER_NAMES = forever.FOREVER_MARKETS
         data.upload_timers = {}
         data.session = Mock()

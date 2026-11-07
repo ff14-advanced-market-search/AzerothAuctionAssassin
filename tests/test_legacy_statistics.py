@@ -120,6 +120,19 @@ class StatisticsTests(unittest.TestCase):
         self.assertTrue(self.app.item_statistics.empty)
         self.ns["QMessageBox"].warning.assert_called_once()
 
+    def test_forever_to_classic_or_sod_rejects_stale_catalogs_and_queues_refresh(self):
+        for region in ("NACLASSIC", "EUCLASSIC", "NASODCLASSIC", "EUSODCLASSIC"):
+            self.worker.region = self.worker.pending_region = "NAFOREVER"
+            self.worker.running = True
+            self.app.on_region_changed(region)
+            self.assertEqual(self.worker.pending_region, region)
+            self.app.api_data_received(
+                "NAFOREVER", Frame(), Frame([{"itemName": "Old Forever"}])
+            )
+            self.assertTrue(self.app.item_statistics.empty)
+            self.worker.finish()
+            self.assertEqual(self.worker.region, region)
+
     def test_stale_completion_is_ignored_after_new_region_starts(self):
         self.worker.region = self.worker.pending_region = "EUFOREVER"
         self.app.api_data_received("NA", Frame(), Frame([{"itemName": "Old"}]))

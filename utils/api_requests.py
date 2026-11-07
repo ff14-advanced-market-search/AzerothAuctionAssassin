@@ -182,13 +182,14 @@ def get_forever_item_statistics(region, use_backup=True):
     if region not in ("NA", "EU"):
         raise ValueError("Forever region must be NA or EU")
     try:
-        return get_forever_data(
+        rows = get_forever_data(
             "megaitemnames",
             {"region": region, "discount": 1},
             "",
             forever.validate_statistics,
             use_backup=False,
         )
+        return [{**row, "priceAvailable": row["desiredPrice"] > 0} for row in rows]
     except (requests.RequestException, ValueError):
         if not use_backup:
             raise

@@ -104,7 +104,16 @@ class Item_And_Pet_Statistics(QThread):
 
     def set_region(self, region):
         """Update region and refresh statistics"""
-        if region in ["NA", "EU", "NAFOREVER", "EUFOREVER"]:
+        if region in [
+            "NA",
+            "EU",
+            "NAFOREVER",
+            "EUFOREVER",
+            "NACLASSIC",
+            "EUCLASSIC",
+            "NASODCLASSIC",
+            "EUSODCLASSIC",
+        ]:
             self.pending_region = region
             if not self.isRunning():
                 self.region = region
@@ -148,7 +157,7 @@ class Item_And_Pet_Statistics(QThread):
                 headers=saddlebag_request_headers({"Accept": "application/json"}),
                 json={
                     "discord_consent": WOW_DISCORD_CONSENT,
-                    "region": self.region,
+                    "region": "NA" if self.region.startswith("NA") else "EU",
                     "discount": 1,
                 },
                 timeout=15,
@@ -161,7 +170,7 @@ class Item_And_Pet_Statistics(QThread):
                 headers=saddlebag_request_headers({"Accept": "application/json"}),
                 json={
                     "discord_consent": WOW_DISCORD_CONSENT,
-                    "region": self.region,
+                    "region": "NA" if self.region.startswith("NA") else "EU",
                     "discount": 1,
                     "pets": True,
                 },
@@ -756,7 +765,16 @@ class App(QMainWindow):
             button = getattr(self, name, None)
             if button is not None:
                 button.setEnabled(not forever.is_forever(new_region))
-        if new_region in ["NA", "EU", "NAFOREVER", "EUFOREVER"]:
+        if new_region in [
+            "NA",
+            "EU",
+            "NAFOREVER",
+            "EUFOREVER",
+            "NACLASSIC",
+            "EUCLASSIC",
+            "NASODCLASSIC",
+            "EUSODCLASSIC",
+        ]:
             if self.api_data_thread.pending_region != new_region:
                 self.clear_statistics()
             self.api_data_thread.set_region(new_region)
@@ -1676,12 +1694,7 @@ class App(QMainWindow):
             file_path = os.path.join(
                 data_folder, f"{region}-wow-connected-realm-ids.json"
             )
-            if os.path.exists(file_path):
-                with open(file_path) as source:
-                    markets = forever.rename_markets(json.load(source))
-            else:
-                markets = forever.FOREVER_MARKETS
-            forever.save_markets(file_path, markets)
+            forever.load_markets(file_path, migrate=True)
 
         if not os.path.exists(self.eu_connected_realms):
             from utils.realm_data import EU_CONNECTED_REALMS_IDS
@@ -1724,7 +1737,16 @@ class App(QMainWindow):
             # After loading config, update region if needed
             if hasattr(self, "wow_region"):
                 selected_region = self.wow_region.currentText()
-                if selected_region in ["NA", "EU", "NAFOREVER", "EUFOREVER"]:
+                if selected_region in [
+                    "NA",
+                    "EU",
+                    "NAFOREVER",
+                    "EUFOREVER",
+                    "NACLASSIC",
+                    "EUCLASSIC",
+                    "NASODCLASSIC",
+                    "EUSODCLASSIC",
+                ]:
                     self.api_data_thread.set_region(selected_region)
         else:
             # If no config exists, start with default EU region

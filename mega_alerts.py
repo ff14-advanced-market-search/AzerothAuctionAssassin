@@ -841,63 +841,88 @@ class Alerts(QThread):
                 return current_min >= start_min or current_min <= end_min
 
         def main():
-            while self.running:
-                current_min = int(datetime.now().minute)
+            recovery_pool = (
+                ThreadPoolExecutor(max_workers=2)
+                if forever.is_forever(mega_data.REGION)
+                else None
+            )
+            recovery_jobs = {}
+            try:
+                while self.running:
+                    current_min = int(datetime.now().minute)
 
-                # refresh alerts 1 time per hour
-                if current_min == 1 and mega_data.REFRESH_ALERTS:
-                    print(self.alert_record)
-                    print("\n\nClearing Alert Record\n\n")
-                    self.alert_record = []
+                    # refresh alerts 1 time per hour
+                    if current_min == 1 and mega_data.REFRESH_ALERTS:
+                        print(self.alert_record)
+                        print("\n\nClearing Alert Record\n\n")
+                        self.alert_record = []
 
-                matching_realms = [
-                    realm["dataSetID"]
-                    for realm in mega_data.get_upload_time_list()
-                    if is_in_scan_window(
-                        current_min,
-                        realm["lastUploadMinute"],
-                        mega_data.SCAN_TIME_MIN,
-                        mega_data.SCAN_TIME_MAX,
-                    )
-                ]
-                # mega wants extra alerts
-                if mega_data.EXTRA_ALERTS:
-                    extra_alert_mins = json.loads(mega_data.EXTRA_ALERTS)
-                    if current_min in extra_alert_mins:
-                        matching_realms = [
-                            realm["dataSetID"]
-                            for realm in mega_data.get_upload_time_list()
-                        ]
-
-                matching_realms.extend(mega_data.get_untracked_forever_feeds())
-                if matching_realms != []:
-                    self.progress.emit("Sending alerts!")
-                    pool = ThreadPoolExecutor(max_workers=mega_data.THREADS)
-                    # Classic faction timers can select the same realm more than once.
-                    for connected_id in dict.fromkeys(matching_realms):
-                        pool.submit(pull_single_realm_data, connected_id)
-                    pool.shutdown(wait=True)
-                    # Short sleep between cycles; skipping processing speeds things up but may lead to more 429s
-                    time.sleep(5)
-
-                else:
-                    self.progress.emit(
-                        f"The updates will come\non min {mega_data.format_upload_time_minutes()}\nof each hour."
-                    )
-                    up_mins = mega_data.get_upload_time_minutes()
-                    wrap_note = ""
-                    if 0 in up_mins:
-                        wrap_note = (
-                            " Note: an upload minute of 0 wraps the scan window (SCAN_TIME_MIN=-1) "
-                            "to include minutes 59, 0, 1, 2, 3."
+                    matching_realms = [
+                        realm["dataSetID"]
+                        for realm in mega_data.get_upload_time_list()
+                        if is_in_scan_window(
+                            current_min,
+                            realm["lastUploadMinute"],
+                            mega_data.SCAN_TIME_MIN,
+                            mega_data.SCAN_TIME_MAX,
                         )
-                    print(
-                        "Blizzard API data only updates 1 time per hour. "
-                        f"The updates will come on minute {mega_data.format_upload_time_minutes()} of each hour. "
-                        f"{datetime.now()} is outside those upload minutes (local clock).{wrap_note}"
-                    )
-                    time.sleep(20)
+                    ]
+                    # mega wants extra alerts
+                    if mega_data.EXTRA_ALERTS:
+                        extra_alert_mins = json.loads(mega_data.EXTRA_ALERTS)
+                        if current_min in extra_alert_mins:
+                            matching_realms = [
+                                realm["dataSetID"]
+                                for realm in mega_data.get_upload_time_list()
+                            ]
 
+                    for feed, future in list(recovery_jobs.items()):
+                        if future.done():
+                            try:
+                                future.result()
+                            except Exception as error:
+                                print(f"Forever recovery feed {feed} failed: {error}")
+                            del recovery_jobs[feed]
+                    if recovery_pool is not None:
+                        for feed in mega_data.get_untracked_forever_feeds():
+                            if feed not in recovery_jobs:
+                                recovery_jobs[feed] = recovery_pool.submit(
+                                    pull_single_realm_data, feed
+                                )
+                    matching_realms = [
+                        feed for feed in matching_realms if feed not in recovery_jobs
+                    ]
+                    if matching_realms != []:
+                        self.progress.emit("Sending alerts!")
+                        pool = ThreadPoolExecutor(max_workers=mega_data.THREADS)
+                        # Classic faction timers can select the same realm more than once.
+                        for connected_id in dict.fromkeys(matching_realms):
+                            pool.submit(pull_single_realm_data, connected_id)
+                        pool.shutdown(wait=True)
+                        # Short sleep between cycles; skipping processing speeds things up but may lead to more 429s
+                        time.sleep(5)
+
+                    else:
+                        self.progress.emit(
+                            f"The updates will come\non min {mega_data.format_upload_time_minutes()}\nof each hour."
+                        )
+                        up_mins = mega_data.get_upload_time_minutes()
+                        wrap_note = ""
+                        if 0 in up_mins:
+                            wrap_note = (
+                                " Note: an upload minute of 0 wraps the scan window (SCAN_TIME_MIN=-1) "
+                                "to include minutes 59, 0, 1, 2, 3."
+                            )
+                        print(
+                            "Blizzard API data only updates 1 time per hour. "
+                            f"The updates will come on minute {mega_data.format_upload_time_minutes()} of each hour. "
+                            f"{datetime.now()} is outside those upload minutes (local clock).{wrap_note}"
+                        )
+                        time.sleep(20)
+
+            finally:
+                if recovery_pool is not None:
+                    recovery_pool.shutdown(wait=False, cancel_futures=True)
             self.progress.emit("Stopped alerts!")
             self.completed.emit(1)
 

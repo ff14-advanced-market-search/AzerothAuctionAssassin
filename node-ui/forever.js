@@ -63,7 +63,12 @@ const Forever = {
   },
   rename(markets) {
     if (!markets || typeof markets !== "object" || Array.isArray(markets))
-      return {}
+      return Object.fromEntries(
+        Object.keys(MARKETS).flatMap((house) => [
+          [this.name(Number(house)), Number(house)],
+          [this.name(-Number(house)), -Number(house)],
+        ])
+      )
     return Object.fromEntries(
       Object.entries(markets).map(([name, id]) => [
         /^(Alliance|Horde|Blackwater) Auction House \d+ — (Items|Commodities)$/.test(
