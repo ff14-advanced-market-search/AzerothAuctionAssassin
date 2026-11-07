@@ -598,9 +598,40 @@ const EUSODCLASSIC_CONNECTED_REALMS_IDS = {
   "Shadowstrike (RU)": 5830,
 }
 
+// Forever uses signed feed keys: positive item house IDs, negative commodity house IDs.
+const FOREVER_MARKETS = {
+  "PvP Alliance \u2014 Items": 110,
+  "PvP Alliance \u2014 Commodities": -110,
+  "Normal Alliance \u2014 Items": 111,
+  "Normal Alliance \u2014 Commodities": -111,
+  "PvP Horde \u2014 Items": 113,
+  "PvP Horde \u2014 Commodities": -113,
+  "Normal Horde \u2014 Items": 114,
+  "Normal Horde \u2014 Commodities": -114,
+  "PvP Neutral \u2014 Items": 116,
+  "PvP Neutral \u2014 Commodities": -116,
+  "Normal Neutral \u2014 Items": 117,
+  "Normal Neutral \u2014 Commodities": -117,
+  "Roleplay Alliance \u2014 Items": 119,
+  "Roleplay Alliance \u2014 Commodities": -119,
+  "Roleplay Horde \u2014 Items": 120,
+  "Roleplay Horde \u2014 Commodities": -120,
+  "Roleplay Neutral \u2014 Items": 121,
+  "Roleplay Neutral \u2014 Commodities": -121,
+  "Roleplay PvP Alliance \u2014 Items": 123,
+  "Roleplay PvP Alliance \u2014 Commodities": -123,
+  "Roleplay PvP Horde \u2014 Items": 124,
+  "Roleplay PvP Horde \u2014 Commodities": -124,
+  "Roleplay PvP Neutral \u2014 Items": 125,
+  "Roleplay PvP Neutral \u2014 Commodities": -125,
+}
+
 // Helper function to get realm list by region
 function getRealmListByRegion(region) {
   switch (region) {
+    case "NAFOREVER":
+    case "EUFOREVER":
+      return { ...FOREVER_MARKETS }
     case "EU":
       return EU_CONNECTED_REALMS_IDS
     case "NA":
@@ -620,7 +651,7 @@ function getRealmListByRegion(region) {
 }
 
 // Make available globally
-window.REALM_DATA = {
+const REALM_DATA = {
   EU_CONNECTED_REALMS_IDS,
   NA_CONNECTED_REALMS_IDS,
   EUCLASSIC_CONNECTED_REALMS_IDS,
@@ -629,3 +660,6 @@ window.REALM_DATA = {
   EUSODCLASSIC_CONNECTED_REALMS_IDS,
   getRealmListByRegion,
 }
+
+if (typeof window !== "undefined") window.REALM_DATA = REALM_DATA
+if (typeof module !== "undefined") module.exports = REALM_DATA

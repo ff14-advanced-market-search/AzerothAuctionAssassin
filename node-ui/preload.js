@@ -26,8 +26,8 @@ contextBridge.exposeInMainWorld("aaa", {
     return () => ipcRenderer.removeListener("mega-exit", handler)
   },
   loadRealmLists: () => ipcRenderer.invoke("load-realm-lists"),
-  saveRealmList: (region, realms) =>
-    ipcRenderer.invoke("save-realm-list", region, realms),
+  saveRealmList: (region, realms, options) =>
+    ipcRenderer.invoke("save-realm-list", region, realms, options),
   resetMegaData: () => ipcRenderer.invoke("reset-mega-data"),
   resetItems: () => ipcRenderer.invoke("reset-items"),
   resetIlvl: () => ipcRenderer.invoke("reset-ilvl"),

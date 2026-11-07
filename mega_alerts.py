@@ -13,6 +13,7 @@ from utils.helpers import (
 from utils.ilvl_resolver import resolve_post_midnight_ilvl
 from PyQt5.QtCore import QThread, pyqtSignal
 import utils.mega_data_setup
+from utils import forever
 
 
 # Add at the beginning of the file, after imports
@@ -100,6 +101,7 @@ class Alerts(QThread):
 
             # add details on each snipe to the message
             embed_fields = []
+            pending_alerts = []
             for auction in clean_auctions:
                 if not self.running:
                     break
@@ -168,12 +170,15 @@ class Alerts(QThread):
                     else "Undermine link"
                 )
                 link_url = (
-                    f"https://www.wowhead.com/item={auction['itemID']}"
+                    f"https://www.wowhead.com/{'forever/' if forever.is_forever(mega_data.REGION) else ''}item={auction['itemID']}"
                     if mega_data.WOWHEAD_LINK and "itemID" in auction
                     else auction["itemlink"]
                 )
+                if not mega_data.NO_LINKS and forever.is_forever(mega_data.REGION):
+                    message += f"[Undermine link]({forever.undermine_link(mega_data.REGION, connected_id, auction['itemID'])})\n"
                 if not mega_data.NO_LINKS:
                     message += f"[{link_label}]({link_url})\n"
+                if not mega_data.NO_LINKS and not forever.is_forever(mega_data.REGION):
                     message += f"[Saddlebag link](https://saddlebagexchange.com/wow/item-data/{saddlebag_link_id})\n"
                     message += f"[Where to Sell](https://saddlebagexchange.com/wow/export-search?itemId={saddlebag_link_id})\n"
                 # Add price info, if available
@@ -183,7 +188,7 @@ class Alerts(QThread):
                 message += f"`{price_type}`: {auction[price_type]}\n"
 
                 # send alerts
-                if auction not in self.alert_record:
+                if auction not in self.alert_record and auction not in pending_alerts:
                     # # old method one message per item
                     # mega_data.send_discord_message(message)
                     embed_fields.append(
@@ -193,11 +198,12 @@ class Alerts(QThread):
                             "inline": True,
                         }
                     )
-                    self.alert_record.append(auction)
+                    pending_alerts.append(auction)
                 else:
                     print(f"Already sent this alert {auction}")
 
-            if len(embed_fields) != 0:
+            sent = 0
+            if self.running and len(embed_fields) != 0:
                 # new embed method one message per realm
                 desc = f"**region:** {mega_data.REGION}\n"
                 desc += (
@@ -207,17 +213,25 @@ class Alerts(QThread):
 
                 # split it up so message is not too long
                 for chunk in split_list(embed_fields, 10):
+                    if not self.running:
+                        break
                     item_embed = create_embed(
                         f"{mega_data.REGION} SNIPE FOUND!", desc, chunk
                     )
                     mega_data.send_discord_embed(item_embed)
+                    sent += len(chunk)
+            self.alert_record.extend(pending_alerts[:sent])
 
         def check_token_price():
             try:
                 # check if token price is below threshold durring commodity run
                 if mega_data.TOKEN_PRICE:
                     token_price = mega_data.get_wow_token_price()
-                    if token_price and token_price < mega_data.TOKEN_PRICE:
+                    if (
+                        self.running
+                        and token_price
+                        and token_price < mega_data.TOKEN_PRICE
+                    ):
                         token_embed = create_embed(
                             f"WoW Token Alert - {mega_data.REGION}",
                             f"**Token Price:** {token_price:,} gold\n**Threshold:** {mega_data.TOKEN_PRICE:,} gold\n**Region:** {mega_data.REGION}",
@@ -240,6 +254,10 @@ class Alerts(QThread):
                 return
 
             def add_price_to_dict(price, item_id, price_dict, is_pet=False):
+                if forever.is_forever(mega_data.REGION) and (
+                    price is None or price <= 0
+                ):
+                    return
                 if is_pet:
                     if price < mega_data.DESIRED_PETS[item_id] * 10000:
                         if item_id not in price_dict:
@@ -247,10 +265,16 @@ class Alerts(QThread):
                         elif price / 10000 not in price_dict[item_id]:
                             price_dict[item_id].append(price / 10000)
                 elif price < mega_data.DESIRED_ITEMS[item_id] * 10000:
+                    # Keep copper precision in Forever display prices, after matching.
+                    display_price = (
+                        round(price / 10000, 4)
+                        if forever.is_forever(mega_data.REGION)
+                        else price / 10000
+                    )
                     if item_id not in price_dict:
-                        price_dict[item_id] = [price / 10000]
-                    elif price / 10000 not in price_dict[item_id]:
-                        price_dict[item_id].append(price / 10000)
+                        price_dict[item_id] = [display_price]
+                    elif display_price not in price_dict[item_id]:
+                        price_dict[item_id].append(display_price)
 
             for item in auctions:
                 item_id = item["item"]["id"]
@@ -260,15 +284,27 @@ class Alerts(QThread):
                     price = 10000000 * 10000
 
                     if "bid" in item and mega_data.SHOW_BIDPRICES == "true":
-                        price = item["bid"]
+                        price = (
+                            forever.unit_price(item, "bid")
+                            if forever.is_forever(mega_data.REGION)
+                            else item["bid"]
+                        )
                         add_price_to_dict(price, item_id, all_ah_bids)
 
                     if "buyout" in item:
-                        price = item["buyout"]
+                        price = (
+                            forever.unit_price(item, "buyout")
+                            if forever.is_forever(mega_data.REGION)
+                            else item["buyout"]
+                        )
                         add_price_to_dict(price, item_id, all_ah_buyouts)
 
                     if "unit_price" in item:
-                        price = item["unit_price"]
+                        price = (
+                            forever.unit_price(item, "unit_price")
+                            if forever.is_forever(mega_data.REGION)
+                            else item["unit_price"]
+                        )
                         add_price_to_dict(price, item_id, all_ah_buyouts)
 
                 # all caged battle pets have item id 82800
@@ -690,7 +726,11 @@ class Alerts(QThread):
                 "realmID": connected_id,
                 "realmNames": realm_names,
                 f"{idType}": id,
-                "itemlink": itemlink,
+                "itemlink": (
+                    forever.undermine_link(mega_data.REGION, connected_id, id)
+                    if forever.is_forever(mega_data.REGION)
+                    else itemlink
+                ),
                 "minPrice": minPrice,
                 f"{priceType}_prices": json.dumps(auction),
             }
@@ -817,62 +857,88 @@ class Alerts(QThread):
                 return current_min >= start_min or current_min <= end_min
 
         def main():
-            while self.running:
-                current_min = int(datetime.now().minute)
+            recovery_pool = (
+                ThreadPoolExecutor(max_workers=2)
+                if forever.is_forever(mega_data.REGION)
+                else None
+            )
+            recovery_jobs = {}
+            try:
+                while self.running:
+                    current_min = int(datetime.now().minute)
 
-                # refresh alerts 1 time per hour
-                if current_min == 1 and mega_data.REFRESH_ALERTS:
-                    print(self.alert_record)
-                    print("\n\nClearing Alert Record\n\n")
-                    self.alert_record = []
+                    # refresh alerts 1 time per hour
+                    if current_min == 1 and mega_data.REFRESH_ALERTS:
+                        print(self.alert_record)
+                        print("\n\nClearing Alert Record\n\n")
+                        self.alert_record = []
 
-                matching_realms = [
-                    realm["dataSetID"]
-                    for realm in mega_data.get_upload_time_list()
-                    if is_in_scan_window(
-                        current_min,
-                        realm["lastUploadMinute"],
-                        mega_data.SCAN_TIME_MIN,
-                        mega_data.SCAN_TIME_MAX,
-                    )
-                ]
-                # mega wants extra alerts
-                if mega_data.EXTRA_ALERTS:
-                    extra_alert_mins = json.loads(mega_data.EXTRA_ALERTS)
-                    if current_min in extra_alert_mins:
-                        matching_realms = [
-                            realm["dataSetID"]
-                            for realm in mega_data.get_upload_time_list()
-                        ]
-
-                if matching_realms != []:
-                    self.progress.emit("Sending alerts!")
-                    pool = ThreadPoolExecutor(max_workers=mega_data.THREADS)
-                    # Classic faction timers can select the same realm more than once.
-                    for connected_id in dict.fromkeys(matching_realms):
-                        pool.submit(pull_single_realm_data, connected_id)
-                    pool.shutdown(wait=True)
-                    # Short sleep between cycles; skipping processing speeds things up but may lead to more 429s
-                    time.sleep(5)
-
-                else:
-                    self.progress.emit(
-                        f"The updates will come\non min {mega_data.format_upload_time_minutes()}\nof each hour."
-                    )
-                    up_mins = mega_data.get_upload_time_minutes()
-                    wrap_note = ""
-                    if 0 in up_mins:
-                        wrap_note = (
-                            " Note: an upload minute of 0 wraps the scan window (SCAN_TIME_MIN=-1) "
-                            "to include minutes 59, 0, 1, 2, 3."
+                    matching_realms = [
+                        realm["dataSetID"]
+                        for realm in mega_data.get_upload_time_list()
+                        if is_in_scan_window(
+                            current_min,
+                            realm["lastUploadMinute"],
+                            mega_data.SCAN_TIME_MIN,
+                            mega_data.SCAN_TIME_MAX,
                         )
-                    print(
-                        "Blizzard API data only updates 1 time per hour. "
-                        f"The updates will come on minute {mega_data.format_upload_time_minutes()} of each hour. "
-                        f"{datetime.now()} is outside those upload minutes (local clock).{wrap_note}"
-                    )
-                    time.sleep(20)
+                    ]
+                    # mega wants extra alerts
+                    if mega_data.EXTRA_ALERTS:
+                        extra_alert_mins = json.loads(mega_data.EXTRA_ALERTS)
+                        if current_min in extra_alert_mins:
+                            matching_realms = [
+                                realm["dataSetID"]
+                                for realm in mega_data.get_upload_time_list()
+                            ]
 
+                    for feed, future in list(recovery_jobs.items()):
+                        if future.done():
+                            try:
+                                future.result()
+                            except Exception as error:
+                                print(f"Forever recovery feed {feed} failed: {error}")
+                            del recovery_jobs[feed]
+                    if recovery_pool is not None:
+                        for feed in mega_data.get_untracked_forever_feeds():
+                            if feed not in recovery_jobs:
+                                recovery_jobs[feed] = recovery_pool.submit(
+                                    pull_single_realm_data, feed
+                                )
+                    matching_realms = [
+                        feed for feed in matching_realms if feed not in recovery_jobs
+                    ]
+                    if matching_realms != []:
+                        self.progress.emit("Sending alerts!")
+                        pool = ThreadPoolExecutor(max_workers=mega_data.THREADS)
+                        # Classic faction timers can select the same realm more than once.
+                        for connected_id in dict.fromkeys(matching_realms):
+                            pool.submit(pull_single_realm_data, connected_id)
+                        pool.shutdown(wait=True)
+                        # Short sleep between cycles; skipping processing speeds things up but may lead to more 429s
+                        time.sleep(5)
+
+                    else:
+                        self.progress.emit(
+                            f"The updates will come\non min {mega_data.format_upload_time_minutes()}\nof each hour."
+                        )
+                        up_mins = mega_data.get_upload_time_minutes()
+                        wrap_note = ""
+                        if 0 in up_mins:
+                            wrap_note = (
+                                " Note: an upload minute of 0 wraps the scan window (SCAN_TIME_MIN=-1) "
+                                "to include minutes 59, 0, 1, 2, 3."
+                            )
+                        print(
+                            "Blizzard API data only updates 1 time per hour. "
+                            f"The updates will come on minute {mega_data.format_upload_time_minutes()} of each hour. "
+                            f"{datetime.now()} is outside those upload minutes (local clock).{wrap_note}"
+                        )
+                        time.sleep(20)
+
+            finally:
+                if recovery_pool is not None:
+                    recovery_pool.shutdown(wait=False, cancel_futures=True)
             self.progress.emit("Stopped alerts!")
             self.completed.emit(1)
 

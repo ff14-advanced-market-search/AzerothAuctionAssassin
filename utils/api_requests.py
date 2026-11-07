@@ -1,4 +1,5 @@
 import requests
+from utils import forever
 from tenacity import retry, stop_after_attempt
 from utils.helpers import get_wow_russian_realm_ids
 from utils.version import AAA_VERSION
@@ -141,6 +142,68 @@ def get_update_timers_backup(REGION, NO_RUSSIAN_REALMS=True):
         }
 
     return server_update_times
+
+
+def get_forever_data(endpoint, payload, filename, validator, use_backup=True):
+    try:
+        response = requests.post(
+            f"{SADDLEBAG_URL}/api/wow/forever/{endpoint}",
+            json=payload,
+            headers=saddlebag_request_headers(),
+            timeout=15,
+        )
+        response.raise_for_status()
+        return validator(response.json())
+    except (requests.RequestException, ValueError) as error:
+        if not use_backup:
+            raise
+        print(f"Forever API unavailable ({error}); loading GitHub backup {filename}")
+        response = requests.get(f"{RAW_GITHUB_BACKUP_PATH}/{filename}", timeout=15)
+        response.raise_for_status()
+        return validator(response.json())
+
+
+def get_forever_itemnames(item_ids, use_backup=True):
+    names = get_forever_data(
+        "itemnames",
+        {"item_ids": item_ids},
+        "forever_item_names.json",
+        forever.validate_names,
+        use_backup,
+    )
+    return {
+        item_id: name
+        for item_id, name in names.items()
+        if not item_ids or int(item_id) in item_ids
+    }
+
+
+def get_forever_item_statistics(region, use_backup=True):
+    if region not in ("NA", "EU"):
+        raise ValueError("Forever region must be NA or EU")
+    try:
+        rows = get_forever_data(
+            "megaitemnames",
+            {"region": region, "discount": 1},
+            "",
+            forever.validate_statistics,
+            use_backup=False,
+        )
+        return [{**row, "priceAvailable": row["desiredPrice"] > 0} for row in rows]
+    except (requests.RequestException, ValueError):
+        if not use_backup:
+            raise
+        names = get_forever_itemnames([])
+        return [
+            {
+                "itemID": int(item_id),
+                "itemName": name,
+                "desiredPrice": 0,
+                "salesPerDay": 0,
+                "priceAvailable": False,
+            }
+            for item_id, name in names.items()
+        ]
 
 
 def get_itemnames():

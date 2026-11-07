@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements.in
 #
+# Requires Python 3.10 or later.
+#
 
 certifi==2023.11.17
 charset-normalizer==3.3.2
@@ -12,8 +14,8 @@ orjson==3.11.5
 PyQt5==5.15.10
 PyQt5-Qt5==5.15.2
 PyQt5-sip==12.13.0
-requests==2.31.0
+requests==2.33.0
 tenacity==8.2.3
-urllib3==2.1.0
+urllib3==2.8.0
 pandas==2.2.2
 numpy==1.26.4

@@ -3,6 +3,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron")
 const path = require("path")
 const fs = require("fs")
+const Forever = require("./forever")
 const https = require("https")
 
 // Get current app version
@@ -114,6 +115,8 @@ let FILES = {
 }
 
 let REALM_FILES = {
+  NAFOREVER: path.join(DATA_DIR, "naforever-wow-connected-realm-ids.json"),
+  EUFOREVER: path.join(DATA_DIR, "euforever-wow-connected-realm-ids.json"),
   EU: path.join(DATA_DIR, "eu-wow-connected-realm-ids.json"),
   NA: path.join(DATA_DIR, "na-wow-connected-realm-ids.json"),
   EUCLASSIC: path.join(DATA_DIR, "euclassic-wow-connected-realm-ids.json"),
@@ -151,6 +154,27 @@ function writeJson(filePath, data) {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
     return { success: true }
   } catch (error) {
+    console.error(`Failed to write JSON file: ${filePath}`, error)
+    return { success: false, error: error.message }
+  }
+}
+
+function writeRealmList(filePath, data) {
+  const dir = path.dirname(filePath)
+  const temporary = path.join(dir, `.${path.basename(filePath)}.tmp`)
+  try {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    fs.writeFileSync(temporary, JSON.stringify(data, null, 2))
+    fs.renameSync(temporary, filePath)
+    return { success: true }
+  } catch (error) {
+    try {
+      fs.rmSync(temporary, { force: true })
+    } catch {
+      // The destination is still the previous complete file.
+    }
     console.error(`Failed to write JSON file: ${filePath}`, error)
     return { success: false, error: error.message }
   }
@@ -253,11 +277,11 @@ function ensureDataFiles() {
     }
   }
 
-  // Initialize realm list files if they don't exist (empty objects)
-  // They will be populated by the reset function using hardcoded data
-  for (const filePath of Object.values(REALM_FILES)) {
+  // Missing Forever files start with the default houses. An existing empty
+  // file stays empty because that is an intentional selection.
+  for (const [region, filePath] of Object.entries(REALM_FILES)) {
     if (!fs.existsSync(filePath)) {
-      writeJson(filePath, {})
+      writeJson(filePath, Forever.isRegion(region) ? Forever.rename(null) : {})
     }
   }
 }
@@ -524,6 +548,8 @@ function setupIpc() {
     }
 
     REALM_FILES = {
+      NAFOREVER: path.join(DATA_DIR, "naforever-wow-connected-realm-ids.json"),
+      EUFOREVER: path.join(DATA_DIR, "euforever-wow-connected-realm-ids.json"),
       EU: path.join(DATA_DIR, "eu-wow-connected-realm-ids.json"),
       NA: path.join(DATA_DIR, "na-wow-connected-realm-ids.json"),
       EUCLASSIC: path.join(DATA_DIR, "euclassic-wow-connected-realm-ids.json"),
@@ -1075,29 +1101,74 @@ function setupIpc() {
     return { stopped: true }
   })
 
-  // Realm list handlers
+  // Realm list handlers. An invalid Forever file is shown as the default
+  // houses, but ordinary saves must not replace that file.
+  const invalidForeverRegions = new Set()
+
+  function readForeverRealmFile(filePath) {
+    if (!fs.existsSync(filePath)) return { data: {}, missing: true }
+    try {
+      return {
+        data: JSON.parse(fs.readFileSync(filePath, "utf8")),
+        missing: false,
+      }
+    } catch {
+      return { data: null, missing: false }
+    }
+  }
+
   ipcMain.handle("load-realm-lists", () => {
     const lists = {}
+    const invalidRegions = []
     for (const [region, filePath] of Object.entries(REALM_FILES)) {
-      lists[region] = readJson(filePath, {})
+      if (!Forever.isRegion(region)) {
+        lists[region] = readJson(filePath, {})
+        continue
+      }
+      const file = readForeverRealmFile(filePath)
+      const described = Forever.describe(file.data)
+      lists[region] = described.markets
+      if (!file.missing && described.fallback) {
+        invalidForeverRegions.add(region)
+        invalidRegions.push(region)
+        const message = `Invalid Forever realm list for ${region}; showing defaults without replacing the file\n`
+        console.warn(message.trim())
+        sendToLogPanel(message)
+      } else {
+        invalidForeverRegions.delete(region)
+      }
     }
-    return lists
+    return { lists, invalidRegions }
   })
 
-  ipcMain.handle("save-realm-list", (_event, region, realms) => {
+  ipcMain.handle("save-realm-list", (_event, region, realms, options = {}) => {
     const filePath = REALM_FILES[region]
     if (!filePath) return { error: "Unknown region" }
     const logMsg = `[SAVE] Saving realm list for ${region} to: ${filePath}\n`
     console.log(logMsg.trim())
     sendToLogPanel(logMsg)
-    const normalized = {}
-    Object.entries(realms || {}).forEach(([k, v]) => {
-      const id = Number(v)
-      if (!Number.isNaN(id)) {
-        normalized[String(k)] = id
-      }
-    })
-    writeJson(filePath, normalized)
+    if (invalidForeverRegions.has(region) && options?.replaceInvalid !== true) {
+      const message = `The saved ${region} realm list is invalid and was not changed. Reset the list to replace it.`
+      console.log(message)
+      sendToLogPanel(`${message}\n`)
+      return { error: message }
+    }
+    const { normalized, rejected } = Forever.savedIds(region, realms)
+    if (rejected.length) {
+      const message = `${
+        Forever.isRegion(region)
+          ? "Rejected unknown Forever feed IDs"
+          : "Rejected invalid realm IDs"
+      }: ${rejected.join(", ")}`
+      console.log(message)
+      sendToLogPanel(`${message}\n`)
+      return { error: message }
+    }
+    const written = writeRealmList(filePath, normalized)
+    if (!written?.success) {
+      return { error: written?.error || "Could not save realm list" }
+    }
+    invalidForeverRegions.delete(region)
     const successMsg = `[SAVE] Successfully saved realm list for ${region}\n`
     console.log(successMsg.trim())
     sendToLogPanel(successMsg)

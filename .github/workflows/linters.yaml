@@ -22,5 +22,10 @@ jobs:
       - name: Install dependencies
         run: pip install black
 
+      - name: Test Python scanner (offline)
+        run: |
+          pip install --only-binary=:all: -r .github/requirements-tests.txt
+          python -m unittest discover -s tests -p "test_*.py" -v
+
       - name: Run black check
         run: black --check .

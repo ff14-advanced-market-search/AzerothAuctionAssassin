@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements.in
 #
+# Requires Python 3.10 or later.
+#
 
 certifi
 charset-normalizer

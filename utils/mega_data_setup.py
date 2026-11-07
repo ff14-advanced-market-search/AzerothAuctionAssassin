@@ -5,7 +5,9 @@ import orjson
 from requests.adapters import HTTPAdapter
 from datetime import datetime
 from tenacity import retry, stop_after_attempt, retry_if_exception_type
+from utils import forever
 from utils.api_requests import (
+    get_forever_itemnames,
     send_discord_message,
     get_itemnames,
     get_ilvl_items,
@@ -62,9 +64,12 @@ class MegaData:
         )
         self.WEBHOOK_URL = self.__set_mega_vars("MEGA_WEBHOOK_URL", raw_mega_data, True)
         self.REGION = self.__set_mega_vars("WOW_REGION", raw_mega_data, True)
+        self.IS_FOREVER = forever.is_forever(self.REGION)
+        self.forever_failures = {}
+        self.forever_last_attempt = {}
 
         # classic regions dont have undermine exchange
-        if "CLASSIC" in self.REGION:
+        if self.IS_FOREVER or "CLASSIC" in self.REGION:
             self.WOWHEAD_LINK = True
             self.FACTION = self.__set_mega_vars("FACTION", raw_mega_data)
         else:
@@ -80,47 +85,64 @@ class MegaData:
         self.DESIRED_ITEMS = self.__set_desired_items(
             "desired_items", path_to_desired_items
         )
-        self.DESIRED_PETS = self.__set_desired_items(
-            "desired_pets", path_to_desired_pets
-        )
+        if self.IS_FOREVER:
+            self.DESIRED_PETS = {}
+            self.DESIRED_ILVL_ITEMS, self.min_ilvl = {}, 100000
+            self.DESIRED_ILVL_LIST = []
+            self.DESIRED_PET_ILVL_LIST = []
+        else:
+            self.DESIRED_PETS = self.__set_desired_items(
+                "desired_pets", path_to_desired_pets
+            )
 
-        # this should be depreciated now
-        self.DESIRED_ILVL_ITEMS, self.min_ilvl = {}, 100000
-        # this should be depreciated now
+            # this should be depreciated now
+            self.DESIRED_ILVL_ITEMS, self.min_ilvl = {}, 100000
+            # this should be depreciated now
 
-        self.DESIRED_ILVL_LIST = self.__set_desired_ilvl_list(path_to_desired_ilvl_list)
-        self.DESIRED_PET_ILVL_LIST = self.__set_desired_pet_ilvl_list(
-            path_to_desired_pet_ilvl_list
-        )
+            self.DESIRED_ILVL_LIST = self.__set_desired_ilvl_list(
+                path_to_desired_ilvl_list
+            )
+            self.DESIRED_PET_ILVL_LIST = self.__set_desired_pet_ilvl_list(
+                path_to_desired_pet_ilvl_list
+            )
         self.__validate_snipe_lists()
 
         ## should do this here and only get the names of desired items to limit data
         # get name dictionaries
         self.ITEM_NAMES = self.__set_item_names()
-        try:
-            self.PET_NAMES = get_petnames(self.access_token)
-        except Exception as ex:
-            # it's better to avoid using saddlebag apis if possible
-            print(
-                f"Error getting pet names from blizzard api, using backup method: {ex}"
-            )
-            self.PET_NAMES = get_pet_names_backup()
+        self.PET_NAMES = {}
+        self.socket_ids, self.leech_ids, self.avoidance_ids, self.speed_ids = (
+            set(),
+            set(),
+            set(),
+            set(),
+        )
+        self.ilvl_addition = {}
+        if not self.IS_FOREVER:
+            try:
+                self.PET_NAMES = get_petnames(self.access_token)
+            except Exception as ex:
+                # it's better to avoid using saddlebag apis if possible
+                print(
+                    f"Error getting pet names from blizzard api, using backup method: {ex}"
+                )
+                self.PET_NAMES = get_pet_names_backup()
 
-        # get static lists of ALL bonus id values from raidbots, note this is the index for all ilvl gear
-        (
-            self.socket_ids,
-            self.leech_ids,
-            self.avoidance_ids,
-            self.speed_ids,
-            self.ilvl_addition,
-            # self.ilvl_base,
-        ) = get_bonus_id_sets()
+            # get static lists of ALL bonus id values from raidbots, note this is the index for all ilvl gear
+            (
+                self.socket_ids,
+                self.leech_ids,
+                self.avoidance_ids,
+                self.speed_ids,
+                self.ilvl_addition,
+                # self.ilvl_base,
+            ) = get_bonus_id_sets()
 
         self.bonuses_by_id = {}
         self.equippable_items = {}
         self.item_curves = {}
         self.item_squish_era = {}
-        if self.USE_POST_MIDNIGHT_ILVL:
+        if self.USE_POST_MIDNIGHT_ILVL and not self.IS_FOREVER:
             bonus_data = get_bonus_ids()
             self.bonuses_by_id = bonus_data.get("bonuses_by_id", {})
             self.equippable_items = get_raidbots_equippable_items()
@@ -179,6 +201,8 @@ class MegaData:
                 "NASODCLASSIC",
                 "EUCLASSIC",
                 "EUSODCLASSIC",
+                "NAFOREVER",
+                "EUFOREVER",
             ]:
                 raise Exception(f"error {var_value} not a valid region")
 
@@ -288,7 +312,14 @@ class MegaData:
             return self.access_token
 
     def __set_item_names(self):
-        item_names = get_itemnames()
+        if self.IS_FOREVER:
+            try:
+                item_names = get_forever_itemnames(list(self.DESIRED_ITEMS))
+            except (requests.RequestException, ValueError) as error:
+                print(f"Forever names unavailable; alerts will use item IDs: {error}")
+                item_names = {}
+        else:
+            item_names = get_itemnames()
         item_names = {
             int(id): name
             for id, name in item_names.items()
@@ -605,6 +636,10 @@ class MegaData:
         return processed_pet_list
 
     def __set_realm_names(self):
+        if self.IS_FOREVER:
+            file_path = f"AzerothAuctionAssassinData/{self.REGION.lower()}-wow-connected-realm-ids.json"
+            markets = forever.load_markets(file_path)
+            return forever.filter_markets(markets, self.FACTION)
         realm_names = json.load(
             open(
                 f"AzerothAuctionAssassinData/{str(self.REGION).lower()}-wow-connected-realm-ids.json"
@@ -618,6 +653,11 @@ class MegaData:
         return realm_names
 
     def __validate_snipe_lists(self):
+        if self.IS_FOREVER and not self.WOW_SERVER_NAMES:
+            raise Exception(
+                f"No Forever feeds are selected for {self.REGION} and faction "
+                f"{self.FACTION}. Add feeds in Realm Lists."
+            )
         if (
             len(self.DESIRED_ITEMS) == 0
             and len(self.DESIRED_PETS) == 0
@@ -634,6 +674,19 @@ class MegaData:
             error_message += "- desired_ilvl_list.json\n"
             error_message += "- desired_pet_ilvl_list.json\n"
             raise Exception(error_message)
+
+    def get_untracked_forever_feeds(self):
+        if not forever.is_forever(self.REGION):
+            return []
+        now = time.monotonic()
+        return sorted(
+            feed
+            for feed in set(self.WOW_SERVER_NAMES.values()) - set(self.upload_timers)
+            if getattr(self, "forever_failures", {}).get(feed, {}).get("next_retry", 0)
+            <= now
+            and getattr(self, "forever_last_attempt", {}).get(feed, float("-inf"))
+            <= now - 60
+        )
 
     def get_upload_time_list(self):
         return list(self.upload_timers.values())
@@ -674,6 +727,47 @@ class MegaData:
     #### AH API CALLS ####
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda state: {})
     def get_listings_single(self, connectedRealmId: int):
+        if forever.is_forever(self.REGION):
+            failures = self.forever_failures
+            if (
+                failures.get(connectedRealmId, {}).get("next_retry", 0)
+                > time.monotonic()
+            ):
+                return None
+            if not hasattr(self, "forever_last_attempt"):
+                self.forever_last_attempt = {}
+            self.forever_last_attempt[connectedRealmId] = time.monotonic()
+            try:
+                data = self._make_ah_api_request(
+                    forever.auction_url(self.REGION, connectedRealmId), connectedRealmId
+                )
+                if not isinstance(data, dict):
+                    raise ValueError(
+                        f"Forever feed {connectedRealmId} returned a non-object payload"
+                    )
+                if data.get("skipped"):
+                    failures.pop(connectedRealmId, None)
+                    return None
+                auctions = data.get("auctions", [])
+                if not isinstance(auctions, list):
+                    raise ValueError(
+                        f"Forever feed {connectedRealmId} returned a non-list auctions payload"
+                    )
+                failures.pop(connectedRealmId, None)
+                return auctions
+            except Exception as error:
+                attempts = min(
+                    failures.get(connectedRealmId, {}).get("attempts", 0) + 1, 7
+                )
+                wait = min(300, 5 * 2 ** (attempts - 1))
+                failures[connectedRealmId] = {
+                    "attempts": attempts,
+                    "next_retry": time.monotonic() + wait,
+                }
+                print(
+                    f"Forever feed {connectedRealmId} failed; retrying in {wait}s: {error}"
+                )
+                return []
         if connectedRealmId in [-1, -2]:
             print(f"gather data from {self.REGION} commodities")
             auction_info = self.make_commodity_ah_api_request()
@@ -721,6 +815,8 @@ class MegaData:
         return all_auctions
 
     def construct_api_url(self, connectedRealmId, endpoint):
+        if forever.is_forever(self.REGION):
+            return forever.auction_url(self.REGION, connectedRealmId)
         base_url = (
             "https://us.api.blizzard.com"
             if "NA" in self.REGION
@@ -744,6 +840,9 @@ class MegaData:
         retry_error_callback=lambda retry_state: {"auctions": []},
     )
     def make_ah_api_request(self, url, connectedRealmId, endpoint=""):
+        return self._make_ah_api_request(url, connectedRealmId, endpoint)
+
+    def _make_ah_api_request(self, url, connectedRealmId, endpoint=""):
         timer_key = (connectedRealmId, endpoint) if endpoint else connectedRealmId
         with self.get_if_modified(url, timer_key) as req:
             if req.status_code == 304:
@@ -833,7 +932,11 @@ class MegaData:
     def update_local_timers(
         self, dataSetID, lastUploadTimeRaw, response_headers=None, endpoint=""
     ):
-        if dataSetID == -1:
+        if forever.is_forever(self.REGION):
+            feed_type = "commodityListings" if int(dataSetID) < 0 else "singleMinPrices"
+            tableName = f"{self.REGION.replace('FOREVER', '')}_forever_{abs(int(dataSetID))}_{feed_type}"
+            dataSetName = self.get_realm_names(dataSetID)
+        elif dataSetID == -1:
             tableName = f"{self.REGION}_retail_commodityListings"
             dataSetName = [f"{self.REGION} Commodities"]
         elif dataSetID == -2:

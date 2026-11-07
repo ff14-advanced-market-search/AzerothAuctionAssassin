@@ -1689,7 +1689,7 @@ const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
 // Keep in sync with root package.json version (avoid IPC on every Saddlebag request — was causing UI jitter)
-const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.2.2"
+const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.3.0"
 
 function saddlebagFetchHeaders(base = {}) {
   return { ...base, "User-Agent": SADDLEBAG_USER_AGENT }
@@ -1926,6 +1926,9 @@ function syncAlertSoundControlsFromData(data) {
   }
 }
 
+let itemSearchRetryAt = 0
+let itemSearchGeneration = 0
+let itemSearchRegion = null
 let itemSearchCache = null
 let itemSearchPromise = null
 let petSearchCache = null
@@ -2059,6 +2062,11 @@ function setRunning(running) {
 }
 
 function showView(view) {
+  if (
+    ["NAFOREVER", "EUFOREVER"].includes(state.megaData?.WOW_REGION) &&
+    ["ilvl", "pet-ilvl"].includes(view)
+  )
+    view = "items"
   document
     .querySelectorAll(".view")
     .forEach((node) =>
@@ -2156,9 +2164,13 @@ function updateSuggestions(inputEl, suggestEl, cache) {
   const matches = cache
     .filter((row) => row.itemName && row.itemName.toLowerCase().includes(term))
     .slice(0, 12)
-  suggestEl.innerHTML = matches
-    .map((row) => `<option value="${escapeHtml(row.itemName)}"></option>`)
-    .join("")
+  suggestEl.replaceChildren(
+    ...matches.map((row) => {
+      const option = document.createElement("option")
+      option.value = row.itemName
+      return option
+    })
+  )
 }
 
 async function handleImport(target, btn) {
@@ -2194,7 +2206,7 @@ function flashButton(btn, label = "Done") {
 /**
  * Show a toast notification message
  * @param {string} message - The message to display
- * @param {string} type - 'error' or 'success' (default: 'error')
+ * @param {string} type - 'error', 'warning', or 'success' (default: 'error')
  * @param {number} duration - Duration in milliseconds (default: 3000)
  */
 function showToast(message, type = "error", duration = 3000) {
@@ -2203,7 +2215,7 @@ function showToast(message, type = "error", duration = 3000) {
   if (existing) existing.remove()
 
   const toast = document.createElement("div")
-  toast.className = `toast ${type === "success" ? "success" : ""}`
+  toast.className = `toast ${type || ""}`.trim()
   toast.textContent = message
   document.body.appendChild(toast)
 
@@ -2525,6 +2537,14 @@ function discountPercent() {
   return val
 }
 
+function recommendedItemPrice(desiredPrice) {
+  const discounted = Number(desiredPrice || 0) * (discountPercent() / 100)
+  if (["NAFOREVER", "EUFOREVER"].includes(state.megaData?.WOW_REGION)) {
+    return Math.round(discounted * 10000) / 10000
+  }
+  return Math.round(discounted)
+}
+
 async function handlePastePBSItems(btn) {
   showPasteModal(
     "Import Auctionator/PBS items",
@@ -2563,22 +2583,47 @@ async function handlePastePBSItems(btn) {
         const tempItems = { ...state.desiredItems }
         const unmatchedNames = new Set(pbs_prices.keys())
         let importedCount = 0
+        const missingPrices = []
         for (const row of items) {
           const lower = row.itemName.toLowerCase()
           if (pbs_prices.has(lower)) {
             const price = pbs_prices.get(lower)
             if (price !== null) {
               tempItems[String(row.itemID)] = price
+            } else if (row.priceAvailable === false) {
+              if (
+                Object.prototype.hasOwnProperty.call(
+                  state.desiredItems,
+                  String(row.itemID)
+                )
+              ) {
+                tempItems[String(row.itemID)] =
+                  state.desiredItems[String(row.itemID)]
+              } else {
+                missingPrices.push(row.itemName)
+                unmatchedNames.delete(lower)
+                continue
+              }
             } else {
-              const pct = discountPercent() / 100
-              tempItems[String(row.itemID)] = Math.round(
-                Number(row.desiredPrice || 0) * pct
+              tempItems[String(row.itemID)] = recommendedItemPrice(
+                row.desiredPrice
               )
             }
             unmatchedNames.delete(lower)
             importedCount++
           }
         }
+        if (missingPrices.length) {
+          appendLog(
+            `Skipped items without prices: ${missingPrices.join(
+              ", "
+            )}. Enter prices manually.\n`
+          )
+        }
+        if (!importedCount && missingPrices.length)
+          throw new Error(
+            `Prices unavailable for ${missingPrices.length} item(s). Enter explicit prices before importing.`
+          )
         if (!importedCount) {
           throw new Error(
             "No matching items found. Check the item names in your Auctionator/PBS list."
@@ -2586,12 +2631,12 @@ async function handlePastePBSItems(btn) {
         }
         state.desiredItems = await window.aaa.saveItems(tempItems)
         await loadState()
-        const message = `Imported ${importedCount} item(s). ${unmatchedNames.size} name(s) not found.`
+        const message = `Imported ${importedCount} item(s). ${unmatchedNames.size} name(s) not found. ${missingPrices.length} item(s) skipped because prices are unavailable.`
         appendLog(`${message}\n`)
         if (unmatchedNames.size) {
           appendLog(`Unmatched item names: ${[...unmatchedNames].join(", ")}\n`)
         }
-        showToast(message, "success", 5000)
+        showToast(message, missingPrices.length ? "warning" : "success", 5000)
         flashButton(btn, "Imported!")
       } catch (err) {
         const message = `Import error: ${err.message || err}`
@@ -3343,9 +3388,30 @@ function appendLog(line) {
   }
 }
 
+function applyForeverMode() {
+  if (
+    ["NAFOREVER", "EUFOREVER"].includes(state.megaData?.WOW_REGION) &&
+    document.querySelector(
+      '.view.active[data-view="ilvl"], .view.active[data-view="pet-ilvl"]'
+    )
+  )
+    showView("items")
+  const forever = ["NAFOREVER", "EUFOREVER"].includes(
+    state.megaData?.WOW_REGION
+  )
+  document
+    .querySelectorAll(
+      '[data-view-target="ilvl"], [data-view-target="pet-ilvl"]'
+    )
+    .forEach((button) => {
+      button.hidden = forever
+    })
+}
+
 async function loadState() {
   const payload = await window.aaa.loadState()
   state.megaData = payload.megaData || {}
+  applyForeverMode()
   state.desiredItems = payload.desiredItems || {}
   state.ilvlList = payload.ilvlList || []
   state.petIlvlList = payload.petIlvlList || []
@@ -3405,33 +3471,144 @@ async function loadZoomLevel() {
   }
 }
 
-async function fetchItemNames() {
-  if (itemSearchPromise) return itemSearchPromise
-  if (itemSearchCache) return itemSearchCache
+async function fetchForeverJSON(url, options, timeoutMs) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    return await response.json()
+  } finally {
+    clearTimeout(timeout)
+  }
+}
 
+async function fetchForeverStatistics(region) {
+  try {
+    const data = await fetchForeverJSON(
+      "https://api.saddlebagexchange.com/api/wow/forever/megaitemnames",
+      {
+        method: "POST",
+        headers: saddlebagFetchHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          region: region.replace("FOREVER", ""),
+          discount: 1,
+        }),
+      },
+      4000
+    )
+    if (
+      !Array.isArray(data) ||
+      !data.length ||
+      data.some(
+        (row) =>
+          !row ||
+          !Number.isInteger(row.itemID) ||
+          typeof row.itemName !== "string" ||
+          !row.itemName.trim() ||
+          [row.desiredPrice, row.salesPerDay].some(
+            (value) => !Number.isFinite(value) || value < 0
+          )
+      )
+    )
+      throw new Error("Invalid Forever statistics response")
+    return data.map((row) => ({ ...row, priceAvailable: row.desiredPrice > 0 }))
+  } catch (error) {
+    // Names remain usable when pricing is unavailable; never suggest stale prices.
+    const sources = [
+      [
+        "https://api.saddlebagexchange.com/api/wow/forever/itemnames",
+        {
+          method: "POST",
+          headers: saddlebagFetchHeaders({
+            "Content-Type": "application/json",
+          }),
+          body: JSON.stringify({ item_ids: [] }),
+        },
+      ],
+      [
+        "https://raw.githubusercontent.com/ff14-advanced-market-search/AzerothAuctionAssassin/refs/heads/main/StaticData/forever_item_names.json",
+        {},
+      ],
+    ]
+    let lastError = error
+    for (const [index, [url, options]] of sources.entries()) {
+      try {
+        const names = await fetchForeverJSON(
+          url,
+          options,
+          index === 0 ? 2000 : 4000
+        )
+        if (
+          !names ||
+          typeof names !== "object" ||
+          Array.isArray(names) ||
+          !Object.keys(names).length ||
+          Object.entries(names).some(
+            ([id, name]) =>
+              !/^\d+$/.test(id) || typeof name !== "string" || !name.trim()
+          )
+        )
+          throw new Error("Invalid Forever names response")
+        return Object.entries(names).map(([id, name]) => ({
+          itemID: Number(id),
+          itemName: name,
+          desiredPrice: 0,
+          salesPerDay: 0,
+          priceAvailable: false,
+        }))
+      } catch (error_) {
+        lastError = error_
+      }
+    }
+    throw lastError
+  }
+}
+
+async function fetchItemNames() {
+  const selectedRegion = state.megaData?.WOW_REGION || "EU"
+  if (itemSearchRegion !== selectedRegion) {
+    itemSearchGeneration++
+    itemSearchRegion = selectedRegion
+    itemSearchCache = null
+    itemSearchRetryAt = 0
+    itemSearchPromise = null
+    itemNameMap = {}
+  }
+  if (itemSearchPromise) return itemSearchPromise
+  if (itemSearchCache && (!itemSearchRetryAt || Date.now() < itemSearchRetryAt))
+    return itemSearchCache
+
+  const previousNames = itemSearchCache
+  const generation = itemSearchGeneration
   itemSearchStatus.textContent = "Loading item names…"
   const region = state.megaData?.WOW_REGION || "EU"
   // All callers must await the same lookup, including imports during startup.
   itemSearchPromise = (async () => {
     try {
-      const resp = await fetchWithTimeout(
-        "https://api.saddlebagexchange.com/api/wow/megaitemnames",
-        {
-          method: "POST",
-          headers: saddlebagFetchHeaders({
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          }),
-          body: JSON.stringify({
-            discord_consent: WOW_DISCORD_CONSENT,
-            region,
-            discount: 1,
-          }),
-        },
-        30000
-      )
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-      const data = await resp.json()
+      let data
+      if (["NAFOREVER", "EUFOREVER"].includes(region)) {
+        data = await fetchForeverStatistics(region)
+      } else {
+        const resp = await fetchWithTimeout(
+          "https://api.saddlebagexchange.com/api/wow/megaitemnames",
+          {
+            method: "POST",
+            headers: saddlebagFetchHeaders({
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            }),
+            body: JSON.stringify({
+              discord_consent: WOW_DISCORD_CONSENT,
+              region,
+              discount: 1,
+            }),
+          },
+          30000
+        )
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+        data = await resp.json()
+      }
       const rows = Array.isArray(data)
         ? data.filter(
             (row) =>
@@ -3443,7 +3620,13 @@ async function fetchItemNames() {
       if (!rows.length) {
         throw new Error("No item data returned")
       }
+      if (generation !== itemSearchGeneration) return []
       itemSearchCache = rows
+      itemSearchRetryAt =
+        ["NAFOREVER", "EUFOREVER"].includes(region) &&
+        rows.every((row) => row.priceAvailable === false)
+          ? Date.now() + 60000
+          : 0
       itemNameMap = {}
       itemSearchCache.forEach((row) => {
         if (row?.itemID && row?.itemName) {
@@ -3455,6 +3638,16 @@ async function fetchItemNames() {
       updateSuggestions(ilvlSearchInput, ilvlSearchSuggest, itemSearchCache)
       return itemSearchCache
     } catch (err) {
+      if (generation !== itemSearchGeneration) return []
+      if (
+        previousNames?.length &&
+        previousNames.every((row) => row.priceAvailable === false)
+      ) {
+        itemSearchCache = previousNames
+        itemSearchRetryAt = Date.now() + 60000
+        itemSearchStatus.textContent = "Names available; prices unavailable"
+        return previousNames
+      }
       console.error("Item search fetch failed", err)
       itemSearchStatus.textContent = "Failed to load items (check connection)"
       // Leave failures uncached so the next search or import can retry.
@@ -3465,7 +3658,7 @@ async function fetchItemNames() {
   try {
     return await itemSearchPromise
   } finally {
-    itemSearchPromise = null
+    if (generation === itemSearchGeneration) itemSearchPromise = null
   }
 }
 
@@ -3482,9 +3675,9 @@ function renderItemSearchResults(results) {
     const div = document.createElement("div")
     div.className = "search-result"
 
-    // Apply discount percentage to the average price
-    const pct = discountPercent() / 100
-    const recommendedPrice = Math.round(Number(row.desiredPrice || 0) * pct)
+    // Apply discount percentage to the average price.
+    // Forever keeps copper (four decimal gold); Retail stays whole gold.
+    const recommendedPrice = recommendedItemPrice(row.desiredPrice)
 
     const innerDiv = document.createElement("div")
     const nameDiv = document.createElement("div")
@@ -3495,7 +3688,11 @@ function renderItemSearchResults(results) {
 
     const metaDiv = document.createElement("div")
     metaDiv.className = "meta"
-    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${recommendedPrice}`
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${
+      row.priceAvailable === false
+        ? "unavailable — enter a price"
+        : recommendedPrice
+    }`
     innerDiv.appendChild(metaDiv)
 
     div.appendChild(innerDiv)
@@ -3505,7 +3702,10 @@ function renderItemSearchResults(results) {
     btn.onclick = () => {
       const form = document.getElementById("item-form")
       form.id.value = row.itemID
-      form.price.value = recommendedPrice
+      form.price.value =
+        row.priceAvailable === false
+          ? state.desiredItems[String(row.itemID)] ?? ""
+          : recommendedPrice
       ensureItemName(String(row.itemID), row.itemName)
       showView("items")
     }
@@ -3608,6 +3808,11 @@ async function handleIlvlSearch() {
 }
 
 async function fetchPetNames() {
+  if (["NAFOREVER", "EUFOREVER"].includes(state.megaData?.WOW_REGION)) {
+    petSearchCache = null
+    petNameMap = {}
+    return []
+  }
   if (petSearchLoading) return petSearchCache
   if (petSearchCache) return petSearchCache
 
@@ -3863,10 +4068,12 @@ async function saveMegaData(skipValidation = false) {
       "NACLASSIC",
       "NASODCLASSIC",
       "EUSODCLASSIC",
+      "NAFOREVER",
+      "EUFOREVER",
     ]
     const region = (data.WOW_REGION || "").trim()
     if (!validRegions.includes(region)) {
-      const errorMsg = `WOW region must be either 'NA', 'EU', 'NACLASSIC', 'EUCLASSIC', 'EUSODCLASSIC' or 'NASODCLASSIC'.`
+      const errorMsg = `WOW region must be one of: ${validRegions.join(", ")}.`
       showToast(errorMsg, "error")
       megaForm.WOW_REGION.focus()
       return false
@@ -3968,6 +4175,12 @@ async function saveMegaData(skipValidation = false) {
 
   state.megaData = await window.aaa.saveMegaData(data)
   renderMegaForm(state.megaData)
+  applyForeverMode()
+  fetchItemNames().then(() => {
+    renderItemList()
+    renderIlvlRules()
+  })
+  fetchPetNames().then(() => renderPetIlvlRules())
   trimAlertEmbedHistoryToLimit()
   if (!skipValidation) {
     showToast("Settings saved successfully!", "success", 2000)
@@ -4580,9 +4793,9 @@ startBtn.addEventListener("click", async () => {
       console.error(`No default list for region: ${region}`)
       return
     }
+    const previous = { ...(state.realmLists[region] || {}) }
     state.realmLists[region] = { ...defaultList }
-    await saveRealmList(region)
-    renderRealmList()
+    await commitRealmList(region, previous)
   }
 
   await window.aaa.runMega()
@@ -4683,21 +4896,46 @@ function renderRealmList() {
 
 async function loadRealmLists() {
   try {
-    const lists = await window.aaa.loadRealmLists()
-    state.realmLists = lists || {}
+    const result = await window.aaa.loadRealmLists()
+    state.realmLists = result?.lists || {}
+    const invalidRegions = result?.invalidRegions || []
+    if (invalidRegions.length) {
+      showToast(
+        `Saved realm list for ${invalidRegions.join(
+          ", "
+        )} is invalid. Showing defaults without replacing the file. Reset that list to overwrite it.`,
+        "warning",
+        6000
+      )
+    }
     renderRealmList()
   } catch (err) {
     console.error("Failed to load realm lists:", err)
   }
 }
 
-async function saveRealmList(region) {
+async function saveRealmList(region, options) {
   try {
     const realms = state.realmLists[region] || {}
-    await window.aaa.saveRealmList(region, realms)
+    const saved = await window.aaa.saveRealmList(region, realms, options)
+    if (saved?.error) showToast(saved.error, "error")
+    return saved
   } catch (err) {
     console.error("Failed to save realm list:", err)
+    showToast("Failed to save realm list.", "error")
+    return { error: err.message }
   }
+}
+
+async function commitRealmList(region, previous, options) {
+  const saved = await saveRealmList(region, options)
+  if (saved?.error) {
+    state.realmLists[region] = previous
+    renderRealmList()
+    return false
+  }
+  renderRealmList()
+  return true
 }
 
 async function addRealm(region, name, id) {
@@ -4705,8 +4943,16 @@ async function addRealm(region, name, id) {
   if (!state.realmLists[region]) {
     state.realmLists[region] = {}
   }
+  const previous = Object.hasOwn(state.realmLists[region], name)
+    ? state.realmLists[region][name]
+    : undefined
   state.realmLists[region][name] = Number(id)
-  await saveRealmList(region)
+  const saved = await saveRealmList(region)
+  if (saved?.error) {
+    if (previous === undefined) delete state.realmLists[region][name]
+    else state.realmLists[region][name] = previous
+    return
+  }
   renderRealmList()
   realmNameInput.value = ""
   realmIdInput.value = ""
@@ -4715,16 +4961,16 @@ async function addRealm(region, name, id) {
 async function removeRealm(name, id) {
   const region = realmRegionSelect?.value || "EU"
   if (!state.realmLists[region]) return
+  const previous = { ...state.realmLists[region] }
   delete state.realmLists[region][name]
-  await saveRealmList(region)
-  renderRealmList()
+  await commitRealmList(region, previous)
 }
 
 async function removeAllRealms() {
   const region = realmRegionSelect?.value || "EU"
+  const previous = { ...(state.realmLists[region] || {}) }
   state.realmLists[region] = {}
-  await saveRealmList(region)
-  renderRealmList()
+  await commitRealmList(region, previous)
 }
 
 async function resetRealmList() {
@@ -4738,9 +4984,9 @@ async function resetRealmList() {
     console.error(`No default list for region: ${region}`)
     return
   }
+  const previous = { ...(state.realmLists[region] || {}) }
   state.realmLists[region] = { ...defaultList }
-  await saveRealmList(region)
-  renderRealmList()
+  await commitRealmList(region, previous, { replaceInvalid: true })
 }
 
 realmForm?.addEventListener("submit", async (e) => {

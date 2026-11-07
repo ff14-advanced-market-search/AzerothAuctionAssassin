@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 import json, requests
+from pathlib import Path
 from utils.api_requests import (
     WOW_DISCORD_CONSENT,
+    get_forever_itemnames,
     get_itemnames,
     get_ilvl_items,
     get_raidbots_bonus_ids,
@@ -11,6 +13,47 @@ from utils.api_requests import (
     get_pet_names_backup,
     saddlebag_request_headers,
 )
+
+
+def update_forever_static_data(output_dir="StaticData"):
+    # Fetch and validate fresh names before replacing the published snapshot.
+    # Disable runtime fallback here so an outage cannot republish stale backups.
+    snapshots = {
+        "forever_item_names.json": get_forever_itemnames([], use_backup=False),
+    }
+    destination = Path(output_dir)
+    destination.mkdir(parents=True, exist_ok=True)
+    for filename, data in snapshots.items():
+        path = destination / filename
+        # Any existing item ID missing from the new map is a partial catalog.
+        # Keep the published snapshot instead of guessing a shrinkage percentage.
+        # Names added after that point stay unpublished until the snapshot can
+        # be replaced. To accept a retired item ID, delete
+        # StaticData/forever_item_names.json and run this script again.
+        if path.exists():
+            try:
+                current = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                current = None
+            if isinstance(current, dict):
+                missing = [item_id for item_id in current if item_id not in data]
+                if missing:
+                    raise ValueError(
+                        f"{filename} update drops {len(missing)} existing item id(s); keeping the current snapshot"
+                    )
+        temporary = path.with_suffix(".json.tmp")
+        temporary.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        temporary.replace(path)
+    print("Forever static names updated successfully!")
+
+
+try:
+    update_forever_static_data()
+except (requests.RequestException, ValueError, OSError) as error:
+    print(f"Forever static update failed; retaining existing backups: {error}")
+
 
 # get the upload timers
 upload_timers = requests.post(

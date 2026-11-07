@@ -1,7 +1,7 @@
 name: Build Windows Executable
 
 env:
-  AAA_VERSION: "1.6.7"
+  AAA_VERSION: "1.7.0"
 
 on:
   workflow_dispatch:
@@ -9,15 +9,22 @@ on:
   #   branches:
   #     - main
 
+permissions:
+  contents: read
+
 jobs:
   build-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     outputs:
       upload_url_base64: ${{ steps.b64encode_upload_url.outputs.upload_url_base64 }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2 #using Microsoft's setup-msbuild action
@@ -66,6 +73,41 @@ jobs:
           echo $env:AAA_VERSION > AzerothAuctionAssassin-windows\AzerothAuctionAssassin\Resources\appVersion.txt
         shell: pwsh
 
+      - name: Check release version is unused
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = `v${process.env.AAA_VERSION}`;
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              ...context.repo,
+              per_page: 100,
+            });
+            if (releases.some((release) => release.tag_name === tag)) {
+              throw new Error(`Release ${tag} already exists; bump AAA_VERSION before building.`);
+            }
+            let existingRef;
+            try {
+              const response = await github.rest.git.getRef({
+                ...context.repo, ref: `tags/${tag}`,
+              });
+              existingRef = response.data;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            if (existingRef) {
+              let target = existingRef.object;
+              while (target.type === "tag") {
+                const { data: annotated } = await github.rest.git.getTag({
+                  ...context.repo, tag_sha: target.sha,
+                });
+                target = annotated.object;
+              }
+              if (target.type !== "commit" || target.sha !== context.sha) {
+                throw new Error(`Existing tag ${tag} does not match build commit ${context.sha}`);
+              }
+              throw new Error(`Tag ${tag} already exists; bump AAA_VERSION before building.`);
+            }
+
       - name: Build EXE
         run: |
           msbuild AzerothAuctionAssassin-windows\AzerothAuctionAssassin.sln -restore -t:Publish /p:Configuration=Release /p:PublishProfile=".\AzerothAuctionAssassin\Properties\PublishProfiles\FolderProfile.pubxml"
@@ -90,14 +132,41 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v7
         with:
-          tag_name: "v${{env.AAA_VERSION}}"
-          release_name: "Release v${{env.AAA_VERSION}}"
-          draft: false
-          prerelease: false
+          script: |
+            const tag = `v${process.env.AAA_VERSION}`;
+            let existingRef;
+            try {
+              const response = await github.rest.git.getRef({
+                ...context.repo, ref: `tags/${tag}`,
+              });
+              existingRef = response.data;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            if (existingRef) {
+              let target = existingRef.object;
+              while (target.type === "tag") {
+                const { data: annotated } = await github.rest.git.getTag({
+                  ...context.repo, tag_sha: target.sha,
+                });
+                target = annotated.object;
+              }
+              if (target.type !== "commit" || target.sha !== context.sha) {
+                throw new Error(`Existing tag ${tag} does not match build commit ${context.sha}`);
+              }
+            }
+            const { data } = await github.rest.repos.createRelease({
+              ...context.repo,
+              tag_name: tag,
+              target_commitish: context.sha,
+              name: `Release v${process.env.AAA_VERSION}`,
+              draft: false,
+              prerelease: false,
+              make_latest: "false",
+            });
+            core.setOutput("upload_url", data.upload_url);
 
       - name: Encode and Save Upload URL as Base64
         id: b64encode_upload_url
@@ -116,10 +185,14 @@ jobs:
   build-mac:
     needs: build-windows
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v2
