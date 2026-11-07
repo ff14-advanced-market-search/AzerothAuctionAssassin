@@ -199,6 +199,7 @@ def get_forever_item_statistics(region, use_backup=True):
                 "itemName": name,
                 "desiredPrice": 0,
                 "salesPerDay": 0,
+                "priceAvailable": False,
             }
             for item_id, name in names.items()
         ]

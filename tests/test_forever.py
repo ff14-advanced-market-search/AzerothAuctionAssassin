@@ -50,6 +50,25 @@ class ForeverTests(unittest.TestCase):
         )
         self.assertEqual(forever.rename_markets({"Custom": 111}), {"Custom": 111})
 
+    def test_atomic_market_write_failure_preserves_original(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "markets.json"
+            path.write_text('{"Selected":110}')
+            with patch.object(Path, "replace", side_effect=OSError("disk error")):
+                with self.assertRaises(OSError):
+                    forever.save_markets(path, {"New": 111})
+            self.assertEqual(json.loads(path.read_text()), {"Selected": 110})
+            self.assertEqual(len(list(Path(directory).iterdir())), 1)
+
+    def test_untracked_feeds_remain_eligible_until_first_success(self):
+        data = MegaData.__new__(MegaData)
+        data.REGION = "NAFOREVER"
+        data.WOW_SERVER_NAMES = {"Items": 110, "Commodities": -110}
+        data.upload_timers = {-110: {"dataSetID": -110}}
+        self.assertEqual(data.get_untracked_forever_feeds(), [110])
+        data.upload_timers[110] = {"dataSetID": 110}
+        self.assertEqual(data.get_untracked_forever_feeds(), [])
+
     def test_urls_and_unit_prices(self):
         self.assertIn(
             "us.api.blizzard.com/data/wow/ruleset/1/auctions/110?",

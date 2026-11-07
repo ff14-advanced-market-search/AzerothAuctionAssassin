@@ -869,6 +869,7 @@ class Alerts(QThread):
                             for realm in mega_data.get_upload_time_list()
                         ]
 
+                matching_realms.extend(mega_data.get_untracked_forever_feeds())
                 if matching_realms != []:
                     self.progress.emit("Sending alerts!")
                     pool = ThreadPoolExecutor(max_workers=mega_data.THREADS)

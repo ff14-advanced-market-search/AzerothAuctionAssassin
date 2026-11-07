@@ -856,6 +856,13 @@ class MegaData {
   /**
    * Get list of all upload timer objects
    */
+  getUntrackedForeverFeeds() {
+    if (!this.IS_FOREVER) return []
+    return [...new Set(Object.values(this.WOW_SERVER_NAMES))].filter(
+      (id) => !this.upload_timers[id]
+    )
+  }
+
   get_upload_time_list() {
     return Object.values(this.upload_timers)
   }
@@ -911,6 +918,13 @@ class MegaData {
       const headers = {
         Authorization: `Bearer ${await this.fetchAccessToken()}`,
       }
+      if (
+        this.IS_FOREVER &&
+        this.upload_timers[connectedRealmId]?.lastUploadTimeRaw
+      ) {
+        headers["If-Modified-Since"] =
+          this.upload_timers[connectedRealmId].lastUploadTimeRaw
+      }
       const res = await fetch(url, { headers, signal: controller.signal })
       clearTimeout(timeoutId)
       if (res.status === 429) {
@@ -929,6 +943,17 @@ class MegaData {
           )
         }
         throw new Error("429")
+      }
+      if (
+        this.IS_FOREVER &&
+        (res.status === 304 ||
+          (res.status === 200 &&
+            res.headers.get("last-modified") &&
+            res.headers.get("last-modified") ===
+              this.upload_timers[connectedRealmId]?.lastUploadTimeRaw))
+      ) {
+        await res.body?.cancel?.()
+        return { auctions: [], skipped: true }
       }
       if (res.status !== 200) throw new Error(`${res.status}`)
       const text = await res.text()
@@ -1142,11 +1167,16 @@ class MegaData {
    */
   async get_listings_single(connectedRealmId) {
     if (this.IS_FOREVER) {
-      const data = await this.makeAhRequest(
-        Forever.url(this.REGION, connectedRealmId),
-        connectedRealmId
-      )
-      return data?.skipped ? null : data?.auctions || []
+      try {
+        const data = await this.makeAhRequest(
+          Forever.url(this.REGION, connectedRealmId),
+          connectedRealmId
+        )
+        return data?.skipped ? null : data?.auctions || []
+      } catch (error) {
+        logError(`Forever feed ${connectedRealmId} failed; will retry`, error)
+        return []
+      }
     }
     if (connectedRealmId === -1 || connectedRealmId === -2) {
       try {
@@ -1252,7 +1282,7 @@ class MegaData {
       ]
       for (const [url, options] of sources) {
         const controller = new AbortController()
-        const timeout = setTimeout(() => controller.abort(), 15000)
+        const timeout = setTimeout(() => controller.abort(), 4000)
         try {
           const response = await fetch(url, {
             ...options,
@@ -2982,6 +3012,9 @@ async function runAlerts(state, progress, runOnce = false) {
       matching_realms = state.get_upload_time_list().map((r) => r.dataSetID)
     }
 
+    matching_realms = [
+      ...new Set([...matching_realms, ...state.getUntrackedForeverFeeds()]),
+    ]
     if (matching_realms.length) {
       log(
         `Starting mega-alerts-js for region=${state.REGION}, items=${

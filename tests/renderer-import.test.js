@@ -78,6 +78,7 @@ function setup(fetch = async () => response(), saveError = null) {
     context
   )
   return {
+    run: (code) => vm.runInContext(code, context),
     calls,
     setRegion: (region) =>
       vm.runInContext(
@@ -319,3 +320,83 @@ for (const region of ["NAFOREVER", "EUFOREVER"]) {
     assert.equal(urls.length, 3)
   })
 }
+
+test("names-only PBS import skips missing prices and preserves supplied and saved targets", async () => {
+  const ui = setup(async () =>
+    response([
+      {
+        itemID: 3048,
+        itemName: "Unpriced",
+        desiredPrice: 0,
+        salesPerDay: 0,
+        priceAvailable: false,
+      },
+      {
+        itemID: 720,
+        itemName: "Explicit",
+        desiredPrice: 0,
+        salesPerDay: 0,
+        priceAvailable: false,
+      },
+      {
+        itemID: 999,
+        itemName: "Saved",
+        desiredPrice: 0,
+        salesPerDay: 0,
+        priceAvailable: false,
+      },
+    ])
+  )
+  await ui.importItems("List^Unpriced^Explicit;;0^Saved")
+  assert.deepEqual(ui.calls.saves[0], { 999: 42, 720: 0 })
+  assert.ok(
+    ui.calls.toasts.some((toast) =>
+      toast.message.includes("Prices unavailable")
+    )
+  )
+  assert.ok(ui.calls.logs.some((line) => line.includes("Unpriced")))
+})
+
+test(
+  "settings save finishes while the item lookup remains pending",
+  { timeout: 1000 },
+  async () => {
+    const ui = setup()
+    ui.run(`readMegaForm = () => ({ WOW_REGION: "NAFOREVER" })
+    window.aaa.saveMegaData = async (data) => data
+    renderMegaForm = () => {}
+    applyForeverMode = () => {}
+    trimAlertEmbedHistoryToLimit = () => {}
+    renderItemList = () => {}
+    fetchItemNames = () => new Promise((resolve) => { globalThis.finishLookup = resolve })`)
+    assert.equal(await ui.run("saveMegaData(true)"), true)
+    ui.run("finishLookup([])")
+  }
+)
+
+test("saving Forever switches away from an active pet or ilvl view", () => {
+  const ui = setup()
+  ui.run(`state.megaData.WOW_REGION = "NAFOREVER"
+    document.querySelector = () => ({})
+    showView = (view) => { globalThis.selectedView = view }
+    applyForeverMode()`)
+  assert.equal(ui.run("selectedView"), "items")
+})
+
+test("a names-only result requests manual pricing instead of suggesting zero", () => {
+  const ui = setup()
+  ui.run(`globalThis.cards = []
+    document.createElement = () => ({children: [], appendChild(child) { this.children.push(child) }})
+    itemSearchResults.appendChild = (card) => cards.push(card)
+    globalThis.form = { id: {value: ""}, price: {value: ""} }
+    document.getElementById = () => form
+    showView = () => {}
+    ensureItemName = () => {}
+    renderItemSearchResults([{ itemID: 3048, itemName: "Item", desiredPrice: 0, salesPerDay: 0, priceAvailable: false }])
+    cards[0].children[1].onclick()`)
+  assert.equal(ui.run("form.price.value"), "")
+  assert.match(
+    ui.run("cards[0].children[0].children[1].textContent"),
+    /unavailable/
+  )
+})

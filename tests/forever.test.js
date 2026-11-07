@@ -249,3 +249,79 @@ test("Forever scanner uses public GitHub names when Saddlebag is down", async (t
   assert.equal(data.ITEM_NAMES[720], undefined)
   assert.equal(urls.length, 2)
 })
+
+test("null and array market files cannot break all-region loading", () => {
+  assert.deepEqual(Forever.rename(null), {})
+  assert.deepEqual(Forever.rename([]), {})
+})
+
+test("Forever skips unchanged bodies and uses each signed feed's conditional header", async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aaa-conditional-"))
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }))
+  fs.writeFileSync(
+    path.join(dir, "mega_data.json"),
+    JSON.stringify({ WOW_REGION: "EUFOREVER" })
+  )
+  const stamp = "Fri, 06 Nov 2026 14:00:00 GMT"
+  const calls = []
+  let bodyReads = 0,
+    cancelled = 0
+  const api = scanner(async (url, options) => {
+    calls.push({ url, options })
+    return {
+      status: calls.length === 3 ? 304 : 200,
+      headers: new Headers({ "Last-Modified": stamp }),
+      body: {
+        cancel: async () => {
+          cancelled++
+        },
+      },
+      text: async () => {
+        bodyReads++
+        return JSON.stringify({ auctions: [{ id: 1 }] })
+      },
+    }
+  })
+  api.setPaths(dir, dir)
+  const data = new api.MegaData()
+  data.upload_timers = {}
+  data.fetchAccessToken = async () => "test"
+  await data.get_listings_single(110)
+  await data.get_listings_single(-110)
+  assert.equal(await data.get_listings_single(110), null)
+  assert.equal(await data.get_listings_single(-110), null)
+  assert.equal(bodyReads, 2)
+  assert.equal(cancelled, 2)
+  assert.equal(calls[0].options.headers["If-Modified-Since"], undefined)
+  assert.equal(calls[1].options.headers["If-Modified-Since"], undefined)
+  assert.equal(calls[2].options.headers["If-Modified-Since"], stamp)
+  assert.equal(calls[3].options.headers["If-Modified-Since"], stamp)
+})
+
+test("one failed feed does not reject scanning and remains eligible until recovery", async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aaa-retry-"))
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }))
+  fs.writeFileSync(
+    path.join(dir, "mega_data.json"),
+    JSON.stringify({ WOW_REGION: "NAFOREVER" })
+  )
+  fs.writeFileSync(
+    path.join(dir, "naforever-wow-connected-realm-ids.json"),
+    JSON.stringify({ Items: 110, Commodities: -110 })
+  )
+  let offline = true
+  const api = scanner(async (url) => {
+    if (offline && !url.includes("commodities")) throw new Error("offline")
+    return response({ auctions: [{ id: 1 }] })
+  })
+  api.setPaths(dir, dir)
+  const data = new api.MegaData()
+  data.upload_timers = {}
+  data.fetchAccessToken = async () => "test"
+  assert.equal((await data.get_listings_single(110)).length, 0)
+  assert.equal((await data.get_listings_single(-110)).length, 1)
+  assert.deepEqual(Array.from(data.getUntrackedForeverFeeds()), [110])
+  offline = false
+  assert.equal((await data.get_listings_single(110)).length, 1)
+  assert.equal(data.getUntrackedForeverFeeds().length, 0)
+})

@@ -92,6 +92,26 @@ class ForeverBackupTests(unittest.TestCase):
             self.assertEqual(path.read_text(), "existing snapshot")
             self.assertEqual(len(list(Path(directory).iterdir())), 1)
 
+    def test_filesystem_failure_does_not_stop_other_static_updates(self):
+        tree = ast.parse(Path("update-static-saddlebag-data.py").read_text())
+        block = next(node for node in tree.body if isinstance(node, ast.Try))
+        continued = Mock()
+        ns = {
+            "requests": requests,
+            "update_forever_static_data": Mock(side_effect=OSError("disk error")),
+            "continued": continued,
+        }
+        continuation = ast.parse("continued()").body[0]
+        exec(
+            compile(
+                ast.Module(body=[block, continuation], type_ignores=[]),
+                "updater",
+                "exec",
+            ),
+            ns,
+        )
+        continued.assert_called_once()
+
     def test_refresh_writes_only_names(self):
         names, statistics = Mock(return_value=NAMES), Mock(return_value=STATS)
         with tempfile.TemporaryDirectory() as directory:

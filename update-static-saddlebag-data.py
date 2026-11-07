@@ -35,7 +35,7 @@ def update_forever_static_data(output_dir="StaticData"):
 
 try:
     update_forever_static_data()
-except (requests.RequestException, ValueError) as error:
+except (requests.RequestException, ValueError, OSError) as error:
     print(f"Forever static update failed; retaining existing backups: {error}")
 
 

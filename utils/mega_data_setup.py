@@ -672,6 +672,11 @@ class MegaData:
             error_message += "- desired_pet_ilvl_list.json\n"
             raise Exception(error_message)
 
+    def get_untracked_forever_feeds(self):
+        if not forever.is_forever(self.REGION):
+            return []
+        return sorted(set(self.WOW_SERVER_NAMES.values()) - set(self.upload_timers))
+
     def get_upload_time_list(self):
         return list(self.upload_timers.values())
 

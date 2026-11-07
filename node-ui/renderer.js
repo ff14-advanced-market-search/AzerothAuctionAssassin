@@ -2570,12 +2570,27 @@ async function handlePastePBSItems(btn) {
         const tempItems = { ...state.desiredItems }
         const unmatchedNames = new Set(pbs_prices.keys())
         let importedCount = 0
+        const missingPrices = []
         for (const row of items) {
           const lower = row.itemName.toLowerCase()
           if (pbs_prices.has(lower)) {
             const price = pbs_prices.get(lower)
             if (price !== null) {
               tempItems[String(row.itemID)] = price
+            } else if (row.priceAvailable === false) {
+              if (
+                Object.prototype.hasOwnProperty.call(
+                  state.desiredItems,
+                  String(row.itemID)
+                )
+              ) {
+                tempItems[String(row.itemID)] =
+                  state.desiredItems[String(row.itemID)]
+              } else {
+                missingPrices.push(row.itemName)
+                unmatchedNames.delete(lower)
+                continue
+              }
             } else {
               const pct = discountPercent() / 100
               tempItems[String(row.itemID)] = Math.round(
@@ -2586,6 +2601,22 @@ async function handlePastePBSItems(btn) {
             importedCount++
           }
         }
+        if (missingPrices.length) {
+          appendLog(
+            `Skipped items without prices: ${missingPrices.join(
+              ", "
+            )}. Enter prices manually.\n`
+          )
+          showToast(
+            `Prices unavailable for ${missingPrices.length} item(s); entries without explicit prices were skipped.`,
+            "warning",
+            5000
+          )
+        }
+        if (!importedCount && missingPrices.length)
+          throw new Error(
+            "Prices are unavailable. Enter explicit prices before importing these items."
+          )
         if (!importedCount) {
           throw new Error(
             "No matching items found. Check the item names in your Auctionator/PBS list."
@@ -3351,6 +3382,13 @@ function appendLog(line) {
 }
 
 function applyForeverMode() {
+  if (
+    ["NAFOREVER", "EUFOREVER"].includes(state.megaData?.WOW_REGION) &&
+    document.querySelector(
+      '.view.active[data-view="ilvl"], .view.active[data-view="pet-ilvl"]'
+    )
+  )
+    showView("items")
   const forever = ["NAFOREVER", "EUFOREVER"].includes(
     state.megaData?.WOW_REGION
   )
@@ -3426,9 +3464,21 @@ async function loadZoomLevel() {
   }
 }
 
+async function fetchForeverJSON(url, options, timeoutMs) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    return await response.json()
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 async function fetchForeverStatistics(region) {
   try {
-    const response = await fetchWithTimeout(
+    const data = await fetchForeverJSON(
       "https://api.saddlebagexchange.com/api/wow/forever/megaitemnames",
       {
         method: "POST",
@@ -3438,10 +3488,8 @@ async function fetchForeverStatistics(region) {
           discount: 1,
         }),
       },
-      15000
+      4000
     )
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    const data = await response.json()
     if (
       !Array.isArray(data) ||
       !data.length ||
@@ -3477,11 +3525,13 @@ async function fetchForeverStatistics(region) {
       ],
     ]
     let lastError = error
-    for (const [url, options] of sources) {
+    for (const [index, [url, options]] of sources.entries()) {
       try {
-        const response = await fetchWithTimeout(url, options, 15000)
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const names = await response.json()
+        const names = await fetchForeverJSON(
+          url,
+          options,
+          index === 0 ? 2000 : 4000
+        )
         if (
           !names ||
           typeof names !== "object" ||
@@ -3498,9 +3548,10 @@ async function fetchForeverStatistics(region) {
           itemName: name,
           desiredPrice: 0,
           salesPerDay: 0,
+          priceAvailable: false,
         }))
-      } catch (failure) {
-        lastError = failure
+      } catch (error_) {
+        lastError = error_
       }
     }
     throw lastError
@@ -3613,7 +3664,11 @@ function renderItemSearchResults(results) {
 
     const metaDiv = document.createElement("div")
     metaDiv.className = "meta"
-    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${recommendedPrice}`
+    metaDiv.textContent = `ID: ${row.itemID} • Recommended: ${
+      row.priceAvailable === false
+        ? "unavailable — enter a price"
+        : recommendedPrice
+    }`
     innerDiv.appendChild(metaDiv)
 
     div.appendChild(innerDiv)
@@ -3623,7 +3678,9 @@ function renderItemSearchResults(results) {
     btn.onclick = () => {
       const form = document.getElementById("item-form")
       form.id.value = row.itemID
-      form.price.value = recommendedPrice
+      form.price.value =
+        state.desiredItems[String(row.itemID)] ??
+        (row.priceAvailable === false ? "" : recommendedPrice)
       ensureItemName(String(row.itemID), row.itemName)
       showView("items")
     }
@@ -4094,8 +4151,7 @@ async function saveMegaData(skipValidation = false) {
   state.megaData = await window.aaa.saveMegaData(data)
   renderMegaForm(state.megaData)
   applyForeverMode()
-  await fetchItemNames()
-  renderItemList()
+  fetchItemNames().then(() => renderItemList())
   trimAlertEmbedHistoryToLimit()
   if (!skipValidation) {
     showToast("Settings saved successfully!", "success", 2000)

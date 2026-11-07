@@ -93,7 +93,8 @@ class StreamToFile:
 
 
 class Item_And_Pet_Statistics(QThread):
-    completed = pyqtSignal(pd.DataFrame, pd.DataFrame)
+    completed = pyqtSignal(str, pd.DataFrame, pd.DataFrame)
+    failed = pyqtSignal(str, str)
 
     def __init__(self, parent=None):
         super(Item_And_Pet_Statistics, self).__init__(parent)
@@ -110,15 +111,34 @@ class Item_And_Pet_Statistics(QThread):
                 self.start()  # Refresh the statistics with new region
 
     def run(self):
+        try:
+            self.load_statistics()
+        except Exception as error:
+            self.failed.emit(self.region, str(error))
+
+    def load_statistics(self):
         if forever.is_forever(self.region):
             statistics = get_forever_item_statistics(self.region.replace("FOREVER", ""))
             self.completed.emit(
+                self.region,
                 pd.DataFrame(
-                    columns=["itemID", "itemName", "desiredPrice", "salesPerDay"]
+                    columns=[
+                        "itemID",
+                        "itemName",
+                        "desiredPrice",
+                        "salesPerDay",
+                        "priceAvailable",
+                    ]
                 ),
                 pd.DataFrame(
                     statistics,
-                    columns=["itemID", "itemName", "desiredPrice", "salesPerDay"],
+                    columns=[
+                        "itemID",
+                        "itemName",
+                        "desiredPrice",
+                        "salesPerDay",
+                        "priceAvailable",
+                    ],
                 ),
             )
             return
@@ -131,6 +151,7 @@ class Item_And_Pet_Statistics(QThread):
                     "region": self.region,
                     "discount": 1,
                 },
+                timeout=15,
             ).json()
         )
 
@@ -144,10 +165,11 @@ class Item_And_Pet_Statistics(QThread):
                     "discount": 1,
                     "pets": True,
                 },
+                timeout=15,
             ).json()
         )
 
-        self.completed.emit(pet_statistics, item_statistics)
+        self.completed.emit(self.region, pet_statistics, item_statistics)
 
 
 class App(QMainWindow):
@@ -220,6 +242,8 @@ class App(QMainWindow):
             # default to 10% discount, just use EU for now for less data
             self.api_data_thread = Item_And_Pet_Statistics(self)
             self.api_data_thread.completed.connect(self.api_data_received)
+            self.api_data_thread.finished.connect(self.statistics_request_finished)
+            self.api_data_thread.failed.connect(self.statistics_request_failed)
 
             self.pet_statistics = None
             self.item_statistics = None
@@ -733,6 +757,8 @@ class App(QMainWindow):
             if button is not None:
                 button.setEnabled(not forever.is_forever(new_region))
         if new_region in ["NA", "EU", "NAFOREVER", "EUFOREVER"]:
+            if self.api_data_thread.pending_region != new_region:
+                self.clear_statistics()
             self.api_data_thread.set_region(new_region)
 
     def make_pet_page(self, pet_page):
@@ -1085,19 +1111,49 @@ class App(QMainWindow):
     def go_to_pet_ilvl_page(self):
         self.stacked_widget.setCurrentIndex(6)
 
-    def api_data_received(self, pet_statistics, item_statistics):
+    def statistics_request_finished(self):
         requested = self.api_data_thread.pending_region
-        if self.api_data_thread.region != requested:
-            self.api_data_thread.wait()
+        if (
+            not self.api_data_thread.isRunning()
+            and self.api_data_thread.region != requested
+        ):
             self.api_data_thread.region = requested
             self.api_data_thread.start()
+
+    def clear_statistics(self):
+        columns = ["itemID", "itemName", "desiredPrice", "salesPerDay"]
+        self.item_statistics = pd.DataFrame(columns=columns)
+        self.pet_statistics = pd.DataFrame(columns=columns)
+        for name in ("item_name_input", "pet_name_input", "pet_ilvl_name_input"):
+            selector = getattr(self, name, None)
+            if selector is not None:
+                selector.blockSignals(True)
+                selector.clear()
+                selector.setEnabled(False)
+                selector.blockSignals(False)
+
+    def statistics_request_failed(self, region, message):
+        if region == self.api_data_thread.pending_region:
+            self.clear_statistics()
+            QMessageBox.warning(
+                self,
+                "Item data unavailable",
+                f"Could not load item data. Saved snipe prices are unchanged.\n{message}",
+            )
+
+    def api_data_received(self, region, pet_statistics, item_statistics):
+        if region != self.api_data_thread.pending_region:
             return
         self.pet_statistics = pet_statistics
         self.item_statistics = item_statistics
 
-        self.item_name_input.clear()
-        self.pet_name_input.clear()
-        self.pet_ilvl_name_input.clear()
+        for selector in (
+            self.item_name_input,
+            self.pet_name_input,
+            self.pet_ilvl_name_input,
+        ):
+            selector.blockSignals(True)
+            selector.clear()
 
         # Populate both pet name dropdowns
         pet_names = self.pet_statistics.sort_values(by="itemName")["itemName"].tolist()
@@ -1106,7 +1162,6 @@ class App(QMainWindow):
         self.pet_name_input.setEditable(True)
         self.pet_name_input.setInsertPolicy(QComboBox.NoInsert)
         self.pet_name_input.completer()
-        self.pet_name_input.currentIndexChanged.connect(self.on_combo_box_pet_changed)
 
         self.pet_ilvl_name_input.addItems(pet_names)
         self.pet_ilvl_name_input.setEnabled(True)
@@ -1117,7 +1172,6 @@ class App(QMainWindow):
         self.item_name_input.setEditable(True)
         self.item_name_input.setInsertPolicy(QComboBox.NoInsert)
         self.item_name_input.completer()
-        self.item_name_input.currentIndexChanged.connect(self.on_combo_box_item_changed)
 
         self.item_name_input.setEnabled(True)
         self.item_name_input.setStyleSheet(
@@ -1131,6 +1185,24 @@ class App(QMainWindow):
             "QComboBox::editable { background: #1D2023; color: white; }"
             "QComboBox::drop-down { border: 0px; }"
         )
+
+        for selector in (
+            self.item_name_input,
+            self.pet_name_input,
+            self.pet_ilvl_name_input,
+        ):
+            selector.blockSignals(False)
+        if not getattr(self, "_statistics_handlers_connected", False):
+            self.pet_name_input.currentIndexChanged.connect(
+                self.on_combo_box_pet_changed
+            )
+            self.item_name_input.currentIndexChanged.connect(
+                self.on_combo_box_item_changed
+            )
+            self._statistics_handlers_connected = True
+        self.item_name_input.setEnabled(not self.item_statistics.empty)
+        self.pet_name_input.setEnabled(not self.pet_statistics.empty)
+        self.pet_ilvl_name_input.setEnabled(not self.pet_statistics.empty)
 
     def on_combo_box_item_changed(self, index):
         # This function will be called whenever the user selects a different item
@@ -1146,6 +1218,18 @@ class App(QMainWindow):
             selected_item_price = self.items_list[str(selected_item_id)]
         else:
             selected_item_price = selected_item_stats["desiredPrice"].iloc[0]
+
+        if (
+            "priceAvailable" in selected_item_stats
+            and selected_item_stats["priceAvailable"].iloc[0] == False
+            and str(selected_item_id) not in self.items_list
+        ):
+            self.item_id_input.setText(str(selected_item_id))
+            self.item_price_input.clear()
+            self.item_price_input.setPlaceholderText(
+                "Price unavailable — enter a price"
+            )
+            return
 
         # if the user has not set a price for the item, set the price from TSM stats
         if (
@@ -1597,8 +1681,7 @@ class App(QMainWindow):
                     markets = forever.rename_markets(json.load(source))
             else:
                 markets = forever.FOREVER_MARKETS
-            with open(file_path, "w") as target:
-                json.dump(markets, target, indent=4)
+            forever.save_markets(file_path, markets)
 
         if not os.path.exists(self.eu_connected_realms):
             from utils.realm_data import EU_CONNECTED_REALMS_IDS
@@ -2871,6 +2954,26 @@ class App(QMainWindow):
     def validate_item_lists(self, reset=False):
         # When resetting, we don't need to validate since lists will be empty
         if reset:
+            return True
+
+        if forever.is_forever(self.wow_region.currentText()):
+            if not self.items_list:
+                QMessageBox.critical(
+                    self,
+                    "No Forever items",
+                    "Add at least one regular item. Forever ignores saved pet and ilvl rules; those rules are preserved for other regions.",
+                )
+                return False
+            if not all(
+                str(key).isdigit() and 1 <= int(key) <= 500000
+                for key in self.items_list
+            ):
+                QMessageBox.critical(
+                    self,
+                    "Invalid Item ID",
+                    "All item IDs should be integers between 1 and 500000.",
+                )
+                return False
             return True
 
         # Check if items_list, pet_list, ilvl_list, or pet_ilvl_rules are not empty

@@ -2,6 +2,9 @@
 
 import math
 import re
+import json
+import tempfile
+from pathlib import Path
 
 # Verified against Undermine's realm catalog and Blizzard snapshots in both regions.
 MARKETS = {
@@ -60,6 +63,8 @@ def market_name(feed_id):
 
 
 def rename_markets(markets):
+    if not isinstance(markets, dict):
+        return {}
     return {
         (
             (market_name(feed) or name)
@@ -154,3 +159,22 @@ def validate_statistics(data):
             ):
                 raise ValueError(f"Invalid Forever statistics {field}")
     return data
+
+
+def save_markets(path, markets):
+    path = Path(path)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=path.name + ".",
+            delete=False,
+        ) as target:
+            temporary = Path(target.name)
+            json.dump(markets, target, indent=4)
+        temporary.replace(path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
