@@ -12,7 +12,7 @@ from utils import forever
 
 class RecoverySchedulingTests(unittest.TestCase):
     def test_untracked_recovery_uses_separate_pool_without_waiting(self):
-        tree = ast.parse(Path("mega_alerts.py").read_text())
+        tree = ast.parse(Path("mega_alerts.py").read_text(encoding="utf-8"))
         main = next(
             node
             for node in ast.walk(tree)

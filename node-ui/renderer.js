@@ -2608,15 +2608,10 @@ async function handlePastePBSItems(btn) {
               ", "
             )}. Enter prices manually.\n`
           )
-          showToast(
-            `Prices unavailable for ${missingPrices.length} item(s); entries without explicit prices were skipped.`,
-            "warning",
-            5000
-          )
         }
         if (!importedCount && missingPrices.length)
           throw new Error(
-            "Prices are unavailable. Enter explicit prices before importing these items."
+            `Prices unavailable for ${missingPrices.length} item(s). Enter explicit prices before importing.`
           )
         if (!importedCount) {
           throw new Error(
@@ -2625,12 +2620,12 @@ async function handlePastePBSItems(btn) {
         }
         state.desiredItems = await window.aaa.saveItems(tempItems)
         await loadState()
-        const message = `Imported ${importedCount} item(s). ${unmatchedNames.size} name(s) not found.`
+        const message = `Imported ${importedCount} item(s). ${unmatchedNames.size} name(s) not found. ${missingPrices.length} item(s) skipped because prices are unavailable.`
         appendLog(`${message}\n`)
         if (unmatchedNames.size) {
           appendLog(`Unmatched item names: ${[...unmatchedNames].join(", ")}\n`)
         }
-        showToast(message, "success", 5000)
+        showToast(message, missingPrices.length ? "warning" : "success", 5000)
         flashButton(btn, "Imported!")
       } catch (err) {
         const message = `Import error: ${err.message || err}`

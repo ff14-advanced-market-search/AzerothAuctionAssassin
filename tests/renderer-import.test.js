@@ -350,11 +350,11 @@ test("names-only PBS import skips missing prices and preserves supplied and save
   await ui.importItems("List^Unpriced^Explicit;;0^Saved")
   assert.deepEqual(ui.calls.saves[0], { 999: 42, 720: 0 })
   assert.ok(
-    ui.calls.toasts.some((toast) =>
-      toast.message.includes("Prices unavailable")
-    )
+    ui.calls.toasts.some((toast) => toast.message.includes("1 item(s) skipped"))
   )
   assert.ok(ui.calls.logs.some((line) => line.includes("Unpriced")))
+  assert.equal(ui.calls.toasts.at(-1).type, "warning")
+  assert.match(ui.calls.toasts.at(-1).message, /1 item\(s\) skipped/)
 })
 
 test(

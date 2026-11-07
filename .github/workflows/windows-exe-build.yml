@@ -93,9 +93,32 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const tag = `v${process.env.AAA_VERSION}`;
+            let existingRef;
+            try {
+              const response = await github.rest.git.getRef({
+                ...context.repo, ref: `tags/${tag}`,
+              });
+              existingRef = response.data;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            if (existingRef) {
+              let target = existingRef.object;
+              while (target.type === "tag") {
+                const { data: annotated } = await github.rest.git.getTag({
+                  ...context.repo, tag_sha: target.sha,
+                });
+                target = annotated.object;
+              }
+              if (target.type !== "commit" || target.sha !== context.sha) {
+                throw new Error(`Existing tag ${tag} does not match build commit ${context.sha}`);
+              }
+            }
             const { data } = await github.rest.repos.createRelease({
               ...context.repo,
-              tag_name: `v${process.env.AAA_VERSION}`,
+              tag_name: tag,
+              target_commitish: context.sha,
               name: `Release v${process.env.AAA_VERSION}`,
               draft: false,
               prerelease: false,

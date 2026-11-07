@@ -76,7 +76,7 @@ class ForeverBackupTests(unittest.TestCase):
 
     def load_updater(self, names, statistics):
         path = Path("update-static-saddlebag-data.py")
-        tree = ast.parse(path.read_text())
+        tree = ast.parse(path.read_text(encoding="utf-8"))
         func = next(
             n
             for n in tree.body
@@ -104,7 +104,9 @@ class ForeverBackupTests(unittest.TestCase):
             self.assertEqual(len(list(Path(directory).iterdir())), 1)
 
     def test_filesystem_failure_does_not_stop_other_static_updates(self):
-        tree = ast.parse(Path("update-static-saddlebag-data.py").read_text())
+        tree = ast.parse(
+            Path("update-static-saddlebag-data.py").read_text(encoding="utf-8")
+        )
         block = next(node for node in tree.body if isinstance(node, ast.Try))
         continued = Mock()
         ns = {

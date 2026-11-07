@@ -52,7 +52,7 @@ class Frame:
 
 
 def classes():
-    tree = ast.parse(Path("AzerothAuctionAssassin.py").read_text())
+    tree = ast.parse(Path("AzerothAuctionAssassin.py").read_text(encoding="utf-8"))
     worker = next(
         n
         for n in tree.body

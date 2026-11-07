@@ -74,7 +74,13 @@ class ForeverTests(unittest.TestCase):
     ):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "markets.json"
-            for content in ("null", "[]", "{broken"):
+            for content in (
+                "null",
+                "[]",
+                "{broken",
+                '{"Alliance Auction House 111 — Items":"bad"}',
+                '{"Custom":"bad"}',
+            ):
                 path.write_text(content)
                 with redirect_stdout(io.StringIO()):
                     self.assertEqual(

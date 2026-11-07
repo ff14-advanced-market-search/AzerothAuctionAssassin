@@ -190,12 +190,15 @@ def load_markets(path, migrate=False):
         original = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(original, dict):
             raise ValueError("expected a market object")
+        for feed in original.values():
+            if not re.fullmatch(r"-?[0-9]+", str(feed)) or not faction(feed):
+                raise ValueError("invalid Forever feed ID")
+        markets = rename_markets(original)
     except (OSError, ValueError) as error:
         print(
             f"Invalid Forever market file {path}; preserving file and using defaults: {error}"
         )
         return FOREVER_MARKETS.copy()
-    markets = rename_markets(original)
     if migrate and markets != original:
         save_markets(path, markets)
     return markets
