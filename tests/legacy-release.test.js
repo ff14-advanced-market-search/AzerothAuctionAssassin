@@ -8,17 +8,36 @@ const workflow = fs.readFileSync(
   path.join(__dirname, "../.github/workflows/windows-exe-build.yml"),
   "utf8"
 )
-const scriptMatch = workflow.match(
-  /      - name: Create Release[\s\S]*?          script: \|\n([\s\S]*?)(?=\n      - name:)/
-)
-assert.ok(scriptMatch, "release script not found in windows-exe-build.yml")
-const source = scriptMatch[1].replace(/^ {12}/gm, "")
+
+function workflowScript(text, stepName, missingMessage) {
+  const escaped = stepName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const match = text.match(
+    new RegExp(
+      `^[ \\t]*- name: ${escaped}\\b[\\s\\S]*?^[ \\t]*script:\\s*[|>][+-]?\\n([\\s\\S]*?)(?=\\n[ \\t]*- name:)`,
+      "m"
+    )
+  )
+  assert.ok(match, missingMessage)
+  const lines = match[1].split("\n")
+  const indent = lines.reduce((min, line) => {
+    if (!line.trim()) return min
+    return Math.min(min, line.match(/^[ \t]*/)[0].length)
+  }, Infinity)
+  if (!Number.isFinite(indent)) return ""
+  return lines.map((line) => line.slice(indent)).join("\n")
+}
+
 async function release(
   getRef,
   getTag = async () => ({
     data: { object: { type: "commit", sha: "build-commit" } },
   })
 ) {
+  const source = workflowScript(
+    workflow,
+    "Create Release",
+    "release script not found in windows-exe-build.yml"
+  )
   const calls = []
   calls.refs = []
   calls.tags = []
@@ -97,15 +116,29 @@ test("a missing annotated object is not mistaken for a missing tag reference", a
   )
 })
 
-test("legacy preflight refuses existing releases and propagates authorization errors", async () => {
-  const match = workflow.match(
-    /      - name: Check release version is unused[\s\S]*?          script: \|\n([\s\S]*?)(?=\n      - name:)/
+test("release script extraction ignores indentation and block style", () => {
+  const sample = [
+    "    - name: Create Release",
+    "      with:",
+    "        script: >",
+    "          const tag = 1",
+    "          return tag",
+    "    - name: Upload",
+  ].join("\n")
+  assert.equal(
+    workflowScript(sample, "Create Release", "missing"),
+    "const tag = 1\nreturn tag"
   )
-  assert.ok(match)
+})
+
+test("legacy preflight refuses existing releases and propagates authorization errors", async () => {
+  const preflight = workflowScript(
+    workflow,
+    "Check release version is unused",
+    "release script not found in windows-exe-build.yml"
+  )
   const run = (getReleaseByTag) =>
-    new vm.Script(
-      `(async () => {${match[1].replace(/^ {12}/gm, "")}})()`
-    ).runInNewContext({
+    new vm.Script(`(async () => {${preflight}})()`).runInNewContext({
       context: { repo: { owner: "owner", repo: "repo" } },
       process: { env: { AAA_VERSION: "1.7.0" } },
       github: { rest: { repos: { getReleaseByTag } } },

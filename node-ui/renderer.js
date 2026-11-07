@@ -2601,9 +2601,8 @@ async function handlePastePBSItems(btn) {
                 continue
               }
             } else {
-              const pct = discountPercent() / 100
-              tempItems[String(row.itemID)] = Math.round(
-                Number(row.desiredPrice || 0) * pct
+              tempItems[String(row.itemID)] = recommendedItemPrice(
+                row.desiredPrice
               )
             }
             unmatchedNames.delete(lower)

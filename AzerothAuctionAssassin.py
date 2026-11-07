@@ -2657,15 +2657,25 @@ class App(QMainWindow):
                     pbs_prices[item_name] = None
 
             temp_items_list = {}
+            skipped_names = []
             pbs_item_names = list(pbs_prices.keys())
             for _index, item in self.item_statistics.iterrows():
                 item_name_lower = item["itemName"].lower()
                 if item_name_lower in pbs_item_names:
+                    item_id = str(item["itemID"])
                     price = pbs_prices[item_name_lower]
                     if price is not None:
-                        temp_items_list[str(item["itemID"])] = pbs_prices[
-                            item_name_lower
-                        ]
+                        temp_items_list[item_id] = pbs_prices[item_name_lower]
+                    elif (
+                        "priceAvailable" in item
+                        and item["priceAvailable"] == False
+                    ):
+                        # A names-only row has desiredPrice 0. Keep a saved
+                        # target, and do not invent a zero alert threshold.
+                        if item_id in self.items_list:
+                            temp_items_list[item_id] = self.items_list[item_id]
+                        else:
+                            skipped_names.append(item["itemName"])
                     else:
                         # Use default behavior if price is not set in PBS
                         default_price = item["desiredPrice"]
@@ -2673,7 +2683,16 @@ class App(QMainWindow):
                         discount_price = round(
                             float(default_price) * discount_percent, 4
                         )
-                        temp_items_list[str(item["itemID"])] = discount_price
+                        temp_items_list[item_id] = discount_price
+
+            if skipped_names:
+                QMessageBox.warning(
+                    self,
+                    "Import Warning",
+                    "Skipped items without prices: "
+                    + ", ".join(str(name) for name in skipped_names)
+                    + ". Enter prices manually.",
+                )
 
             for key, value in temp_items_list.items():
                 self.item_list_display.insertItem(

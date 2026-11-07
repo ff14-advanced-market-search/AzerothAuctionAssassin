@@ -68,6 +68,8 @@ def classes():
         "on_region_changed",
         "validate_item_lists",
         "on_combo_box_item_changed",
+        "import_pbs_data",
+        "isfloat",
     }
     app.body = [
         n for n in app.body if isinstance(n, ast.FunctionDef) and n.name in keep
@@ -182,6 +184,50 @@ class StatisticsTests(unittest.TestCase):
         self.app.wow_region.currentText.return_value = "EU"
         self.app.on_combo_box_item_changed(0)
         self.app.item_price_input.setText.assert_called_once_with("0")
+
+    def test_pbs_import_keeps_saved_price_when_row_has_no_price(self):
+        self.ns["QInputDialog"] = SimpleNamespace(
+            getMultiLineText=lambda *args, **kwargs: (
+                "Saved;;#;;^Fresh;;#;;^Missing;;#;;",
+                True,
+            )
+        )
+        self.app.item_list_display = Mock()
+        self.app.items_list = {"3048": 15}
+        self.app.discount_percent = Mock()
+        self.app.discount_percent.text.return_value = "10"
+        rows = [
+            {
+                "itemID": 3048,
+                "itemName": "Saved",
+                "desiredPrice": 0,
+                "priceAvailable": False,
+            },
+            {
+                "itemID": 25,
+                "itemName": "Fresh",
+                "desiredPrice": 4,
+                "priceAvailable": True,
+            },
+            {
+                "itemID": 99,
+                "itemName": "Missing",
+                "desiredPrice": 0,
+                "priceAvailable": False,
+            },
+        ]
+
+        class Stats:
+            def iterrows(self):
+                return enumerate(rows)
+
+        self.app.item_statistics = Stats()
+        self.app.import_pbs_data()
+        self.assertEqual(self.app.items_list, {"3048": 15, "25": 0.4})
+        self.ns["QMessageBox"].warning.assert_called_once()
+        self.assertIn(
+            "Missing", self.ns["QMessageBox"].warning.call_args.args[2]
+        )
 
     def test_unavailable_saved_price_is_not_discounted_when_input_is_empty(self):
         stats = MagicMock()

@@ -162,6 +162,22 @@ for (const price of ["Infinity", "-Infinity", "1e309", "-1", "NaN", " "]) {
   })
 }
 
+test("Forever PBS fallback keeps a sub-gold recommendation", async () => {
+  const app = setup(async () =>
+    response([
+      {
+        itemID: 25,
+        itemName: "Worn Shortsword",
+        desiredPrice: 2,
+        salesPerDay: 1,
+      },
+    ])
+  )
+  app.setRegion("NAFOREVER")
+  await app.importItems('boe?"Worn Shortsword"')
+  assert.deepEqual(app.calls.saves, [{ 999: 42, 25: 0.4 }])
+})
+
 test("preserves an explicit zero PBS price", async () => {
   const app = setup()
   await app.importItems('boe?"Worn Shortsword";;0;0;0;0;0;0;0;0;;#;;')
