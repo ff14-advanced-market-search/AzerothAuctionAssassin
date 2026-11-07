@@ -2666,10 +2666,7 @@ class App(QMainWindow):
                     price = pbs_prices[item_name_lower]
                     if price is not None:
                         temp_items_list[item_id] = pbs_prices[item_name_lower]
-                    elif (
-                        "priceAvailable" in item
-                        and item["priceAvailable"] == False
-                    ):
+                    elif "priceAvailable" in item and item["priceAvailable"] == False:
                         # A names-only row has desiredPrice 0. Keep a saved
                         # target, and do not invent a zero alert threshold.
                         if item_id in self.items_list:

@@ -225,9 +225,7 @@ class StatisticsTests(unittest.TestCase):
         self.app.import_pbs_data()
         self.assertEqual(self.app.items_list, {"3048": 15, "25": 0.4})
         self.ns["QMessageBox"].warning.assert_called_once()
-        self.assertIn(
-            "Missing", self.ns["QMessageBox"].warning.call_args.args[2]
-        )
+        self.assertIn("Missing", self.ns["QMessageBox"].warning.call_args.args[2])
 
     def test_unavailable_saved_price_is_not_discounted_when_input_is_empty(self):
         stats = MagicMock()
