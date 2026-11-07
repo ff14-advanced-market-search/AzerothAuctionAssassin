@@ -87,6 +87,14 @@ class ForeverTests(unittest.TestCase):
             bad[field] = value
             with self.assertRaises(ValueError):
                 forever.validate_statistics([bad])
+        huge = dict(row)
+        huge["desiredPrice"] = 10**400
+        self.assertEqual(forever.validate_statistics([huge]), [huge])
+        for value in (float("nan"), float("inf")):
+            bad = dict(row)
+            bad["salesPerDay"] = value
+            with self.assertRaises(ValueError):
+                forever.validate_statistics([bad])
 
     def test_untracked_forever_feed_without_last_modified_waits_a_minute(self):
         data = MegaData.__new__(MegaData)
@@ -151,6 +159,21 @@ class ForeverTests(unittest.TestCase):
             data._make_ah_api_request.return_value = {"auctions": []}
             self.assertEqual(data.get_listings_single(110), [])
         self.assertEqual(data.forever_failures, {})
+
+    def test_non_object_forever_payload_keeps_backoff(self):
+        data = MegaData.__new__(MegaData)
+        data.REGION = "NAFOREVER"
+        data.forever_failures = {110: {"attempts": 2, "next_retry": 0}}
+        data._make_ah_api_request = Mock(return_value=None)
+        with redirect_stdout(io.StringIO()), patch(
+            "utils.mega_data_setup.time.monotonic", return_value=100
+        ):
+            self.assertEqual(data.get_listings_single(110), [])
+            self.assertEqual(data.forever_failures[110]["attempts"], 3)
+            data.forever_failures[110]["next_retry"] = 0
+            data._make_ah_api_request.return_value = {"auctions": {"bad": True}}
+            self.assertEqual(data.get_listings_single(110), [])
+            self.assertEqual(data.forever_failures[110]["attempts"], 4)
 
     def test_urls_and_unit_prices(self):
         self.assertIn(

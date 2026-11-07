@@ -736,8 +736,20 @@ class MegaData:
                 data = self._make_ah_api_request(
                     forever.auction_url(self.REGION, connectedRealmId), connectedRealmId
                 )
+                if not isinstance(data, dict):
+                    raise ValueError(
+                        f"Forever feed {connectedRealmId} returned a non-object payload"
+                    )
+                if data.get("skipped"):
+                    failures.pop(connectedRealmId, None)
+                    return None
+                auctions = data.get("auctions", [])
+                if not isinstance(auctions, list):
+                    raise ValueError(
+                        f"Forever feed {connectedRealmId} returned a non-list auctions payload"
+                    )
                 failures.pop(connectedRealmId, None)
-                return None if data.get("skipped") else data.get("auctions", [])
+                return auctions
             except Exception as error:
                 attempts = min(
                     failures.get(connectedRealmId, {}).get("attempts", 0) + 1, 7

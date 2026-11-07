@@ -42,9 +42,18 @@ class Thread:
 
 
 class Frame:
-    def __init__(self, rows=None, columns=None):
+    def __init__(self, rows=None, columns=None, data=None):
+        if data is not None:
+            rows = data
         self.rows = rows or []
-        self.columns = list(columns or [])
+        self.columns = list(
+            columns
+            or (
+                list(self.rows[0].keys())
+                if self.rows and isinstance(self.rows[0], dict)
+                else []
+            )
+        )
         self.empty = not self.rows
 
     def sort_values(self, by):
@@ -138,6 +147,19 @@ class StatisticsTests(unittest.TestCase):
         self.assertEqual(pets.rows, [])
         self.assertEqual(items.columns, columns)
         self.assertEqual(items.rows, rows)
+
+    def test_statistics_without_item_names_fail_the_request(self):
+        response = Mock()
+        response.json.return_value = []
+        self.ns["requests"] = SimpleNamespace(post=Mock(return_value=response))
+        self.ns["saddlebag_request_headers"] = lambda headers: headers
+        self.ns["WOW_DISCORD_CONSENT"] = False
+        failed = []
+        self.worker.failed.connect(lambda *args: failed.append(args))
+        self.worker.region = "EU"
+        self.worker.run()
+        self.assertEqual(failed[0][0], "EU")
+        self.assertIn("no item names", failed[0][1])
 
     def test_request_failure_still_starts_pending_region(self):
         self.worker.set_region("NA")

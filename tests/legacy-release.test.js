@@ -160,6 +160,12 @@ test("legacy preflight runs before the Windows build", () => {
   assert.notEqual(build, -1)
   assert.ok(preflight < build, "release preflight must run before Build EXE")
   assert.match(workflow.slice(job, preflight), /permissions:\s+contents: write/)
+  assert.match(workflow, /^permissions:\n {2}contents: read\n/m)
+  const mac = workflow.indexOf("  build-mac:")
+  assert.match(
+    workflow.slice(mac, mac + 180),
+    /permissions:\n {6}contents: write/
+  )
 })
 
 test("a legacy release propagates non-404 tag lookup errors", async () => {

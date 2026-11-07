@@ -451,3 +451,25 @@ test("Forever scan fails when the selected faction has no feeds", (t) => {
     /No Forever feeds are selected for NAFOREVER/
   )
 })
+
+test("a non-array Forever auctions payload is an empty listing", async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aaa-bad-auctions-"))
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }))
+  fs.writeFileSync(
+    path.join(dir, "mega_data.json"),
+    JSON.stringify({ WOW_REGION: "NAFOREVER" })
+  )
+  fs.writeFileSync(
+    path.join(dir, "naforever-wow-connected-realm-ids.json"),
+    JSON.stringify({ Items: 110 })
+  )
+  const api = scanner(async () => response({ auctions: { bad: true } }))
+  api.setPaths(dir, dir)
+  const data = new api.MegaData()
+  data.upload_timers = {}
+  data.fetchAccessToken = async () => "test"
+  const listings = await data.get_listings_single(110)
+  assert.equal(Array.isArray(listings), true)
+  assert.equal(listings.length, 0)
+  assert.equal(data.feedFailures[110], undefined)
+})

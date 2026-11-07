@@ -1202,7 +1202,8 @@ class MegaData {
           connectedRealmId
         )
         delete this.feedFailures[connectedRealmId]
-        return data?.skipped ? null : data?.auctions || []
+        if (data?.skipped) return null
+        return Array.isArray(data?.auctions) ? data.auctions : []
       } catch (error) {
         const attempts = Math.min(
           (this.feedFailures[connectedRealmId]?.attempts || 0) + 1,

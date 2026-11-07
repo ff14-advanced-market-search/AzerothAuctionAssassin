@@ -178,6 +178,9 @@ class Item_And_Pet_Statistics(QThread):
             ).json()
         )
 
+        for statistics in (pet_statistics, item_statistics):
+            if "itemName" not in statistics.columns:
+                raise ValueError("Saddlebag returned no item names.")
         self.completed.emit(self.region, pet_statistics, item_statistics)
 
 
@@ -1464,6 +1467,18 @@ class App(QMainWindow):
         self.realm_name_input.setText(str(selected_realm_name))
         self.realm_id_input.setText(str(realm_list[selected_realm_name]))
 
+    def save_forever_markets(self, path, markets):
+        try:
+            forever.save_markets(path, markets)
+        except OSError as error:
+            QMessageBox.critical(
+                self,
+                "Forever realm list not saved",
+                f"Could not save the Forever realm list: {error}",
+            )
+            return False
+        return True
+
     def add_realm_to_list(self):
         if self.realm_name_input.text() == "":
             return 0
@@ -1518,17 +1533,18 @@ class App(QMainWindow):
             feed_id = int(self.realm_id_input.text())
         data[self.realm_name_input.text()] = feed_id
 
+        if forever.is_forever(selected_realm):
+            if not self.save_forever_markets(data_to_insert, data):
+                return False
+        else:
+            self.save_json_file(data_to_insert, data)
+
         self.realm_list_display.clear()
 
         for key, value in data.items():
             self.realm_list_display.insertItem(
                 self.realm_list_display.count(), f"Name: {key}; ID: {value};"
             )
-
-        if forever.is_forever(selected_realm):
-            forever.save_markets(data_to_insert, data)
-        else:
-            self.save_json_file(data_to_insert, data)
 
     def remove_realm_to_list(self):
         if self.realm_name_input.text() == "":
@@ -1579,6 +1595,12 @@ class App(QMainWindow):
             )
             return 0
 
+        if forever.is_forever(selected_realm):
+            if not self.save_forever_markets(data_to_insert, data):
+                return False
+        else:
+            self.save_json_file(data_to_insert, data)
+
         self.realm_list_display.clear()
 
         for key, value in data.items():
@@ -1588,11 +1610,6 @@ class App(QMainWindow):
 
         self.realm_name_input.setText("")
         self.realm_id_input.setText("")
-
-        if forever.is_forever(selected_realm):
-            forever.save_markets(data_to_insert, data)
-        else:
-            self.save_json_file(data_to_insert, data)
 
     def reset_realm_list(self):
         selected_realm = self.realm_region.currentText()
@@ -1647,7 +1664,8 @@ class App(QMainWindow):
                 return False
 
         if forever.is_forever(selected_realm):
-            forever.save_markets(data_to_insert, realm_list)
+            if not self.save_forever_markets(data_to_insert, realm_list):
+                return False
         else:
             with open(data_to_insert, "w") as json_file:
                 json.dump(realm_list, json_file, indent=4)
