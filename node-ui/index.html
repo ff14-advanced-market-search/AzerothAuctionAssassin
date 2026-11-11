@@ -33,7 +33,7 @@
       <header class="topbar">
         <div>
           <div class="eyebrow">Azeroth Auction Assassin</div>
-          <div class="title">Version: 2.3.0</div>
+          <div class="title">Version: 2.3.1</div>
         </div>
         <div class="actions">
           <div class="nav-controls">
@@ -570,16 +570,57 @@
                   Item ID
                   <input type="text" name="id" placeholder="Item ID" />
                 </label>
-                <label title="Pick a price you want to buy at or under.">
-                  Max price
-                  <input
-                    type="number"
-                    name="price"
-                    placeholder="Max price"
-                    min="0"
-                    step="any"
-                  />
-                </label>
+                <fieldset class="item-price-fields">
+                  <legend>Max price per item</legend>
+                  <label>
+                    <span
+                      >Gold<span
+                        class="coin coin-gold"
+                        aria-hidden="true"
+                      ></span
+                    ></span>
+                    <input
+                      type="number"
+                      name="gold"
+                      min="0"
+                      max="10000000"
+                      step="1"
+                      placeholder="0"
+                    />
+                  </label>
+                  <label>
+                    <span
+                      >Silver<span
+                        class="coin coin-silver"
+                        aria-hidden="true"
+                      ></span
+                    ></span>
+                    <input
+                      type="number"
+                      name="silver"
+                      min="0"
+                      max="99"
+                      step="1"
+                      placeholder="0"
+                    />
+                  </label>
+                  <label>
+                    <span
+                      >Copper<span
+                        class="coin coin-copper"
+                        aria-hidden="true"
+                      ></span
+                    ></span>
+                    <input
+                      type="number"
+                      name="copper"
+                      min="0"
+                      max="99"
+                      step="1"
+                      placeholder="0"
+                    />
+                  </label>
+                </fieldset>
                 <button
                   type="submit"
                   class="primary"
