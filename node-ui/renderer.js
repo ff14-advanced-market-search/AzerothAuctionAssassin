@@ -1689,7 +1689,7 @@ const WOW_DISCORD_CONSENT =
   "I have gone to discord and asked the devs about this api and i know it only updates once per hour and will not spam the api like an idiot and there is no point in making more than one request per hour and i will not make request for one item at a time i know many apis support calling multiple items at once"
 
 // Keep in sync with root package.json version (avoid IPC on every Saddlebag request — was causing UI jitter)
-const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.3.0"
+const SADDLEBAG_USER_AGENT = "AzerothAuctionAssassin/2.3.1"
 
 function saddlebagFetchHeaders(base = {}) {
   return { ...base, "User-Agent": SADDLEBAG_USER_AGENT }
@@ -3030,6 +3030,43 @@ function renderKVList(target, data, onRemove, labelFn, onClick) {
   })
 }
 
+function splitItemPrice(price) {
+  const totalCopper = Math.round(Number(price) * 10000)
+  return {
+    gold: Math.floor(totalCopper / 10000),
+    silver: Math.floor((totalCopper % 10000) / 100),
+    copper: totalCopper % 100,
+  }
+}
+
+function fillItemPrice(form, price) {
+  for (const [unit, amount] of Object.entries(splitItemPrice(price))) {
+    form.elements[unit].value =
+      price !== "" && Number.isFinite(amount) ? amount : ""
+  }
+}
+
+function renderItemPrice(price) {
+  const amounts = splitItemPrice(price)
+  const showZeroCopper = amounts.gold === 0 && amounts.silver === 0
+  const display = document.createElement("span")
+  display.className = "item-coin-price"
+  for (const [unit, amount] of Object.entries(amounts)) {
+    if (amount === 0 && !(unit === "copper" && showZeroCopper)) continue
+
+    const part = document.createElement("span")
+    part.className = "coin-amount"
+    part.textContent = amount.toLocaleString()
+    const coin = document.createElement("span")
+    coin.className = `coin coin-${unit}`
+    coin.setAttribute("role", "img")
+    coin.setAttribute("aria-label", unit)
+    part.appendChild(coin)
+    display.appendChild(part)
+  }
+  return display
+}
+
 function renderItemList() {
   const filterTerm = itemFilterInput
     ? itemFilterInput.value.toLowerCase().trim()
@@ -3051,7 +3088,7 @@ function renderItemList() {
   const handleItemClick = (itemId, price) => {
     if (itemForm) {
       itemForm.id.value = itemId
-      itemForm.price.value = price
+      fillItemPrice(itemForm, price)
       itemForm.id.focus()
     }
   }
@@ -3080,7 +3117,7 @@ function renderItemList() {
       strong.appendChild(document.createTextNode(` • ${name}`))
 
       labelEl.appendChild(strong)
-      labelEl.appendChild(document.createTextNode(` → ${String(p)}`))
+      labelEl.append(document.createTextNode(" → "), renderItemPrice(p))
     },
     handleItemClick
   )
@@ -3702,10 +3739,12 @@ function renderItemSearchResults(results) {
     btn.onclick = () => {
       const form = document.getElementById("item-form")
       form.id.value = row.itemID
-      form.price.value =
+      fillItemPrice(
+        form,
         row.priceAvailable === false
           ? state.desiredItems[String(row.itemID)] ?? ""
           : recommendedPrice
+      )
       ensureItemName(String(row.itemID), row.itemName)
       showView("items")
     }
@@ -4211,20 +4250,22 @@ document.getElementById("item-form").addEventListener("submit", async (e) => {
   e.preventDefault()
   const form = e.target
   const id = form.id.value.trim()
-  const price = Number(form.price.value)
+  const { gold, silver, copper } = form.elements
+  const price =
+    (Number(gold.value) * 10000 +
+      Number(silver.value) * 100 +
+      Number(copper.value)) /
+    10000
 
-  // Validation
-  if (!id || form.price.value === "") {
-    const errorMsg = "All fields are required."
-    showToast(errorMsg, "error")
+  if (!id) {
+    showToast("Enter an item ID.", "error")
     form.id.focus()
     return
   }
 
-  if (Number.isNaN(price)) {
-    const errorMsg = "Item ID and Price should be numbers."
-    showToast(errorMsg, "error")
-    form.price.focus()
+  if ([gold, silver, copper].every((field) => field.value === "")) {
+    showToast("Enter a max price.", "error")
+    gold.focus()
     return
   }
 
@@ -4239,7 +4280,7 @@ document.getElementById("item-form").addEventListener("submit", async (e) => {
   if (!(0 <= price && price <= 10000000)) {
     const errorMsg = "Price must be between 0 and 10 million."
     showToast(errorMsg, "error")
-    form.price.focus()
+    gold.focus()
     return
   }
 

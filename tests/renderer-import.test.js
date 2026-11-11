@@ -411,13 +411,18 @@ test("a names-only result requests manual pricing instead of suggesting zero", (
   ui.run(`globalThis.cards = []
     document.createElement = () => ({children: [], appendChild(child) { this.children.push(child) }})
     itemSearchResults.appendChild = (card) => cards.push(card)
-    globalThis.form = { id: {value: ""}, price: {value: ""} }
+    globalThis.form = { id: {value: ""}, elements: { gold: {value: ""}, silver: {value: ""}, copper: {value: ""} } }
     document.getElementById = () => form
     showView = () => {}
     ensureItemName = () => {}
     renderItemSearchResults([{ itemID: 3048, itemName: "Item", desiredPrice: 0, salesPerDay: 0, priceAvailable: false }])
     cards[0].children[1].onclick()`)
-  assert.equal(ui.run("form.price.value"), "")
+  assert.deepEqual(
+    Array.from(
+      ui.run("Object.values(form.elements).map(field => field.value)")
+    ),
+    ["", "", ""]
+  )
   assert.match(
     ui.run("cards[0].children[0].children[1].textContent"),
     /unavailable/
@@ -467,13 +472,18 @@ test("Use applies a real recommendation instead of an old saved target", () => {
   ui.run(`globalThis.cards = []
     document.createElement = () => ({children: [], appendChild(child) { this.children.push(child) }})
     itemSearchResults.appendChild = (card) => cards.push(card)
-    globalThis.form = { id: {value: ""}, price: {value: ""} }
+    globalThis.form = { id: {value: ""}, elements: { gold: {value: ""}, silver: {value: ""}, copper: {value: ""} } }
     document.getElementById = () => form
     showView = () => {}
     ensureItemName = () => {}
     renderItemSearchResults([{ itemID: 999, itemName: "Item", desiredPrice: 100, salesPerDay: 2 }])
     cards[0].children[1].onclick()`)
-  assert.equal(ui.run("form.price.value"), 20)
+  assert.deepEqual(
+    Array.from(
+      ui.run("Object.values(form.elements).map(field => field.value)")
+    ),
+    [20, 0, 0]
+  )
 })
 
 test("Forever Use keeps a sub-gold recommendation", () => {
@@ -482,13 +492,18 @@ test("Forever Use keeps a sub-gold recommendation", () => {
   ui.run(`globalThis.cards = []
     document.createElement = () => ({children: [], appendChild(child) { this.children.push(child) }})
     itemSearchResults.appendChild = (card) => cards.push(card)
-    globalThis.form = { id: {value: ""}, price: {value: ""} }
+    globalThis.form = { id: {value: ""}, elements: { gold: {value: ""}, silver: {value: ""}, copper: {value: ""} } }
     document.getElementById = () => form
     showView = () => {}
     ensureItemName = () => {}
     renderItemSearchResults([{ itemID: 999, itemName: "Item", desiredPrice: 2, salesPerDay: 1 }])
     cards[0].children[1].onclick()`)
-  assert.equal(ui.run("form.price.value"), 0.4)
+  assert.deepEqual(
+    Array.from(
+      ui.run("Object.values(form.elements).map(field => field.value)")
+    ),
+    [0, 40, 0]
+  )
   assert.match(ui.run("cards[0].children[0].children[1].textContent"), /0\.4/)
 })
 

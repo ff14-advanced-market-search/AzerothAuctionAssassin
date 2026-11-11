@@ -745,6 +745,66 @@ select:focus {
   gap: 6px;
 }
 
+.item-price-fields {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.item-price-fields legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.item-price-fields input {
+  width: 100%;
+  min-width: 0;
+}
+
+.item-coin-price {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 0.5em;
+}
+
+.coin-amount {
+  white-space: nowrap;
+}
+
+.coin {
+  display: inline-block;
+  width: 0.72em;
+  height: 0.72em;
+  margin-inline-start: 0.25em;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 28%,
+    var(--coin-light),
+    var(--coin-dark) 80%
+  );
+  box-shadow: inset 0 0 0 1px var(--coin-dark);
+}
+
+.coin-gold {
+  --coin-light: #fff2a0;
+  --coin-dark: #bf7e12;
+}
+
+.coin-silver {
+  --coin-light: #f5f7ff;
+  --coin-dark: #818b9b;
+}
+
+.coin-copper {
+  --coin-light: #ffd1a4;
+  --coin-dark: #a7522b;
+}
+
 .import-vertical {
   display: flex;
   flex-direction: column;
